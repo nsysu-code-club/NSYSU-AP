@@ -145,10 +145,10 @@ class ScorePageState extends State<ScorePage>
       case _State.empty:
         return FlatButton(
           onPressed: () {
-            /*if (state == _State.error)
+            if (state == _State.error)
               _getSemesterScore();
             else
-              _selectSemester();*/
+              _selectSemester();
             FA.logAction('retry', 'click');
           },
           child: HintContent(
@@ -191,7 +191,11 @@ class ScorePageState extends State<ScorePage>
                         width: 0.5,
                       ),
                     ),
-                    children: scoreWeightList,
+                    children: [
+                      _scoreTitle(),
+                      for (var score in scoreData.content.scores)
+                        _scoreTableRowTitle(score),
+                    ],
                   ),
                 ),
                 SizedBox(height: 20.0),
@@ -361,7 +365,9 @@ class ScorePageState extends State<ScorePage>
     try {
       scoreSemesterData = await Helper.instance.getScoreSemesterData();
     } catch (e) {
-      print(e);
+      setState(() {
+        state = _State.error;
+      });
     } finally {
       if (scoreSemesterData.years.length != 0 &&
           scoreSemesterData.semesters.length != 0)
@@ -375,11 +381,19 @@ class ScorePageState extends State<ScorePage>
   }
 
   void _getSemesterScore() async {
+    setState(() {
+      state = _State.loading;
+    });
     scoreData = await Helper.instance.getScoreData(
         scoreSemesterData.year.value, scoreSemesterData.semester.value);
-    _renderScoreDataWidget();
     setState(() {
-      state = _State.finish;
+      if (scoreData.status == 200) {
+        state = _State.finish;
+      } else if (scoreData.status == 204) {
+        state = _State.empty;
+      } else {
+        state = _State.error;
+      }
     });
   }
 }
