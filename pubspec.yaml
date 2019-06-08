@@ -1,0 +1,37 @@
+name: nsysu_ap
+description: NSYSU AP
+
+version: 0.0.1+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  #official plugin
+  shared_preferences: ^0.5.3+1
+  package_info: ^0.4.0+4
+  url_launcher: ^5.0.3
+  firebase_core: ^0.4.0+3
+  firebase_analytics: ^3.0.2
+  firebase_remote_config: ^0.2.0+2
+  firebase_messaging: ^5.0.2
+  http: ^0.12.0+2
+  html: ^0.14.0+2
+  #third party plugin
+  toast: ^0.1.4
+  encrypt: ^3.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+
+  uses-material-design: true
+  assets:
+    - assets/images/
