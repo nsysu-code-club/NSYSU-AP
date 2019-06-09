@@ -23,8 +23,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     if (Platform.isAndroid || Platform.isIOS) {
       analytics = FirebaseAnalytics();
-      //_firebaseMessaging = FirebaseMessaging();
-      //_initFCM();
+      _firebaseMessaging = FirebaseMessaging();
+      _initFCM();
       FA.analytics = analytics;
     }
     return MaterialApp(

@@ -4,7 +4,6 @@ import 'package:encrypt/encrypt.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
-import 'package:nsysu_ap/pages/score_page.dart';
 import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
@@ -15,6 +14,8 @@ import 'package:nsysu_ap/widgets/progress_dialog.dart';
 import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routerName = "/login";
@@ -430,7 +431,7 @@ class LoginPageState extends State<LoginPage>
 
   _navigateToFilterObject(BuildContext context) async {
     final result = await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => ScorePage()));
+        context, MaterialPageRoute(builder: (context) => HomePage()));
     print(result);
     clearSetting();
   }
