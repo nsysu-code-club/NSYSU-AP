@@ -12,6 +12,7 @@ import 'package:nsysu_ap/pages/score_page.dart';
 import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
+import 'package:nsysu_ap/utils/helper.dart';
 import 'package:nsysu_ap/widgets/drawer_body.dart';
 import 'package:nsysu_ap/widgets/hint_content.dart';
 import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
@@ -55,7 +56,7 @@ class HomePageState extends State<HomePage> {
     super.initState();
     FA.setCurrentScreen("HomePage", "home_page.dart");
     _getAllNews();
-//    _getUserInfo();
+    _getUserInfo();
   }
 
   @override
@@ -247,38 +248,17 @@ class HomePageState extends State<HomePage> {
     });
   }
 
-  /*_getUserInfo() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool(Constants.PREF_IS_OFFLINE_LOGIN)) {
-      userInfo = await CacheUtils.loadUserInfo();
-      setState(() {
-        state = _State.offline;
-      });
-      return;
-    }
-    Helper.instance.getUsersInfo().then((response) {
+  _getUserInfo() async {
+    Helper.instance.getUserInfo().then((response) {
       if (this.mounted) {
         setState(() {
           userInfo = response;
         });
         FA.setUserProperty('department', userInfo.department);
         FA.setUserId(userInfo.studentId);
-        CacheUtils.saveUserInfo(userInfo);
       }
-    }).catchError((e) {
-      if (e is DioError) {
-        switch (e.type) {
-          case DioErrorType.RESPONSE:
-            Utils.handleResponseError(context, 'getUserInfo', mounted, e);
-            break;
-          default:
-            break;
-        }
-      } else {
-        throw e;
-      }
-    });
-  }*/
+    }).catchError((e) {});
+  }
 
   void _showLogoutDialog() {
     showDialog(

@@ -1,18 +1,13 @@
+import 'options.dart';
+
 class CourseSemesterData {
   List<Options> semesters;
 
   int selectSemesterIndex = 0;
 
   Options get semester => semesters.length == 0
-      ? Options(text: '上學期', value: '1')
+      ? Options(text: '1072', value: '1072')
       : semesters[selectSemesterIndex];
 
   CourseSemesterData({this.semesters});
-}
-
-class Options {
-  String text;
-  String value;
-
-  Options({this.text, this.value});
 }

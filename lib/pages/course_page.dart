@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/course_data.dart';
 import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
+import 'package:nsysu_ap/utils/helper.dart';
 import 'package:nsysu_ap/widgets/default_dialog.dart';
 import 'package:nsysu_ap/widgets/hint_content.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum _State { loading, finish, error, empty, offlineEmpty }
 
@@ -291,7 +294,11 @@ class CoursePageState extends State<CoursePage>
     );
   }
 
-  void _getSemester() async {}
+  void _getSemester() async {
+    semesterData = await Helper.instance.getCourseSemesterData();
+    setState(() {});
+    _getCourseTables();
+  }
 
   void _selectSemester() {
     var semesters = <SimpleDialogOption>[];
@@ -309,6 +316,7 @@ class CoursePageState extends State<CoursePage>
         setState(() {
           semesterData.selectSemesterIndex = position;
         });
+        _getCourseTables();
       }
     });
   }
@@ -321,5 +329,22 @@ class CoursePageState extends State<CoursePage>
         });
   }
 
-  _getCourseTables() async {}
+  _getCourseTables() async {
+    setState(() {
+      state = _State.loading;
+    });
+    var prefs = await SharedPreferences.getInstance();
+    courseData = await Helper.instance.getCourseData(
+      prefs.getString(Constants.PREF_USERNAME),
+      semesterData.semester.value,
+    );
+    setState(() {
+      if (courseData.status == 200)
+        state = _State.finish;
+      else if (courseData.status == 204)
+        state = _State.empty;
+      else
+        state = _State.error;
+    });
+  }
 }

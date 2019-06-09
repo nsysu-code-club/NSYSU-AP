@@ -46,7 +46,32 @@ class CourseTables {
       this.friday,
       this.saturday,
       this.sunday,
-      this.timeCode});
+      this.timeCode}) {
+    this.monday = [];
+    this.tuesday = [];
+    this.wednesday = [];
+    this.thursday = [];
+    this.friday = [];
+    this.saturday = [];
+    this.sunday = [];
+    this.timeCode = [
+      'A',
+      '1',
+      '2',
+      '3',
+      '4',
+      'B',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      'C',
+      'D',
+      'E',
+      'F'
+    ];
+  }
 
   CourseTables.fromJson(Map<String, dynamic> json) {
     if (json['Monday'] != null) {
@@ -235,7 +260,74 @@ class Date {
   String weekday;
   String section;
 
-  Date({this.startTime, this.endTime, this.weekday, this.section});
+  Date({this.startTime, this.endTime, this.weekday, this.section}) {
+    switch (section) {
+      case 'A':
+        startTime = '7:00';
+        endTime = '7:50';
+        break;
+      case '1':
+        startTime = '8:10';
+        endTime = '9:00';
+        break;
+      case '2':
+        startTime = '9:10';
+        endTime = '10:00';
+        break;
+      case '3':
+        startTime = '10:10';
+        endTime = '11:00';
+        break;
+      case '4':
+        startTime = '11:10';
+        endTime = '12:00';
+        break;
+      case 'B':
+        startTime = '12:10';
+        endTime = '13:00';
+        break;
+      case '5':
+        startTime = '13:10';
+        endTime = '14:00';
+        break;
+      case '6':
+        startTime = '14:10';
+        endTime = '15:00';
+        break;
+      case '7':
+        startTime = '15:10';
+        endTime = '16:00';
+        break;
+      case '8':
+        startTime = '16:10';
+        endTime = '17:00';
+        break;
+      case '9':
+        startTime = '17:10';
+        endTime = '18:00';
+        break;
+      case 'C':
+        startTime = '18:20';
+        endTime = '19:10';
+        break;
+      case 'D':
+        startTime = '19:15';
+        endTime = '20:05';
+        break;
+      case 'E':
+        startTime = '20:10';
+        endTime = '21:00';
+        break;
+      case 'F':
+        startTime = '21:05';
+        endTime = '21:55';
+        break;
+      default:
+        startTime = '';
+        endTime = '';
+        break;
+    }
+  }
 
   Date.fromJson(Map<String, dynamic> json) {
     startTime = json['start_time'];
