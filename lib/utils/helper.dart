@@ -2,9 +2,13 @@ import 'dart:convert';
 
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
+import 'package:nsysu_ap/models/course_data.dart';
+import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/models/login_response.dart';
+import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/score_data.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
+import 'package:nsysu_ap/models/user_info.dart';
 
 import 'app_localizations.dart';
 import 'big5.dart';
@@ -15,7 +19,8 @@ const BASE_URL = 'https://$HOST:$PORT';
 
 class Helper {
   static Helper _instance;
-  static String cookie = 'ASPSESSIONIDSCRQARTB=GFBKIHCBPGELFHFMBLAPJINC';
+  static String courseCookie = '';
+  static String scoreCookie = '';
 
   static Helper get instance {
     if (_instance == null) {
@@ -52,11 +57,125 @@ class Helper {
       jsonDecode(response.body),
     );
     if (loginResponse.data != null) {
-      cookie = '${loginResponse.data[0].name}=${loginResponse.data[0].value}';
+      courseCookie =
+          '${loginResponse.data[0].name}=${loginResponse.data[0].value}';
+      scoreCookie =
+          '${loginResponse.data[0].name}=${loginResponse.data[0].value}';
       return 200;
     } else {
       return 500;
     }
+  }
+
+  Future<UserInfo> getUserInfo() async {
+    var url = 'http://selcrs.nsysu.edu.tw/menu4/tools/changedat.asp';
+    var response = await http.get(
+      url,
+      headers: {'Cookie': courseCookie},
+    );
+    String text = big5.decode(response.bodyBytes);
+    print('text =  ${text}');
+    var document = parse(text, encoding: 'BIG-5');
+    var tdDoc = document.getElementsByTagName('td');
+    var userInfo = UserInfo();
+    if (tdDoc.length > 0)
+      userInfo = UserInfo(
+        department: tdDoc[1].text,
+        studentId: tdDoc[5].text,
+        studentNameCht: tdDoc[7].text,
+        educationSystem: tdDoc[9].text,
+      );
+    return userInfo;
+  }
+
+  Future<CourseSemesterData> getCourseSemesterData() async {
+    var url = 'http://selcrs.nsysu.edu.tw/menu4/query/stu_slt_up.asp';
+    var response = await http.post(
+      url,
+      headers: {'Cookie': courseCookie},
+      encoding: Encoding.getByName('BIG-5'),
+    );
+    String text = big5.decode(response.bodyBytes);
+    //print('text =  ${text}');
+    var document = parse(text, encoding: 'BIG-5');
+    var options = document.getElementsByTagName('option');
+    var courseSemesterData = CourseSemesterData(semesters: []);
+    for (var i = 0; i < options.length; i++) {
+      //print('$i => ${tdDoc[i].text}');
+      courseSemesterData.semesters.add(
+        Options(
+          text: options[i].text,
+          value: options[i].attributes['value'],
+        ),
+      );
+    }
+    return courseSemesterData;
+  }
+
+  Future<CourseData> getCourseData(String username, String semester) async {
+    var url = 'http://selcrs1.nsysu.edu.tw/menu4/query/stu_slt_data.asp';
+    var response = await http.post(
+      url,
+      headers: {'Cookie': courseCookie},
+      body: {
+        'stuact': 'B',
+        'YRSM': semester,
+        'Stuid': username,
+        'B1': '%BDT%A9w%B0e%A5X',
+      },
+      encoding: Encoding.getByName('BIG-5'),
+    );
+    String text = big5.decode(response.bodyBytes);
+    //print('text =  ${text}');
+    var document = parse(text, encoding: 'BIG-5');
+    var trDoc = document.getElementsByTagName('tr');
+    var courseData = CourseData(
+        status: (trDoc.length == 0) ? 204 : 200,
+        messages: '',
+        courseTables: (trDoc.length == 0) ? null : CourseTables());
+    print(DateTime.now());
+    for (var i = 0; i < trDoc.length; i++) {
+      var tdDoc = trDoc[i].getElementsByTagName('td');
+      if (i == 0) continue;
+      for (var j = 10; j < tdDoc.length; j++) {
+        if (tdDoc[j].text.length > 0) {
+          for (var section in tdDoc[j].text.split('')) {
+            if (courseData.courseTables.timeCode.indexOf(section) == -1)
+              continue;
+            var course = Course(
+              title: tdDoc[4].text,
+              instructors: [tdDoc[8].text],
+              location: Location(
+                building: '',
+                room: tdDoc[9].text,
+              ),
+              date: Date(weekday: 'T', section: section),
+            );
+            if (j == 10)
+              courseData.courseTables.monday.add(course);
+            else if (j == 11)
+              courseData.courseTables.tuesday.add(course);
+            else if (j == 12)
+              courseData.courseTables.wednesday.add(course);
+            else if (j == 13)
+              courseData.courseTables.thursday.add(course);
+            else if (j == 14)
+              courseData.courseTables.friday.add(course);
+            else if (j == 15)
+              courseData.courseTables.saturday.add(course);
+            else if (j == 16) courseData.courseTables.sunday.add(course);
+          }
+        }
+      }
+    }
+    if (trDoc.length != 0) {
+      if (courseData.courseTables.saturday.length == 0)
+        courseData.courseTables.saturday = null;
+      if (courseData.courseTables.sunday.length == 0)
+        courseData.courseTables.sunday = null;
+    }
+    print(DateTime.now());
+    return courseData;
   }
 
   Future<ScoreSemesterData> getScoreSemesterData() async {
@@ -64,7 +183,7 @@ class Helper {
         'http://selcrs.nsysu.edu.tw/scoreqry/sco_query.asp?ACTION=702&KIND=2&LANGS=$language';
     var response = await http.post(
       url,
-      headers: {'Cookie': cookie},
+      headers: {'Cookie': scoreCookie},
       encoding: Encoding.getByName('BIG-5'),
     );
     String text = big5.decode(response.bodyBytes);
@@ -107,7 +226,7 @@ class Helper {
         'http://selcrs.nsysu.edu.tw/scoreqry/sco_query.asp?ACTION=804&KIND=2&LANGS=$language';
     var response = await http.post(
       url,
-      headers: {'Cookie': cookie},
+      headers: {'Cookie': scoreCookie},
       body: {
         'SYEAR': year,
         'SEM': semester,

@@ -1,3 +1,5 @@
+import 'options.dart';
+
 class ScoreSemesterData {
   List<Options> years;
   List<Options> semesters;
@@ -14,11 +16,4 @@ class ScoreSemesterData {
       : semesters[selectSemesterIndex];
 
   ScoreSemesterData({this.years, this.semesters});
-}
-
-class Options {
-  String text;
-  String value;
-
-  Options({this.text, this.value});
 }
