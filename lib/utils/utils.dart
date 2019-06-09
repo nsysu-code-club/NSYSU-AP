@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -102,5 +103,41 @@ class Utils {
                     })
               ]),
     ).then<void>((int position) {});
+  }
+
+  static void showFCMNotification(
+      String title, String body, String payload) async {
+    //limit Android and iOS system
+    if (Platform.isAndroid || Platform.isIOS) {
+      var flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+      var initializationSettings = InitializationSettings(
+        AndroidInitializationSettings(
+            Constants.ANDROID_DEFAULT_NOTIFICATION_NAME),
+        IOSInitializationSettings(
+          onDidReceiveLocalNotification: (id, title, body, payload) {},
+        ),
+      );
+      flutterLocalNotificationsPlugin.initialize(initializationSettings,
+          onSelectNotification: (text) {});
+      var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+          Constants.NOTIFICATION_FCM_ID.toString(), '系統通知', '系統通知',
+          largeIconBitmapSource: BitmapSource.Drawable,
+          importance: Importance.Default,
+          largeIcon: '@drawable/ic_launcher',
+          style: AndroidNotificationStyle.BigText,
+          enableVibration: false);
+      var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
+      var platformChannelSpecifics = new NotificationDetails(
+          androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+      await flutterLocalNotificationsPlugin.show(
+        Constants.NOTIFICATION_FCM_ID,
+        title,
+        payload,
+        platformChannelSpecifics,
+        payload: payload,
+      );
+    } else {
+      //TODO implement other platform system local notification
+    }
   }
 }

@@ -11,6 +11,7 @@ import 'package:nsysu_ap/pages/score_page.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
+import 'package:nsysu_ap/utils/utils.dart';
 
 void main() => runApp(MyApp());
 
@@ -73,8 +74,8 @@ class MyApp extends StatelessWidget {
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         if (Constants.isInDebugMode) print("onMessage: $message");
-//        Utils.showFCMNotification(message['notification']['title'],
-//            message['notification']['title'], message['notification']['body']);
+        Utils.showFCMNotification(message['notification']['title'],
+            message['notification']['title'], message['notification']['body']);
       },
       onLaunch: (Map<String, dynamic> message) async {
         if (Constants.isInDebugMode) print("onLaunch: $message");
