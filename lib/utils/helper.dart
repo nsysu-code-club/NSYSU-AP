@@ -173,7 +173,7 @@ class Helper {
         status: (trDoc.length == 0) ? 204 : 200,
         messages: '',
         courseTables: (trDoc.length == 0) ? null : CourseTables());
-    print(DateTime.now());
+    //print(DateTime.now());
     for (var i = 0; i < trDoc.length; i++) {
       var tdDoc = trDoc[i].getElementsByTagName('td');
       if (i == 0) continue;
@@ -214,7 +214,7 @@ class Helper {
       if (courseData.courseTables.sunday.length == 0)
         courseData.courseTables.sunday = null;
     }
-    print(DateTime.now());
+    //print(DateTime.now());
     return courseData;
   }
 
