@@ -66,7 +66,7 @@ class AboutUsPageState extends State<AboutUsPage>
               backgroundColor: Resource.Colors.blue,
               flexibleSpace: FlexibleSpaceBar(
                 background: Image.asset(
-                  "assets/images/kuasap2.webp",
+                  "assets/images/nsysu.webp",
                   fit: BoxFit.cover,
                 ),
               ),
