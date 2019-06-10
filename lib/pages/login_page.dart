@@ -14,6 +14,7 @@ import 'package:nsysu_ap/widgets/progress_dialog.dart';
 import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'home_page.dart';
 
@@ -38,6 +39,8 @@ class LoginPageState extends State<LoginPage>
   FocusNode passwordFocusNode;
 
   final encrypter = Encrypter(AES(Constants.key, mode: AESMode.cbc));
+
+  var _controller;
 
   @override
   void initState() {
@@ -65,22 +68,39 @@ class LoginPageState extends State<LoginPage>
     return OrientationBuilder(builder: (_, orientation) {
       return Scaffold(
         resizeToAvoidBottomPadding: orientation == Orientation.portrait,
-        backgroundColor: Resource.Colors.blue,
-        body: Center(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 30.0),
-            child: orientation == Orientation.portrait
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    mainAxisSize: MainAxisSize.min,
-                    children: _renderContent(orientation),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: _renderContent(orientation),
-                  ),
-          ),
+        body: Stack(
+          alignment: Alignment(0, 0),
+          children: <Widget>[
+            SizedBox(
+              child: WebView(
+                initialUrl: 'https://sso.nsysu.edu.tw/index.php/passport/login',
+                javascriptMode: JavascriptMode.unrestricted,
+                onWebViewCreated: (controller) {
+                  _controller = controller;
+                },
+                onPageFinished: (s) {
+                  //print('onPageFinished = $s');
+                },
+                debuggingEnabled: true,
+              ),
+            ),
+            Container(
+              alignment: Alignment(0, 0),
+              color: Resource.Colors.blue,
+              padding: EdgeInsets.symmetric(horizontal: 30.0),
+              child: orientation == Orientation.portrait
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisSize: MainAxisSize.min,
+                      children: _renderContent(orientation),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: _renderContent(orientation),
+                    ),
+            )
+          ],
         ),
       );
     });
@@ -410,19 +430,24 @@ class LoginPageState extends State<LoginPage>
 
       if (Platform.isAndroid || Platform.isIOS)
         prefs.setString(Constants.PREF_USERNAME, _username.text);
+      var base64md5Password = await _controller
+          ?.evaluateJavascript('base64_md5("${_password.text}")');
+      base64md5Password = base64md5Password.replaceAll('\"', '');
       Helper.instance
-          .login(_username.text, _password.text)
+          .selcrsLogin(_username.text, base64md5Password)
           .then((response) async {
         if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
-        if (Platform.isAndroid || Platform.isIOS) {
+        if (response == 403) {
+          Utils.showToast(context, app.loginFail);
+        } else if (Platform.isAndroid || Platform.isIOS) {
           prefs.setString(Constants.PREF_USERNAME, _username.text);
           if (isRememberPassword) {
             await prefs.setString(Constants.PREF_PASSWORD,
                 encrypter.encrypt(_password.text, iv: Constants.iv).base64);
           }
           prefs.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
+          _navigateToFilterObject(context);
         }
-        _navigateToFilterObject(context);
       }).catchError((e) {
         if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
       });
