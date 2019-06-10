@@ -13,6 +13,12 @@ import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
+import 'pages/about/about_us_page.dart';
+import 'pages/about/open_source_page.dart';
+import 'pages/course_page.dart';
+import 'pages/home_page.dart';
+import 'pages/setting_page.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -37,7 +43,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
         Navigator.defaultRouteName: (context) => LoginPage(),
+        HomePage.routerName: (context) => HomePage(),
+        CoursePage.routerName: (context) => CoursePage(),
         ScorePage.routerName: (context) => ScorePage(),
+        SettingPage.routerName: (context) => SettingPage(),
+        AboutUsPage.routerName: (context) => AboutUsPage(),
+        OpenSourcePage.routerName: (context) => OpenSourcePage(),
       },
       theme: ThemeData(
         brightness: brightness,

@@ -43,6 +43,46 @@ class Helper {
     }
   }
 
+  Future<int> selcrsLogin(String username, String password) async {
+    print(DateTime.now());
+    bool score = true, course = true;
+    var scoreResponse = await http.post(
+      'http://selcrs.nsysu.edu.tw/scoreqry/sco_query_prs_sso2.asp',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: {
+        'SID': username,
+        'PASSWD': password,
+        'ACTION': '0',
+        'INTYPE': '1',
+      },
+    );
+    String text = big5.decode(scoreResponse.bodyBytes);
+    if (text.contains("資料錯誤請重新輸入")) score = false;
+    //print('text =  ${text}');
+    scoreCookie = scoreResponse.headers['set-cookie'];
+    var courseResponse = await http.post(
+      'http://selcrs.nsysu.edu.tw/menu4/Studcheck_sso2.asp',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: {
+        'stuid': username,
+        'SPassword': password,
+      },
+    );
+    text = big5.decode(courseResponse.bodyBytes);
+    if (text.contains("學號碼密碼不符")) course = false;
+    courseCookie = courseResponse.headers['set-cookie'];
+    //print('text =  ${text}');
+    print(DateTime.now());
+    if (score && course)
+      return 200;
+    else
+      return 403;
+  }
+
   Future<int> login(String username, String password) async {
     print(DateTime.now());
     var response = await http.post(
@@ -74,7 +114,7 @@ class Helper {
       headers: {'Cookie': courseCookie},
     );
     String text = big5.decode(response.bodyBytes);
-    print('text =  ${text}');
+    //print('text =  ${text}');
     var document = parse(text, encoding: 'BIG-5');
     var tdDoc = document.getElementsByTagName('td');
     var userInfo = UserInfo();
@@ -133,7 +173,7 @@ class Helper {
         status: (trDoc.length == 0) ? 204 : 200,
         messages: '',
         courseTables: (trDoc.length == 0) ? null : CourseTables());
-    print(DateTime.now());
+    //print(DateTime.now());
     for (var i = 0; i < trDoc.length; i++) {
       var tdDoc = trDoc[i].getElementsByTagName('td');
       if (i == 0) continue;
@@ -174,7 +214,7 @@ class Helper {
       if (courseData.courseTables.sunday.length == 0)
         courseData.courseTables.sunday = null;
     }
-    print(DateTime.now());
+    //print(DateTime.now());
     return courseData;
   }
 

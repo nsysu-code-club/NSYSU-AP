@@ -45,6 +45,8 @@ class CoursePageState extends State<CoursePage>
 
   bool isOffline = false;
 
+  List<TableRow> list = [];
+
   @override
   void initState() {
     super.initState();
@@ -334,17 +336,22 @@ class CoursePageState extends State<CoursePage>
       state = _State.loading;
     });
     var prefs = await SharedPreferences.getInstance();
-    courseData = await Helper.instance.getCourseData(
+    Helper.instance
+        .getCourseData(
       prefs.getString(Constants.PREF_USERNAME),
       semesterData.semester.value,
-    );
-    setState(() {
-      if (courseData.status == 200)
-        state = _State.finish;
-      else if (courseData.status == 204)
-        state = _State.empty;
-      else
-        state = _State.error;
+    )
+        .then((courseData) {
+      this.courseData = courseData;
+      if (mounted)
+        setState(() {
+          if (courseData.status == 200)
+            state = _State.finish;
+          else if (courseData.status == 204)
+            state = _State.empty;
+          else
+            state = _State.error;
+        });
     });
   }
 }

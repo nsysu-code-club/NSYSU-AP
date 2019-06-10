@@ -384,15 +384,21 @@ class ScorePageState extends State<ScorePage>
     setState(() {
       state = _State.loading;
     });
-    scoreData = await Helper.instance.getScoreData(
-        scoreSemesterData.year.value, scoreSemesterData.semester.value);
-    setState(() {
-      if (scoreData.status == 200) {
-        state = _State.finish;
-      } else if (scoreData.status == 204) {
-        state = _State.empty;
-      } else {
-        state = _State.error;
+    Helper.instance
+        .getScoreData(
+            scoreSemesterData.year.value, scoreSemesterData.semester.value)
+        .then((scoreData) {
+      this.scoreData = scoreData;
+      if (mounted) {
+        setState(() {
+          if (scoreData.status == 200) {
+            state = _State.finish;
+          } else if (scoreData.status == 204) {
+            state = _State.empty;
+          } else {
+            state = _State.error;
+          }
+        });
       }
     });
   }
