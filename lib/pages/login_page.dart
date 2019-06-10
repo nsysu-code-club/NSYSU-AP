@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:encrypt/encrypt.dart';
@@ -40,8 +41,6 @@ class LoginPageState extends State<LoginPage>
 
   final encrypter = Encrypter(AES(Constants.key, mode: AESMode.cbc));
 
-  var _controller;
-
   @override
   void initState() {
     super.initState();
@@ -76,7 +75,7 @@ class LoginPageState extends State<LoginPage>
                 initialUrl: 'https://sso.nsysu.edu.tw/index.php/passport/login',
                 javascriptMode: JavascriptMode.unrestricted,
                 onWebViewCreated: (controller) {
-                  _controller = controller;
+                  Helper.controller = controller;
                 },
                 onPageFinished: (s) {
                   //print('onPageFinished = $s');
@@ -263,7 +262,7 @@ class LoginPageState extends State<LoginPage>
       );
       prefs.setString(Constants.PREF_CURRENT_VERSION, packageInfo.buildNumber);
     }
-    if (Constants.isInDebugMode) {
+    if (!Constants.isInDebugMode) {
       final RemoteConfig remoteConfig = await RemoteConfig.instance;
       try {
         await remoteConfig.fetch(expiration: const Duration(seconds: 10));
@@ -430,11 +429,8 @@ class LoginPageState extends State<LoginPage>
 
       if (Platform.isAndroid || Platform.isIOS)
         prefs.setString(Constants.PREF_USERNAME, _username.text);
-      var base64md5Password = await _controller
-          ?.evaluateJavascript('base64_md5("${_password.text}")');
-      base64md5Password = base64md5Password.replaceAll('\"', '');
       Helper.instance
-          .selcrsLogin(_username.text, base64md5Password)
+          .selcrsLogin(_username.text, _password.text)
           .then((response) async {
         if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
         if (response == 403) {
@@ -450,6 +446,13 @@ class LoginPageState extends State<LoginPage>
         }
       }).catchError((e) {
         if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
+        Helper.changeSelcrsUrl();
+        Helper.error++;
+        if (Helper.error < 5) {
+          _login();
+        } else {
+          Utils.showToast(context, app.timeoutMessage);
+        }
       });
     }
   }

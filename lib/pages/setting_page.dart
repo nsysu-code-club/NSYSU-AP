@@ -68,6 +68,7 @@ class SettingPageState extends State<SettingPage>
             children: <Widget>[
               _titleItem(app.notificationItem),
               _itemSwitch(app.courseNotify, courseNotify, () async {
+                Utils.showToast(context, app.functionNotOpen);
 //            FA.logAction('notify_course', 'create');
 //            setState(() {
 //              courseNotify = !courseNotify;
@@ -85,13 +86,6 @@ class SettingPageState extends State<SettingPage>
                 height: 0.5,
               ),
               _titleItem(app.otherSettings),
-              _itemSwitch(app.headPhotoSetting, displayPicture, () {
-                setState(() {
-                  displayPicture = !displayPicture;
-                });
-                prefs.setBool(Constants.PREF_DISPLAY_PICTURE, displayPicture);
-                FA.logAction('head_photo', 'click');
-              }),
               _itemSingle(app.language, () {
                 Utils.showChoseLanguageDialog(context, () {
                   setState(() {});
@@ -104,25 +98,23 @@ class SettingPageState extends State<SettingPage>
               _titleItem(app.otherInfo),
               _item(app.feedback, app.feedbackViaFacebook, () {
                 if (Platform.isAndroid)
-                  Utils.launchUrl('fb://messaging/954175941266264').catchError(
-                      (onError) => Utils.launchUrl(
-                          'https://www.facebook.com/954175941266264/'));
-                else if (Platform.isIOS)
-                  Utils.launchUrl('fb-messenger://user-thread/954175941266264')
-                      .catchError((onError) => Utils.launchUrl(
-                          'https://www.facebook.com/954175941266264/'));
-                else {
-                  Utils.launchUrl('https://www.facebook.com/954175941266264/')
+                  Utils.launchUrl('fb://messaging/${Constants.FANS_PAGE_ID}')
                       .catchError((onError) =>
-                          Utils.showToast(context, app.platformError));
+                          Utils.launchUrl(Constants.FANS_PAGE_URL));
+                else if (Platform.isIOS)
+                  Utils.launchUrl(
+                          'fb-messenger://user-thread/${Constants.FANS_PAGE_ID}')
+                      .catchError((onError) =>
+                          Utils.launchUrl(Constants.FANS_PAGE_URL));
+                else {
+                  Utils.launchUrl(Constants.FANS_PAGE_URL).catchError(
+                      (onError) => Utils.showToast(context, app.platformError));
                 }
                 FA.logAction('feedback', 'click');
               }),
               _item(app.donateTitle, app.donateContent, () {
-                Utils.launchUrl(
-                        "https://payment.ecpay.com.tw/QuickCollect/PayData?mLM7iy8RpUGk%2fyBotSDMdvI0qGI5ToToqBW%2bOQbOE80%3d")
-                    .catchError((onError) =>
-                        Utils.showToast(context, app.platformError));
+                Utils.launchUrl("https://p.ecpay.com.tw/3D54D").catchError(
+                    (onError) => Utils.showToast(context, app.platformError));
                 FA.logAction('donate', 'click');
               }),
               _item(app.appVersion, "v$appVersion", () {
