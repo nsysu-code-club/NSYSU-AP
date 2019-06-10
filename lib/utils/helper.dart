@@ -9,6 +9,7 @@ import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/score_data.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/models/user_info.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'app_localizations.dart';
 import 'big5.dart';
@@ -21,6 +22,10 @@ class Helper {
   static Helper _instance;
   static String courseCookie = '';
   static String scoreCookie = '';
+  static String selcrsUrl = 'selcrs1.nsysu.edu.tw';
+  static WebViewController controller;
+  static int index = 0;
+  static int error = 0;
 
   static Helper get instance {
     if (_instance == null) {
@@ -43,39 +48,54 @@ class Helper {
     }
   }
 
+  static changeSelcrsUrl() {
+    index++;
+    if (index == 5) index = 0;
+    selcrsUrl = 'selcrs${index == 0 ? '' : index}.nsysu.edu.tw';
+    print(selcrsUrl);
+  }
+
   Future<int> selcrsLogin(String username, String password) async {
     print(DateTime.now());
+    var base64md5Password =
+        await Helper.controller?.evaluateJavascript('base64_md5("$password")');
+    base64md5Password = base64md5Password.replaceAll('\"', '');
     bool score = true, course = true;
     var scoreResponse = await http.post(
-      'http://selcrs.nsysu.edu.tw/scoreqry/sco_query_prs_sso2.asp',
+      'http://$selcrsUrl/scoreqry/sco_query_prs_sso2.asp',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: {
         'SID': username,
-        'PASSWD': password,
+        'PASSWD': base64md5Password,
         'ACTION': '0',
         'INTYPE': '1',
       },
-    );
+    ).timeout(Duration(seconds: 2));
     String text = big5.decode(scoreResponse.bodyBytes);
-    if (text.contains("資料錯誤請重新輸入")) score = false;
-    //print('text =  ${text}');
+    //print('text =  ${scoreResponse.statusCode}');
+    if (text.contains("資料錯誤請重新輸入"))
+      score = false;
+    else if (scoreResponse.statusCode != 302) throw '';
     scoreCookie = scoreResponse.headers['set-cookie'];
     var courseResponse = await http.post(
-      'http://selcrs.nsysu.edu.tw/menu4/Studcheck_sso2.asp',
+      'http://$selcrsUrl/menu4/Studcheck_sso2.asp',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: {
         'stuid': username,
-        'SPassword': password,
+        'SPassword': base64md5Password,
       },
-    );
+    ).timeout(Duration(seconds: 2));
+    print('text =  ${courseResponse.statusCode}');
     text = big5.decode(courseResponse.bodyBytes);
-    if (text.contains("學號碼密碼不符")) course = false;
+    if (text.contains("學號碼密碼不符"))
+      course = false;
+    else if (courseResponse.statusCode != 200) throw '';
     courseCookie = courseResponse.headers['set-cookie'];
-    //print('text =  ${text}');
+    print('text =  ${courseResponse.headers['set-cookie'] == null}');
     print(DateTime.now());
     if (score && course)
       return 200;
@@ -108,7 +128,7 @@ class Helper {
   }
 
   Future<UserInfo> getUserInfo() async {
-    var url = 'http://selcrs.nsysu.edu.tw/menu4/tools/changedat.asp';
+    var url = 'http://$selcrsUrl/menu4/tools/changedat.asp';
     var response = await http.get(
       url,
       headers: {'Cookie': courseCookie},
@@ -129,7 +149,7 @@ class Helper {
   }
 
   Future<CourseSemesterData> getCourseSemesterData() async {
-    var url = 'http://selcrs.nsysu.edu.tw/menu4/query/stu_slt_up.asp';
+    var url = 'http://$selcrsUrl/menu4/query/stu_slt_up.asp';
     var response = await http.post(
       url,
       headers: {'Cookie': courseCookie},
@@ -153,7 +173,7 @@ class Helper {
   }
 
   Future<CourseData> getCourseData(String username, String semester) async {
-    var url = 'http://selcrs1.nsysu.edu.tw/menu4/query/stu_slt_data.asp';
+    var url = 'http://$selcrsUrl/menu4/query/stu_slt_data.asp';
     var response = await http.post(
       url,
       headers: {'Cookie': courseCookie},
@@ -220,7 +240,7 @@ class Helper {
 
   Future<ScoreSemesterData> getScoreSemesterData() async {
     var url =
-        'http://selcrs.nsysu.edu.tw/scoreqry/sco_query.asp?ACTION=702&KIND=2&LANGS=$language';
+        'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=702&KIND=2&LANGS=$language';
     var response = await http.post(
       url,
       headers: {'Cookie': scoreCookie},
@@ -263,7 +283,7 @@ class Helper {
 
   Future<ScoreData> getScoreData(String year, String semester) async {
     var url =
-        'http://selcrs.nsysu.edu.tw/scoreqry/sco_query.asp?ACTION=804&KIND=2&LANGS=$language';
+        'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=804&KIND=2&LANGS=$language';
     var response = await http.post(
       url,
       headers: {'Cookie': scoreCookie},
