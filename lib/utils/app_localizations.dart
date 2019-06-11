@@ -25,7 +25,7 @@ class AppLocalizations {
       'app_name': 'NSYSU AP',
       'update_note_title': 'Update Notes',
       'update_note_content':
-          '1.Add feature change app language.\n2.Now can click to facebook app.\n3.Fix some error.',
+          'Welcome to NSYSU AP\nCurrent can use feature\n1.Login\n2.Home page list news\n3.Semester course\n4.Semester score\n\n有任何問題歡迎聯絡粉絲專頁',
       'splash_content': '我們全都包了\n只剩下學校不包我們',
       'share': 'Share',
       'teacher_confirm_title': 'Are you a teacher?',
@@ -300,7 +300,7 @@ class AppLocalizations {
       'app_name': '中山校務通',
       'update_note_title': '更新日誌',
       'update_note_content':
-          '1.新增可在App內更換語言\n2.現在可以直接從App跳轉至Facebook相關的App\n3.修正部分錯誤',
+          '歡迎使用中山校務通\n目前可使用功能有\n1.登入\n2.主畫面陳列最新消息\n3.學期課表查詢\n4.學期成績查詢\n\n有任何問題歡迎聯絡粉絲專頁',
       'splash_content': '我們全都包了\n只剩下學校不包我們',
       'share': '分享',
       'teacher_confirm_title': '您是老師嗎？',
