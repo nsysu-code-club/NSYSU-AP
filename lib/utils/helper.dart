@@ -74,10 +74,11 @@ class Helper {
       },
     ).timeout(Duration(seconds: 2));
     String text = big5.decode(scoreResponse.bodyBytes);
-    //print('text =  ${scoreResponse.statusCode}');
+    //print('text =  $text');
     if (text.contains("資料錯誤請重新輸入"))
       score = false;
-    else if (scoreResponse.statusCode != 302) throw '';
+    else if (scoreResponse.statusCode != 302 && scoreResponse.statusCode != 200)
+      throw '';
     scoreCookie = scoreResponse.headers['set-cookie'];
     var courseResponse = await http.post(
       'http://$selcrsUrl/menu4/Studcheck_sso2.asp',

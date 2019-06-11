@@ -219,6 +219,7 @@ class LoginPageState extends State<LoginPage>
           padding: EdgeInsets.all(14.0),
           onPressed: () {
             FA.logAction('login', 'click');
+            Helper.error = 0;
             _login();
           },
           color: Colors.white,
