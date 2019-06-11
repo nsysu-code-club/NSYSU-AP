@@ -219,6 +219,7 @@ class LoginPageState extends State<LoginPage>
           padding: EdgeInsets.all(14.0),
           onPressed: () {
             FA.logAction('login', 'click');
+            Helper.error = 0;
             _login();
           },
           color: Colors.white,
@@ -275,7 +276,7 @@ class LoginPageState extends State<LoginPage>
         newVersion = remoteConfig.getInt(Constants.ANDROID_APP_VERSION);
       } else if (Platform.isIOS) {
         url =
-            "itms-apps://itunes.apple.com/tw/app/apple-store/id1439751462?mt=8";
+            "itms-apps://itunes.apple.com/tw/app/apple-store/id1467522198?mt=8";
         newVersion = remoteConfig.getInt(Constants.IOS_APP_VERSION);
       } else {
         url = "https://www.facebook.com/NKUST.ITC/";
