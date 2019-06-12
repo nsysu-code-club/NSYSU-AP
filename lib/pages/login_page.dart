@@ -75,10 +75,11 @@ class LoginPageState extends State<LoginPage>
                 initialUrl: 'https://sso.nsysu.edu.tw/index.php/passport/login',
                 javascriptMode: JavascriptMode.unrestricted,
                 onWebViewCreated: (controller) {
+                  print('onWebViewCreated = $controller');
                   Helper.controller = controller;
                 },
                 onPageFinished: (s) {
-                  //print('onPageFinished = $s');
+                  print('onPageFinished = $s');
                 },
                 debuggingEnabled: true,
               ),
@@ -451,6 +452,7 @@ class LoginPageState extends State<LoginPage>
         Helper.error++;
         if (Helper.error < 5) {
           _login();
+          setState(() {});
         } else {
           Utils.showToast(context, app.timeoutMessage);
         }

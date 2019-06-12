@@ -89,7 +89,8 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  void _initFCM() {
+  void _initFCM() async {
+    await Future.delayed(Duration(seconds: 2));
     _firebaseMessaging.requestNotificationPermissions();
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
