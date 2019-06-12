@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
@@ -51,6 +52,11 @@ class LoginPageState extends State<LoginPage>
       _getPreference();
       _checkUpdate();
     }
+    f();
+  }
+
+  f() async {
+    //print(MD5.base64_md5("Rain5345"));
   }
 
   @override
@@ -72,11 +78,13 @@ class LoginPageState extends State<LoginPage>
           children: <Widget>[
             SizedBox(
               child: WebView(
-                initialUrl: 'https://sso.nsysu.edu.tw/index.php/passport/login',
                 javascriptMode: JavascriptMode.unrestricted,
-                onWebViewCreated: (controller) {
+                onWebViewCreated: (controller) async {
                   print('onWebViewCreated = $controller');
+                  //source https://sso.nsysu.edu.tw/public/js/md5.js
+                  String code = await rootBundle.loadString('assets/md5.js');
                   Helper.controller = controller;
+                  Helper.controller.evaluateJavascript(code);
                 },
                 onPageFinished: (s) {
                   print('onPageFinished = $s');
