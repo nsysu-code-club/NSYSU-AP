@@ -13,6 +13,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import 'app_localizations.dart';
 import 'big5.dart';
+import 'firebase_analytics_utils.dart';
 
 const HOST = "nsysu-ap.rainvisitor.me";
 const PORT = '8443';
@@ -188,6 +189,7 @@ class Helper {
     );
     String text = big5.decode(response.bodyBytes);
     //print('text =  ${text}');
+    var startTime = DateTime.now().millisecondsSinceEpoch;
     var document = parse(text, encoding: 'BIG-5');
     var trDoc = document.getElementsByTagName('tr');
     var courseData = CourseData(
@@ -234,6 +236,8 @@ class Helper {
         courseData.courseTables.saturday = null;
       if (courseData.courseTables.sunday.length == 0)
         courseData.courseTables.sunday = null;
+      var endTime = DateTime.now().millisecondsSinceEpoch;
+      FA.logTimeEvent(FA.COURSE_HTML_PARSER, (endTime - startTime) / 1000.0);
     }
     //print(DateTime.now());
     return courseData;
@@ -295,6 +299,7 @@ class Helper {
       encoding: Encoding.getByName('BIG-5'),
     );
     String text = big5.decode(response.bodyBytes);
+    var startTime = DateTime.now().millisecondsSinceEpoch;
     var document = parse(text, encoding: 'BIG-5');
     List<Score> list = [];
     Detail detail = Detail();
@@ -332,6 +337,8 @@ class Helper {
             finalScore: fontDoc[5].text,
           ));
       }
+      var endTime = DateTime.now().millisecondsSinceEpoch;
+      FA.logTimeEvent(FA.SCORE_HTML_PARSER, (endTime - startTime) / 1000.0);
     }
     /*var trDoc = document.getElementsByTagName('tr');
     for (var i = 0; i < trDoc.length; i++) {

@@ -30,6 +30,18 @@ class FA {
     print('setUserProperty succeeded');
   }
 
+  static Future<void> logUserInfo(String department) async {
+    if (Platform.isIOS || Platform.isAndroid)
+      await analytics.logEvent(
+        name: 'user_info',
+        parameters: <String, dynamic>{
+          'department': department,
+          'platform': Platform.operatingSystem,
+        },
+      );
+    print('setUserProperty succeeded');
+  }
+
   static Future<void> logApiEvent(String type, int status,
       {String message = ''}) async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
@@ -73,6 +85,23 @@ class FA {
         },
       );
     print('log CalculateUnits succeeded');
+  }
+
+  static const String COURSE_HTML_PARSER = 'course_html_parser';
+  static const String SCORE_HTML_PARSER = 'score_html_parser';
+
+  static Future<void> logTimeEvent(String name, double seconds) async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    if (Platform.isIOS || Platform.isAndroid)
+      await analytics.logEvent(
+        name: name,
+        parameters: <String, dynamic>{
+          'time': seconds,
+          'buildNumber': int.parse(packageInfo.buildNumber),
+          'platform': Platform.operatingSystem,
+        },
+      );
+    print('log TimeEvent succeeded');
   }
 
   static Future<void> logAction(String name, String action,
