@@ -255,6 +255,7 @@ class HomePageState extends State<HomePage> {
           userInfo = response;
         });
         FA.setUserProperty('department', userInfo.department);
+        FA.logUserInfo(userInfo.department);
         FA.setUserId(userInfo.studentId);
       }
     }).catchError((e) {});
