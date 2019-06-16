@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/login_page.dart';
 import 'package:nsysu_ap/pages/score_page.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
         HomePage.routerName: (context) => HomePage(),
         CoursePage.routerName: (context) => CoursePage(),
         ScorePage.routerName: (context) => ScorePage(),
+        GraduationReportPage.routerName: (context) => GraduationReportPage(),
         SettingPage.routerName: (context) => SettingPage(),
         AboutUsPage.routerName: (context) => AboutUsPage(),
         OpenSourcePage.routerName: (context) => OpenSourcePage(),

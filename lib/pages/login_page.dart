@@ -439,6 +439,7 @@ class LoginPageState extends State<LoginPage>
 
       if (Platform.isAndroid || Platform.isIOS)
         prefs.setString(Constants.PREF_USERNAME, _username.text);
+      Helper.instance.graduationLogin(_username.text, _password.text);
       Helper.instance
           .selcrsLogin(_username.text, _password.text)
           .then((response) async {

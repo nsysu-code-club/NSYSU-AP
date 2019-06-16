@@ -295,6 +295,21 @@ class AppLocalizations {
       'offline_score': 'Offline Score',
       'offline_bus_reservations': 'Offline Bus Reservations',
       'offline_leave_data': 'Offline absent Report',
+      'graduationCheckChecklist': 'Graduation check checklist',
+      'missingRequiredCourses': 'Missing Required Courses',
+      'generalEducationCourse': 'General Education Courses',
+      'otherEducationsCourse': 'Other Education Courses',
+      'description': 'Description',
+      'subjectType': 'Subject Type',
+      'check': 'Check',
+      'shouldCredits': 'Should Credits',
+      'actualCredits': 'Actual Credits',
+      'totalCredits': 'Total Credits',
+      'practiceSituation': 'Practice Situation',
+      'courseClickHint': 'Click subject show more.',
+      'graduationCheckChecklistHint':
+          'The information is for reference only. Please refer to the school service system.',
+      'graduationCheckChecklistEmpty': 'No graduation check information yet',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -554,6 +569,20 @@ class AppLocalizations {
       'offline_score': '離線成績',
       'offline_bus_reservations': '離線校車紀錄',
       'offline_leave_data': '離線缺曠資料',
+      'graduationCheckChecklist': '應屆畢業生成績檢核表',
+      'missingRequiredCourses': '學系必修課程缺修',
+      'generalEducationCourse': '通識課程',
+      'otherEducationsCourse': '其他：請務必依各學系之專業選修規定，或加修之雙主修／輔系規定檢查',
+      'description': '說明',
+      'subjectType': '科目類別',
+      'check': '檢核',
+      'shouldCredits': '應修學分',
+      'actualCredits': '實得學分',
+      'totalCredits': '累計學分',
+      'practiceSituation': '修習情形',
+      'courseClickHint': '點擊科目名稱可看詳細資訊',
+      'graduationCheckChecklistHint': '資料僅供參考詳細請參考校務系統',
+      'graduationCheckChecklistEmpty': '尚未有任何畢業檢核資料',
     },
   };
 
@@ -996,6 +1025,37 @@ class AppLocalizations {
       _vocabularies['offline_bus_reservations'];
 
   String get offlineLeaveData => _vocabularies['offline_leave_data'];
+
+  String get graduationCheckChecklist =>
+      _vocabularies['graduationCheckChecklist'];
+
+  String get missingRequiredCourses => _vocabularies['missingRequiredCourses'];
+
+  String get generalEducationCourse => _vocabularies['generalEducationCourse'];
+
+  String get otherEducationsCourse => _vocabularies['otherEducationsCourse'];
+
+  String get description => _vocabularies['description'];
+
+  String get subjectType => _vocabularies['subjectType'];
+
+  String get check => _vocabularies['check'];
+
+  String get shouldCredits => _vocabularies['shouldCredits'];
+
+  String get actualCredits => _vocabularies['actualCredits'];
+
+  String get totalCredits => _vocabularies['totalCredits'];
+
+  String get practiceSituation => _vocabularies['practiceSituation'];
+
+  String get courseClickHint => _vocabularies['courseClickHint'];
+
+  String get graduationCheckChecklistHint =>
+      _vocabularies['graduationCheckChecklistHint'];
+
+  String get graduationCheckChecklistEmpty =>
+      _vocabularies['graduationCheckChecklistEmpty'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
