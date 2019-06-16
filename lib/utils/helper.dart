@@ -84,6 +84,7 @@ class Helper {
     else if (scoreResponse.statusCode != 302 && scoreResponse.statusCode != 200)
       throw '';
     scoreCookie = scoreResponse.headers['set-cookie'];
+    //print('scoreResponse statusCode =  ${scoreResponse.statusCode}');
     var courseResponse = await http.post(
       'http://$selcrsUrl/menu4/Studcheck_sso2.asp',
       headers: {
@@ -94,13 +95,13 @@ class Helper {
         'SPassword': base64md5Password,
       },
     ).timeout(Duration(seconds: 2));
-    print('text =  ${courseResponse.statusCode}');
+    //print('courseResponse statusCode =  ${courseResponse.statusCode}');
     text = big5.decode(courseResponse.bodyBytes);
+    //print('text =  $text');
     if (text.contains("學號碼密碼不符"))
       course = false;
     else if (courseResponse.statusCode != 200) throw '';
     courseCookie = courseResponse.headers['set-cookie'];
-    print('text =  ${courseResponse.headers['set-cookie'] == null}');
     print(DateTime.now());
     if (score && course)
       return 200;
@@ -113,8 +114,7 @@ class Helper {
     var base64md5Password =
         await Helper.controller?.evaluateJavascript('base64_md5("$password")');
     base64md5Password = base64md5Password.replaceAll('\"', '');
-    print('password = $base64md5Password');
-    bool grade = true, course = true;
+    bool graduation = true;
     var response = await http.post(
       'http://$selcrsUrl/gadchk/gad_chk_login_prs_sso2.asp',
       headers: {
@@ -128,13 +128,13 @@ class Helper {
       },
     ).timeout(Duration(seconds: 2));
     String text = big5.decode(response.bodyBytes);
-    print('Response =  $text');
-    print('response.statusCode = ${response.statusCode}');
+//    print('Response =  $text');
+//    print('response.statusCode = ${response.statusCode}');
     if (text.contains("資料錯誤請重新輸入"))
-      grade = false;
+      graduation = false;
     else if (response.statusCode != 302 && response.statusCode != 200) throw '';
     graduationCookie = response.headers['set-cookie'];
-    if (grade) {
+    if (graduation) {
       Helper.username = username;
       return 200;
     } else

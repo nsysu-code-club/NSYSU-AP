@@ -130,7 +130,10 @@ class GeneralEducationItem {
       this.check,
       this.actualCredits,
       this.totalCredits,
-      this.practiceSituation});
+      this.practiceSituation}) {
+    this.credit = this.credit.replaceAll('�', '\\');
+    this.check = this.check.replaceAll('�', '\\');
+  }
 
   GeneralEducationItem.fromJson(Map<String, dynamic> json) {
     name = json['name'];

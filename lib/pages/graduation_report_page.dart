@@ -121,7 +121,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
               children: <Widget>[
                 Text(
                   app.graduationCheckChecklistHint,
-                  textAlign: TextAlign.start,
+                  textAlign: TextAlign.center,
                   style: TextStyle(color: Resource.Colors.grey, fontSize: 16.0),
                 ),
                 SizedBox(height: 4.0),
