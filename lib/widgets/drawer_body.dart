@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/user_info.dart';
 import 'package:nsysu_ap/pages/about/about_us_page.dart';
 import 'package:nsysu_ap/pages/course_page.dart';
+import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/score_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
@@ -126,6 +127,8 @@ class DrawerBodyState extends State<DrawerBody> {
               children: <Widget>[
                 _subItem(Icons.class_, app.course, CoursePageRoute()),
                 _subItem(Icons.assignment, app.score, ScorePageRoute()),
+                _subItem(Icons.grade, app.graduationCheckChecklist,
+                    GraduationReportPageRoute()),
               ],
             ),
             _item(Icons.face, app.about, AboutUsPageRoute()),

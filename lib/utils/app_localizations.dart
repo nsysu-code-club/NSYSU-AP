@@ -25,7 +25,7 @@ class AppLocalizations {
       'app_name': 'NSYSU AP',
       'update_note_title': 'Update Notes',
       'update_note_content':
-          'Welcome to NSYSU AP\nCurrent can use feature\n1.Login system.\n2.Home page list news.\n3.Semester course.\n4.Semester score.\nPlease use SSO system account to login\n\nHave any problem please contact fans page.',
+          'Welcome to NSYSU AP\nCurrent can use feature\n1.Login system.\n2.Home page list news.\n3.Semester course.\n4.Semester score.\n5.Graduation check checklist.\nPlease use SSO system account to login\n\nHave any problem please contact fans page.',
       'splash_content': '我們全都包了\n只剩下學校不包我們',
       'share': 'Share',
       'teacher_confirm_title': 'Are you a teacher?',
@@ -295,12 +295,27 @@ class AppLocalizations {
       'offline_score': 'Offline Score',
       'offline_bus_reservations': 'Offline Bus Reservations',
       'offline_leave_data': 'Offline absent Report',
+      'graduationCheckChecklist': 'Graduation check checklist',
+      'missingRequiredCourses': 'Missing Required Courses',
+      'generalEducationCourse': 'General Education Courses',
+      'otherEducationsCourse': 'Other Education Courses',
+      'description': 'Description',
+      'subjectType': 'Subject Type',
+      'check': 'Check',
+      'shouldCredits': 'Should Credits',
+      'actualCredits': 'Actual Credits',
+      'totalCredits': 'Total Credits',
+      'practiceSituation': 'Practice Situation',
+      'courseClickHint': 'Click subject show more.',
+      'graduationCheckChecklistHint':
+          'The selected credits for this semester are considered as passing prequalification.\nThe information is for reference only. Please refer to the school service system.',
+      'graduationCheckChecklistEmpty': 'No graduation check information yet',
     },
     'zh': {
       'app_name': '中山校務通',
       'update_note_title': '更新日誌',
       'update_note_content':
-          '歡迎使用中山校務通\n目前可使用功能有\n1.登入\n2.主畫面陳列最新消息\n3.學期課表查詢\n4.學期成績查詢\n請使用SSO系統帳號登入\n\n有任何問題歡迎聯絡粉絲專頁',
+          '歡迎使用中山校務通\n目前可使用功能有\n1.登入\n2.主畫面陳列最新消息\n3.學期課表查詢\n4.學期成績查詢5.應屆畢業生成績檢核表\n\n請使用SSO系統帳號登入\n\n有任何問題歡迎聯絡粉絲專頁',
       'splash_content': '我們全都包了\n只剩下學校不包我們',
       'share': '分享',
       'teacher_confirm_title': '您是老師嗎？',
@@ -554,6 +569,20 @@ class AppLocalizations {
       'offline_score': '離線成績',
       'offline_bus_reservations': '離線校車紀錄',
       'offline_leave_data': '離線缺曠資料',
+      'graduationCheckChecklist': '應屆畢業生成績檢核表',
+      'missingRequiredCourses': '學系必修課程缺修',
+      'generalEducationCourse': '通識課程',
+      'otherEducationsCourse': '其他：請務必依各學系之專業選修規定，或加修之雙主修／輔系規定檢查',
+      'description': '說明',
+      'subjectType': '科目類別',
+      'check': '檢核',
+      'shouldCredits': '應修學分',
+      'actualCredits': '實得學分',
+      'totalCredits': '累計學分',
+      'practiceSituation': '修習情形',
+      'courseClickHint': '點擊科目名稱可看詳細資訊',
+      'graduationCheckChecklistHint': '本學期已選學分視同及格預審\n資料僅供參考詳細請參考校務系統',
+      'graduationCheckChecklistEmpty': '尚未有任何畢業檢核資料',
     },
   };
 
@@ -996,6 +1025,37 @@ class AppLocalizations {
       _vocabularies['offline_bus_reservations'];
 
   String get offlineLeaveData => _vocabularies['offline_leave_data'];
+
+  String get graduationCheckChecklist =>
+      _vocabularies['graduationCheckChecklist'];
+
+  String get missingRequiredCourses => _vocabularies['missingRequiredCourses'];
+
+  String get generalEducationCourse => _vocabularies['generalEducationCourse'];
+
+  String get otherEducationsCourse => _vocabularies['otherEducationsCourse'];
+
+  String get description => _vocabularies['description'];
+
+  String get subjectType => _vocabularies['subjectType'];
+
+  String get check => _vocabularies['check'];
+
+  String get shouldCredits => _vocabularies['shouldCredits'];
+
+  String get actualCredits => _vocabularies['actualCredits'];
+
+  String get totalCredits => _vocabularies['totalCredits'];
+
+  String get practiceSituation => _vocabularies['practiceSituation'];
+
+  String get courseClickHint => _vocabularies['courseClickHint'];
+
+  String get graduationCheckChecklistHint =>
+      _vocabularies['graduationCheckChecklistHint'];
+
+  String get graduationCheckChecklistEmpty =>
+      _vocabularies['graduationCheckChecklistEmpty'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
