@@ -496,8 +496,9 @@ class Helper {
         if (tdDoc[i].text.contains('目前累計學分數'))
           graduationReportData.totalDescription = tdDoc[i].text;
       }
-      graduationReportData.totalDescription =
-          graduationReportData.totalDescription.replaceAll('※', '');
+      if (graduationReportData.totalDescription != null)
+        graduationReportData.totalDescription =
+            graduationReportData.totalDescription.replaceAll('※', '');
       print(DateTime.now());
     } else {
       return null;

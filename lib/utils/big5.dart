@@ -48,7 +48,7 @@ String Big5TransformDecode(List<int> src) {
       size = 2;
 
       var i = c0 * 16 * 16 + c1;
-      var s = decode()[i];
+      var s = decode[i];
       if (s != null) {
         write(s);
         continue;
@@ -91,49 +91,49 @@ List<int> Big5TransformEncode(String src) {
 
     if (r >= RUNE_SELF) {
       if (encode0Low <= r && r < encode0High) {
-        r = encode0()[r - encode0Low];
+        r = encode0[r - encode0Low];
         if (r != 0) {
           write2(r);
           continue;
         }
       } else if (encode1Low <= r && r < encode1High) {
-        r = encode1()[r - encode1Low];
+        r = encode1[r - encode1Low];
         if (r != 0) {
           write2(r);
           continue;
         }
       } else if (encode2Low <= r && r < encode2High) {
-        r = encode2()[r - encode2Low];
+        r = encode2[r - encode2Low];
         if (r != 0) {
           write2(r);
           continue;
         }
       } else if (encode3Low <= r && r < encode3High) {
-        r = encode3()[r - encode3Low];
+        r = encode3[r - encode3Low];
         if (r != 0) {
           write2(r);
           continue;
         }
       } else if (encode4Low <= r && r < encode4High) {
-        r = encode4()[r - encode4Low];
+        r = encode4[r - encode4Low];
         if (r != 0) {
           write2(r);
           continue;
         }
       } else if (encode5Low <= r && r < encode5High) {
-        r = encode5()[r - encode5Low];
+        r = encode5[r - encode5Low];
         if (r != 0) {
           write2(r);
           continue;
         }
       } else if (encode6Low <= r && r < encode6High) {
-        r = encode6()[r - encode6Low];
+        r = encode6[r - encode6Low];
         if (r != 0) {
           write2(r);
           continue;
         }
       } else if (encode7Low <= r && r < encode7High) {
-        r = encode7()[r - encode7Low];
+        r = encode7[r - encode7Low];
         if (r != 0) {
           write2(r);
           continue;
