@@ -60,7 +60,6 @@ class Helper {
   }
 
   Future<int> selcrsLogin(String username, String password) async {
-    print(DateTime.now());
     var base64md5Password =
         await Helper.controller?.evaluateJavascript('base64_md5("$password")');
     base64md5Password = base64md5Password.replaceAll('\"', '');
@@ -425,7 +424,7 @@ class Helper {
         //print('i => ${tableDoc[i].text}');
         var trDoc = tableDoc[i].getElementsByTagName('tr');
         if (i == 4) {
-          //學系必修課程缺修
+          //缺修學系必修課程
           if (trDoc.length > 3) {
             for (var j = 2; j < trDoc.length; j++) {
               var tdDoc = trDoc[j].getElementsByTagName('td');
@@ -441,6 +440,10 @@ class Helper {
 //                print("i $i j $j k $k => ${tdDoc[k].text}");
 //              }
             }
+          }
+          if (trDoc.length > 0) {
+            graduationReportData.missingRequiredCoursesCredit =
+                trDoc.last.text.replaceAll(RegExp(r'[※\n]'), '');
           }
         } else if (i == 5) {
           //通識課程
@@ -471,6 +474,10 @@ class Helper {
                 ),
               );
           }
+          if (graduationReportData.generalEducationCourse.length > 0) {
+            graduationReportData.generalEducationCourseDescription =
+                trDoc.last.text.replaceAll(RegExp(r'[※\n]'), '');
+          }
         } else if (i == 6) {
           //其他
           if (trDoc.length > 3) {
@@ -489,16 +496,18 @@ class Helper {
 //              }
             }
           }
+          if (trDoc.length > 0) {
+            graduationReportData.otherEducationsCourseCredit =
+                trDoc.last.text.replaceAll(RegExp(r'[※\n]'), '');
+          }
         }
       }
       var tdDoc = document.getElementsByTagName('td');
       for (var i = 0; i < tdDoc.length; i++) {
         if (tdDoc[i].text.contains('目前累計學分數'))
-          graduationReportData.totalDescription = tdDoc[i].text;
+          graduationReportData.totalDescription =
+              tdDoc[i].text.replaceAll(RegExp(r'[※\n]'), '');
       }
-      if (graduationReportData.totalDescription != null)
-        graduationReportData.totalDescription =
-            graduationReportData.totalDescription.replaceAll('※', '');
       print(DateTime.now());
     } else {
       return null;

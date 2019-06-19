@@ -310,6 +310,8 @@ class AppLocalizations {
       'graduationCheckChecklistHint':
           'The selected credits for this semester are considered as passing prequalification.\nThe information is for reference only. Please refer to the school service system.',
       'graduationCheckChecklistEmpty': 'No graduation check information yet',
+      'graduationCheckChecklistSummary': 'Summary',
+      'noData': 'No Data',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -583,6 +585,8 @@ class AppLocalizations {
       'courseClickHint': '點擊科目名稱可看詳細資訊',
       'graduationCheckChecklistHint': '本學期已選學分視同及格預審\n資料僅供參考詳細請參考校務系統',
       'graduationCheckChecklistEmpty': '尚未有任何畢業檢核資料',
+      'graduationCheckChecklistSummary': '總結',
+      'noData': '無資料',
     },
   };
 
@@ -1056,6 +1060,11 @@ class AppLocalizations {
 
   String get graduationCheckChecklistEmpty =>
       _vocabularies['graduationCheckChecklistEmpty'];
+
+  String get noData => _vocabularies['noData'];
+
+  String get graduationCheckChecklistSummary =>
+      _vocabularies['graduationCheckChecklistSummary'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

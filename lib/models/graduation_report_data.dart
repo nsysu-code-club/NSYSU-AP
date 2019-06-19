@@ -3,6 +3,8 @@ class GraduationReportData {
   String name;
   String time;
   String missingRequiredCoursesCredit;
+  String generalEducationCourseDescription;
+  String otherEducationsCourseCredit;
   String totalDescription;
   List<MissingRequiredCourse> missingRequiredCourse;
   List<GeneralEducationCourse> generalEducationCourse;
@@ -23,6 +25,9 @@ class GraduationReportData {
     name = json['name'];
     time = json['time'];
     missingRequiredCoursesCredit = json['missingRequiredCoursesCredit'];
+    generalEducationCourseDescription =
+        json['generalEducationCourseDescription'];
+    otherEducationsCourseCredit = json['otherEducationsCourseCredit'];
     totalDescription = json['totalDescription'];
     if (json['missingRequiredCourse'] != null) {
       missingRequiredCourse = new List<MissingRequiredCourse>();
@@ -50,6 +55,9 @@ class GraduationReportData {
     data['name'] = this.name;
     data['time'] = this.time;
     data['missingRequiredCoursesCredit'] = this.missingRequiredCoursesCredit;
+    data['generalEducationCourseDescription'] =
+        this.generalEducationCourseDescription;
+    data['otherEducationsCourseCredit'] = this.otherEducationsCourseCredit;
     data['totalDescription'] = this.totalDescription;
     if (this.missingRequiredCourse != null) {
       data['missingRequiredCourse'] =

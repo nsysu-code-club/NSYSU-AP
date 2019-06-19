@@ -122,55 +122,70 @@ class GraduationReportPageState extends State<GraduationReportPage>
                 Text(
                   app.graduationCheckChecklistHint,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Resource.Colors.grey, fontSize: 16.0),
+                  style: TextStyle(color: Colors.grey[700], fontSize: 16.0),
                 ),
-                SizedBox(height: 4.0),
+                SizedBox(height: 8.0),
                 Text(
                   app.missingRequiredCourses,
                   textAlign: TextAlign.start,
                   style: _textBlueStyle(),
                 ),
-                BorderContainer(
-                  child: Table(
-                    columnWidths: const <int, TableColumnWidth>{
-                      0: FlexColumnWidth(2.5),
-                      1: FlexColumnWidth(1.0),
-                      2: FlexColumnWidth(1.0),
-                    },
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    border: TableBorder.symmetric(
-                      inside: BorderSide(
-                        color: Colors.grey,
-                        width: 0.5,
+                graduationReportData.missingRequiredCourse.length == 0
+                    ? Text(
+                        app.noData,
+                        style: TextStyle(
+                            color: Resource.Colors.grey, fontSize: 14.0),
+                      )
+                    : BorderContainer(
+                        child: Table(
+                          columnWidths: const <int, TableColumnWidth>{
+                            0: FlexColumnWidth(2.5),
+                            1: FlexColumnWidth(1.0),
+                            2: FlexColumnWidth(1.0),
+                          },
+                          defaultVerticalAlignment:
+                              TableCellVerticalAlignment.middle,
+                          border: TableBorder.symmetric(
+                            inside: BorderSide(
+                              color: Colors.grey,
+                              width: 0.5,
+                            ),
+                          ),
+                          children: [
+                            TableRow(
+                              children: <Widget>[
+                                _scoreTextBorder(app.subject, true),
+                                _scoreTextBorder(app.credits, true),
+                                _scoreTextBorder(app.description, true),
+                              ],
+                            ),
+                            for (var missingRequiredCourse
+                                in graduationReportData.missingRequiredCourse)
+                              TableRow(children: <Widget>[
+                                _scoreTextBorder(
+                                    missingRequiredCourse.name, false),
+                                _scoreTextBorder(
+                                    missingRequiredCourse.credit, false),
+                                _scoreTextBorder(
+                                    missingRequiredCourse.description, false),
+                              ]),
+                          ],
+                        ),
                       ),
-                    ),
-                    children: [
-                      TableRow(
-                        children: <Widget>[
-                          _scoreTextBorder(app.subject, true),
-                          _scoreTextBorder(app.credits, true),
-                          _scoreTextBorder(app.description, true),
-                        ],
-                      ),
-                      for (var missingRequiredCourse
-                          in graduationReportData.missingRequiredCourse)
-                        TableRow(children: <Widget>[
-                          _scoreTextBorder(missingRequiredCourse.name, false),
-                          _scoreTextBorder(missingRequiredCourse.credit, false),
-                          _scoreTextBorder(
-                              missingRequiredCourse.description, false),
-                        ]),
-                    ],
-                  ),
+                Text(
+                  graduationReportData.missingRequiredCoursesCredit,
+                  style: _textBlueStyle(),
                 ),
+                Divider(color: Colors.grey),
                 Text(
                   app.generalEducationCourse,
                   textAlign: TextAlign.start,
                   style: _textBlueStyle(),
                 ),
                 Text(
-                  app.courseClickHint,
-                  textAlign: TextAlign.start,
+                  graduationReportData.generalEducationCourse.length != 0
+                      ? app.courseClickHint
+                      : app.noData,
                   style: TextStyle(color: Resource.Colors.grey, fontSize: 14.0),
                 ),
                 for (var generalEducationCourse
@@ -216,6 +231,13 @@ class GraduationReportPageState extends State<GraduationReportPage>
                     ),
                   ),
                 ],
+                graduationReportData.generalEducationCourse.length != 0
+                    ? Text(
+                        graduationReportData.generalEducationCourseDescription,
+                        style: _textBlueStyle(),
+                      )
+                    : SizedBox(),
+                Divider(color: Colors.grey),
                 Text(
                   app.otherEducationsCourse,
                   textAlign: TextAlign.start,
@@ -253,12 +275,22 @@ class GraduationReportPageState extends State<GraduationReportPage>
                     ],
                   ),
                 ),
-                SizedBox(height: 20.0),
+                Text(
+                  graduationReportData.otherEducationsCourseCredit,
+                  style: _textBlueStyle(),
+                ),
+                Divider(color: Resource.Colors.grey),
+                Text(
+                  app.graduationCheckChecklistSummary,
+                  style: TextStyle(color: Colors.black, fontSize: 16.0),
+                ),
+                SizedBox(height: 4),
                 Text(
                   graduationReportData.totalDescription ?? '',
                   textAlign: TextAlign.start,
                   style: _textBlueStyle(),
                 ),
+                SizedBox(height: 16),
               ],
             ),
           ),
