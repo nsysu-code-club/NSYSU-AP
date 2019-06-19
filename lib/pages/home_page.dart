@@ -13,6 +13,7 @@ import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/helper.dart';
+import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/drawer_body.dart';
 import 'package:nsysu_ap/widgets/hint_content.dart';
 import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
@@ -172,8 +173,8 @@ class HomePageState extends State<HomePage> {
             backgroundColor: Resource.Colors.blue,
             actions: <Widget>[
               IconButton(
-                icon: Icon(Icons.exit_to_app),
-                onPressed: _showLogoutDialog,
+                icon: Icon(Icons.info),
+                onPressed: _showInformationDialog,
               )
             ],
           ),
@@ -205,7 +206,7 @@ class HomePageState extends State<HomePage> {
           ),
         ),
         onWillPop: () async {
-          if (Platform.isAndroid) _showLogoutDialog();
+          if (Platform.isAndroid) _showInformationDialog();
           return false;
         });
   }
@@ -261,19 +262,44 @@ class HomePageState extends State<HomePage> {
     }).catchError((e) {});
   }
 
-  void _showLogoutDialog() {
+  void _showInformationDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) => YesNoDialog(
-            title: app.logout,
-            contentWidget: Text(app.logoutCheck,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Resource.Colors.grey)),
+            title: app.newsRuleTitle,
+            contentWidget: RichText(
+              text: TextSpan(
+                  style: TextStyle(color: Resource.Colors.grey, fontSize: 16.0),
+                  children: [
+                    TextSpan(
+                        text: '${app.newsRuleDescription1}',
+                        style: TextStyle(fontWeight: FontWeight.normal)),
+                    TextSpan(
+                        text: '${app.newsRuleDescription2}',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    TextSpan(
+                        text: '${app.newsRuleDescription3}',
+                        style: TextStyle(fontWeight: FontWeight.normal)),
+                  ]),
+            ),
             leftActionText: app.cancel,
-            rightActionText: app.ok,
+            rightActionText: app.contactFansPage,
+            leftActionFunction: () {},
             rightActionFunction: () {
-              Navigator.popUntil(
-                  context, ModalRoute.withName(Navigator.defaultRouteName));
+              if (Platform.isAndroid)
+                Utils.launchUrl('fb://messaging/${Constants.FANS_PAGE_ID}')
+                    .catchError(
+                        (onError) => Utils.launchUrl(Constants.FANS_PAGE_URL));
+              else if (Platform.isIOS)
+                Utils.launchUrl(
+                        'fb-messenger://user-thread/${Constants.FANS_PAGE_ID}')
+                    .catchError(
+                        (onError) => Utils.launchUrl(Constants.FANS_PAGE_URL));
+              else {
+                Utils.launchUrl(Constants.FANS_PAGE_URL).catchError(
+                    (onError) => Utils.showToast(context, app.platformError));
+              }
+              FA.logAction('contact_fans_page', 'click');
             },
           ),
     );
