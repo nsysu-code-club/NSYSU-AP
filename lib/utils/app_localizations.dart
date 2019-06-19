@@ -310,6 +310,15 @@ class AppLocalizations {
       'graduationCheckChecklistHint':
           'The selected credits for this semester are considered as passing prequalification.\nThe information is for reference only. Please refer to the school service system.',
       'graduationCheckChecklistEmpty': 'No graduation check information yet',
+      'graduationCheckChecklistSummary': 'Summary',
+      'noData': 'No Data',
+      'contactFansPage': 'Contact',
+      'newsRuleTitle': 'News publication rules',
+      'newsRuleDescription1':
+          'This feature provides information about the school or student\'s publication of the school.\n\nPlease contact the fan page if you need it\n',
+      'newsRuleDescription2':
+          '1. Image and upload to imgur, please use JPEG compressed file. It is recommended not to exceed 100KB. \n2. The title suggests placing the name of the event, not too long. \n3. Activity URL link. \n4. Description of the content. \n5. Must be a non-profit activity.\n\n',
+      'newsRuleDescription3': 'The NSYSU AP team has the final right to modify.'
     },
     'zh': {
       'app_name': '中山校務通',
@@ -583,6 +592,14 @@ class AppLocalizations {
       'courseClickHint': '點擊科目名稱可看詳細資訊',
       'graduationCheckChecklistHint': '本學期已選學分視同及格預審\n資料僅供參考詳細請參考校務系統',
       'graduationCheckChecklistEmpty': '尚未有任何畢業檢核資料',
+      'graduationCheckChecklistSummary': '總結',
+      'noData': '無資料',
+      'contactFansPage': '聯絡粉專',
+      'newsRuleTitle': '最新消息刊登規則',
+      'newsRuleDescription1': '本功能提供社團或學生\n刊登學校相關資訊\n\n若需要請聯絡粉絲專頁並提供\n',
+      'newsRuleDescription2':
+          '1. 圖片且上傳至 imgur\n請使用ＪＰＥＧ有壓縮過的檔案\n建議不要超過100KB\n2. 標題建議放活動名稱，不要太長\n3. 活動網址連結\n4. 內容說明\n5.必須為非營利活動\n\n',
+      'newsRuleDescription3': '中山校務通團隊有最終修改權利'
     },
   };
 
@@ -1056,6 +1073,21 @@ class AppLocalizations {
 
   String get graduationCheckChecklistEmpty =>
       _vocabularies['graduationCheckChecklistEmpty'];
+
+  String get noData => _vocabularies['noData'];
+
+  String get graduationCheckChecklistSummary =>
+      _vocabularies['graduationCheckChecklistSummary'];
+
+  String get contactFansPage => _vocabularies['contactFansPage'];
+
+  String get newsRuleTitle => _vocabularies['newsRuleTitle'];
+
+  String get newsRuleDescription1 => _vocabularies['newsRuleDescription1'];
+
+  String get newsRuleDescription2 => _vocabularies['newsRuleDescription2'];
+
+  String get newsRuleDescription3 => _vocabularies['newsRuleDescription3'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

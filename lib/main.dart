@@ -22,28 +22,36 @@ import 'pages/home_page.dart';
 import 'pages/setting_page.dart';
 
 void main() {
-  Crashlytics.instance.enableInDevMode = true;
-
-  // Pass all uncaught errors to Crashlytics.
+  Crashlytics.instance.enableInDevMode = false;
   FlutterError.onError = (FlutterErrorDetails details) {
     Crashlytics.instance.onError(details);
   };
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  FirebaseAnalytics analytics;
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  FirebaseAnalytics _analytics;
   FirebaseMessaging _firebaseMessaging;
   Brightness brightness = Brightness.light;
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
     if (Platform.isAndroid || Platform.isIOS) {
-      analytics = FirebaseAnalytics();
+      _analytics = FirebaseAnalytics();
       _firebaseMessaging = FirebaseMessaging();
-      _initFCM();
-      FA.analytics = analytics;
+      _initFCM(_firebaseMessaging);
+      FA.analytics = _analytics;
     }
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp(
       localeResolutionCallback:
           (Locale locale, Iterable<Locale> supportedLocales) {
@@ -75,7 +83,7 @@ class MyApp extends StatelessWidget {
       ),
       navigatorObservers: (Platform.isIOS || Platform.isAndroid)
           ? [
-              FirebaseAnalyticsObserver(analytics: analytics),
+              FirebaseAnalyticsObserver(analytics: _analytics),
             ]
           : [],
       localizationsDelegates: [
@@ -91,14 +99,16 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  void _initFCM() async {
+  void _initFCM(FirebaseMessaging firebaseMessaging) async {
     await Future.delayed(Duration(seconds: 2));
-    _firebaseMessaging.requestNotificationPermissions();
-    _firebaseMessaging.configure(
+    firebaseMessaging.requestNotificationPermissions();
+    firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         if (Constants.isInDebugMode) print("onMessage: $message");
-        Utils.showFCMNotification(message['notification']['title'],
-            message['notification']['title'], message['notification']['body']);
+        Utils.showFCMNotification(
+            message['notification']['title'] ?? '',
+            message['notification']['title'] ?? '',
+            message['notification']['body'] ?? '');
       },
       onLaunch: (Map<String, dynamic> message) async {
         if (Constants.isInDebugMode) print("onLaunch: $message");
@@ -108,20 +118,20 @@ class MyApp extends StatelessWidget {
         if (Constants.isInDebugMode) print("onResume: $message");
       },
     );
-    _firebaseMessaging.requestNotificationPermissions(
+    firebaseMessaging.requestNotificationPermissions(
         const IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
+    firebaseMessaging.onIosSettingsRegistered
         .listen((IosNotificationSettings settings) {
       print("Settings registered: $settings");
     });
-    _firebaseMessaging.getToken().then((String token) {
+    firebaseMessaging.getToken().then((String token) {
       if (token == null) return;
       if (Constants.isInDebugMode) {
         print("Push Messaging token: $token");
       }
       if (Platform.isAndroid)
-        _firebaseMessaging.subscribeToTopic("Android");
-      else if (Platform.isIOS) _firebaseMessaging.subscribeToTopic("IOS");
+        firebaseMessaging.subscribeToTopic("Android");
+      else if (Platform.isIOS) firebaseMessaging.subscribeToTopic("IOS");
     });
   }
 }

@@ -118,7 +118,7 @@ class DrawerBodyState extends State<DrawerBody> {
                 });
               },
               leading: Icon(
-                Icons.school,
+                Icons.collections_bookmark,
                 color: isStudyExpanded
                     ? Resource.Colors.blue
                     : Resource.Colors.grey,
@@ -127,10 +127,10 @@ class DrawerBodyState extends State<DrawerBody> {
               children: <Widget>[
                 _subItem(Icons.class_, app.course, CoursePageRoute()),
                 _subItem(Icons.assignment, app.score, ScorePageRoute()),
-                _subItem(Icons.grade, app.graduationCheckChecklist,
-                    GraduationReportPageRoute()),
               ],
             ),
+            _item(Icons.school, app.graduationCheckChecklist,
+                GraduationReportPageRoute()),
             _item(Icons.face, app.about, AboutUsPageRoute()),
             _item(Icons.settings, app.settings, SettingPageRoute()),
             ListTile(
