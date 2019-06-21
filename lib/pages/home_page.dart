@@ -206,7 +206,7 @@ class HomePageState extends State<HomePage> {
           ),
         ),
         onWillPop: () async {
-          if (Platform.isAndroid) _showInformationDialog();
+          if (Platform.isAndroid) _showLogoutDialog();
           return false;
         });
   }
@@ -260,6 +260,24 @@ class HomePageState extends State<HomePage> {
         FA.setUserId(userInfo.studentId);
       }
     }).catchError((e) {});
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => YesNoDialog(
+            title: app.logout,
+            contentWidget: Text(app.logoutCheck,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Resource.Colors.grey)),
+            leftActionText: app.cancel,
+            rightActionText: app.ok,
+            rightActionFunction: () {
+              Navigator.popUntil(
+                  context, ModalRoute.withName(Navigator.defaultRouteName));
+            },
+          ),
+    );
   }
 
   void _showInformationDialog() {
