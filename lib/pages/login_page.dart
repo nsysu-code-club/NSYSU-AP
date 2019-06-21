@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
@@ -16,7 +15,6 @@ import 'package:nsysu_ap/widgets/progress_dialog.dart';
 import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import 'home_page.dart';
 
@@ -72,43 +70,22 @@ class LoginPageState extends State<LoginPage>
     app = AppLocalizations.of(context);
     return OrientationBuilder(builder: (_, orientation) {
       return Scaffold(
+        backgroundColor: Resource.Colors.blue,
         resizeToAvoidBottomPadding: orientation == Orientation.portrait,
-        body: Stack(
+        body: Container(
           alignment: Alignment(0, 0),
-          children: <Widget>[
-            SizedBox(
-              child: WebView(
-                javascriptMode: JavascriptMode.unrestricted,
-                onWebViewCreated: (controller) async {
-                  print('onWebViewCreated = $controller');
-                  //source https://sso.nsysu.edu.tw/public/js/md5.js
-                  String code = await rootBundle.loadString('assets/md5.js');
-                  Helper.controller = controller;
-                  Helper.controller.evaluateJavascript(code);
-                },
-                onPageFinished: (s) {
-                  print('onPageFinished = $s');
-                },
-                debuggingEnabled: true,
-              ),
-            ),
-            Container(
-              alignment: Alignment(0, 0),
-              color: Resource.Colors.blue,
-              padding: EdgeInsets.symmetric(horizontal: 30.0),
-              child: orientation == Orientation.portrait
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      mainAxisSize: MainAxisSize.min,
-                      children: _renderContent(orientation),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: _renderContent(orientation),
-                    ),
-            )
-          ],
+          padding: EdgeInsets.symmetric(horizontal: 30.0),
+          child: orientation == Orientation.portrait
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisSize: MainAxisSize.min,
+                  children: _renderContent(orientation),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: _renderContent(orientation),
+                ),
         ),
       );
     });

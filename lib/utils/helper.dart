@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:nsysu_ap/models/course_data.dart';
@@ -10,7 +11,6 @@ import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/score_data.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/models/user_info.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import 'app_localizations.dart';
 import 'big5.dart';
@@ -27,7 +27,6 @@ class Helper {
   static String graduationCookie = '';
   static String username = '';
   static String selcrsUrl = 'selcrs1.nsysu.edu.tw';
-  static WebViewController controller;
   static int index = 0;
   static int error = 0;
 
@@ -59,10 +58,14 @@ class Helper {
     print(selcrsUrl);
   }
 
+  String base64md5(String text) {
+    var bytes = utf8.encode(text);
+    var digest = md5.convert(bytes);
+    return base64.encode(digest.bytes);
+  }
+
   Future<int> selcrsLogin(String username, String password) async {
-    var base64md5Password =
-        await Helper.controller?.evaluateJavascript('base64_md5("$password")');
-    base64md5Password = base64md5Password.replaceAll('\"', '');
+    var base64md5Password = base64md5(password);
     bool score = true, course = true;
     var scoreResponse = await http.post(
       'http://$selcrsUrl/scoreqry/sco_query_prs_sso2.asp',
@@ -110,9 +113,7 @@ class Helper {
 
   Future<int> graduationLogin(String username, String password) async {
     print(DateTime.now());
-    var base64md5Password =
-        await Helper.controller?.evaluateJavascript('base64_md5("$password")');
-    base64md5Password = base64md5Password.replaceAll('\"', '');
+    var base64md5Password = base64md5(password);
     bool graduation = true;
     var response = await http.post(
       'http://$selcrsUrl/gadchk/gad_chk_login_prs_sso2.asp',

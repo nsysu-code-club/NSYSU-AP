@@ -16,7 +16,6 @@ dependencies:
   shared_preferences: ^0.5.3+1
   package_info: ^0.4.0+4
   url_launcher: ^5.0.3
-  webview_flutter: ^0.3.9+1
   firebase_core: ^0.4.0+3
   firebase_analytics: ^3.0.2
   firebase_remote_config: ^0.2.0+2
@@ -31,6 +30,7 @@ dependencies:
   carousel_slider: ^1.2.0
   flutter_local_notifications: ^0.6.1
   sprintf: ^4.0.2
+  crypto: ^2.0.6
 
 dev_dependencies:
   flutter_test:
