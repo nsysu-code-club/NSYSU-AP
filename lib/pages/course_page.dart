@@ -94,7 +94,6 @@ class CoursePageState extends State<CoursePage>
                   ],
                 ),
               ),
-              SizedBox(height: 4.0),
               Container(
                 child: isOffline
                     ? Text(
@@ -103,6 +102,11 @@ class CoursePageState extends State<CoursePage>
                       )
                     : null,
               ),
+              Text(
+                app.courseClickHint,
+                style: TextStyle(color: Resource.Colors.grey),
+              ),
+              SizedBox(height: 4.0),
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async {

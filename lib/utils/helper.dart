@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:nsysu_ap/models/course_data.dart';
 import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
-import 'package:nsysu_ap/models/login_response.dart';
 import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/score_data.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
@@ -139,30 +138,6 @@ class Helper {
       return 200;
     } else
       return 403;
-  }
-
-  Future<int> login(String username, String password) async {
-    print(DateTime.now());
-    var response = await http.post(
-      '$BASE_URL/selcrs/login',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: '{\"username\": \"$username\",\"password\": \"$password\"}',
-    );
-    print(DateTime.now());
-    var loginResponse = LoginResponse.fromJson(
-      jsonDecode(response.body),
-    );
-    if (loginResponse.data != null) {
-      courseCookie =
-          '${loginResponse.data[0].name}=${loginResponse.data[0].value}';
-      scoreCookie =
-          '${loginResponse.data[0].name}=${loginResponse.data[0].value}';
-      return 200;
-    } else {
-      return 500;
-    }
   }
 
   Future<UserInfo> getUserInfo() async {

@@ -281,6 +281,7 @@ class HomePageState extends State<HomePage> {
   }
 
   void _showInformationDialog() {
+    FA.logAction('news_rule', 'click');
     showDialog(
       context: context,
       builder: (BuildContext context) => YesNoDialog(
