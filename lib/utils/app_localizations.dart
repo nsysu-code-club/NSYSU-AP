@@ -25,7 +25,7 @@ class AppLocalizations {
       'app_name': 'NSYSU AP',
       'update_note_title': 'Update Notes',
       'update_note_content':
-          'Welcome to NSYSU AP\nCurrent can use feature\n1.Login system.\n2.Home page list news.\n3.Semester course.\n4.Semester score.\n5.Graduation check checklist.\nPlease use SSO system account to login\n\nHave any problem please contact fans page.',
+          '1.Improve login encrypt function.\n2.Fix logout dialog.\n3.Fix crashlytics.\nPlease use SSO system account to login\n\nHave any problem please contact fans page.',
       'splash_content': '我們全都包了\n只剩下學校不包我們',
       'share': 'Share',
       'teacher_confirm_title': 'Are you a teacher?',
@@ -324,7 +324,7 @@ class AppLocalizations {
       'app_name': '中山校務通',
       'update_note_title': '更新日誌',
       'update_note_content':
-          '歡迎使用中山校務通\n目前可使用功能有\n1.登入\n2.主畫面陳列最新消息\n3.學期課表查詢\n4.學期成績查詢5.應屆畢業生成績檢核表\n\n請使用SSO系統帳號登入\n\n有任何問題歡迎聯絡粉絲專頁',
+          '1.改善登入加密功能\n2.修復登出對話框錯\n3.修正崩潰分析\n請使用SSO系統帳號登入\n\n有任何問題歡迎聯絡粉絲專頁',
       'splash_content': '我們全都包了\n只剩下學校不包我們',
       'share': '分享',
       'teacher_confirm_title': '您是老師嗎？',
