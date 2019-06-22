@@ -1,7 +1,7 @@
 name: nsysu_ap
 description: NSYSU AP
 
-version: 0.1.1+101
+version: 0.1.2+102
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -30,7 +30,8 @@ dependencies:
   flutter_local_notifications: ^0.6.1
   sprintf: ^4.0.2
   crypto: ^2.0.6
-  flutter_crashlytics: 1.0.0
+  flutter_crashlytics:
+    path: ../flutter_crashlytics
 
 dev_dependencies:
   flutter_test:
