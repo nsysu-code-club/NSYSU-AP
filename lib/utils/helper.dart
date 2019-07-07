@@ -342,6 +342,8 @@ class Helper {
         if (fontDoc.length != 6) continue;
         if (i != 0)
           list.add(Score(
+            number:
+                '${fontDoc[2].text.substring(1, fontDoc[2].text.length - 1)}',
             title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
                 '${fontDoc[3].text}',
             middleScore: '${fontDoc[4].text}',
@@ -375,6 +377,46 @@ class Helper {
     );
     if (list.length == 0) scoreData.status = 204;
     return scoreData;
+  }
+
+  Future<PreScore> getPreScoreData(String courseNumber) async {
+    var url =
+        'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=814&KIND=1&LANGS=$language';
+    var response = await http.post(
+      url,
+      headers: {
+        'Cookie': scoreCookie,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: {
+        'CRSNO': courseNumber,
+      },
+      encoding: Encoding.getByName('BIG-5'),
+    );
+    String text = big5.decode(response.bodyBytes);
+    var startTime = DateTime.now().millisecondsSinceEpoch;
+    //print('text = $text}');
+    var document = parse(text, encoding: 'BIG-5');
+    PreScore detail;
+    var tableDoc = document.getElementsByTagName('table');
+    if (tableDoc.length >= 1) {
+      for (var i = 0; i < tableDoc.length; i++) {
+        var trDoc = tableDoc[i].getElementsByTagName('tr');
+        if (trDoc.length >= 2) {
+          var tdDoc = trDoc[1].getElementsByTagName('td');
+          if (tdDoc.length >= 6) {
+            detail = PreScore(
+              item: tdDoc[2].text,
+              percentage: tdDoc[3].text,
+              originalGrades: tdDoc[4].text,
+              grades: tdDoc[5].text,
+              remark: tdDoc[6].text,
+            );
+          }
+        }
+      }
+    }
+    return detail;
   }
 
   Future<GraduationReportData> getGraduationReport() async {

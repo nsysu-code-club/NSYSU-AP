@@ -56,6 +56,7 @@ class Score {
   String middleScore;
   String finalScore;
   String remark;
+  String number;
 
   Score({
     this.title,
@@ -66,6 +67,7 @@ class Score {
     this.middleScore,
     this.finalScore,
     this.remark,
+    this.number,
   });
 
   static List<Score> toList(List<dynamic> jsonArray) {
@@ -84,6 +86,7 @@ class Score {
       middleScore: json['middle_score'],
       finalScore: json['final_score'],
       remark: json['remark'],
+      number: json['number'],
     );
   }
 
@@ -96,6 +99,7 @@ class Score {
         'middle_score': middleScore,
         'final_score': finalScore,
         'remark': remark,
+        'number': number,
       };
 }
 
@@ -127,4 +131,20 @@ class Detail {
         'class_rank': classRank,
         'class_percentage': classPercentage,
       };
+}
+
+class PreScore {
+  String percentage;
+  String item;
+  String originalGrades;
+  String grades;
+  String remark;
+
+  PreScore({
+    this.percentage = '',
+    this.item = '',
+    this.originalGrades = '',
+    this.grades = '',
+    this.remark = '',
+  });
 }
