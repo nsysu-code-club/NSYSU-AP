@@ -10,6 +10,7 @@ import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/score_data.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/models/user_info.dart';
+import 'package:nsysu_ap/utils/utils.dart';
 
 import 'app_localizations.dart';
 import 'big5.dart';
@@ -536,5 +537,28 @@ class Helper {
     var endTime = DateTime.now().millisecondsSinceEpoch;
     print((endTime - startTime) / 1000.0);
     return graduationReportData;
+  }
+
+  Future<String> getUsername(String name, String id) async {
+    var url = 'http://$selcrsUrl/newstu/stu_new.asp?action=16';
+    var encoded = Utils.uriEncodeBig5(name);
+    var response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: {
+        'CNAME': encoded,
+        'T_CID': id,
+        'B1': '%BDT%A9w%B0e%A5X',
+      },
+    );
+    String text = big5.decode(response.bodyBytes);
+    var document = parse(text, encoding: 'BIG-5');
+    var elements = document.getElementsByTagName('b');
+    if (elements.length > 0)
+      return elements[0].text;
+    else
+      return '';
   }
 }
