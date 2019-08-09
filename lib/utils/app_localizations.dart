@@ -318,7 +318,16 @@ class AppLocalizations {
           'This feature provides information about the school or student\'s publication of the school.\n\nPlease contact the fan page if you need it\n',
       'newsRuleDescription2':
           '1. Image and upload to imgur, please use JPEG compressed file. It is recommended not to exceed 100KB. \n2. The title suggests placing the name of the event, not too long. \n3. Activity URL link. \n4. Description of the content. \n5. Must be a non-profit activity.\n\n',
-      'newsRuleDescription3': 'The NSYSU AP team has the final right to modify.'
+      'newsRuleDescription3':
+          'The NSYSU AP team has the final right to modify.',
+      'searchUsername': 'Search Student ID',
+      'search': 'Search',
+      'name': 'Name',
+      'id': 'id',
+      'searchResult': 'Result',
+      'autoFill': 'Auto Fill',
+      'firstLoginHint':
+          'For first-time login, please fill in the last six number of your ID as your password',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -599,7 +608,14 @@ class AppLocalizations {
       'newsRuleDescription1': '本功能提供社團或學生\n刊登學校相關資訊\n\n若需要請聯絡粉絲專頁並提供\n',
       'newsRuleDescription2':
           '1. 圖片且上傳至 imgur\n請使用ＪＰＥＧ有壓縮過的檔案\n建議不要超過100KB\n2. 標題建議放活動名稱，不要太長\n3. 活動網址連結\n4. 內容說明\n5.必須為非營利活動\n\n',
-      'newsRuleDescription3': '中山校務通團隊有最終修改權利'
+      'newsRuleDescription3': '中山校務通團隊有最終修改權利',
+      'searchUsername': '學號查詢',
+      'search': '查詢',
+      'name': '名字',
+      'id': '身分證字號',
+      'searchResult': '查詢結果',
+      'autoFill': '自動填入',
+      'firstLoginHint': '首次登入密碼預設為身分證末六碼',
     },
   };
 
@@ -1088,6 +1104,20 @@ class AppLocalizations {
   String get newsRuleDescription2 => _vocabularies['newsRuleDescription2'];
 
   String get newsRuleDescription3 => _vocabularies['newsRuleDescription3'];
+
+  String get searchUsername => _vocabularies['searchUsername'];
+
+  String get search => _vocabularies['search'];
+
+  String get name => _vocabularies['name'];
+
+  String get id => _vocabularies['id'];
+
+  String get searchResult => _vocabularies['searchResult'];
+
+  String get autoFill => _vocabularies['autoFill'];
+
+  String get firstLoginHint => _vocabularies['firstLoginHint'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/course_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/utils/big5.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:toast/toast.dart';
@@ -61,49 +62,46 @@ class Utils {
     showDialog<int>(
       context: context,
       builder: (BuildContext context) => SimpleDialog(
-              title: Text(app.choseLanguageTitle),
-              children: <SimpleDialogOption>[
-                SimpleDialogOption(
-                    child: Text(app.systemLanguage),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      if (Platform.isAndroid || Platform.isIOS) {
-                        SharedPreferences preference =
-                            await SharedPreferences.getInstance();
-                        preference.setString(
-                            Constants.PREF_LANGUAGE_CODE, 'system');
-                        AppLocalizations.locale =
-                            Localizations.localeOf(context);
-                      }
-                      function();
-                    }),
-                SimpleDialogOption(
-                    child: Text(app.traditionalChinese),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      if (Platform.isAndroid || Platform.isIOS) {
-                        SharedPreferences preference =
-                            await SharedPreferences.getInstance();
-                        preference.setString(
-                            Constants.PREF_LANGUAGE_CODE, 'zh');
-                        AppLocalizations.locale = Locale('zh');
-                      }
-                      function();
-                    }),
-                SimpleDialogOption(
-                    child: Text(app.english),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      if (Platform.isAndroid || Platform.isIOS) {
-                        SharedPreferences preference =
-                            await SharedPreferences.getInstance();
-                        preference.setString(
-                            Constants.PREF_LANGUAGE_CODE, 'en');
-                        AppLocalizations.locale = Locale('en');
-                      }
-                      function();
-                    })
-              ]),
+          title: Text(app.choseLanguageTitle),
+          children: <SimpleDialogOption>[
+            SimpleDialogOption(
+                child: Text(app.systemLanguage),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  if (Platform.isAndroid || Platform.isIOS) {
+                    SharedPreferences preference =
+                        await SharedPreferences.getInstance();
+                    preference.setString(
+                        Constants.PREF_LANGUAGE_CODE, 'system');
+                    AppLocalizations.locale = Localizations.localeOf(context);
+                  }
+                  function();
+                }),
+            SimpleDialogOption(
+                child: Text(app.traditionalChinese),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  if (Platform.isAndroid || Platform.isIOS) {
+                    SharedPreferences preference =
+                        await SharedPreferences.getInstance();
+                    preference.setString(Constants.PREF_LANGUAGE_CODE, 'zh');
+                    AppLocalizations.locale = Locale('zh');
+                  }
+                  function();
+                }),
+            SimpleDialogOption(
+                child: Text(app.english),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  if (Platform.isAndroid || Platform.isIOS) {
+                    SharedPreferences preference =
+                        await SharedPreferences.getInstance();
+                    preference.setString(Constants.PREF_LANGUAGE_CODE, 'en');
+                    AppLocalizations.locale = Locale('en');
+                  }
+                  function();
+                })
+          ]),
     ).then<void>((int position) {});
   }
 
@@ -217,5 +215,14 @@ class Utils {
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: (text) {});
     return flutterLocalNotificationsPlugin;
+  }
+
+  static String uriEncodeBig5(String text) {
+    var list = big5.encode(text);
+    var result = '';
+    for (var value in list) {
+      result += '%${value.toRadixString(16)}';
+    }
+    return result;
   }
 }

@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/pages/search_username_page.dart';
 import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
@@ -50,11 +52,6 @@ class LoginPageState extends State<LoginPage>
       _getPreference();
       _checkUpdate();
     }
-    f();
-  }
-
-  f() async {
-    //print(MD5.base64_md5("Rain5345"));
   }
 
   @override
@@ -215,6 +212,28 @@ class LoginPageState extends State<LoginPage>
           ),
         ),
       ),
+      Center(
+        child: FlatButton(
+          onPressed: () async {
+            var username = await Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (_) => SearchUsernamePage(),
+              ),
+            );
+            if (username != null && username is String) {
+              setState(() {
+                _username.text = username;
+              });
+              Utils.showToast(context, app.firstLoginHint);
+            }
+          },
+          child: Text(
+            app.searchUsername,
+            style: TextStyle(color: Colors.white, fontSize: 16.0),
+          ),
+        ),
+      ),
     ];
     if (orientation == Orientation.portrait) {
       list.addAll(listB);
@@ -235,17 +254,17 @@ class LoginPageState extends State<LoginPage>
       showDialog(
         context: context,
         builder: (BuildContext context) => DefaultDialog(
-              title: app.updateNoteTitle,
-              contentWidget: Text(
-                "v${packageInfo.version}\n"
-                "${app.updateNoteContent}",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Resource.Colors.grey),
-              ),
-              actionText: app.iKnow,
-              actionFunction: () =>
-                  Navigator.of(context, rootNavigator: true).pop('dialog'),
-            ),
+          title: app.updateNoteTitle,
+          contentWidget: Text(
+            "v${packageInfo.version}\n"
+            "${app.updateNoteContent}",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Resource.Colors.grey),
+          ),
+          actionText: app.iKnow,
+          actionFunction: () =>
+              Navigator.of(context, rootNavigator: true).pop('dialog'),
+        ),
       );
       prefs.setString(Constants.PREF_CURRENT_VERSION, packageInfo.buildNumber);
     }
@@ -285,7 +304,36 @@ class LoginPageState extends State<LoginPage>
         showDialog(
           context: context,
           builder: (BuildContext context) => YesNoDialog(
+            title: app.updateTitle,
+            contentWidget: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                  style: TextStyle(
+                      color: Resource.Colors.grey, height: 1.3, fontSize: 16.0),
+                  children: [
+                    TextSpan(
+                      text:
+                          '${Utils.getPlatformUpdateContent(app)}\n${versionContent.replaceAll('\\n', '\n')}',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ]),
+            ),
+            leftActionText: app.skip,
+            rightActionText: app.update,
+            leftActionFunction: null,
+            rightActionFunction: () {
+              Utils.launchUrl(url);
+            },
+          ),
+        );
+      } else if (versionDiff >= 5) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => WillPopScope(
+            child: DefaultDialog(
                 title: app.updateTitle,
+                actionText: app.update,
                 contentWidget: RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
@@ -295,49 +343,18 @@ class LoginPageState extends State<LoginPage>
                           fontSize: 16.0),
                       children: [
                         TextSpan(
-                          text:
-                              '${Utils.getPlatformUpdateContent(app)}\n${versionContent.replaceAll('\\n', '\n')}',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                            text:
+                                '${Utils.getPlatformUpdateContent(app)}\n${versionContent.replaceAll('\\n', '\n')}',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ]),
                 ),
-                leftActionText: app.skip,
-                rightActionText: app.update,
-                leftActionFunction: null,
-                rightActionFunction: () {
+                actionFunction: () {
                   Utils.launchUrl(url);
-                },
-              ),
-        );
-      } else if (versionDiff >= 5) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) => WillPopScope(
-                child: DefaultDialog(
-                    title: app.updateTitle,
-                    actionText: app.update,
-                    contentWidget: RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                          style: TextStyle(
-                              color: Resource.Colors.grey,
-                              height: 1.3,
-                              fontSize: 16.0),
-                          children: [
-                            TextSpan(
-                                text:
-                                    '${Utils.getPlatformUpdateContent(app)}\n${versionContent.replaceAll('\\n', '\n')}',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                          ]),
-                    ),
-                    actionFunction: () {
-                      Utils.launchUrl(url);
-                    }),
-                onWillPop: () async {
-                  return false;
-                },
-              ),
+                }),
+            onWillPop: () async {
+              return false;
+            },
+          ),
         );
       }
     }
