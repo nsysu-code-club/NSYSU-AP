@@ -5,6 +5,7 @@ import 'package:nsysu_ap/pages/course_page.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/score_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
+import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -131,6 +132,8 @@ class DrawerBodyState extends State<DrawerBody> {
             ),
             _item(Icons.school, app.graduationCheckChecklist,
                 GraduationReportPageRoute()),
+            _item(Icons.monetization_on, app.tuitionAndFees,
+                TuitionAndFeesPageRoute()),
             _item(Icons.face, app.about, AboutUsPageRoute()),
             _item(Icons.settings, app.settings, SettingPageRoute()),
             ListTile(

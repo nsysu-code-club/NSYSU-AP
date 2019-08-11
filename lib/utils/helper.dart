@@ -9,6 +9,7 @@ import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/score_data.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
+import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/models/user_info.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
@@ -25,8 +26,10 @@ class Helper {
   static String courseCookie = '';
   static String scoreCookie = '';
   static String graduationCookie = '';
+  static String tsfCookie = '';
   static String username = '';
   static String selcrsUrl = 'selcrs1.nsysu.edu.tw';
+  static const String tfUrl = 'tfstu.nsysu.edu.tw';
   static int index = 0;
   static int error = 0;
 
@@ -560,5 +563,68 @@ class Helper {
       return elements[0].text;
     else
       return '';
+  }
+
+  Future<int> tfLogin(String username, String password) async {
+    var response = await http.post(
+      'https://$tfUrl/tfstu/tfstu_login_chk.asp',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: {
+        'ID': username,
+        'passwd': password,
+      },
+    ).timeout(Duration(seconds: 2));
+    String text = big5.decode(response.bodyBytes);
+    print('Response =  $text');
+    print('response.statusCode = ${response.statusCode}');
+    tsfCookie = response.headers['set-cookie'];
+    return response.statusCode;
+  }
+
+  Future<List<TuitionAndFees>> getTfData() async {
+    var url = 'https://$tfUrl/tfstu/tfstudata.asp?act=11';
+    var response = await http.get(
+      url,
+      headers: {'Cookie': tsfCookie},
+    );
+    String text = big5.decode(response.bodyBytes);
+    //print('text =  ${text}');
+    var document = parse(text, encoding: 'BIG-5');
+    var tbody = document.getElementsByTagName('tbody');
+    List<TuitionAndFees> list = [];
+    var trElements = tbody[1].getElementsByTagName('tr');
+    for (var i = 1; i < trElements.length; i++) {
+      var tdDoc = trElements[i].getElementsByTagName('td');
+      var aTag = tdDoc[4].getElementsByTagName('a');
+      String serialNumber;
+      if (aTag.length > 0) {
+        serialNumber = aTag[0].attributes['onclick'].split('mst_sno').last;
+        serialNumber = serialNumber.substring(1, serialNumber.length - 1);
+      }
+      String paymentStatus = '', paymentStatusEn = '';
+      for (var charCode in tdDoc[2].text.codeUnits) {
+        if (charCode < 200) {
+          if (charCode == 32)
+            paymentStatusEn += '\n';
+          else
+            paymentStatusEn += String.fromCharCode(charCode);
+        } else
+          paymentStatus += String.fromCharCode(charCode);
+      }
+      list.add(
+        TuitionAndFees(
+          titleZH: tdDoc[0].text.split(' ').first,
+          titleEN: tdDoc[0].text.split(' ').last,
+          amount: tdDoc[1].text,
+          paymentStatusZH: paymentStatus,
+          paymentStatusEN: paymentStatusEn,
+          dateOfPayment: tdDoc[3].text,
+          serialNumber: serialNumber ?? '',
+        ),
+      );
+    }
+    return list;
   }
 }
