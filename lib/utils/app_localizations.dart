@@ -329,7 +329,8 @@ class AppLocalizations {
       'firstLoginHint':
           'For first-time login, please fill in the last six number of your ID as your password',
       'tuitionAndFees': 'Tuition Payment Status',
-      'tuitionAndFeesItemTitleFormat': 'Amount：%s\nDate of Payment：%s'
+      'tuitionAndFeesItemTitleFormat': 'Amount：%s\nDate of Payment：%s',
+      'admissionGuide': 'Admission Guide',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -619,7 +620,8 @@ class AppLocalizations {
       'autoFill': '自動填入',
       'firstLoginHint': '首次登入密碼預設為身分證末六碼',
       'tuitionAndFees': '學雑費繖費狀況查詢',
-      'tuitionAndFeesItemTitleFormat': '金額：%s\n繳費日期：%s'
+      'tuitionAndFeesItemTitleFormat': '金額：%s\n繳費日期：%s',
+      'admissionGuide': '入學指南',
     },
   };
 
@@ -1127,6 +1129,8 @@ class AppLocalizations {
 
   String get tuitionAndFeesItemTitleFormat =>
       _vocabularies['tuitionAndFeesItemTitleFormat'];
+
+  String get admissionGuide => _vocabularies['admissionGuide'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

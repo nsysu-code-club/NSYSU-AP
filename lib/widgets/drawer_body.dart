@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/user_info.dart';
 import 'package:nsysu_ap/pages/about/about_us_page.dart';
+import 'package:nsysu_ap/pages/admission_guide_page.dart';
 import 'package:nsysu_ap/pages/course_page.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/score_page.dart';
@@ -134,6 +135,8 @@ class DrawerBodyState extends State<DrawerBody> {
                 GraduationReportPageRoute()),
             _item(Icons.monetization_on, app.tuitionAndFees,
                 TuitionAndFeesPageRoute()),
+            _item(Icons.accessibility_new, app.admissionGuide,
+                MaterialPageRoute(builder: (_) => AdmissionGuidePage())),
             _item(Icons.face, app.about, AboutUsPageRoute()),
             _item(Icons.settings, app.settings, SettingPageRoute()),
             ListTile(
