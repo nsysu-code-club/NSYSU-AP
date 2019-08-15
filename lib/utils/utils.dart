@@ -1,11 +1,11 @@
 import 'dart:io';
 
+import 'package:big5/big5.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/course_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/utils/big5.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:toast/toast.dart';

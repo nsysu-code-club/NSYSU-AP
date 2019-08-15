@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:big5/big5.dart';
 import 'package:crypto/crypto.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
@@ -14,7 +15,6 @@ import 'package:nsysu_ap/models/user_info.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
 import 'app_localizations.dart';
-import 'big5.dart';
 import 'firebase_analytics_utils.dart';
 
 const HOST = "nsysu-ap.rainvisitor.me";
