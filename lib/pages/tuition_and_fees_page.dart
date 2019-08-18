@@ -5,6 +5,8 @@ import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/helper.dart';
 import 'package:nsysu_ap/widgets/hint_content.dart';
+import 'package:nsysu_ap/widgets/progress_dialog.dart';
+import 'package:printing/printing.dart';
 import 'package:sprintf/sprintf.dart';
 
 enum _State { loading, finish, error, empty }
@@ -21,6 +23,12 @@ class TuitionAndFeesPageRoute extends MaterialPageRoute {
 }
 
 class TuitionAndFeesPage extends StatefulWidget {
+  final String username;
+  final String password;
+
+  const TuitionAndFeesPage({Key key, this.username, this.password})
+      : super(key: key);
+
   @override
   _TuitionAndFeesPageState createState() => _TuitionAndFeesPageState();
 }
@@ -77,6 +85,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             return null;
           },
           child: ListView.builder(
+            padding: EdgeInsets.all(8.0),
             itemBuilder: (context, index) {
               return _notificationItem(items[index]);
             },
@@ -104,9 +113,27 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             '${item.paymentStatus}',
             style: TextStyle(
               fontSize: 16.0,
-              color: Colors.green,
+              color: item.isPayment ? Colors.green : Colors.red,
             ),
           ),
+          onTap: () async {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) => WillPopScope(
+                  child: ProgressDialog(app.loading),
+                  onWillPop: () async {
+                    return false;
+                  }),
+              barrierDismissible: false,
+            );
+            List<int> bytes =
+                await Helper.instance.downloadFile(item.serialNumber);
+            Navigator.of(context, rootNavigator: true).pop();
+            await Printing.layoutPdf(
+              onLayout: (format) async => bytes,
+            );
+            //Utils.showToast(context, 'success!');
+          },
           subtitle: Padding(
             padding: const EdgeInsets.all(4.0),
             child: Text(
@@ -125,6 +152,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   }
 
   Future<Null> _getData() async {
+    await Helper.instance.tfLogin(widget.username, widget.password);
     List<TuitionAndFees> data = await Helper.instance.getTfData();
     setState(() {
       if (data == null) {

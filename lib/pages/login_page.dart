@@ -14,6 +14,7 @@ import 'package:nsysu_ap/utils/helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/default_dialog.dart';
 import 'package:nsysu_ap/widgets/progress_dialog.dart';
+import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -434,10 +435,11 @@ class LoginPageState extends State<LoginPage>
       if (Platform.isAndroid || Platform.isIOS)
         prefs.setString(Constants.PREF_USERNAME, _username.text);
       await Helper.instance.graduationLogin(_username.text, _password.text);
-      await Helper.instance.tfLogin(_username.text, _password.text);
       Helper.instance
           .selcrsLogin(_username.text, _password.text)
           .then((response) async {
+        ShareDataWidget.of(context).data.username = _username.text;
+        ShareDataWidget.of(context).data.password = _password.text;
         if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
         if (response == 403) {
           Utils.showToast(context, app.loginFail);

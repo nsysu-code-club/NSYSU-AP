@@ -577,8 +577,8 @@ class Helper {
       },
     ).timeout(Duration(seconds: 2));
     String text = big5.decode(response.bodyBytes);
-    print('Response =  $text');
-    print('response.statusCode = ${response.statusCode}');
+//    print('Response =  $text');
+//    print('response.statusCode = ${response.statusCode}');
     tsfCookie = response.headers['set-cookie'];
     return response.statusCode;
   }
@@ -600,8 +600,11 @@ class Helper {
       var aTag = tdDoc[4].getElementsByTagName('a');
       String serialNumber;
       if (aTag.length > 0) {
-        serialNumber = aTag[0].attributes['onclick'].split('mst_sno').last;
-        serialNumber = serialNumber.substring(1, serialNumber.length - 1);
+        serialNumber = aTag[0]
+            .attributes['onclick']
+            .split('javascript:window.location.href=\'')
+            .last;
+        serialNumber = serialNumber.substring(0, serialNumber.length - 1);
       }
       String paymentStatus = '', paymentStatusEn = '';
       for (var charCode in tdDoc[2].text.codeUnits) {
@@ -613,10 +616,11 @@ class Helper {
         } else
           paymentStatus += String.fromCharCode(charCode);
       }
+      final titleEN = tdDoc[0].getElementsByTagName('span')[0].text;
       list.add(
         TuitionAndFees(
-          titleZH: tdDoc[0].text.split(' ').first,
-          titleEN: tdDoc[0].text.split(' ').last,
+          titleZH: tdDoc[0].text.replaceAll(titleEN, ''),
+          titleEN: titleEN,
           amount: tdDoc[1].text,
           paymentStatusZH: paymentStatus,
           paymentStatusEN: paymentStatusEn,
@@ -626,5 +630,21 @@ class Helper {
       );
     }
     return list;
+  }
+
+  Future<List<int>> downloadFile(String serialNumber) async {
+    var response = await http.get(
+      'https://$tfUrl/tfstu/$serialNumber',
+      headers: {'Cookie': tsfCookie},
+    );
+//    var bytes = response.bodyBytes;
+//    await Printing.sharePdf(bytes: bytes, filename: filename);
+//    await Printing.layoutPdf(
+//      onLayout: (format) async => response.bodyBytes,
+//    );
+//    String dir = (await getApplicationDocumentsDirectory()).path;
+//    File file = new File('$dir/$filename');
+//    await file.writeAsBytes(bytes);
+    return response.bodyBytes;
   }
 }

@@ -36,4 +36,7 @@ class TuitionAndFees {
         return paymentStatusEN;
     }
   }
+
+  bool get isPayment =>
+      paymentStatus.contains('繳費成功') || paymentStatus.contains('completed');
 }

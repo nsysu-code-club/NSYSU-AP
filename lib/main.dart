@@ -16,6 +16,7 @@ import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/utils.dart';
+import 'package:nsysu_ap/widgets/share_data_widget.dart';
 
 import 'pages/about/about_us_page.dart';
 import 'pages/about/open_source_page.dart';
@@ -57,13 +58,15 @@ void main() async {
 
 class MyApp extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  MyAppState createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> {
   FirebaseAnalytics _analytics;
   FirebaseMessaging _firebaseMessaging;
   Brightness brightness = Brightness.light;
+  String username;
+  String password;
 
   @override
   void initState() {
@@ -78,50 +81,53 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      localeResolutionCallback:
-          (Locale locale, Iterable<Locale> supportedLocales) {
-        return locale;
-      },
-      onGenerateTitle: (context) => AppLocalizations.of(context).appName,
-      debugShowCheckedModeBanner: false,
-      routes: <String, WidgetBuilder>{
-        Navigator.defaultRouteName: (context) => LoginPage(),
-        HomePage.routerName: (context) => HomePage(),
-        CoursePage.routerName: (context) => CoursePage(),
-        ScorePage.routerName: (context) => ScorePage(),
-        GraduationReportPage.routerName: (context) => GraduationReportPage(),
-        SettingPage.routerName: (context) => SettingPage(),
-        AboutUsPage.routerName: (context) => AboutUsPage(),
-        OpenSourcePage.routerName: (context) => OpenSourcePage(),
-      },
-      theme: ThemeData(
-        brightness: brightness,
-        hintColor: Colors.white,
-        accentColor: Resource.Colors.blue,
-        unselectedWidgetColor: Resource.Colors.grey,
-        backgroundColor: Colors.black12,
-        inputDecorationTheme: InputDecorationTheme(
-          labelStyle: TextStyle(color: Colors.white),
-          border:
-              UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+    return ShareDataWidget(
+      this,
+      child: MaterialApp(
+        localeResolutionCallback:
+            (Locale locale, Iterable<Locale> supportedLocales) {
+          return locale;
+        },
+        onGenerateTitle: (context) => AppLocalizations.of(context).appName,
+        debugShowCheckedModeBanner: false,
+        routes: <String, WidgetBuilder>{
+          Navigator.defaultRouteName: (context) => LoginPage(),
+          HomePage.routerName: (context) => HomePage(),
+          CoursePage.routerName: (context) => CoursePage(),
+          ScorePage.routerName: (context) => ScorePage(),
+          GraduationReportPage.routerName: (context) => GraduationReportPage(),
+          SettingPage.routerName: (context) => SettingPage(),
+          AboutUsPage.routerName: (context) => AboutUsPage(),
+          OpenSourcePage.routerName: (context) => OpenSourcePage(),
+        },
+        theme: ThemeData(
+          brightness: brightness,
+          hintColor: Colors.white,
+          accentColor: Resource.Colors.blue,
+          unselectedWidgetColor: Resource.Colors.grey,
+          backgroundColor: Colors.black12,
+          inputDecorationTheme: InputDecorationTheme(
+            labelStyle: TextStyle(color: Colors.white),
+            border: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white)),
+          ),
         ),
+        navigatorObservers: (Platform.isIOS || Platform.isAndroid)
+            ? [
+                FirebaseAnalyticsObserver(analytics: _analytics),
+              ]
+            : [],
+        localizationsDelegates: [
+          const AppLocalizationsDelegate(),
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          CupertinoEnDefaultLocalizationsDelegate(),
+        ],
+        supportedLocales: [
+          const Locale('en', 'US'), // English
+          const Locale('zh', 'TW'), // Chinese
+        ],
       ),
-      navigatorObservers: (Platform.isIOS || Platform.isAndroid)
-          ? [
-              FirebaseAnalyticsObserver(analytics: _analytics),
-            ]
-          : [],
-      localizationsDelegates: [
-        const AppLocalizationsDelegate(),
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        CupertinoEnDefaultLocalizationsDelegate(),
-      ],
-      supportedLocales: [
-        const Locale('en', 'US'), // English
-        const Locale('zh', 'TW'), // Chinese
-      ],
     );
   }
 
