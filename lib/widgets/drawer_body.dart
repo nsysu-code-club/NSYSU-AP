@@ -6,10 +6,8 @@ import 'package:nsysu_ap/pages/course_page.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/score_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
-import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 var pictureUrl = "";
@@ -134,14 +132,14 @@ class DrawerBodyState extends State<DrawerBody> {
             ),
             _item(Icons.school, app.graduationCheckChecklist,
                 GraduationReportPageRoute()),
-            _item(
-                Icons.monetization_on,
-                app.tuitionAndFees,
-                MaterialPageRoute(
-                    builder: (_) => TuitionAndFeesPage(
-                          username: ShareDataWidget.of(context).data.username,
-                          password: ShareDataWidget.of(context).data.password,
-                        ))),
+//            _item(
+//                Icons.monetization_on,
+//                app.tuitionAndFees,
+//                MaterialPageRoute(
+//                    builder: (_) => TuitionAndFeesPage(
+//                          username: ShareDataWidget.of(context).data.username,
+//                          password: ShareDataWidget.of(context).data.password,
+//                        ))),
             _item(Icons.accessibility_new, app.admissionGuide,
                 MaterialPageRoute(builder: (_) => AdmissionGuidePage())),
             _item(Icons.face, app.about, AboutUsPageRoute()),
