@@ -6,7 +6,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
-import 'package:nsysu_ap/pages/search_username_page.dart';
+import 'package:nsysu_ap/pages/search_student_id_page.dart';
 import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
@@ -14,6 +14,7 @@ import 'package:nsysu_ap/utils/helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/default_dialog.dart';
 import 'package:nsysu_ap/widgets/progress_dialog.dart';
+import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -218,7 +219,7 @@ class LoginPageState extends State<LoginPage>
             var username = await Navigator.push(
               context,
               CupertinoPageRoute(
-                builder: (_) => SearchUsernamePage(),
+                builder: (_) => SearchStudentIdPage(),
               ),
             );
             if (username != null && username is String) {
@@ -433,10 +434,12 @@ class LoginPageState extends State<LoginPage>
 
       if (Platform.isAndroid || Platform.isIOS)
         prefs.setString(Constants.PREF_USERNAME, _username.text);
-      Helper.instance.graduationLogin(_username.text, _password.text);
+      await Helper.instance.graduationLogin(_username.text, _password.text);
       Helper.instance
           .selcrsLogin(_username.text, _password.text)
           .then((response) async {
+        ShareDataWidget.of(context).data.username = _username.text;
+        ShareDataWidget.of(context).data.password = _password.text;
         if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
         if (response == 403) {
           Utils.showToast(context, app.loginFail);

@@ -25,7 +25,7 @@ class AppLocalizations {
       'app_name': 'NSYSU AP',
       'update_note_title': 'Update Notes',
       'update_note_content':
-          '1.Improve login encrypt function.\n2.Fix logout dialog.\n3.Fix crashlytics.\nPlease use SSO system account to login\n\nHave any problem please contact fans page.',
+          '1.Add search student id page.\n2.Add admission guide page.\nPlease use SSO system account to login\n\nHave any problem please contact fans page.',
       'splash_content': '我們全都包了\n只剩下學校不包我們',
       'share': 'Share',
       'teacher_confirm_title': 'Are you a teacher?',
@@ -328,12 +328,15 @@ class AppLocalizations {
       'autoFill': 'Auto Fill',
       'firstLoginHint':
           'For first-time login, please fill in the last six number of your ID as your password',
+      'tuitionAndFees': 'Tuition Payment Status',
+      'tuitionAndFeesItemTitleFormat': 'Amount：%s\nDate of Payment：%s',
+      'admissionGuide': 'Admission Guide',
     },
     'zh': {
       'app_name': '中山校務通',
       'update_note_title': '更新日誌',
       'update_note_content':
-          '1.改善登入加密功能\n2.修復登出對話框錯\n3.修正崩潰分析\n請使用SSO系統帳號登入\n\n有任何問題歡迎聯絡粉絲專頁',
+          '1.新增查詢學號\n2.新增入學指南\n請使用SSO系統帳號登入\n\n有任何問題歡迎聯絡粉絲專頁',
       'splash_content': '我們全都包了\n只剩下學校不包我們',
       'share': '分享',
       'teacher_confirm_title': '您是老師嗎？',
@@ -616,6 +619,9 @@ class AppLocalizations {
       'searchResult': '查詢結果',
       'autoFill': '自動填入',
       'firstLoginHint': '首次登入密碼預設為身分證末六碼',
+      'tuitionAndFees': '學雑費繖費狀況查詢',
+      'tuitionAndFeesItemTitleFormat': '金額：%s\n繳費日期：%s',
+      'admissionGuide': '入學指南',
     },
   };
 
@@ -1118,6 +1124,13 @@ class AppLocalizations {
   String get autoFill => _vocabularies['autoFill'];
 
   String get firstLoginHint => _vocabularies['firstLoginHint'];
+
+  String get tuitionAndFees => _vocabularies['tuitionAndFees'];
+
+  String get tuitionAndFeesItemTitleFormat =>
+      _vocabularies['tuitionAndFeesItemTitleFormat'];
+
+  String get admissionGuide => _vocabularies['admissionGuide'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -18,6 +18,7 @@ import 'package:nsysu_ap/widgets/drawer_body.dart';
 import 'package:nsysu_ap/widgets/hint_content.dart';
 import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
 
+import 'admission_guide_page.dart';
 import 'course_page.dart';
 import 'news_content_page.dart';
 
@@ -195,6 +196,10 @@ class HomePageState extends State<HomePage> {
             onTap: onTabTapped,
             items: [
               BottomNavigationBarItem(
+                icon: Icon(Icons.accessibility_new),
+                title: Text(app.admissionGuide),
+              ),
+              BottomNavigationBarItem(
                 icon: Icon(Icons.class_),
                 title: Text(app.course),
               ),
@@ -216,9 +221,13 @@ class HomePageState extends State<HomePage> {
       _currentTabIndex = index;
       switch (_currentTabIndex) {
         case 0:
-          Navigator.of(context).push(CoursePageRoute());
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => AdmissionGuidePage()));
           break;
         case 1:
+          Navigator.of(context).push(CoursePageRoute());
+          break;
+        case 2:
           Navigator.of(context).push(ScorePageRoute());
           break;
       }
@@ -266,17 +275,17 @@ class HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) => YesNoDialog(
-            title: app.logout,
-            contentWidget: Text(app.logoutCheck,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Resource.Colors.grey)),
-            leftActionText: app.cancel,
-            rightActionText: app.ok,
-            rightActionFunction: () {
-              Navigator.popUntil(
-                  context, ModalRoute.withName(Navigator.defaultRouteName));
-            },
-          ),
+        title: app.logout,
+        contentWidget: Text(app.logoutCheck,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Resource.Colors.grey)),
+        leftActionText: app.cancel,
+        rightActionText: app.ok,
+        rightActionFunction: () {
+          Navigator.popUntil(
+              context, ModalRoute.withName(Navigator.defaultRouteName));
+        },
+      ),
     );
   }
 
@@ -285,42 +294,42 @@ class HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) => YesNoDialog(
-            title: app.newsRuleTitle,
-            contentWidget: RichText(
-              text: TextSpan(
-                  style: TextStyle(color: Resource.Colors.grey, fontSize: 16.0),
-                  children: [
-                    TextSpan(
-                        text: '${app.newsRuleDescription1}',
-                        style: TextStyle(fontWeight: FontWeight.normal)),
-                    TextSpan(
-                        text: '${app.newsRuleDescription2}',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(
-                        text: '${app.newsRuleDescription3}',
-                        style: TextStyle(fontWeight: FontWeight.normal)),
-                  ]),
-            ),
-            leftActionText: app.cancel,
-            rightActionText: app.contactFansPage,
-            leftActionFunction: () {},
-            rightActionFunction: () {
-              if (Platform.isAndroid)
-                Utils.launchUrl('fb://messaging/${Constants.FANS_PAGE_ID}')
-                    .catchError(
-                        (onError) => Utils.launchUrl(Constants.FANS_PAGE_URL));
-              else if (Platform.isIOS)
-                Utils.launchUrl(
-                        'fb-messenger://user-thread/${Constants.FANS_PAGE_ID}')
-                    .catchError(
-                        (onError) => Utils.launchUrl(Constants.FANS_PAGE_URL));
-              else {
-                Utils.launchUrl(Constants.FANS_PAGE_URL).catchError(
-                    (onError) => Utils.showToast(context, app.platformError));
-              }
-              FA.logAction('contact_fans_page', 'click');
-            },
-          ),
+        title: app.newsRuleTitle,
+        contentWidget: RichText(
+          text: TextSpan(
+              style: TextStyle(color: Resource.Colors.grey, fontSize: 16.0),
+              children: [
+                TextSpan(
+                    text: '${app.newsRuleDescription1}',
+                    style: TextStyle(fontWeight: FontWeight.normal)),
+                TextSpan(
+                    text: '${app.newsRuleDescription2}',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(
+                    text: '${app.newsRuleDescription3}',
+                    style: TextStyle(fontWeight: FontWeight.normal)),
+              ]),
+        ),
+        leftActionText: app.cancel,
+        rightActionText: app.contactFansPage,
+        leftActionFunction: () {},
+        rightActionFunction: () {
+          if (Platform.isAndroid)
+            Utils.launchUrl('fb://messaging/${Constants.FANS_PAGE_ID}')
+                .catchError(
+                    (onError) => Utils.launchUrl(Constants.FANS_PAGE_URL));
+          else if (Platform.isIOS)
+            Utils.launchUrl(
+                    'fb-messenger://user-thread/${Constants.FANS_PAGE_ID}')
+                .catchError(
+                    (onError) => Utils.launchUrl(Constants.FANS_PAGE_URL));
+          else {
+            Utils.launchUrl(Constants.FANS_PAGE_URL).catchError(
+                (onError) => Utils.showToast(context, app.platformError));
+          }
+          FA.logAction('contact_fans_page', 'click');
+        },
+      ),
     );
   }
 }
