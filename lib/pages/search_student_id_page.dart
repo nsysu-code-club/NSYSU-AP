@@ -1,6 +1,4 @@
-import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
@@ -8,14 +6,14 @@ import 'package:nsysu_ap/utils/helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/default_dialog.dart';
 
-class SearchUsernamePage extends StatefulWidget {
+class SearchStudentIdPage extends StatefulWidget {
   static const String routerName = "/searchUsername";
 
   @override
-  SearchUsernamePageState createState() => SearchUsernamePageState();
+  SearchStudentIdPageState createState() => SearchStudentIdPageState();
 }
 
-class SearchUsernamePageState extends State<SearchUsernamePage> {
+class SearchStudentIdPageState extends State<SearchStudentIdPage> {
   AppLocalizations app;
 
   final TextEditingController _name = TextEditingController();
@@ -25,14 +23,12 @@ class SearchUsernamePageState extends State<SearchUsernamePage> {
   FocusNode nameFocusNode;
   FocusNode idFocusNode;
 
-  final encrypter = Encrypter(AES(Constants.key, mode: AESMode.cbc));
-
   @override
   void initState() {
-    super.initState();
-    FA.setCurrentScreen("SearchUsernamePagePage", "search_username_page.dart");
+    FA.setCurrentScreen("SearchStudentIdPage", "search_student_id_page.dart");
     nameFocusNode = FocusNode();
     idFocusNode = FocusNode();
+    super.initState();
   }
 
   @override
@@ -51,6 +47,10 @@ class SearchUsernamePageState extends State<SearchUsernamePage> {
         return Scaffold(
           backgroundColor: Resource.Colors.blue,
           resizeToAvoidBottomPadding: orientation == Orientation.portrait,
+          appBar: AppBar(
+            backgroundColor: Resource.Colors.blue,
+            elevation: 0.0,
+          ),
           body: Container(
             alignment: Alignment(0, 0),
             padding: EdgeInsets.symmetric(horizontal: 30.0),
@@ -166,7 +166,7 @@ class SearchUsernamePageState extends State<SearchUsernamePage> {
           ),
           padding: EdgeInsets.all(14.0),
           onPressed: () {
-            FA.logAction('search_username', 'click');
+            FA.logAction('search_student_id', 'click');
             _search();
           },
           color: Colors.white,

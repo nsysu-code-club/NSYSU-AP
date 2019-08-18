@@ -6,7 +6,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
-import 'package:nsysu_ap/pages/search_username_page.dart';
+import 'package:nsysu_ap/pages/search_student_id_page.dart';
 import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
@@ -219,7 +219,7 @@ class LoginPageState extends State<LoginPage>
             var username = await Navigator.push(
               context,
               CupertinoPageRoute(
-                builder: (_) => SearchUsernamePage(),
+                builder: (_) => SearchStudentIdPage(),
               ),
             );
             if (username != null && username is String) {
