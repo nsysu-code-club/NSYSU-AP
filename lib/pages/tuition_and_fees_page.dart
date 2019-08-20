@@ -42,8 +42,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   @override
   void initState() {
-//TODO decide class name
-    // FA.setCurrentScreen("LoginPage", "login_page.dart");
+    FA.setCurrentScreen("TuitionAndFeesPage", "tuition_and_fees_page.dart");
     _getData();
     super.initState();
   }
@@ -163,7 +162,6 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                       }),
                   barrierDismissible: false,
                 );
-                print(item.serialNumber);
                 List<int> bytes =
                     await Helper.instance.downloadFile(item.serialNumber);
                 Navigator.of(context, rootNavigator: true).pop();
@@ -172,10 +170,12 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                     await Printing.layoutPdf(
                       onLayout: (format) async => bytes,
                     );
+                    FA.logAction('export_by_printing', '');
                     break;
                   case 1:
                     await Printing.sharePdf(
                         bytes: bytes, filename: '${item.title}.pdf');
+                    FA.logAction('export_by_share', '');
                     break;
                 }
               }
