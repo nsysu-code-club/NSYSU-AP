@@ -169,6 +169,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                   case 0:
                     await Printing.layoutPdf(
                       onLayout: (format) async => bytes,
+                      name: item.title,
                     );
                     FA.logAction('export_by_printing', '');
                     break;
