@@ -331,6 +331,10 @@ class AppLocalizations {
       'tuitionAndFees': 'Tuition Payment Status',
       'tuitionAndFeesItemTitleFormat': 'Amount：%s\nDate of Payment：%s',
       'admissionGuide': 'Admission Guide',
+      'tuitionAndFeesPageHint': 'Click to view the receipt or fees bill',
+      'share': 'Sharing',
+      'printing': 'Printing',
+      'tuitionAndFeesPageDialogTitle': 'Pick method of export.',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -622,6 +626,10 @@ class AppLocalizations {
       'tuitionAndFees': '學雑費繖費狀況查詢',
       'tuitionAndFeesItemTitleFormat': '金額：%s\n繳費日期：%s',
       'admissionGuide': '入學指南',
+      'tuitionAndFeesPageHint': '點擊可查看收據或繳費單',
+      'share': '分享',
+      'printing': '印表機',
+      'tuitionAndFeesPageDialogTitle': '請選擇匯出方式',
     },
   };
 
@@ -1131,6 +1139,15 @@ class AppLocalizations {
       _vocabularies['tuitionAndFeesItemTitleFormat'];
 
   String get admissionGuide => _vocabularies['admissionGuide'];
+
+  String get tuitionAndFeesPageHint => _vocabularies['tuitionAndFeesPageHint'];
+
+  String get share => _vocabularies['share'];
+
+  String get printing => _vocabularies['printing'];
+
+  String get tuitionAndFeesPageDialogTitle =>
+      _vocabularies['tuitionAndFeesPageDialogTitle'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

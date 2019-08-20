@@ -85,11 +85,19 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             return null;
           },
           child: ListView.builder(
+            shrinkWrap: true,
             padding: EdgeInsets.all(8.0),
             itemBuilder: (context, index) {
-              return _notificationItem(items[index]);
+              if (index == 0)
+                return Text(
+                  app.tuitionAndFeesPageHint,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Resource.Colors.grey),
+                );
+              else
+                return _notificationItem(items[index - 1]);
             },
-            itemCount: items.length,
+            itemCount: items.length + 1,
           ),
         );
     }
@@ -117,22 +125,61 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             ),
           ),
           onTap: () async {
+            //if (!item.serialNumber.contains('act=51'))
             showDialog(
               context: context,
-              builder: (BuildContext context) => WillPopScope(
-                  child: ProgressDialog(app.loading),
-                  onWillPop: () async {
-                    return false;
-                  }),
-              barrierDismissible: false,
-            );
-            List<int> bytes =
-                await Helper.instance.downloadFile(item.serialNumber);
-            Navigator.of(context, rootNavigator: true).pop();
-            await Printing.layoutPdf(
-              onLayout: (format) async => bytes,
-            );
-            //Utils.showToast(context, 'success!');
+              builder: (_) => SimpleDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(16),
+                  ),
+                ),
+                title: Text(app.tuitionAndFeesPageDialogTitle),
+                children: <Widget>[
+                  ListTile(
+                    leading: Icon(Icons.print),
+                    title: Text(app.printing),
+                    onTap: () {
+                      Navigator.of(context).pop(0);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.share),
+                    title: Text(app.share),
+                    onTap: () {
+                      Navigator.of(context).pop(1);
+                    },
+                  ),
+                ],
+              ),
+            ).then((index) async {
+              if (index != null) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) => WillPopScope(
+                      child: ProgressDialog(app.loading),
+                      onWillPop: () async {
+                        return false;
+                      }),
+                  barrierDismissible: false,
+                );
+                print(item.serialNumber);
+                List<int> bytes =
+                    await Helper.instance.downloadFile(item.serialNumber);
+                Navigator.of(context, rootNavigator: true).pop();
+                switch (index) {
+                  case 0:
+                    await Printing.layoutPdf(
+                      onLayout: (format) async => bytes,
+                    );
+                    break;
+                  case 1:
+                    await Printing.sharePdf(
+                        bytes: bytes, filename: '${item.title}.pdf');
+                    break;
+                }
+              }
+            });
           },
           subtitle: Padding(
             padding: const EdgeInsets.all(4.0),
