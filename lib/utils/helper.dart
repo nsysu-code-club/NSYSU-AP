@@ -591,6 +591,9 @@ class Helper {
     );
     String text = big5.decode(response.bodyBytes);
     //print('text =  ${text}');
+    if (text.contains('沒有合乎查詢條件的資料')) {
+      return null;
+    }
     var document = parse(text, encoding: 'BIG-5');
     var tbody = document.getElementsByTagName('tbody');
     List<TuitionAndFees> list = [];

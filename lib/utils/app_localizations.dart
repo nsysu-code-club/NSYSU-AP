@@ -340,6 +340,7 @@ class AppLocalizations {
       'fallSemester': 'Fall Semester',
       'springSemester': 'Spring Semester',
       'summerSemester': 'Summer Semester',
+      'tuitionAndFeesEmpty': 'Oops！No tuition and fees data～\uD83D\uDE0B'
     },
     'zh': {
       'app_name': '中山校務通',
@@ -640,6 +641,7 @@ class AppLocalizations {
       'fallSemester': '上學期',
       'springSemester': '下學期',
       'summerSemester': '暑假',
+      'tuitionAndFeesEmpty': 'Oops！查無任何學雜費資料哦～\uD83D\uDE0B'
     },
   };
 
@@ -1169,6 +1171,8 @@ class AppLocalizations {
   String get springSemester => _vocabularies['springSemester'];
 
   String get summerSemester => _vocabularies['summerSemester'];
+
+  String get tuitionAndFeesEmpty => _vocabularies['tuitionAndFeesEmpty'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
