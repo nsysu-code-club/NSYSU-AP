@@ -25,7 +25,7 @@ class AppLocalizations {
       'app_name': 'NSYSU AP',
       'update_note_title': 'Update Notes',
       'update_note_content':
-          '1.Add search student id page.\n2.Add admission guide page.\nPlease use SSO system account to login\n\nHave any problem please contact fans page.',
+          '1.Add search student id page.\n2.Add admission guide page.\n3.Add tuition and fees page.\nPlease use SSO system account to login\n\nHave any problem please contact fans page.',
       'splash_content': '我們全都包了\n只剩下學校不包我們',
       'share': 'Share',
       'teacher_confirm_title': 'Are you a teacher?',
@@ -331,12 +331,16 @@ class AppLocalizations {
       'tuitionAndFees': 'Tuition Payment Status',
       'tuitionAndFeesItemTitleFormat': 'Amount：%s\nDate of Payment：%s',
       'admissionGuide': 'Admission Guide',
+      'tuitionAndFeesPageHint': 'Click to view the receipt or fees bill',
+      'share': 'Sharing',
+      'printing': 'Printing',
+      'tuitionAndFeesPageDialogTitle': 'Pick method of export.',
     },
     'zh': {
       'app_name': '中山校務通',
       'update_note_title': '更新日誌',
       'update_note_content':
-          '1.新增查詢學號\n2.新增入學指南\n請使用SSO系統帳號登入\n\n有任何問題歡迎聯絡粉絲專頁',
+          '1.新增查詢學號\n2.新增入學指南\n3.新增學雜費與學分費查詢\n請使用SSO系統帳號登入\n\n有任何問題歡迎聯絡粉絲專頁',
       'splash_content': '我們全都包了\n只剩下學校不包我們',
       'share': '分享',
       'teacher_confirm_title': '您是老師嗎？',
@@ -622,6 +626,10 @@ class AppLocalizations {
       'tuitionAndFees': '學雑費繖費狀況查詢',
       'tuitionAndFeesItemTitleFormat': '金額：%s\n繳費日期：%s',
       'admissionGuide': '入學指南',
+      'tuitionAndFeesPageHint': '點擊可查看收據或繳費單',
+      'share': '分享',
+      'printing': '印表機',
+      'tuitionAndFeesPageDialogTitle': '請選擇匯出方式',
     },
   };
 
@@ -1131,6 +1139,15 @@ class AppLocalizations {
       _vocabularies['tuitionAndFeesItemTitleFormat'];
 
   String get admissionGuide => _vocabularies['admissionGuide'];
+
+  String get tuitionAndFeesPageHint => _vocabularies['tuitionAndFeesPageHint'];
+
+  String get share => _vocabularies['share'];
+
+  String get printing => _vocabularies['printing'];
+
+  String get tuitionAndFeesPageDialogTitle =>
+      _vocabularies['tuitionAndFeesPageDialogTitle'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
