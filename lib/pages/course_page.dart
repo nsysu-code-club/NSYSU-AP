@@ -1,3 +1,4 @@
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/course_data.dart';
@@ -82,7 +83,9 @@ class CoursePageState extends State<CoursePage>
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Text(
-                      semesterData == null ? "" : semesterData.semester.text,
+                      semesterData == null
+                          ? ""
+                          : parser(semesterData.semester.text),
                       style: TextStyle(
                           color: Resource.Colors.blue, fontSize: 18.0),
                     ),
@@ -252,40 +255,38 @@ class CoursePageState extends State<CoursePage>
         showDialog(
           context: context,
           builder: (BuildContext context) => DefaultDialog(
-                title: app.courseDialogTitle,
-                actionText: app.iKnow,
-                actionFunction: () =>
-                    Navigator.of(context, rootNavigator: true).pop('dialog'),
-                contentWidget: RichText(
-                  text: TextSpan(
-                      style: TextStyle(
-                          color: Resource.Colors.grey,
-                          height: 1.3,
-                          fontSize: 16.0),
-                      children: [
-                        TextSpan(
-                            text: '${app.courseDialogName}：',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        TextSpan(text: '${course.title}\n'),
-                        TextSpan(
-                            text: '${app.courseDialogProfessor}：',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        TextSpan(text: '${course.getInstructors()}\n'),
-                        TextSpan(
-                            text: '${app.courseDialogLocation}：',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        TextSpan(
-                            text:
-                                '${course.location.building}${course.location.room}\n'),
-                        TextSpan(
-                            text: '${app.courseDialogTime}：',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        TextSpan(
-                            text:
-                                '${course.date.startTime}-${course.date.endTime}'),
-                      ]),
-                ),
-              ),
+            title: app.courseDialogTitle,
+            actionText: app.iKnow,
+            actionFunction: () =>
+                Navigator.of(context, rootNavigator: true).pop('dialog'),
+            contentWidget: RichText(
+              text: TextSpan(
+                  style: TextStyle(
+                      color: Resource.Colors.grey, height: 1.3, fontSize: 16.0),
+                  children: [
+                    TextSpan(
+                        text: '${app.courseDialogName}：',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    TextSpan(text: '${course.title}\n'),
+                    TextSpan(
+                        text: '${app.courseDialogProfessor}：',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    TextSpan(text: '${course.getInstructors()}\n'),
+                    TextSpan(
+                        text: '${app.courseDialogLocation}：',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    TextSpan(
+                        text:
+                            '${course.location.building}${course.location.room}\n'),
+                    TextSpan(
+                        text: '${app.courseDialogTime}：',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    TextSpan(
+                        text:
+                            '${course.date.startTime}-${course.date.endTime}'),
+                  ]),
+            ),
+          ),
         );
         FA.logAction('show_course', 'click');
       },
@@ -302,6 +303,19 @@ class CoursePageState extends State<CoursePage>
 
   void _getSemester() async {
     semesterData = await Helper.instance.getCourseSemesterData();
+    final RemoteConfig remoteConfig = await RemoteConfig.instance;
+    try {
+      await remoteConfig.fetch(expiration: const Duration(seconds: 10));
+      await remoteConfig.activateFetched();
+    } on FetchThrottledException catch (exception) {
+      semesterData.setDefault('1082');
+    } catch (exception) {
+      semesterData.setDefault('1082');
+    } finally {
+      String code =
+          remoteConfig.getString(Constants.DEFAULT_COURSE_SEMESTER_CODE);
+      semesterData.setDefault(code);
+    }
     setState(() {});
     _getCourseTables();
   }
@@ -310,7 +324,7 @@ class CoursePageState extends State<CoursePage>
     var semesters = <SimpleDialogOption>[];
     if (semesterData == null) return;
     for (var semester in semesterData.semesters) {
-      semesters.add(_dialogItem(semesters.length, semester.text));
+      semesters.add(_dialogItem(semesters.length, parser(semester.text)));
     }
     FA.logAction('pick_yms', 'click');
     showDialog<int>(
@@ -333,6 +347,36 @@ class CoursePageState extends State<CoursePage>
         onPressed: () {
           Navigator.pop(context, index);
         });
+  }
+
+  String parser(String text) {
+    if (text.length == 4) {
+      String lastCode = text.substring(3);
+      String last = '';
+      switch (lastCode) {
+        case '0':
+          last = app.continuingSummerEducationProgram;
+          break;
+        case '1':
+          last = app.fallSemester;
+          break;
+        case '2':
+          last = app.springSemester;
+          break;
+        case '3':
+          last = app.summerSemester;
+          break;
+      }
+      String first;
+      if (AppLocalizations.locale.languageCode == 'en') {
+        int year = int.parse(text.substring(0, 3));
+        year += 1911;
+        first = '$year~${year + 1}';
+      } else
+        first = '${text.substring(0, 3)}${app.courseYear}';
+      return '$first $last';
+    } else
+      return text;
   }
 
   _getCourseTables() async {

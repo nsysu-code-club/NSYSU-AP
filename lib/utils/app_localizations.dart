@@ -335,6 +335,11 @@ class AppLocalizations {
       'share': 'Sharing',
       'printing': 'Printing',
       'tuitionAndFeesPageDialogTitle': 'Pick method of export.',
+      'courseYear': 'Year',
+      'continuingSummerEducationProgram': 'Continuing Summer Education Program',
+      'fallSemester': 'Fall Semester',
+      'springSemester': 'Spring Semester',
+      'summerSemester': 'Summer Semester',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -630,6 +635,11 @@ class AppLocalizations {
       'share': '分享',
       'printing': '印表機',
       'tuitionAndFeesPageDialogTitle': '請選擇匯出方式',
+      'courseYear': '學年度',
+      'continuingSummerEducationProgram': '碩專署',
+      'fallSemester': '上學期',
+      'springSemester': '下學期',
+      'summerSemester': '暑假',
     },
   };
 
@@ -1148,6 +1158,17 @@ class AppLocalizations {
 
   String get tuitionAndFeesPageDialogTitle =>
       _vocabularies['tuitionAndFeesPageDialogTitle'];
+
+  String get courseYear => _vocabularies['courseYear'];
+
+  String get continuingSummerEducationProgram =>
+      _vocabularies['continuingSummerEducationProgram'];
+
+  String get fallSemester => _vocabularies['fallSemester'];
+
+  String get springSemester => _vocabularies['springSemester'];
+
+  String get summerSemester => _vocabularies['summerSemester'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

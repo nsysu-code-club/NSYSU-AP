@@ -9,5 +9,11 @@ class CourseSemesterData {
       ? Options(text: '1072', value: '1072')
       : semesters[selectSemesterIndex];
 
+  void setDefault(String text) {
+    for (var i = 0; i < semesters.length; i++) {
+      if (semesters[i].text == text) selectSemesterIndex = i;
+    }
+  }
+
   CourseSemesterData({this.semesters});
 }

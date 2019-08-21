@@ -49,6 +49,7 @@ class Constants {
   static const NEW_VERSION_CONTENT_ZH = "new_version_content_zh";
   static const NEW_VERSION_CONTENT_EN = "new_version_content_en";
   static const NEWS_DATA = 'news_data';
+  static const DEFAULT_COURSE_SEMESTER_CODE = "default_course_semester_code";
 
   static const TAG_STUDENT_PICTURE = "tag_student_picture";
   static const TAG_NEWS_PICTURE = "tag_news_picture";
