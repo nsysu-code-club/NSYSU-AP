@@ -22,6 +22,11 @@ class GraduationReportPageRoute extends MaterialPageRoute {
 
 class GraduationReportPage extends StatefulWidget {
   static const String routerName = "/graduationReport";
+  final String username;
+  final String password;
+
+  const GraduationReportPage({Key key, this.username, this.password})
+      : super(key: key);
 
   @override
   GraduationReportPageState createState() => GraduationReportPageState();
@@ -323,6 +328,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
     setState(() {
       state = _State.loading;
     });
+    await Helper.instance.graduationLogin(widget.username, widget.password);
     Helper.instance.getGraduationReport().then((data) async {
       graduationReportData = data;
       setState(() {
@@ -338,38 +344,38 @@ class GraduationReportPageState extends State<GraduationReportPage>
     showDialog(
       context: context,
       builder: (BuildContext context) => DefaultDialog(
-            title: app.courseDialogTitle,
-            actionText: app.iKnow,
-            actionFunction: () =>
-                Navigator.of(context, rootNavigator: true).pop('dialog'),
-            contentWidget: RichText(
-              text: TextSpan(
-                  style: TextStyle(
-                      color: Resource.Colors.grey, height: 1.3, fontSize: 16.0),
-                  children: [
-                    TextSpan(
-                        text: '${app.subject}：',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(text: '${course.name}\n'),
-                    TextSpan(
-                        text: '${app.shouldCredits}：',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(text: '${course.credit}\n'),
-                    TextSpan(
-                        text: '${app.actualCredits}：',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(text: '${course.actualCredits}\n'),
-                    TextSpan(
-                        text: '${app.totalCredits}：',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(text: '${course.totalCredits}\n'),
-                    TextSpan(
-                        text: '${app.practiceSituation}：',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(text: '${course.practiceSituation}'),
-                  ]),
-            ),
-          ),
+        title: app.courseDialogTitle,
+        actionText: app.iKnow,
+        actionFunction: () =>
+            Navigator.of(context, rootNavigator: true).pop('dialog'),
+        contentWidget: RichText(
+          text: TextSpan(
+              style: TextStyle(
+                  color: Resource.Colors.grey, height: 1.3, fontSize: 16.0),
+              children: [
+                TextSpan(
+                    text: '${app.subject}：',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: '${course.name}\n'),
+                TextSpan(
+                    text: '${app.shouldCredits}：',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: '${course.credit}\n'),
+                TextSpan(
+                    text: '${app.actualCredits}：',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: '${course.actualCredits}\n'),
+                TextSpan(
+                    text: '${app.totalCredits}：',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: '${course.totalCredits}\n'),
+                TextSpan(
+                    text: '${app.practiceSituation}：',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: '${course.practiceSituation}'),
+              ]),
+        ),
+      ),
     );
   }
 }

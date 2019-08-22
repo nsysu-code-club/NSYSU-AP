@@ -132,8 +132,14 @@ class DrawerBodyState extends State<DrawerBody> {
                 _subItem(Icons.assignment, app.score, ScorePageRoute()),
               ],
             ),
-            _item(Icons.school, app.graduationCheckChecklist,
-                GraduationReportPageRoute()),
+            _item(
+                Icons.school,
+                app.graduationCheckChecklist,
+                MaterialPageRoute(
+                    builder: (_) => GraduationReportPage(
+                          username: ShareDataWidget.of(context).data.username,
+                          password: ShareDataWidget.of(context).data.password,
+                        ))),
             _item(
                 Icons.monetization_on,
                 app.tuitionAndFees,
