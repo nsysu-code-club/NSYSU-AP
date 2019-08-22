@@ -70,7 +70,9 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
           onPressed: _getData,
           child: HintContent(
             icon: Icons.assignment,
-            content: state == _State.error ? app.clickToRetry : app.busEmpty,
+            content: state == _State.error
+                ? app.clickToRetry
+                : app.tuitionAndFeesEmpty,
           ),
         );
       default:
