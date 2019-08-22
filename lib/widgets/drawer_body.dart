@@ -9,6 +9,7 @@ import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -128,30 +129,30 @@ class DrawerBodyState extends State<DrawerBody> {
               ),
               title: Text(app.courseInfo, style: _defaultStyle()),
               children: <Widget>[
-                _subItem(Icons.class_, app.course, CoursePageRoute()),
-                _subItem(Icons.assignment, app.score, ScorePageRoute()),
+                _subItem(Icons.class_, app.course, CoursePage()),
+                _subItem(Icons.assignment, app.score, ScorePage()),
               ],
             ),
             _item(
-                Icons.school,
-                app.graduationCheckChecklist,
-                MaterialPageRoute(
-                    builder: (_) => GraduationReportPage(
-                          username: ShareDataWidget.of(context).data.username,
-                          password: ShareDataWidget.of(context).data.password,
-                        ))),
+              Icons.school,
+              app.graduationCheckChecklist,
+              GraduationReportPage(
+                username: ShareDataWidget.of(context).data.username,
+                password: ShareDataWidget.of(context).data.password,
+              ),
+            ),
             _item(
-                Icons.monetization_on,
-                app.tuitionAndFees,
-                MaterialPageRoute(
-                    builder: (_) => TuitionAndFeesPage(
-                          username: ShareDataWidget.of(context).data.username,
-                          password: ShareDataWidget.of(context).data.password,
-                        ))),
+              Icons.monetization_on,
+              app.tuitionAndFees,
+              TuitionAndFeesPage(
+                username: ShareDataWidget.of(context).data.username,
+                password: ShareDataWidget.of(context).data.password,
+              ),
+            ),
             _item(Icons.accessibility_new, app.admissionGuide,
-                MaterialPageRoute(builder: (_) => AdmissionGuidePage())),
-            _item(Icons.face, app.about, AboutUsPageRoute()),
-            _item(Icons.settings, app.settings, SettingPageRoute()),
+                AdmissionGuidePage()),
+            _item(Icons.face, app.about, AboutUsPage()),
+            _item(Icons.settings, app.settings, SettingPage()),
             ListTile(
               leading: Icon(
                 Icons.power_settings_new,
@@ -169,22 +170,22 @@ class DrawerBodyState extends State<DrawerBody> {
     );
   }
 
-  _item(IconData icon, String title, MaterialPageRoute route) => ListTile(
+  _item(IconData icon, String title, Widget page) => ListTile(
         leading: Icon(icon, color: Resource.Colors.grey),
         title: Text(title, style: _defaultStyle()),
         onTap: () {
           Navigator.pop(context);
-          Navigator.push(context, route);
+          Utils.pushCupertinoStyle(context, page);
         },
       );
 
-  _subItem(IconData icon, String title, MaterialPageRoute route) => ListTile(
+  _subItem(IconData icon, String title, Widget page) => ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: 72.0),
         leading: Icon(icon, color: Resource.Colors.grey),
         title: Text(title, style: _defaultStyle()),
         onTap: () async {
           Navigator.of(context).pop();
-          Navigator.of(context).push(route);
+          Utils.pushCupertinoStyle(context, page);
         },
       );
 }
