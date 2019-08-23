@@ -9,10 +9,8 @@ import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-var pictureUrl = "";
 
 class DrawerBody extends StatefulWidget {
   final UserInfo userInfo;
@@ -24,14 +22,13 @@ class DrawerBody extends StatefulWidget {
 }
 
 class DrawerBodyState extends State<DrawerBody> {
-  SharedPreferences prefs;
-  bool displayPicture = true;
-
   AppLocalizations app;
 
   bool isStudyExpanded = false;
-  bool isBusExpanded = false;
-  bool isLeaveExpanded = false;
+  bool displayPicture = true;
+
+  TextStyle get _defaultStyle =>
+      TextStyle(color: Resource.Colors.grey, fontSize: 16.0);
 
   @override
   void initState() {
@@ -42,8 +39,6 @@ class DrawerBodyState extends State<DrawerBody> {
   void dispose() {
     super.dispose();
   }
-
-  _defaultStyle() => TextStyle(color: Resource.Colors.grey, fontSize: 16.0);
 
   @override
   Widget build(BuildContext context) {
@@ -126,26 +121,50 @@ class DrawerBodyState extends State<DrawerBody> {
                     ? Resource.Colors.blue
                     : Resource.Colors.grey,
               ),
-              title: Text(app.courseInfo, style: _defaultStyle()),
+              title: Text(app.courseInfo, style: _defaultStyle),
               children: <Widget>[
-                _subItem(Icons.class_, app.course, CoursePageRoute()),
-                _subItem(Icons.assignment, app.score, ScorePageRoute()),
+                _subItem(
+                  icon: Icons.class_,
+                  title: app.course,
+                  page: CoursePage(),
+                ),
+                _subItem(
+                  icon: Icons.assignment,
+                  title: app.score,
+                  page: ScorePage(),
+                ),
               ],
             ),
-            _item(Icons.school, app.graduationCheckChecklist,
-                GraduationReportPageRoute()),
             _item(
-                Icons.monetization_on,
-                app.tuitionAndFees,
-                MaterialPageRoute(
-                    builder: (_) => TuitionAndFeesPage(
-                          username: ShareDataWidget.of(context).data.username,
-                          password: ShareDataWidget.of(context).data.password,
-                        ))),
-            _item(Icons.accessibility_new, app.admissionGuide,
-                MaterialPageRoute(builder: (_) => AdmissionGuidePage())),
-            _item(Icons.face, app.about, AboutUsPageRoute()),
-            _item(Icons.settings, app.settings, SettingPageRoute()),
+              icon: Icons.school,
+              title: app.graduationCheckChecklist,
+              page: GraduationReportPage(
+                username: ShareDataWidget.of(context).data.username,
+                password: ShareDataWidget.of(context).data.password,
+              ),
+            ),
+            _item(
+              icon: Icons.monetization_on,
+              title: app.tuitionAndFees,
+              page: TuitionAndFeesPage(
+                username: ShareDataWidget.of(context).data.username,
+                password: ShareDataWidget.of(context).data.password,
+              ),
+            ),
+            _item(
+                icon: Icons.accessibility_new,
+                title: app.admissionGuide,
+                page: AdmissionGuidePage()),
+            _item(
+              icon: Icons.face,
+              title: app.about,
+              page: AboutUsPage(),
+            ),
+            _item(
+              icon: Icons.settings,
+              title: app.settings,
+              page: SettingPage(),
+            ),
             ListTile(
               leading: Icon(
                 Icons.power_settings_new,
@@ -155,7 +174,10 @@ class DrawerBodyState extends State<DrawerBody> {
                 Navigator.popUntil(
                     context, ModalRoute.withName(Navigator.defaultRouteName));
               },
-              title: Text(app.logout, style: _defaultStyle()),
+              title: Text(
+                app.logout,
+                style: _defaultStyle,
+              ),
             ),
           ],
         ),
@@ -163,22 +185,32 @@ class DrawerBodyState extends State<DrawerBody> {
     );
   }
 
-  _item(IconData icon, String title, MaterialPageRoute route) => ListTile(
+  _item({
+    @required IconData icon,
+    @required String title,
+    @required Widget page,
+  }) =>
+      ListTile(
         leading: Icon(icon, color: Resource.Colors.grey),
-        title: Text(title, style: _defaultStyle()),
+        title: Text(title, style: _defaultStyle),
         onTap: () {
           Navigator.pop(context);
-          Navigator.push(context, route);
+          Utils.pushCupertinoStyle(context, page);
         },
       );
 
-  _subItem(IconData icon, String title, MaterialPageRoute route) => ListTile(
+  _subItem({
+    @required IconData icon,
+    @required String title,
+    @required Widget page,
+  }) =>
+      ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: 72.0),
         leading: Icon(icon, color: Resource.Colors.grey),
-        title: Text(title, style: _defaultStyle()),
+        title: Text(title, style: _defaultStyle),
         onTap: () async {
           Navigator.of(context).pop();
-          Navigator.of(context).push(route);
+          Utils.pushCupertinoStyle(context, page);
         },
       );
 }

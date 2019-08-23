@@ -221,14 +221,22 @@ class HomePageState extends State<HomePage> {
       _currentTabIndex = index;
       switch (_currentTabIndex) {
         case 0:
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => AdmissionGuidePage()));
+          Utils.pushCupertinoStyle(
+            context,
+            AdmissionGuidePage(),
+          );
           break;
         case 1:
-          Navigator.of(context).push(CoursePageRoute());
+          Utils.pushCupertinoStyle(
+            context,
+            CoursePage(),
+          );
           break;
         case 2:
-          Navigator.of(context).push(ScorePageRoute());
+          Utils.pushCupertinoStyle(
+            context,
+            ScorePage(),
+          );
           break;
       }
     });

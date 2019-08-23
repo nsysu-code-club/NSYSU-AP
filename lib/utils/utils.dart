@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:big5/big5.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -224,5 +225,13 @@ class Utils {
       result += '%${value.toRadixString(16)}';
     }
     return result;
+  }
+
+  static pushCupertinoStyle(BuildContext context, Widget page) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(builder: (BuildContext context) {
+        return page;
+      }),
+    );
   }
 }
