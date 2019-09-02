@@ -15,6 +15,7 @@ import 'package:nsysu_ap/pages/score_page.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
+import 'package:nsysu_ap/utils/preferences.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 
@@ -27,6 +28,7 @@ import 'pages/setting_page.dart';
 void main() async {
   bool isInDebugMode = Constants.isInDebugMode;
   if (Platform.isIOS || Platform.isAndroid) {
+    await Preferences.init();
     if (!Constants.isInDebugMode) {
       FlutterError.onError = (FlutterErrorDetails details) {
         if (isInDebugMode) {
