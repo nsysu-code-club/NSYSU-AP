@@ -3,15 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/course_data.dart';
 import 'package:nsysu_ap/models/course_semester_data.dart';
-import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/helper.dart';
-import 'package:nsysu_ap/utils/preferences.dart';
 import 'package:nsysu_ap/widgets/default_dialog.dart';
 import 'package:nsysu_ap/widgets/hint_content.dart';
-import 'package:nsysu_ap/widgets/semester_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum _State { loading, finish, error, empty, offlineEmpty }
 
@@ -40,11 +38,10 @@ class CoursePageState extends State<CoursePage>
   _State state = _State.loading;
 
   int base = 6;
-  int selectSemesterIndex = 0;
+  int selectSemesterIndex;
   double childAspectRatio = 0.5;
 
   CourseSemesterData semesterData;
-  Options options;
   CourseData courseData;
 
   bool isOffline = false;
@@ -80,17 +77,25 @@ class CoursePageState extends State<CoursePage>
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               SizedBox(height: 8.0),
-              SemesterPicker(
-                getData: () async {
-                  semesterData = await Helper.instance.getCourseSemesterData();
-                  return semesterData.semesters;
-                },
-                onSelect: (option, index) {
-                  print(option.value);
-                  options = option;
-                  selectSemesterIndex = index;
-                  _getCourseTables();
-                },
+              FlatButton(
+                onPressed: (semesterData != null) ? _selectSemester : null,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      semesterData == null
+                          ? ""
+                          : parser(semesterData.semester.text),
+                      style: TextStyle(
+                          color: Resource.Colors.blue, fontSize: 18.0),
+                    ),
+                    SizedBox(width: 8.0),
+                    Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Resource.Colors.blue,
+                    )
+                  ],
+                ),
               ),
               Container(
                 child: isOffline
@@ -296,9 +301,8 @@ class CoursePageState extends State<CoursePage>
     );
   }
 
-  Future<List<Options>> _getSemester() async {
+  void _getSemester() async {
     semesterData = await Helper.instance.getCourseSemesterData();
-    return semesterData.semesters;
     final RemoteConfig remoteConfig = await RemoteConfig.instance;
     try {
       await remoteConfig.fetch(expiration: const Duration(seconds: 10));
@@ -312,6 +316,8 @@ class CoursePageState extends State<CoursePage>
           remoteConfig.getString(Constants.DEFAULT_COURSE_SEMESTER_CODE);
       semesterData.setDefault(code);
     }
+    setState(() {});
+    _getCourseTables();
   }
 
   void _selectSemester() {
@@ -377,12 +383,14 @@ class CoursePageState extends State<CoursePage>
     setState(() {
       state = _State.loading;
     });
+    var prefs = await SharedPreferences.getInstance();
     Helper.instance
         .getCourseData(
-            Preferences.getString(Constants.PREF_USERNAME, ''), options.value)
+      prefs.getString(Constants.PREF_USERNAME),
+      semesterData.semester.value,
+    )
         .then((courseData) {
       this.courseData = courseData;
-      print(this.courseData.status);
       if (mounted)
         setState(() {
           if (courseData.status == 200)
