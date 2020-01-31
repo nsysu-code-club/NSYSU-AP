@@ -34,7 +34,7 @@ dependencies:
   sprintf: ^4.0.2
   crypto: ^2.0.6
   flutter_crashlytics:
-    path: ../flutter_crashlytics
+    git: https://github.com/abc873693/flutter_crashlytics
   big5: 0.0.4
   printing: 2.1.3
 
