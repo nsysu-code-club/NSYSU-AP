@@ -28,7 +28,6 @@ import 'pages/setting_page.dart';
 void main() async {
   bool isInDebugMode = Constants.isInDebugMode;
   if (Platform.isIOS || Platform.isAndroid) {
-    await Preferences.init();
     if (!Constants.isInDebugMode) {
       FlutterError.onError = (FlutterErrorDetails details) {
         if (isInDebugMode) {
@@ -80,7 +79,8 @@ class MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (kIsWeb) {
+    } else if (Platform.isAndroid || Platform.isIOS) {
       _analytics = FirebaseAnalytics();
       _firebaseMessaging = FirebaseMessaging();
       _initFCM(_firebaseMessaging);
@@ -122,11 +122,13 @@ class MyAppState extends State<MyApp> {
                 borderSide: BorderSide(color: Colors.white)),
           ),
         ),
-        navigatorObservers: (Platform.isIOS || Platform.isAndroid)
-            ? [
-                FirebaseAnalyticsObserver(analytics: _analytics),
-              ]
-            : [],
+        navigatorObservers: (kIsWeb)
+            ? []
+            : (Platform.isIOS || Platform.isAndroid)
+                ? [
+                    FirebaseAnalyticsObserver(analytics: _analytics),
+                  ]
+                : [],
         localizationsDelegates: [
           const AppLocalizationsDelegate(),
           GlobalMaterialLocalizations.delegate,

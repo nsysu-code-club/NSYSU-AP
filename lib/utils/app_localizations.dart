@@ -1,11 +1,16 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppLocalizations {
+  static const SYSTEM = 'system';
+  static const ZH = 'zh';
+  static const EN = 'en';
+
   AppLocalizations(Locale locale) {
     init(locale);
   }
@@ -1184,14 +1189,17 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   @override
   Future<AppLocalizations> load(Locale locale) async {
     print('Load ${locale.languageCode}');
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (kIsWeb) {
+      return AppLocalizations(locale);
+    } else if (Platform.isAndroid || Platform.isIOS) {
       SharedPreferences preference = await SharedPreferences.getInstance();
       String languageCode =
-          preference.getString(Constants.PREF_LANGUAGE_CODE) ?? 'system';
-
+          preference.getString(Constants.PREF_LANGUAGE_CODE) ??
+              AppLocalizations.SYSTEM;
       AppLocalizations localizations = AppLocalizations(
-          (languageCode == 'system') ? locale : Locale(languageCode));
-
+          (languageCode == AppLocalizations.SYSTEM)
+              ? locale
+              : Locale(languageCode));
       return localizations;
     } else {
       //TODO if other platform can use SharedPreferences, need update.
