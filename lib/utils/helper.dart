@@ -83,7 +83,7 @@ class Helper {
       },
     ).timeout(Duration(seconds: 2));
     String text = big5.decode(scoreResponse.bodyBytes);
-    //print('text =  $text');
+//    print('statusCode = ${scoreResponse.statusCode} text =  $text');
     if (text.contains("資料錯誤請重新輸入"))
       score = false;
     else if (scoreResponse.statusCode != 302 && scoreResponse.statusCode != 200)
@@ -105,7 +105,7 @@ class Helper {
     //print('text =  $text');
     if (text.contains("學號碼密碼不符"))
       course = false;
-    else if (courseResponse.statusCode != 200) throw '';
+    else if (courseResponse.statusCode != 302 && courseResponse.statusCode != 200) throw '';
     courseCookie = courseResponse.headers['set-cookie'];
     print(DateTime.now());
     if (score && course)
