@@ -4,7 +4,7 @@ import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/utils/helper.dart';
+import 'package:nsysu_ap/api/helper.dart';
 import 'package:nsysu_ap/widgets/hint_content.dart';
 
 enum _State { loading, finish, error, empty, offlineEmpty }

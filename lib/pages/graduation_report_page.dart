@@ -3,7 +3,7 @@ import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/utils/helper.dart';
+import 'package:nsysu_ap/api/helper.dart';
 import 'package:nsysu_ap/widgets/default_dialog.dart';
 import 'package:nsysu_ap/widgets/hint_content.dart';
 
