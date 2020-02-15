@@ -1,7 +1,7 @@
 name: nsysu_ap
 description: NSYSU AP
 
-version: 0.1.7+107
+version: 0.2.0+200
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -16,25 +16,24 @@ dependencies:
   shared_preferences: ^0.5.3+1
   package_info: ^0.4.0+4
   url_launcher: ^5.0.3
-  firebase_core: ^0.4.0+3
-  firebase_analytics: ^3.0.2
-  firebase_remote_config: ^0.2.0+2
-  firebase_messaging: ^5.0.2
+  firebase_core: 0.4.3+3
+  firebase_analytics: 5.0.11
+  firebase_remote_config: 0.3.0+1
+  firebase_messaging: 6.0.9
+  firebase_crashlytics: 0.1.2+5
   http: ^0.12.0+2
   html: ^0.14.0+2
   path_provider: ^1.2.0
-  webview_flutter: 0.3.13
+  webview_flutter: 0.3.19+7
 
   #third party plugin
   toast: ^0.1.4
   encrypt: ^3.1.0
-  cached_network_image: ^1.1.1
+  cached_network_image: 2.0.0
   carousel_slider: ^1.2.0
-  flutter_local_notifications: ^0.6.1
+  flutter_local_notifications: 1.1.5+1
   sprintf: ^4.0.2
   crypto: ^2.0.6
-  flutter_crashlytics:
-    path: ../flutter_crashlytics
   big5: 0.0.4
   printing: 2.1.3
 
