@@ -1,11 +1,16 @@
 import 'dart:io';
 
+import 'package:ap_common/resources/ap_colors.dart';
+import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/widgets/dialog_option.dart';
+import 'package:ap_common/widgets/option_dialog.dart';
+import 'package:ap_common/widgets/setting_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
-import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/utils.dart';
+import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -60,15 +65,15 @@ class SettingPageState extends State<SettingPage>
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text(app.settings),
-        backgroundColor: Resource.Colors.blue,
+        backgroundColor: ApColors.blue,
       ),
       body: SingleChildScrollView(
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _titleItem(app.notificationItem),
-              _itemSwitch(app.courseNotify, courseNotify, () async {
-                Utils.showToast(context, app.functionNotOpen);
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            SettingTitle(text: app.notificationItem),
+            _itemSwitch(app.courseNotify, courseNotify, () async {
+              Utils.showToast(context, app.functionNotOpen);
 //            FA.logAction('notify_course', 'create');
 //            setState(() {
 //              courseNotify = !courseNotify;
@@ -80,23 +85,55 @@ class SettingPageState extends State<SettingPage>
 //            }
 //            FA.logAction('notify_course', 'create', message: '$courseNotify');
 //            prefs.setBool(Constants.PREF_COURSE_NOTIFY, courseNotify);
-              }),
-              Container(
-                color: Colors.grey,
-                height: 0.5,
-              ),
-              _titleItem(app.otherSettings),
-              _itemSingle(app.language, () {
+            }),
+            Container(
+              color: Colors.grey,
+              height: 0.5,
+            ),
+            SettingTitle(text: app.otherSettings),
+            SettingItem(
+              text: app.language,
+              subText: 'language',
+              onTap: () {
                 Utils.showChoseLanguageDialog(context, () {
                   setState(() {});
                 });
-              }),
-              Divider(
-                color: Colors.grey,
-                height: 0.5,
-              ),
-              _titleItem(app.otherInfo),
-              _item(app.feedback, app.feedbackViaFacebook, () {
+              },
+            ),
+            SettingItem(
+              text: 'app.theme',
+              subText: ' app.themeText',
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => SimpleOptionDialog(
+                    title: 'app.theme',
+                    items: [
+                      Item('app.light', ApTheme.LIGHT),
+                      Item('app.dark', ApTheme.DARK),
+                    ],
+                    value: ApTheme.code,
+                    onSelected: (item) {
+//                              if (ApTheme.code != item.value)
+//                                FA.logAction('change_theme', item.value);
+                      ApTheme.code = item.value;
+                      ShareDataWidget.of(context).data.update();
+//                                  Preferences.setString(
+//                                      Constants.PREF_THEME_CODE, item.value);
+                    },
+                  ),
+                );
+              },
+            ),
+            Divider(
+              color: Colors.grey,
+              height: 0.5,
+            ),
+            SettingTitle(text: app.otherInfo),
+            SettingItem(
+              text: app.feedback,
+              subText: app.feedbackViaFacebook,
+              onTap: () {
                 if (Platform.isAndroid)
                   Utils.launchUrl('fb://messaging/${Constants.FANS_PAGE_ID}')
                       .catchError((onError) =>
@@ -111,16 +148,24 @@ class SettingPageState extends State<SettingPage>
                       (onError) => Utils.showToast(context, app.platformError));
                 }
                 FA.logAction('feedback', 'click');
-              }),
-              _item(app.donateTitle, app.donateContent, () {
+              },
+            ),
+            SettingItem(
+              text: app.donateTitle,
+              subText: app.donateContent,
+              onTap: () {
                 Utils.launchUrl("https://p.ecpay.com.tw/3D54D").catchError(
                     (onError) => Utils.showToast(context, app.platformError));
                 FA.logAction('donate', 'click');
-              }),
-              _item(app.appVersion, "v$appVersion", () {
-                //FA.logAction('donate', 'click');
-              }),
-            ]),
+              },
+            ),
+            SettingItem(
+              text: app.appVersion,
+              subText: 'v$appVersion',
+              onTap: () {},
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -129,7 +174,7 @@ class SettingPageState extends State<SettingPage>
         padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
         child: Text(
           text,
-          style: TextStyle(color: Resource.Colors.blue, fontSize: 14.0),
+          style: TextStyle(color: ApColors.blue, fontSize: 14.0),
           textAlign: TextAlign.start,
         ),
       );
@@ -145,8 +190,8 @@ class SettingPageState extends State<SettingPage>
             ),
             Switch(
               value: value,
-              activeColor: Resource.Colors.blue,
-              activeTrackColor: Resource.Colors.blue,
+              activeColor: ApColors.blue,
+              activeTrackColor: ApColors.blue,
               onChanged: (b) {
                 function();
               },
@@ -167,46 +212,6 @@ class SettingPageState extends State<SettingPage>
       busNotify = prefs.getBool(Constants.PREF_BUS_NOTIFY) ?? false;
     });
   }
-
-  _item(String text, String subText, Function function) => FlatButton(
-        padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        child: SizedBox(
-          width: double.infinity,
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                text,
-                style: TextStyle(fontSize: 16.0),
-              ),
-              Text(
-                subText,
-                style: TextStyle(fontSize: 14.0, color: Resource.Colors.grey),
-              ),
-            ],
-          ),
-        ),
-        onPressed: function,
-      );
-
-  _itemSingle(String text, Function function) => FlatButton(
-        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-        child: SizedBox(
-          width: double.infinity,
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                text,
-                style: TextStyle(fontSize: 16.0),
-              ),
-            ],
-          ),
-        ),
-        onPressed: function,
-      );
 
 //  void _setupCourseNotify(BuildContext context) async {
 //    showDialog(
