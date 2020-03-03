@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ap_common/resources/ap_theme.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -68,18 +69,7 @@ class MyAppState extends State<MyApp> {
           AboutUsPage.routerName: (context) => AboutUsPage(),
           OpenSourcePage.routerName: (context) => OpenSourcePage(),
         },
-        theme: ThemeData(
-          brightness: brightness,
-          hintColor: Colors.white,
-          accentColor: Resource.Colors.blue,
-          unselectedWidgetColor: Resource.Colors.grey,
-          backgroundColor: Colors.black12,
-          inputDecorationTheme: InputDecorationTheme(
-            labelStyle: TextStyle(color: Colors.white),
-            border: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.white)),
-          ),
-        ),
+        theme: ApTheme.data,
         navigatorObservers: (kIsWeb)
             ? []
             : (Platform.isIOS || Platform.isAndroid)
@@ -134,6 +124,12 @@ class MyAppState extends State<MyApp> {
       if (Platform.isAndroid)
         firebaseMessaging.subscribeToTopic("Android");
       else if (Platform.isIOS) firebaseMessaging.subscribeToTopic("IOS");
+    });
+  }
+
+  void update() {
+    setState(() {
+
     });
   }
 }
