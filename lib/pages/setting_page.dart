@@ -1,8 +1,6 @@
 import 'dart:io';
 
-import 'package:ap_common/resources/ap_colors.dart';
 import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/widgets/dialog_option.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:ap_common/widgets/setting_widget.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +63,7 @@ class SettingPageState extends State<SettingPage>
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text(app.settings),
-        backgroundColor: ApColors.blue,
+        backgroundColor: ApTheme.of(context).blue,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -109,6 +107,7 @@ class SettingPageState extends State<SettingPage>
                   builder: (_) => SimpleOptionDialog(
                     title: 'app.theme',
                     items: [
+                      Item('app.system', ApTheme.SYSTEM),
                       Item('app.light', ApTheme.LIGHT),
                       Item('app.dark', ApTheme.DARK),
                     ],
@@ -116,8 +115,22 @@ class SettingPageState extends State<SettingPage>
                     onSelected: (item) {
 //                              if (ApTheme.code != item.value)
 //                                FA.logAction('change_theme', item.value);
+                      ThemeMode themeMode;
                       ApTheme.code = item.value;
-                      ShareDataWidget.of(context).data.update();
+                      switch (item.value) {
+                        case ApTheme.SYSTEM:
+                          themeMode = ThemeMode.system;
+                          break;
+                        case ApTheme.DARK:
+                          themeMode = ThemeMode.dark;
+                          break;
+                        case ApTheme.LIGHT:
+                        default:
+                          themeMode = ThemeMode.light;
+                          break;
+                      }
+                      ShareDataWidget.of(context).data.update(themeMode);
+                      Navigator.of(context).pop();
 //                                  Preferences.setString(
 //                                      Constants.PREF_THEME_CODE, item.value);
                     },
@@ -174,7 +187,7 @@ class SettingPageState extends State<SettingPage>
         padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
         child: Text(
           text,
-          style: TextStyle(color: ApColors.blue, fontSize: 14.0),
+          style: TextStyle(color: ApTheme.of(context).blue, fontSize: 14.0),
           textAlign: TextAlign.start,
         ),
       );
@@ -190,8 +203,8 @@ class SettingPageState extends State<SettingPage>
             ),
             Switch(
               value: value,
-              activeColor: ApColors.blue,
-              activeTrackColor: ApColors.blue,
+              activeColor: ApTheme.of(context).blue,
+              activeTrackColor: ApTheme.of(context).blue,
               onChanged: (b) {
                 function();
               },

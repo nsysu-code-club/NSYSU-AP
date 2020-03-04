@@ -36,6 +36,8 @@ class MyAppState extends State<MyApp> {
   String username;
   String password;
 
+  ThemeMode themeMode = ThemeMode.system;
+
   @override
   void initState() {
     if (kIsWeb) {
@@ -52,41 +54,47 @@ class MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return ShareDataWidget(
       this,
-      child: MaterialApp(
-        localeResolutionCallback:
-            (Locale locale, Iterable<Locale> supportedLocales) {
-          return locale;
-        },
-        onGenerateTitle: (context) => AppLocalizations.of(context).appName,
-        debugShowCheckedModeBanner: false,
-        routes: <String, WidgetBuilder>{
-          Navigator.defaultRouteName: (context) => LoginPage(),
-          HomePage.routerName: (context) => HomePage(),
-          CoursePage.routerName: (context) => CoursePage(),
-          ScorePage.routerName: (context) => ScorePage(),
-          GraduationReportPage.routerName: (context) => GraduationReportPage(),
-          SettingPage.routerName: (context) => SettingPage(),
-          AboutUsPage.routerName: (context) => AboutUsPage(),
-          OpenSourcePage.routerName: (context) => OpenSourcePage(),
-        },
-        theme: ApTheme.data,
-        navigatorObservers: (kIsWeb)
-            ? []
-            : (Platform.isIOS || Platform.isAndroid)
-            ? [
-          FirebaseAnalyticsObserver(analytics: _analytics),
-        ]
-            : [],
-        localizationsDelegates: [
-          const AppLocalizationsDelegate(),
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          CupertinoEnDefaultLocalizationsDelegate(),
-        ],
-        supportedLocales: [
-          const Locale('en', 'US'), // English
-          const Locale('zh', 'TW'), // Chinese
-        ],
+      child: ApTheme(
+        themeMode,
+        child: MaterialApp(
+          localeResolutionCallback:
+              (Locale locale, Iterable<Locale> supportedLocales) {
+            return locale;
+          },
+          onGenerateTitle: (context) => AppLocalizations.of(context).appName,
+          debugShowCheckedModeBanner: false,
+          routes: <String, WidgetBuilder>{
+            Navigator.defaultRouteName: (context) => LoginPage(),
+            HomePage.routerName: (context) => HomePage(),
+            CoursePage.routerName: (context) => CoursePage(),
+            ScorePage.routerName: (context) => ScorePage(),
+            GraduationReportPage.routerName: (context) =>
+                GraduationReportPage(),
+            SettingPage.routerName: (context) => SettingPage(),
+            AboutUsPage.routerName: (context) => AboutUsPage(),
+            OpenSourcePage.routerName: (context) => OpenSourcePage(),
+          },
+          theme: ApTheme.light,
+          darkTheme: ApTheme.dark,
+          themeMode: themeMode,
+          navigatorObservers: (kIsWeb)
+              ? []
+              : (Platform.isIOS || Platform.isAndroid)
+                  ? [
+                      FirebaseAnalyticsObserver(analytics: _analytics),
+                    ]
+                  : [],
+          localizationsDelegates: [
+            const AppLocalizationsDelegate(),
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            CupertinoEnDefaultLocalizationsDelegate(),
+          ],
+          supportedLocales: [
+            const Locale('en', 'US'), // English
+            const Locale('zh', 'TW'), // Chinese
+          ],
+        ),
       ),
     );
   }
@@ -127,9 +135,9 @@ class MyAppState extends State<MyApp> {
     });
   }
 
-  void update() {
+  void update(ThemeMode mode) {
     setState(() {
-
+      themeMode = mode;
     });
   }
 }
