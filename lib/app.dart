@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/preferences.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -47,6 +48,8 @@ class MyAppState extends State<MyApp> {
       _initFCM(_firebaseMessaging);
       FA.analytics = _analytics;
     }
+    themeMode = ThemeMode
+        .values[Preferences.getInt(Constants.PREF_THEME_MODE_INDEX, 0)];
     super.initState();
   }
 

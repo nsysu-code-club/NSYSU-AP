@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:ap_common/widgets/setting_widget.dart';
 import 'package:flutter/material.dart';
@@ -11,17 +12,6 @@ import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class SettingPageRoute extends MaterialPageRoute {
-  SettingPageRoute()
-      : super(builder: (BuildContext context) => new SettingPage());
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    return new FadeTransition(opacity: animation, child: new SettingPage());
-  }
-}
 
 class SettingPage extends StatefulWidget {
   static const String routerName = "/setting";
@@ -107,32 +97,20 @@ class SettingPageState extends State<SettingPage>
                   builder: (_) => SimpleOptionDialog(
                     title: 'app.theme',
                     items: [
-                      Item('app.system', ApTheme.SYSTEM),
-                      Item('app.light', ApTheme.LIGHT),
-                      Item('app.dark', ApTheme.DARK),
+                      'app.system',
+                      'app.light',
+                      'app.dark',
                     ],
-                    value: ApTheme.code,
-                    onSelected: (item) {
-//                              if (ApTheme.code != item.value)
-//                                FA.logAction('change_theme', item.value);
-                      ThemeMode themeMode;
-                      ApTheme.code = item.value;
-                      switch (item.value) {
-                        case ApTheme.SYSTEM:
-                          themeMode = ThemeMode.system;
-                          break;
-                        case ApTheme.DARK:
-                          themeMode = ThemeMode.dark;
-                          break;
-                        case ApTheme.LIGHT:
-                        default:
-                          themeMode = ThemeMode.light;
-                          break;
-                      }
-                      ShareDataWidget.of(context).data.update(themeMode);
+                    index: ApTheme.of(context).themeMode.index,
+                    onSelected: (int index) {
+                      Preferences.getInt(
+                        Constants.PREF_THEME_MODE_INDEX,
+                        index,
+                      );
+                      ShareDataWidget.of(context)
+                          .data
+                          .update(ThemeMode.values[index]);
                       Navigator.of(context).pop();
-//                                  Preferences.setString(
-//                                      Constants.PREF_THEME_CODE, item.value);
                     },
                   ),
                 );
