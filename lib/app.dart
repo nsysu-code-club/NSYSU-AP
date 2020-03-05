@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
@@ -62,7 +64,15 @@ class MyAppState extends State<MyApp> {
         child: MaterialApp(
           localeResolutionCallback:
               (Locale locale, Iterable<Locale> supportedLocales) {
-            return locale;
+            print('Load ${locale.languageCode}');
+            String languageCode = Preferences.getString(
+              Constants.PREF_LANGUAGE_CODE,
+              ApSupportLanguageConstants.SYSTEM,
+            );
+            if (languageCode == ApSupportLanguageConstants.SYSTEM)
+              return locale;
+            else
+              return Locale(languageCode);
           },
           onGenerateTitle: (context) => AppLocalizations.of(context).appName,
           debugShowCheckedModeBanner: false,
@@ -89,6 +99,7 @@ class MyAppState extends State<MyApp> {
                   : [],
           localizationsDelegates: [
             const AppLocalizationsDelegate(),
+            const ApLocalizationsDelegate(),
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             CupertinoEnDefaultLocalizationsDelegate(),
