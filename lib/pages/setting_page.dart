@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:ap_common/widgets/setting_widget.dart';
@@ -11,7 +13,6 @@ import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:package_info/package_info.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingPage extends StatefulWidget {
   static const String routerName = "/setting";
@@ -20,25 +21,24 @@ class SettingPage extends StatefulWidget {
   SettingPageState createState() => new SettingPageState();
 }
 
-class SettingPageState extends State<SettingPage>
-    with SingleTickerProviderStateMixin {
-  SharedPreferences prefs;
-
-  var busNotify = false, courseNotify = false, displayPicture = true;
-
-  AppLocalizations app;
-
-  String appVersion = "1.0.0";
+class SettingPageState extends State<SettingPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
+  AppLocalizations app;
+  ApLocalizations ap;
+
+  bool busNotify = false;
+  bool courseNotify = false;
+  bool displayPicture = true;
   bool isOffline = false;
+
+  String appVersion = "1.0.0";
 
   @override
   void initState() {
     super.initState();
     FA.setCurrentScreen("SettingPage", "setting_page.dart");
     _getPreference();
-    //Utils.showAppReviewDialog(context);
   }
 
   @override
@@ -49,19 +49,41 @@ class SettingPageState extends State<SettingPage>
   @override
   Widget build(BuildContext context) {
     app = AppLocalizations.of(context);
+    ap = ApLocalizations.of(context);
+    final languageTextList = [
+      ApLocalizations.of(context).systemLanguage,
+      ApLocalizations.of(context).traditionalChinese,
+      ApLocalizations.of(context).english,
+    ];
+    final themeTextList = [
+      ApLocalizations.of(context).systemTheme,
+      ApLocalizations.of(context).light,
+      ApLocalizations.of(context).dark,
+    ];
+    final code = Preferences.getString(
+        Constants.PREF_LANGUAGE_CODE, ApSupportLanguageConstants.SYSTEM);
+    final languageIndex = ApSupportLanguageExtension.fromCode(code);
+    final themeModeIndex = ApTheme.of(context).themeMode.index;
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(app.settings),
+        title: Text(ap.settings),
         backgroundColor: ApTheme.of(context).blue,
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            SettingTitle(text: app.notificationItem),
-            _itemSwitch(app.courseNotify, courseNotify, () async {
-              Utils.showToast(context, app.functionNotOpen);
+            SettingTitle(text: ap.notificationItem),
+            SettingSwitch(
+              text: ap.courseNotify,
+              subText: ap.courseNotifyHint,
+              value: courseNotify,
+              onChanged: (state) async {
+                Utils.showToast(
+                  context,
+                  ap.functionNotOpen,
+                );
 //            FA.logAction('notify_course', 'create');
 //            setState(() {
 //              courseNotify = !courseNotify;
@@ -73,35 +95,55 @@ class SettingPageState extends State<SettingPage>
 //            }
 //            FA.logAction('notify_course', 'create', message: '$courseNotify');
 //            prefs.setBool(Constants.PREF_COURSE_NOTIFY, courseNotify);
-            }),
+              },
+            ),
             Container(
               color: Colors.grey,
               height: 0.5,
             ),
-            SettingTitle(text: app.otherSettings),
+            SettingTitle(text: ap.otherSettings),
             SettingItem(
-              text: app.language,
-              subText: 'language',
-              onTap: () {
-                Utils.showChoseLanguageDialog(context, () {
-                  setState(() {});
-                });
-              },
-            ),
-            SettingItem(
-              text: 'app.theme',
-              subText: ' app.themeText',
+              text: ap.language,
+              subText: languageTextList[languageIndex],
               onTap: () {
                 showDialog(
                   context: context,
                   builder: (_) => SimpleOptionDialog(
-                    title: 'app.theme',
-                    items: [
-                      'app.system',
-                      'app.light',
-                      'app.dark',
-                    ],
-                    index: ApTheme.of(context).themeMode.index,
+                    title: ap.language,
+                    items: languageTextList,
+                    index: languageIndex,
+                    onSelected: (int index) {
+                      Locale locale;
+                      String code = ApSupportLanguage.values[index].code;
+                      switch (index) {
+                        case 0:
+                          locale = Localizations.localeOf(context);
+                          break;
+                        default:
+                          locale = Locale(code);
+                          break;
+                      }
+                      Preferences.setString(Constants.PREF_LANGUAGE_CODE, code);
+                      setState(() {
+                        AppLocalizationsDelegate().load(locale);
+                        ApLocalizationsDelegate().load(locale);
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                );
+              },
+            ),
+            SettingItem(
+              text: ap.theme,
+              subText: themeTextList[themeModeIndex],
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => SimpleOptionDialog(
+                    title: ap.theme,
+                    items: themeTextList,
+                    index: themeModeIndex,
                     onSelected: (int index) {
                       Preferences.getInt(
                         Constants.PREF_THEME_MODE_INDEX,
@@ -110,6 +152,8 @@ class SettingPageState extends State<SettingPage>
                       ShareDataWidget.of(context)
                           .data
                           .update(ThemeMode.values[index]);
+                      Preferences.setInt(
+                          Constants.PREF_THEME_MODE_INDEX, index);
                       Navigator.of(context).pop();
                     },
                   ),
@@ -120,10 +164,10 @@ class SettingPageState extends State<SettingPage>
               color: Colors.grey,
               height: 0.5,
             ),
-            SettingTitle(text: app.otherInfo),
+            SettingTitle(text: ap.otherInfo),
             SettingItem(
-              text: app.feedback,
-              subText: app.feedbackViaFacebook,
+              text: ap.feedback,
+              subText: ap.feedbackViaFacebook,
               onTap: () {
                 if (Platform.isAndroid)
                   Utils.launchUrl('fb://messaging/${Constants.FANS_PAGE_ID}')
@@ -136,22 +180,22 @@ class SettingPageState extends State<SettingPage>
                           Utils.launchUrl(Constants.FANS_PAGE_URL));
                 else {
                   Utils.launchUrl(Constants.FANS_PAGE_URL).catchError(
-                      (onError) => Utils.showToast(context, app.platformError));
+                      (onError) => Utils.showToast(context, ap.platformError));
                 }
                 FA.logAction('feedback', 'click');
               },
             ),
             SettingItem(
-              text: app.donateTitle,
-              subText: app.donateContent,
+              text: ap.donateTitle,
+              subText: ap.donateContent,
               onTap: () {
                 Utils.launchUrl("https://p.ecpay.com.tw/3D54D").catchError(
-                    (onError) => Utils.showToast(context, app.platformError));
+                    (onError) => Utils.showToast(context, ap.platformError));
                 FA.logAction('donate', 'click');
               },
             ),
             SettingItem(
-              text: app.appVersion,
+              text: ap.appVersion,
               subText: 'v$appVersion',
               onTap: () {},
             ),
@@ -161,148 +205,15 @@ class SettingPageState extends State<SettingPage>
     );
   }
 
-  _titleItem(String text) => Container(
-        padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-        child: Text(
-          text,
-          style: TextStyle(color: ApTheme.of(context).blue, fontSize: 14.0),
-          textAlign: TextAlign.start,
-        ),
-      );
-
-  _itemSwitch(String text, bool value, Function function) => FlatButton(
-        padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              text,
-              style: TextStyle(fontSize: 16.0),
-            ),
-            Switch(
-              value: value,
-              activeColor: ApTheme.of(context).blue,
-              activeTrackColor: ApTheme.of(context).blue,
-              onChanged: (b) {
-                function();
-              },
-            ),
-          ],
-        ),
-        onPressed: function,
-      );
-
   _getPreference() async {
-    prefs = await SharedPreferences.getInstance();
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     setState(() {
-      isOffline = prefs.getBool(Constants.PREF_IS_OFFLINE_LOGIN) ?? false;
+      isOffline = Preferences.getBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
       appVersion = packageInfo.version;
-      courseNotify = prefs.getBool(Constants.PREF_COURSE_NOTIFY) ?? false;
-      displayPicture = prefs.getBool(Constants.PREF_DISPLAY_PICTURE) ?? true;
-      busNotify = prefs.getBool(Constants.PREF_BUS_NOTIFY) ?? false;
+      courseNotify = Preferences.getBool(Constants.PREF_COURSE_NOTIFY, false);
+      displayPicture =
+          Preferences.getBool(Constants.PREF_DISPLAY_PICTURE, true);
+      busNotify = Preferences.getBool(Constants.PREF_BUS_NOTIFY, false);
     });
   }
-
-//  void _setupCourseNotify(BuildContext context) async {
-//    showDialog(
-//        context: context,
-//        builder: (BuildContext context) => ProgressDialog(app.loading),
-//        barrierDismissible: false);
-//    if (isOffline) {
-//      if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
-//      SemesterData semesterData = await CacheUtils.loadSemesterData();
-//      if (semesterData != null) {
-//        CourseData courseData =
-//            await CacheUtils.loadCourseData(semesterData.defaultSemester.value);
-//        if (courseData != null)
-//          _setCourseData(courseData);
-//        else {
-//          setState(() {
-//            courseNotify = false;
-//            prefs.setBool(Constants.PREF_COURSE_NOTIFY, courseNotify);
-//          });
-//          Utils.showToast(context, app.noOfflineData);
-//        }
-//      } else {
-//        setState(() {
-//          courseNotify = false;
-//          prefs.setBool(Constants.PREF_COURSE_NOTIFY, courseNotify);
-//        });
-//        Utils.showToast(context, app.noOfflineData);
-//      }
-//      return;
-//    }
-//    Helper.instance.getSemester().then((SemesterData semesterData) {
-//      var textList = semesterData.defaultSemester.value.split(",");
-//      if (textList.length == 2) {
-//        Helper.instance
-//            .getCourseTables(textList[0], textList[1])
-//            .then((CourseData courseData) {
-//          if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
-//          _setCourseData(courseData);
-//        }).catchError((e) {
-//          setState(() {
-//            courseNotify = false;
-//            prefs.setBool(Constants.PREF_COURSE_NOTIFY, courseNotify);
-//          });
-//          if (e is DioError) {
-//            switch (e.type) {
-//              case DioErrorType.RESPONSE:
-//                Utils.handleResponseError(
-//                    context, 'getCourseTables', mounted, e);
-//                break;
-//              case DioErrorType.CANCEL:
-//                break;
-//              default:
-//                Utils.handleDioError(context, e);
-//                break;
-//            }
-//          } else {
-//            throw e;
-//          }
-//        });
-//      }
-//    }).catchError((e) {
-//      setState(() {
-//        courseNotify = false;
-//      });
-//      prefs.setBool(Constants.PREF_COURSE_NOTIFY, courseNotify);
-//      if (e is DioError) {
-//        switch (e.type) {
-//          case DioErrorType.RESPONSE:
-//            Utils.handleResponseError(context, 'getSemester', mounted, e);
-//            break;
-//          case DioErrorType.CANCEL:
-//            break;
-//          default:
-//            Utils.handleDioError(context, e);
-//            break;
-//        }
-//      } else {
-//        throw e;
-//      }
-//    });
-//  }
-//
-//  _setCourseData(CourseData courseData) async {
-//    switch (courseData.status) {
-//      case 200:
-//        await Utils.setCourseNotify(context, courseData.courseTables);
-//        Utils.showToast(context, app.courseNotifyHint);
-//        break;
-//      case 204:
-//        Utils.showToast(context, app.courseNotifyEmpty);
-//        break;
-//      default:
-//        Utils.showToast(context, app.courseNotifyError);
-//        break;
-//    }
-//    if (courseData.status != 200) {
-//      setState(() {
-//        courseNotify = false;
-//        prefs.setBool(Constants.PREF_COURSE_NOTIFY, courseNotify);
-//      });
-//    }
-//  }
 }
