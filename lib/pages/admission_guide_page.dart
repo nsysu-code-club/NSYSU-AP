@@ -1,5 +1,5 @@
+import 'package:ap_common/resources/ap_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -23,7 +23,7 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(app.admissionGuide),
-        backgroundColor: Resource.Colors.blue,
+        backgroundColor: ApTheme.of(context).blue,
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.arrow_back_ios),
