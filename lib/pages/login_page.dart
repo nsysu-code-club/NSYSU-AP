@@ -12,10 +12,10 @@ import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
-import 'package:nsysu_ap/widgets/default_dialog.dart';
+import 'package:ap_common/widgets/default_dialog.dart';
 import 'package:nsysu_ap/widgets/progress_dialog.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
-import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
+import 'package:ap_common/widgets/yes_no_dialog.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

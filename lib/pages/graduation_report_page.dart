@@ -4,7 +4,7 @@ import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';
-import 'package:nsysu_ap/widgets/default_dialog.dart';
+import 'package:ap_common/widgets/default_dialog.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 
 enum _State { loading, finish, error, empty, offlineEmpty }
@@ -127,7 +127,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
                 Text(
                   app.graduationCheckChecklistHint,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: ApTheme.of(context).greyText, fontSize: 16.0),
+                  style: TextStyle(
+                      color: ApTheme.of(context).greyText, fontSize: 16.0),
                 ),
                 SizedBox(height: 8.0),
                 Text(
@@ -191,7 +192,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   graduationReportData.generalEducationCourse.length != 0
                       ? app.courseClickHint
                       : app.noData,
-                  style: TextStyle(color: ApTheme.of(context).grey, fontSize: 14.0),
+                  style: TextStyle(
+                      color: ApTheme.of(context).grey, fontSize: 14.0),
                 ),
                 for (var generalEducationCourse
                     in graduationReportData.generalEducationCourse) ...[

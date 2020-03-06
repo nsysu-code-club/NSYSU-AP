@@ -4,7 +4,7 @@ import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
-import 'package:nsysu_ap/widgets/default_dialog.dart';
+import 'package:ap_common/widgets/default_dialog.dart';
 
 class SearchStudentIdPage extends StatefulWidget {
   static const String routerName = "/searchUsername";

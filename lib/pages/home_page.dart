@@ -20,7 +20,7 @@ import 'package:nsysu_ap/api/helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
-import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
+import 'package:ap_common/widgets/yes_no_dialog.dart';
 
 import 'admission_guide_page.dart';
 import 'course_page.dart';
