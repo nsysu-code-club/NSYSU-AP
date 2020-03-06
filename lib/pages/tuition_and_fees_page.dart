@@ -5,7 +5,7 @@ import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';
 import 'package:ap_common/widgets/hint_content.dart';
-import 'package:nsysu_ap/widgets/progress_dialog.dart';
+import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:printing/printing.dart';
 import 'package:sprintf/sprintf.dart';
 
