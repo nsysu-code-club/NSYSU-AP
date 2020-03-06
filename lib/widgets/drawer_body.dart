@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/user_info.dart';
-import 'package:nsysu_ap/pages/about/about_us_page.dart';
+import 'package:ap_common/pages/about_us_page.dart';
 import 'package:nsysu_ap/pages/admission_guide_page.dart';
 import 'package:nsysu_ap/pages/course_page.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
@@ -158,7 +158,15 @@ class DrawerBodyState extends State<DrawerBody> {
             _item(
               icon: Icons.face,
               title: app.about,
-              page: AboutUsPage(),
+              page: AboutUsPage(
+                assetImage: 'assets/images/nsysu.webp',
+                githubName: 'NKUST-ITC',
+                email: 'abc873693@gmail.com',
+                appLicense: app.aboutOpenSourceContent,
+                fbFanPageId: '735951703168873',
+                fbFanPageUrl: 'https://www.facebook.com/NKUST.ITC/',
+                githubUrl: 'https://github.com/NKUST-ITC',
+              ),
             ),
             _item(
               icon: Icons.settings,

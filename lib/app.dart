@@ -15,14 +15,11 @@ import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/login_page.dart';
 import 'package:nsysu_ap/pages/score_page.dart';
-import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 
-import 'pages/about/about_us_page.dart';
-import 'pages/about/open_source_page.dart';
 import 'pages/course_page.dart';
 import 'pages/home_page.dart';
 import 'pages/setting_page.dart';
@@ -84,8 +81,6 @@ class MyAppState extends State<MyApp> {
             GraduationReportPage.routerName: (context) =>
                 GraduationReportPage(),
             SettingPage.routerName: (context) => SettingPage(),
-            AboutUsPage.routerName: (context) => AboutUsPage(),
-            OpenSourcePage.routerName: (context) => OpenSourcePage(),
           },
           theme: ApTheme.light,
           darkTheme: ApTheme.dark,
