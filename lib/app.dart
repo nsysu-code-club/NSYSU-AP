@@ -61,7 +61,7 @@ class MyAppState extends State<MyApp> {
         child: MaterialApp(
           localeResolutionCallback:
               (Locale locale, Iterable<Locale> supportedLocales) {
-            print('Load ${locale.languageCode}');
+//            print('Load ${locale.languageCode}');
             String languageCode = Preferences.getString(
               Constants.PREF_LANGUAGE_CODE,
               ApSupportLanguageConstants.SYSTEM,
