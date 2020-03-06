@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ap_common/resources/ap_theme.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/search_student_id_page.dart';
-import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';
@@ -68,7 +68,7 @@ class LoginPageState extends State<LoginPage>
     app = AppLocalizations.of(context);
     return OrientationBuilder(builder: (_, orientation) {
       return Scaffold(
-        backgroundColor: Resource.Colors.blue,
+        backgroundColor: ApTheme.of(context).blue,
         resizeToAvoidBottomPadding: orientation == Orientation.portrait,
         body: Container(
           alignment: Alignment(0, 0),
@@ -159,7 +159,7 @@ class LoginPageState extends State<LoginPage>
                   ),
                   child: Checkbox(
                     activeColor: Colors.white,
-                    checkColor: Color(0xff2574ff),
+                    checkColor: ApTheme.of(context).blue,
                     value: isAutoLogin,
                     onChanged: _onAutoLoginChanged,
                   ),
@@ -179,7 +179,7 @@ class LoginPageState extends State<LoginPage>
                   ),
                   child: Checkbox(
                     activeColor: Colors.white,
-                    checkColor: Color(0xff2574ff),
+                    checkColor: ApTheme.of(context).blue,
                     value: isRememberPassword,
                     onChanged: _onRememberPasswordChanged,
                   ),
@@ -209,7 +209,7 @@ class LoginPageState extends State<LoginPage>
           color: Colors.white,
           child: Text(
             app.login,
-            style: TextStyle(color: Resource.Colors.blue, fontSize: 18.0),
+            style: TextStyle(color: ApTheme.of(context).blue, fontSize: 18.0),
           ),
         ),
       ),
@@ -260,7 +260,7 @@ class LoginPageState extends State<LoginPage>
             "v${packageInfo.version}\n"
             "${app.updateNoteContent}",
             textAlign: TextAlign.center,
-            style: TextStyle(color: Resource.Colors.grey),
+            style: TextStyle(color: ApTheme.of(context).grey),
           ),
           actionText: app.iKnow,
           actionFunction: () =>
@@ -310,7 +310,9 @@ class LoginPageState extends State<LoginPage>
               textAlign: TextAlign.center,
               text: TextSpan(
                   style: TextStyle(
-                      color: Resource.Colors.grey, height: 1.3, fontSize: 16.0),
+                      color: ApTheme.of(context).grey,
+                      height: 1.3,
+                      fontSize: 16.0),
                   children: [
                     TextSpan(
                       text:
@@ -339,7 +341,7 @@ class LoginPageState extends State<LoginPage>
                   textAlign: TextAlign.center,
                   text: TextSpan(
                       style: TextStyle(
-                          color: Resource.Colors.grey,
+                          color: ApTheme.of(context).grey,
                           height: 1.3,
                           fontSize: 16.0),
                       children: [
