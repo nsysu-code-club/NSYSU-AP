@@ -28,8 +28,7 @@ class LoginPage extends StatefulWidget {
   LoginPageState createState() => new LoginPageState();
 }
 
-class LoginPageState extends State<LoginPage>
-    with SingleTickerProviderStateMixin {
+class LoginPageState extends State<LoginPage> {
   AppLocalizations app;
   SharedPreferences prefs;
 
@@ -66,27 +65,29 @@ class LoginPageState extends State<LoginPage>
   @override
   Widget build(BuildContext context) {
     app = AppLocalizations.of(context);
-    return OrientationBuilder(builder: (_, orientation) {
-      return Scaffold(
-        backgroundColor: ApTheme.of(context).blue,
-        resizeToAvoidBottomPadding: orientation == Orientation.portrait,
-        body: Container(
-          alignment: Alignment(0, 0),
-          padding: EdgeInsets.symmetric(horizontal: 30.0),
-          child: orientation == Orientation.portrait
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  mainAxisSize: MainAxisSize.min,
-                  children: _renderContent(orientation),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: _renderContent(orientation),
-                ),
-        ),
-      );
-    });
+    return OrientationBuilder(
+      builder: (_, orientation) {
+        return Scaffold(
+          backgroundColor: ApTheme.of(context).blue,
+          resizeToAvoidBottomPadding: orientation == Orientation.portrait,
+          body: Container(
+            alignment: Alignment(0, 0),
+            padding: EdgeInsets.symmetric(horizontal: 30.0),
+            child: orientation == Orientation.portrait
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisSize: MainAxisSize.min,
+                    children: _renderContent(orientation),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: _renderContent(orientation),
+                  ),
+          ),
+        );
+      },
+    );
   }
 
   _renderContent(Orientation orientation) {
