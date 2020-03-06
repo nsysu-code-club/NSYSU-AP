@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:ap_common/resources/ap_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -9,7 +10,6 @@ import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/news.dart';
 import 'package:nsysu_ap/models/user_info.dart';
 import 'package:nsysu_ap/pages/score_page.dart';
-import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';
@@ -110,7 +110,7 @@ class HomePageState extends State<HomePage> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontSize: 20.0,
-                      color: Resource.Colors.grey,
+                      color: ApTheme.of(context).grey,
                       fontWeight: FontWeight.w500),
                 ),
               ),
@@ -142,13 +142,14 @@ class HomePageState extends State<HomePage> {
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
-                  style: TextStyle(color: Resource.Colors.grey, fontSize: 24.0),
+                  style: TextStyle(
+                      color: ApTheme.of(context).grey, fontSize: 24.0),
                   children: [
                     TextSpan(
                         text:
                             "${newsList.length >= 10 && _currentNewsIndex < 9 ? "0" : ""}"
                             "${_currentNewsIndex + 1}",
-                        style: TextStyle(color: Resource.Colors.red)),
+                        style: TextStyle(color: ApTheme.of(context).red)),
                     TextSpan(text: ' / ${newsList.length}'),
                   ]),
             ),
@@ -171,7 +172,7 @@ class HomePageState extends State<HomePage> {
         child: Scaffold(
           appBar: AppBar(
             title: Text(app.appName),
-            backgroundColor: Resource.Colors.blue,
+            backgroundColor: ApTheme.of(context).blue,
             actions: <Widget>[
               IconButton(
                 icon: Icon(Icons.info),
@@ -190,9 +191,12 @@ class HomePageState extends State<HomePage> {
             );
           }),
           bottomNavigationBar: BottomNavigationBar(
-            fixedColor: Color(0xff737373),
+            fixedColor: ApTheme.of(context).bottomNavigationSelect,
+            unselectedItemColor: ApTheme.of(context).bottomNavigationSelect,
             type: BottomNavigationBarType.fixed,
-            currentIndex: _currentTabIndex,
+            selectedFontSize: 12.0,
+            unselectedFontSize: 12.0,
+            selectedIconTheme: IconThemeData(size: 24.0),
             onTap: onTabTapped,
             items: [
               BottomNavigationBarItem(
@@ -286,7 +290,7 @@ class HomePageState extends State<HomePage> {
         title: app.logout,
         contentWidget: Text(app.logoutCheck,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Resource.Colors.grey)),
+            style: TextStyle(color: ApTheme.of(context).grey)),
         leftActionText: app.cancel,
         rightActionText: app.ok,
         rightActionFunction: () {
@@ -305,7 +309,7 @@ class HomePageState extends State<HomePage> {
         title: app.newsRuleTitle,
         contentWidget: RichText(
           text: TextSpan(
-              style: TextStyle(color: Resource.Colors.grey, fontSize: 16.0),
+              style: TextStyle(color: ApTheme.of(context).grey, fontSize: 16.0),
               children: [
                 TextSpan(
                     text: '${app.newsRuleDescription1}',
