@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
+import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:ap_common/widgets/setting_page_widgets.dart';
@@ -80,7 +81,7 @@ class SettingPageState extends State<SettingPage> {
               subText: ap.courseNotifyHint,
               value: courseNotify,
               onChanged: (state) async {
-                Utils.showToast(
+                ApUtils.showToast(
                   context,
                   ap.functionNotOpen,
                 );
@@ -180,7 +181,8 @@ class SettingPageState extends State<SettingPage> {
                           Utils.launchUrl(Constants.FANS_PAGE_URL));
                 else {
                   Utils.launchUrl(Constants.FANS_PAGE_URL).catchError(
-                      (onError) => Utils.showToast(context, ap.platformError));
+                      (onError) =>
+                          ApUtils.showToast(context, ap.platformError));
                 }
                 FA.logAction('feedback', 'click');
               },
@@ -190,7 +192,7 @@ class SettingPageState extends State<SettingPage> {
               subText: ap.donateContent,
               onTap: () {
                 Utils.launchUrl("https://p.ecpay.com.tw/3D54D").catchError(
-                    (onError) => Utils.showToast(context, ap.platformError));
+                    (onError) => ApUtils.showToast(context, ap.platformError));
                 FA.logAction('donate', 'click');
               },
             ),

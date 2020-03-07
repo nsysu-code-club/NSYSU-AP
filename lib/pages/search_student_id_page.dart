@@ -1,4 +1,5 @@
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
@@ -200,7 +201,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
 
   _search() async {
     if (_name.text.isEmpty || _id.text.isEmpty) {
-      Utils.showToast(context, app.doNotEmpty);
+      ApUtils.showToast(context, app.doNotEmpty);
     } else {
       String result = await Helper.instance.getUsername(_name.text, _id.text);
       List<String> list = result.split('--');

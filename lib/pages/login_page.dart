@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_utils.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
@@ -227,7 +228,7 @@ class LoginPageState extends State<LoginPage> {
               setState(() {
                 _username.text = username;
               });
-              Utils.showToast(context, app.firstLoginHint);
+              ApUtils.showToast(context, app.firstLoginHint);
             }
           },
           child: Text(
@@ -424,7 +425,7 @@ class LoginPageState extends State<LoginPage> {
 
   _login() async {
     if (_username.text.isEmpty || _password.text.isEmpty) {
-      Utils.showToast(context, app.doNotEmpty);
+      ApUtils.showToast(context, app.doNotEmpty);
     } else {
       showDialog(
           context: context,
@@ -444,7 +445,7 @@ class LoginPageState extends State<LoginPage> {
         ShareDataWidget.of(context).data.password = _password.text;
         if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
         if (response == 403) {
-          Utils.showToast(context, app.loginFail);
+          ApUtils.showToast(context, app.loginFail);
         } else if (Platform.isAndroid || Platform.isIOS) {
           prefs.setString(Constants.PREF_USERNAME, _username.text);
           if (isRememberPassword) {
@@ -462,7 +463,7 @@ class LoginPageState extends State<LoginPage> {
           _login();
           setState(() {});
         } else {
-          Utils.showToast(context, app.timeoutMessage);
+          ApUtils.showToast(context, app.timeoutMessage);
         }
       });
     }

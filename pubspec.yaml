@@ -30,7 +30,6 @@ dependencies:
   webview_flutter: 0.3.19+7
 
   #third party plugin
-  toast: ^0.1.4
   encrypt: ^3.1.0
   cached_network_image: 2.0.0
   carousel_slider: ^1.2.0

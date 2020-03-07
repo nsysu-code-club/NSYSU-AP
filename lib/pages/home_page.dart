@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ap_common/pages/about_us_page.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/widgets/ap_drawer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -416,7 +417,7 @@ class HomePageState extends State<HomePage> {
                     (onError) => Utils.launchUrl(Constants.FANS_PAGE_URL));
           else {
             Utils.launchUrl(Constants.FANS_PAGE_URL).catchError(
-                (onError) => Utils.showToast(context, app.platformError));
+                (onError) => ApUtils.showToast(context, app.platformError));
           }
           FA.logAction('contact_fans_page', 'click');
         },
