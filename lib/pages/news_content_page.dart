@@ -1,8 +1,8 @@
+import 'package:ap_common/resources/ap_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/news.dart';
-import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/utils.dart';
@@ -86,7 +86,7 @@ class NewsContentPageState extends State<NewsContentPage>
     return Scaffold(
       appBar: new AppBar(
         title: new Text(app.news),
-        backgroundColor: Resource.Colors.blue,
+        backgroundColor: ApTheme.of(context).blue,
       ),
       body: OrientationBuilder(builder: (_, orientation) {
         return _homebody(orientation);
@@ -120,7 +120,7 @@ class NewsContentPageState extends State<NewsContentPage>
             textAlign: TextAlign.center,
             style: TextStyle(
                 fontSize: 20.0,
-                color: Resource.Colors.grey,
+                color: ApTheme.of(context).grey,
                 fontWeight: FontWeight.w500),
           ),
         ),
@@ -135,7 +135,7 @@ class NewsContentPageState extends State<NewsContentPage>
         child: Text(
           news.content,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16.0, color: Resource.Colors.grey),
+          style: TextStyle(fontSize: 16.0, color: ApTheme.of(context).grey),
         ),
       ),
       SizedBox(height: 16.0),
@@ -153,7 +153,7 @@ class NewsContentPageState extends State<NewsContentPage>
           FA.logAction('news_link', 'click', message: message);
         },
         padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 0.0),
-        color: Resource.Colors.yellow,
+        color: ApTheme.of(context).yellow,
         child: Icon(Icons.exit_to_app, color: Colors.white),
       )
     ];

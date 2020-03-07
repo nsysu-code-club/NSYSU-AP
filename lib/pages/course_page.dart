@@ -1,14 +1,14 @@
+import 'package:ap_common/resources/ap_theme.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/course_data.dart';
 import 'package:nsysu_ap/models/course_semester_data.dart';
-import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/utils/helper.dart';
-import 'package:nsysu_ap/widgets/default_dialog.dart';
-import 'package:nsysu_ap/widgets/hint_content.dart';
+import 'package:nsysu_ap/api/helper.dart';
+import 'package:ap_common/widgets/default_dialog.dart';
+import 'package:ap_common/widgets/hint_content.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum _State { loading, finish, error, empty, offlineEmpty }
@@ -66,7 +66,7 @@ class CoursePageState extends State<CoursePage>
     return Scaffold(
       appBar: AppBar(
         title: Text(app.course),
-        backgroundColor: Resource.Colors.blue,
+        backgroundColor: ApTheme.of(context).blue,
       ),
       body: Builder(
         builder: (builderContext) {
@@ -87,12 +87,12 @@ class CoursePageState extends State<CoursePage>
                           ? ""
                           : parser(semesterData.semester.text),
                       style: TextStyle(
-                          color: Resource.Colors.blue, fontSize: 18.0),
+                          color: ApTheme.of(context).semesterText, fontSize: 18.0),
                     ),
                     SizedBox(width: 8.0),
                     Icon(
                       Icons.keyboard_arrow_down,
-                      color: Resource.Colors.blue,
+                      color: ApTheme.of(context).semesterText,
                     )
                   ],
                 ),
@@ -101,13 +101,13 @@ class CoursePageState extends State<CoursePage>
                 child: isOffline
                     ? Text(
                         app.offlineCourse,
-                        style: TextStyle(color: Resource.Colors.grey),
+                        style: TextStyle(color: ApTheme.of(context).grey),
                       )
                     : null,
               ),
               Text(
                 app.courseClickHint,
-                style: TextStyle(color: Resource.Colors.grey),
+                style: TextStyle(color: ApTheme.of(context).grey),
               ),
               SizedBox(height: 4.0),
               Expanded(
@@ -164,14 +164,14 @@ class CoursePageState extends State<CoursePage>
                   10.0,
                 ),
               ),
-              border: Border.all(color: Colors.grey, width: 1.0),
+              border: Border.all(color: ApTheme.of(context).grey, width: 1.0),
             ),
             child: Table(
               defaultColumnWidth: FractionColumnWidth(1.0 / base),
               defaultVerticalAlignment: TableCellVerticalAlignment.middle,
               border: TableBorder.symmetric(
                 inside: BorderSide(
-                  color: Colors.grey,
+                  color: ApTheme.of(context).grey,
                   width: 0,
                 ),
               ),
@@ -244,7 +244,7 @@ class CoursePageState extends State<CoursePage>
       alignment: Alignment.center,
       child: Text(
         text ?? '',
-        style: TextStyle(color: Resource.Colors.blue, fontSize: 12.0),
+        style: TextStyle(color: ApTheme.of(context).blueText, fontSize: 12.0),
       ),
     );
   }
@@ -262,7 +262,9 @@ class CoursePageState extends State<CoursePage>
             contentWidget: RichText(
               text: TextSpan(
                   style: TextStyle(
-                      color: Resource.Colors.grey, height: 1.3, fontSize: 16.0),
+                      color: ApTheme.of(context).grey,
+                      height: 1.3,
+                      fontSize: 16.0),
                   children: [
                     TextSpan(
                         text: '${app.courseDialogName}：',
@@ -295,7 +297,7 @@ class CoursePageState extends State<CoursePage>
         alignment: Alignment.center,
         child: Text(
           (course.title[0] + course.title[1]) ?? "",
-          style: TextStyle(color: Colors.black, fontSize: 14.0),
+          style: TextStyle(color: ApTheme.of(context).greyText, fontSize: 14.0),
         ),
       ),
     );

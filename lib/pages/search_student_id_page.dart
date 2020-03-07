@@ -1,10 +1,11 @@
+import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/utils/helper.dart';
+import 'package:nsysu_ap/api/helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
-import 'package:nsysu_ap/widgets/default_dialog.dart';
+import 'package:ap_common/widgets/default_dialog.dart';
 
 class SearchStudentIdPage extends StatefulWidget {
   static const String routerName = "/searchUsername";
@@ -45,10 +46,10 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     return OrientationBuilder(
       builder: (_, orientation) {
         return Scaffold(
-          backgroundColor: Resource.Colors.blue,
+          backgroundColor: ApTheme.of(context).blue,
           resizeToAvoidBottomPadding: orientation == Orientation.portrait,
           appBar: AppBar(
-            backgroundColor: Resource.Colors.blue,
+            backgroundColor: ApTheme.of(context).blue,
             elevation: 0.0,
           ),
           body: Container(
@@ -140,7 +141,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                   ),
                   child: Checkbox(
                     activeColor: Colors.white,
-                    checkColor: Color(0xff2574ff),
+                    checkColor: ApTheme.of(context).blue,
                     value: isAutoFill,
                     onChanged: _onAutoFillChanged,
                   ),
@@ -172,7 +173,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
           color: Colors.white,
           child: Text(
             app.search,
-            style: TextStyle(color: Resource.Colors.blue, fontSize: 18.0),
+            style: TextStyle(color: ApTheme.of(context).blue, fontSize: 18.0),
           ),
         ),
       ),
@@ -200,7 +201,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
 
   _search() async {
     if (_name.text.isEmpty || _id.text.isEmpty) {
-      Utils.showToast(context, app.doNotEmpty);
+      ApUtils.showToast(context, app.doNotEmpty);
     } else {
       String result = await Helper.instance.getUsername(_name.text, _id.text);
       List<String> list = result.split('--');
@@ -217,7 +218,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
             contentWidget: RichText(
               text: TextSpan(
                 style: TextStyle(
-                  color: Resource.Colors.grey,
+                  color: ApTheme.of(context).grey,
                   height: 1.3,
                   fontSize: 16.0,
                 ),

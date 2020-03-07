@@ -1,21 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/config/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AppLocalizations {
-  static const SYSTEM = 'system';
-  static const ZH = 'zh';
-  static const EN = 'en';
-
   AppLocalizations(Locale locale) {
-    init(locale);
-  }
-
-  static init(Locale locale) {
     AppLocalizations.locale = locale;
   }
 
@@ -350,8 +337,7 @@ class AppLocalizations {
     'zh': {
       'app_name': '中山校務通',
       'update_note_title': '更新日誌',
-      'update_note_content':
-          '1.修正填寫大學生成效評量導致無法登入問題',
+      'update_note_content': '1.修正填寫大學生成效評量導致無法登入問題',
       'splash_content': '我們全都包了\n只剩下學校不包我們',
       'share': '分享',
       'teacher_confirm_title': '您是老師嗎？',
@@ -1188,23 +1174,7 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
 
   @override
   Future<AppLocalizations> load(Locale locale) async {
-    print('Load ${locale.languageCode}');
-    if (kIsWeb) {
-      return AppLocalizations(locale);
-    } else if (Platform.isAndroid || Platform.isIOS) {
-      SharedPreferences preference = await SharedPreferences.getInstance();
-      String languageCode =
-          preference.getString(Constants.PREF_LANGUAGE_CODE) ??
-              AppLocalizations.SYSTEM;
-      AppLocalizations localizations = AppLocalizations(
-          (languageCode == AppLocalizations.SYSTEM)
-              ? locale
-              : Locale(languageCode));
-      return localizations;
-    } else {
-      //TODO if other platform can use SharedPreferences, need update.
-      return AppLocalizations(locale);
-    }
+    return AppLocalizations(locale);
   }
 
   @override

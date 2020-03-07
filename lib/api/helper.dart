@@ -14,8 +14,8 @@ import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/models/user_info.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
-import 'app_localizations.dart';
-import 'firebase_analytics_utils.dart';
+import '../utils/app_localizations.dart';
+import '../utils/firebase_analytics_utils.dart';
 
 const HOST = "nsysu-ap.rainvisitor.me";
 const PORT = '8443';

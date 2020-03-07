@@ -1,38 +1,34 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:ap_common/pages/about_us_page.dart';
+import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common/widgets/ap_drawer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/news.dart';
-import 'package:nsysu_ap/models/user_info.dart';
+import 'package:ap_common/models/user_info.dart';
 import 'package:nsysu_ap/pages/score_page.dart';
-import 'package:nsysu_ap/res/colors.dart' as Resource;
+import 'package:nsysu_ap/pages/setting_page.dart';
+import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/utils/helper.dart';
+import 'package:nsysu_ap/api/helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
-import 'package:nsysu_ap/widgets/drawer_body.dart';
-import 'package:nsysu_ap/widgets/hint_content.dart';
-import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
+import 'package:ap_common/widgets/hint_content.dart';
+import 'package:nsysu_ap/widgets/share_data_widget.dart';
+import 'package:ap_common/widgets/yes_no_dialog.dart';
 
 import 'admission_guide_page.dart';
 import 'course_page.dart';
+import 'graduation_report_page.dart';
 import 'news_content_page.dart';
 
 enum _State { loading, finish, error, empty, offline }
-
-class HomePageRoute extends MaterialPageRoute {
-  HomePageRoute() : super(builder: (BuildContext context) => new HomePage());
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    return new FadeTransition(opacity: animation, child: new HomePage());
-  }
-}
 
 class HomePage extends StatefulWidget {
   static const String routerName = "/home";
@@ -53,12 +49,18 @@ class HomePageState extends State<HomePage> {
 
   CarouselSlider cardSlider;
 
+  bool isStudyExpanded = false;
+
+  TextStyle get _defaultStyle => TextStyle(
+        color: ApTheme.of(context).grey,
+        fontSize: 16.0,
+      );
+
   @override
   void initState() {
     super.initState();
     FA.setCurrentScreen("HomePage", "home_page.dart");
     _getAllNews();
-    _getUserInfo();
   }
 
   @override
@@ -110,7 +112,7 @@ class HomePageState extends State<HomePage> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontSize: 20.0,
-                      color: Resource.Colors.grey,
+                      color: ApTheme.of(context).grey,
                       fontWeight: FontWeight.w500),
                 ),
               ),
@@ -142,13 +144,14 @@ class HomePageState extends State<HomePage> {
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
-                  style: TextStyle(color: Resource.Colors.grey, fontSize: 24.0),
+                  style: TextStyle(
+                      color: ApTheme.of(context).grey, fontSize: 24.0),
                   children: [
                     TextSpan(
                         text:
                             "${newsList.length >= 10 && _currentNewsIndex < 9 ? "0" : ""}"
                             "${_currentNewsIndex + 1}",
-                        style: TextStyle(color: Resource.Colors.red)),
+                        style: TextStyle(color: ApTheme.of(context).red)),
                     TextSpan(text: ' / ${newsList.length}'),
                   ]),
             ),
@@ -171,7 +174,7 @@ class HomePageState extends State<HomePage> {
         child: Scaffold(
           appBar: AppBar(
             title: Text(app.appName),
-            backgroundColor: Resource.Colors.blue,
+            backgroundColor: ApTheme.of(context).blue,
             actions: <Widget>[
               IconButton(
                 icon: Icon(Icons.info),
@@ -179,7 +182,98 @@ class HomePageState extends State<HomePage> {
               )
             ],
           ),
-          drawer: DrawerBody(userInfo: userInfo),
+          drawer: ApDrawer(
+            builder: () async {
+              var userInfo = await Helper.instance.getUserInfo();
+              FA.setUserProperty('department', userInfo.department);
+              FA.logUserInfo(userInfo.department);
+              FA.setUserId(userInfo.studentId);
+              return UserInfo(
+                id: userInfo.studentId,
+                name: userInfo.studentNameCht,
+              );
+            },
+            widgets: <Widget>[
+              ExpansionTile(
+                initiallyExpanded: isStudyExpanded,
+                onExpansionChanged: (bool) {
+                  setState(() => isStudyExpanded = bool);
+                },
+                leading: Icon(
+                  Icons.collections_bookmark,
+                  color: isStudyExpanded
+                      ? ApTheme.of(context).blueAccent
+                      : ApTheme.of(context).grey,
+                ),
+                title: Text(app.courseInfo, style: _defaultStyle),
+                children: <Widget>[
+                  DrawerSubItem(
+                    icon: Icons.class_,
+                    title: app.course,
+                    page: CoursePage(),
+                  ),
+                  DrawerSubItem(
+                    icon: Icons.assignment,
+                    title: app.score,
+                    page: ScorePage(),
+                  ),
+                ],
+              ),
+              DrawerItem(
+                icon: Icons.school,
+                title: app.graduationCheckChecklist,
+                page: GraduationReportPage(
+                  username: ShareDataWidget.of(context).data.username,
+                  password: ShareDataWidget.of(context).data.password,
+                ),
+              ),
+              DrawerItem(
+                icon: Icons.monetization_on,
+                title: app.tuitionAndFees,
+                page: TuitionAndFeesPage(
+                  username: ShareDataWidget.of(context).data.username,
+                  password: ShareDataWidget.of(context).data.password,
+                ),
+              ),
+              DrawerItem(
+                  icon: Icons.accessibility_new,
+                  title: app.admissionGuide,
+                  page: AdmissionGuidePage()),
+              DrawerItem(
+                icon: Icons.face,
+                title: app.about,
+                page: AboutUsPage(
+                  assetImage: 'assets/images/nsysu.webp',
+                  githubName: 'NKUST-ITC',
+                  email: 'abc873693@gmail.com',
+                  appLicense: app.aboutOpenSourceContent,
+                  fbFanPageId: '735951703168873',
+                  fbFanPageUrl: 'https://www.facebook.com/NKUST.ITC/',
+                  githubUrl: 'https://github.com/NKUST-ITC',
+                ),
+              ),
+              DrawerItem(
+                icon: Icons.settings,
+                title: app.settings,
+                page: SettingPage(),
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.power_settings_new,
+                  color: ApTheme.of(context).grey,
+                ),
+                onTap: () {
+                  Navigator.popUntil(
+                      context, ModalRoute.withName(Navigator.defaultRouteName));
+                },
+                title: Text(
+                  app.logout,
+                  style: _defaultStyle,
+                ),
+              ),
+            ],
+            onTapHeader: () {},
+          ),
           body: OrientationBuilder(builder: (_, orientation) {
             return Container(
               padding: EdgeInsets.symmetric(
@@ -190,9 +284,12 @@ class HomePageState extends State<HomePage> {
             );
           }),
           bottomNavigationBar: BottomNavigationBar(
-            fixedColor: Color(0xff737373),
+            fixedColor: ApTheme.of(context).bottomNavigationSelect,
+            unselectedItemColor: ApTheme.of(context).bottomNavigationSelect,
             type: BottomNavigationBarType.fixed,
-            currentIndex: _currentTabIndex,
+            selectedFontSize: 12.0,
+            unselectedFontSize: 12.0,
+            selectedIconTheme: IconThemeData(size: 24.0),
             onTap: onTabTapped,
             items: [
               BottomNavigationBarItem(
@@ -266,19 +363,6 @@ class HomePageState extends State<HomePage> {
     });
   }
 
-  _getUserInfo() async {
-    Helper.instance.getUserInfo().then((response) {
-      if (this.mounted) {
-        setState(() {
-          userInfo = response;
-        });
-        FA.setUserProperty('department', userInfo.department);
-        FA.logUserInfo(userInfo.department);
-        FA.setUserId(userInfo.studentId);
-      }
-    }).catchError((e) {});
-  }
-
   void _showLogoutDialog() {
     showDialog(
       context: context,
@@ -286,7 +370,7 @@ class HomePageState extends State<HomePage> {
         title: app.logout,
         contentWidget: Text(app.logoutCheck,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Resource.Colors.grey)),
+            style: TextStyle(color: ApTheme.of(context).grey)),
         leftActionText: app.cancel,
         rightActionText: app.ok,
         rightActionFunction: () {
@@ -305,7 +389,7 @@ class HomePageState extends State<HomePage> {
         title: app.newsRuleTitle,
         contentWidget: RichText(
           text: TextSpan(
-              style: TextStyle(color: Resource.Colors.grey, fontSize: 16.0),
+              style: TextStyle(color: ApTheme.of(context).grey, fontSize: 16.0),
               children: [
                 TextSpan(
                     text: '${app.newsRuleDescription1}',
@@ -333,7 +417,7 @@ class HomePageState extends State<HomePage> {
                     (onError) => Utils.launchUrl(Constants.FANS_PAGE_URL));
           else {
             Utils.launchUrl(Constants.FANS_PAGE_URL).catchError(
-                (onError) => Utils.showToast(context, app.platformError));
+                (onError) => ApUtils.showToast(context, app.platformError));
           }
           FA.logAction('contact_fans_page', 'click');
         },

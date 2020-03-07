@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ap_common/utils/preferences.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,8 @@ import 'package:nsysu_ap/config/constants.dart';
 import 'app.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Preferences.init();
   if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
     Crashlytics.instance.enableInDevMode = Constants.isInDebugMode;
 
