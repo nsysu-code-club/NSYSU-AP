@@ -29,7 +29,7 @@ class MyApp extends StatefulWidget {
   MyAppState createState() => MyAppState();
 }
 
-class MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   FirebaseAnalytics _analytics;
   FirebaseMessaging _firebaseMessaging;
   Brightness brightness = Brightness.light;
@@ -49,7 +49,20 @@ class MyAppState extends State<MyApp> {
     }
     themeMode = ThemeMode
         .values[Preferences.getInt(Constants.PREF_THEME_MODE_INDEX, 0)];
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    setState(() {});
+    super.didChangePlatformBrightness();
   }
 
   @override
