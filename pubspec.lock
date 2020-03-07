@@ -4,9 +4,11 @@ packages:
   ap_common:
     dependency: "direct main"
     description:
-      path: "../../GitHub-NKUST-ITC/ap_common"
-      relative: true
-    source: path
+      path: "."
+      ref: "v0.0.1"
+      resolved-ref: "8df79f7d591ebce29674119ac2aa508873898c9d"
+      url: "https://github.com/abc873693/ap_common"
+    source: git
     version: "0.0.1"
   archive:
     dependency: transitive
