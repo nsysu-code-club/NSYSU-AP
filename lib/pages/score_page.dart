@@ -1,11 +1,11 @@
+import 'package:ap_common/resources/ap_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/score_data.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
-import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';
-import 'package:nsysu_ap/widgets/hint_content.dart';
+import 'package:ap_common/widgets/hint_content.dart';
 
 enum _State { loading, finish, error, empty, offlineEmpty }
 
@@ -57,7 +57,7 @@ class ScorePageState extends State<ScorePage>
       appBar: AppBar(
         // Title
         title: Text(app.score),
-        backgroundColor: Resource.Colors.blue,
+        backgroundColor: ApTheme.of(context).blue,
       ),
       body: Container(
         child: Flex(
@@ -79,12 +79,12 @@ class ScorePageState extends State<ScorePage>
                             ? ''
                             : scoreSemesterData.year.text,
                         style: TextStyle(
-                            color: Resource.Colors.blue, fontSize: 18.0),
+                            color: ApTheme.of(context).blueText, fontSize: 18.0),
                       ),
                       SizedBox(width: 8.0),
                       Icon(
                         Icons.keyboard_arrow_down,
-                        color: Resource.Colors.blue,
+                        color: ApTheme.of(context).blueText,
                       )
                     ],
                   ),
@@ -100,12 +100,12 @@ class ScorePageState extends State<ScorePage>
                             ? ""
                             : scoreSemesterData.semester.text,
                         style: TextStyle(
-                            color: Resource.Colors.blue, fontSize: 18.0),
+                            color: ApTheme.of(context).blueText, fontSize: 18.0),
                       ),
                       SizedBox(width: 8.0),
                       Icon(
                         Icons.keyboard_arrow_down,
-                        color: Resource.Colors.blue,
+                        color: ApTheme.of(context).blueText,
                       )
                     ],
                   ),
@@ -116,7 +116,7 @@ class ScorePageState extends State<ScorePage>
               child: isOffline
                   ? Text(
                       app.offlineScore,
-                      style: TextStyle(color: Resource.Colors.grey),
+                      style: TextStyle(color: ApTheme.of(context).grey),
                     )
                   : null,
             ),
@@ -176,7 +176,8 @@ class ScorePageState extends State<ScorePage>
                         10.0,
                       ),
                     ),
-                    border: Border.all(color: Colors.grey, width: 1.5),
+                    border:
+                        Border.all(color: ApTheme.of(context).grey, width: 1.5),
                   ),
                   child: Table(
                     columnWidths: const <int, TableColumnWidth>{
@@ -187,7 +188,7 @@ class ScorePageState extends State<ScorePage>
                     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                     border: TableBorder.symmetric(
                       inside: BorderSide(
-                        color: Colors.grey,
+                        color: ApTheme.of(context).grey,
                         width: 0.5,
                       ),
                     ),
@@ -206,7 +207,8 @@ class ScorePageState extends State<ScorePage>
                         10.0,
                       ),
                     ),
-                    border: Border.all(color: Colors.grey, width: 1.5),
+                    border:
+                        Border.all(color: ApTheme.of(context).grey, width: 1.5),
                   ),
                   child: Column(
                     children: <Widget>[
@@ -233,11 +235,11 @@ class ScorePageState extends State<ScorePage>
   }
 
   _textBlueStyle() {
-    return TextStyle(color: Resource.Colors.blue, fontSize: 16.0);
+    return TextStyle(color: ApTheme.of(context).blueText, fontSize: 16.0);
   }
 
   _textStyle() {
-    return TextStyle(color: Colors.black, fontSize: 14.0);
+    return TextStyle(fontSize: 14.0);
   }
 
   _scoreTitle() => TableRow(
@@ -256,7 +258,7 @@ class ScorePageState extends State<ScorePage>
         border: Border(
           top: isTop
               ? BorderSide.none
-              : BorderSide(color: Colors.grey, width: 0.5),
+              : BorderSide(color: ApTheme.of(context).grey, width: 0.5),
         ),
       ),
       child: Text(

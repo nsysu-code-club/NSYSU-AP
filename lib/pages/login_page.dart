@@ -1,21 +1,22 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_utils.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/search_student_id_page.dart';
-import 'package:nsysu_ap/res/colors.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
-import 'package:nsysu_ap/widgets/default_dialog.dart';
-import 'package:nsysu_ap/widgets/progress_dialog.dart';
+import 'package:ap_common/widgets/default_dialog.dart';
+import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
-import 'package:nsysu_ap/widgets/yes_no_dialog.dart';
+import 'package:ap_common/widgets/yes_no_dialog.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,8 +29,7 @@ class LoginPage extends StatefulWidget {
   LoginPageState createState() => new LoginPageState();
 }
 
-class LoginPageState extends State<LoginPage>
-    with SingleTickerProviderStateMixin {
+class LoginPageState extends State<LoginPage> {
   AppLocalizations app;
   SharedPreferences prefs;
 
@@ -66,27 +66,29 @@ class LoginPageState extends State<LoginPage>
   @override
   Widget build(BuildContext context) {
     app = AppLocalizations.of(context);
-    return OrientationBuilder(builder: (_, orientation) {
-      return Scaffold(
-        backgroundColor: Resource.Colors.blue,
-        resizeToAvoidBottomPadding: orientation == Orientation.portrait,
-        body: Container(
-          alignment: Alignment(0, 0),
-          padding: EdgeInsets.symmetric(horizontal: 30.0),
-          child: orientation == Orientation.portrait
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  mainAxisSize: MainAxisSize.min,
-                  children: _renderContent(orientation),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: _renderContent(orientation),
-                ),
-        ),
-      );
-    });
+    return OrientationBuilder(
+      builder: (_, orientation) {
+        return Scaffold(
+          backgroundColor: ApTheme.of(context).blue,
+          resizeToAvoidBottomPadding: orientation == Orientation.portrait,
+          body: Container(
+            alignment: Alignment(0, 0),
+            padding: EdgeInsets.symmetric(horizontal: 30.0),
+            child: orientation == Orientation.portrait
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisSize: MainAxisSize.min,
+                    children: _renderContent(orientation),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: _renderContent(orientation),
+                  ),
+          ),
+        );
+      },
+    );
   }
 
   _renderContent(Orientation orientation) {
@@ -159,7 +161,7 @@ class LoginPageState extends State<LoginPage>
                   ),
                   child: Checkbox(
                     activeColor: Colors.white,
-                    checkColor: Color(0xff2574ff),
+                    checkColor: ApTheme.of(context).blue,
                     value: isAutoLogin,
                     onChanged: _onAutoLoginChanged,
                   ),
@@ -179,7 +181,7 @@ class LoginPageState extends State<LoginPage>
                   ),
                   child: Checkbox(
                     activeColor: Colors.white,
-                    checkColor: Color(0xff2574ff),
+                    checkColor: ApTheme.of(context).blue,
                     value: isRememberPassword,
                     onChanged: _onRememberPasswordChanged,
                   ),
@@ -209,7 +211,7 @@ class LoginPageState extends State<LoginPage>
           color: Colors.white,
           child: Text(
             app.login,
-            style: TextStyle(color: Resource.Colors.blue, fontSize: 18.0),
+            style: TextStyle(color: ApTheme.of(context).blue, fontSize: 18.0),
           ),
         ),
       ),
@@ -226,7 +228,7 @@ class LoginPageState extends State<LoginPage>
               setState(() {
                 _username.text = username;
               });
-              Utils.showToast(context, app.firstLoginHint);
+              ApUtils.showToast(context, app.firstLoginHint);
             }
           },
           child: Text(
@@ -260,7 +262,7 @@ class LoginPageState extends State<LoginPage>
             "v${packageInfo.version}\n"
             "${app.updateNoteContent}",
             textAlign: TextAlign.center,
-            style: TextStyle(color: Resource.Colors.grey),
+            style: TextStyle(color: ApTheme.of(context).grey),
           ),
           actionText: app.iKnow,
           actionFunction: () =>
@@ -310,7 +312,9 @@ class LoginPageState extends State<LoginPage>
               textAlign: TextAlign.center,
               text: TextSpan(
                   style: TextStyle(
-                      color: Resource.Colors.grey, height: 1.3, fontSize: 16.0),
+                      color: ApTheme.of(context).grey,
+                      height: 1.3,
+                      fontSize: 16.0),
                   children: [
                     TextSpan(
                       text:
@@ -339,7 +343,7 @@ class LoginPageState extends State<LoginPage>
                   textAlign: TextAlign.center,
                   text: TextSpan(
                       style: TextStyle(
-                          color: Resource.Colors.grey,
+                          color: ApTheme.of(context).grey,
                           height: 1.3,
                           fontSize: 16.0),
                       children: [
@@ -421,7 +425,7 @@ class LoginPageState extends State<LoginPage>
 
   _login() async {
     if (_username.text.isEmpty || _password.text.isEmpty) {
-      Utils.showToast(context, app.doNotEmpty);
+      ApUtils.showToast(context, app.doNotEmpty);
     } else {
       showDialog(
           context: context,
@@ -441,7 +445,7 @@ class LoginPageState extends State<LoginPage>
         ShareDataWidget.of(context).data.password = _password.text;
         if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
         if (response == 403) {
-          Utils.showToast(context, app.loginFail);
+          ApUtils.showToast(context, app.loginFail);
         } else if (Platform.isAndroid || Platform.isIOS) {
           prefs.setString(Constants.PREF_USERNAME, _username.text);
           if (isRememberPassword) {
@@ -459,7 +463,7 @@ class LoginPageState extends State<LoginPage>
           _login();
           setState(() {});
         } else {
-          Utils.showToast(context, app.timeoutMessage);
+          ApUtils.showToast(context, app.timeoutMessage);
         }
       });
     }

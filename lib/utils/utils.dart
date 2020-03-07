@@ -9,19 +9,9 @@ import 'package:nsysu_ap/models/course_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sprintf/sprintf.dart';
-import 'package:toast/toast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Utils {
-  static void showToast(BuildContext context, String message) {
-    Toast.show(
-      message,
-      context,
-      duration: Toast.LENGTH_LONG,
-      gravity: Toast.BOTTOM,
-    );
-  }
-
   static String getPlatformUpdateContent(AppLocalizations app) {
     if (Platform.isAndroid)
       return app.updateAndroidContent;

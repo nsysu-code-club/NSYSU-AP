@@ -1,11 +1,11 @@
+import 'package:ap_common/resources/ap_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
-import 'package:nsysu_ap/res/resource.dart' as Resource;
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';
-import 'package:nsysu_ap/widgets/default_dialog.dart';
-import 'package:nsysu_ap/widgets/hint_content.dart';
+import 'package:ap_common/widgets/default_dialog.dart';
+import 'package:ap_common/widgets/hint_content.dart';
 
 enum _State { loading, finish, error, empty, offlineEmpty }
 
@@ -60,7 +60,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(app.graduationCheckChecklist),
-        backgroundColor: Resource.Colors.blue,
+        backgroundColor: ApTheme.of(context).blue,
       ),
       body: Container(
         child: Flex(
@@ -72,7 +72,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
               child: isOffline
                   ? Text(
                       app.offlineScore,
-                      style: TextStyle(color: Resource.Colors.grey),
+                      style: TextStyle(color: ApTheme.of(context).grey),
                     )
                   : null,
             ),
@@ -127,7 +127,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
                 Text(
                   app.graduationCheckChecklistHint,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[700], fontSize: 16.0),
+                  style: TextStyle(
+                      color: ApTheme.of(context).greyText, fontSize: 16.0),
                 ),
                 SizedBox(height: 8.0),
                 Text(
@@ -139,7 +140,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                     ? Text(
                         app.noData,
                         style: TextStyle(
-                            color: Resource.Colors.grey, fontSize: 14.0),
+                            color: ApTheme.of(context).grey, fontSize: 14.0),
                       )
                     : BorderContainer(
                         child: Table(
@@ -152,7 +153,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                               TableCellVerticalAlignment.middle,
                           border: TableBorder.symmetric(
                             inside: BorderSide(
-                              color: Colors.grey,
+                              color: ApTheme.of(context).grey,
                               width: 0.5,
                             ),
                           ),
@@ -181,7 +182,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   graduationReportData.missingRequiredCoursesCredit,
                   style: _textBlueStyle(),
                 ),
-                Divider(color: Colors.grey),
+                Divider(color: ApTheme.of(context).grey),
                 Text(
                   app.generalEducationCourse,
                   textAlign: TextAlign.start,
@@ -191,7 +192,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   graduationReportData.generalEducationCourse.length != 0
                       ? app.courseClickHint
                       : app.noData,
-                  style: TextStyle(color: Resource.Colors.grey, fontSize: 14.0),
+                  style: TextStyle(
+                      color: ApTheme.of(context).grey, fontSize: 14.0),
                 ),
                 for (var generalEducationCourse
                     in graduationReportData.generalEducationCourse) ...[
@@ -210,7 +212,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                           TableCellVerticalAlignment.middle,
                       border: TableBorder.symmetric(
                         inside: BorderSide(
-                          color: Colors.grey,
+                          color: ApTheme.of(context).grey,
                           width: 0.5,
                         ),
                       ),
@@ -242,7 +244,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                         style: _textBlueStyle(),
                       )
                     : SizedBox(),
-                Divider(color: Colors.grey),
+                Divider(color: ApTheme.of(context).grey),
                 Text(
                   app.otherEducationsCourse,
                   textAlign: TextAlign.start,
@@ -258,7 +260,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                     border: TableBorder.symmetric(
                       inside: BorderSide(
-                        color: Colors.grey,
+                        color: ApTheme.of(context).grey,
                         width: 0.5,
                       ),
                     ),
@@ -284,10 +286,10 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   graduationReportData.otherEducationsCourseCredit,
                   style: _textBlueStyle(),
                 ),
-                Divider(color: Resource.Colors.grey),
+                Divider(color: ApTheme.of(context).grey),
                 Text(
                   app.graduationCheckChecklistSummary,
-                  style: TextStyle(color: Colors.black, fontSize: 16.0),
+                  style: TextStyle(fontSize: 16.0),
                 ),
                 SizedBox(height: 4),
                 Text(
@@ -304,11 +306,11 @@ class GraduationReportPageState extends State<GraduationReportPage>
   }
 
   _textBlueStyle() {
-    return TextStyle(color: Resource.Colors.blue, fontSize: 16.0);
+    return TextStyle(color: ApTheme.of(context).blueText, fontSize: 16.0);
   }
 
   _textStyle() {
-    return TextStyle(color: Colors.black, fontSize: 14.0);
+    return TextStyle(fontSize: 14.0);
   }
 
   Widget _scoreTextBorder(String text, bool isTitle) {
@@ -351,7 +353,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
         contentWidget: RichText(
           text: TextSpan(
               style: TextStyle(
-                  color: Resource.Colors.grey, height: 1.3, fontSize: 16.0),
+                  color: ApTheme.of(context).grey, height: 1.3, fontSize: 16.0),
               children: [
                 TextSpan(
                     text: '${app.subject}：',
@@ -395,7 +397,7 @@ class BorderContainer extends StatelessWidget {
             10.0,
           ),
         ),
-        border: Border.all(color: Colors.grey, width: 1.5),
+        border: Border.all(color: ApTheme.of(context).grey, width: 1.5),
       ),
       child: child,
     );
