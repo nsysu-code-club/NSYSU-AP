@@ -129,7 +129,6 @@ class SettingPageState extends State<SettingPage> {
                         AppLocalizationsDelegate().load(locale);
                         ApLocalizationsDelegate().load(locale);
                       });
-                      Navigator.of(context).pop();
                     },
                   ),
                 );
@@ -155,7 +154,6 @@ class SettingPageState extends State<SettingPage> {
                           .update(ThemeMode.values[index]);
                       Preferences.setInt(
                           Constants.PREF_THEME_MODE_INDEX, index);
-                      Navigator.of(context).pop();
                     },
                   ),
                 );
