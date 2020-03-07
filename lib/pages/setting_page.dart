@@ -5,7 +5,7 @@ import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
-import 'package:ap_common/widgets/setting_widget.dart';
+import 'package:ap_common/widgets/setting_page_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';

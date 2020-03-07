@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:ap_common/pages/about_us_page.dart';
 import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/widgets/drawer_body.dart';
+import 'package:ap_common/widgets/ap_drawer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
