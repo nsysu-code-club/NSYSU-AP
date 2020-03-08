@@ -1,16 +1,17 @@
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:ap_common/config/ApConstant.dart';
 import 'package:ap_common/pages/about_us_page.dart';
+import 'package:ap_common/pages/news/news_content_page.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/widgets/ap_drawer.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ap_common/widgets/ap_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
-import 'package:nsysu_ap/models/news.dart';
+import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:nsysu_ap/pages/score_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
@@ -26,7 +27,6 @@ import 'package:ap_common/widgets/yes_no_dialog.dart';
 import 'admission_guide_page.dart';
 import 'course_page.dart';
 import 'graduation_report_page.dart';
-import 'news_content_page.dart';
 
 enum _State { loading, finish, error, empty, offline }
 
@@ -73,17 +73,19 @@ class HomePageState extends State<HomePage> {
       margin: EdgeInsets.all(5.0),
       child: GestureDetector(
         onTap: () {
-          Navigator.of(context).push(NewsContentPageRoute(news));
-          String message = news.content.length > 12
-              ? news.content
-              : news.content.substring(0, 12);
+          ApUtils.pushCupertinoStyle(
+            context,
+            NewsContentPage(news: news),
+          );
+          String message = news.description.length > 12
+              ? news.description
+              : news.description.substring(0, 12);
           FA.logAction('news_image', 'click', message: message);
         },
         child: Hero(
           tag: news.hashCode,
-          child: CachedNetworkImage(
-            imageUrl: news.image,
-            errorWidget: (context, url, error) => Icon(Icons.error),
+          child: ApNetworkImage(
+            url: news.imageUrl,
           ),
         ),
       ),
@@ -104,7 +106,7 @@ class HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Hero(
-              tag: Constants.TAG_NEWS_TITLE,
+              tag: ApConstants.TAG_NEWS_TITLE,
               child: Material(
                 color: Colors.transparent,
                 child: Text(
@@ -118,7 +120,7 @@ class HomePageState extends State<HomePage> {
               ),
             ),
             Hero(
-              tag: Constants.TAG_NEWS_ICON,
+              tag: ApConstants.TAG_NEWS_ICON,
               child: Icon(Icons.arrow_drop_down),
             ),
             cardSlider = CarouselSlider(
@@ -340,21 +342,15 @@ class HomePageState extends State<HomePage> {
   }
 
   _getAllNews() async {
-    final RemoteConfig remoteConfig = await RemoteConfig.instance;
     try {
+      RemoteConfig remoteConfig = await RemoteConfig.instance;
       await remoteConfig.fetch(expiration: const Duration(seconds: 10));
       await remoteConfig.activateFetched();
-    } on FetchThrottledException catch (exception) {
-      setState(() {
-        state = _State.error;
-      });
+      String rawString = remoteConfig.getString(Constants.NEWS_DATA);
+      newsList = NewsResponse.fromRawJson(rawString).data;
     } catch (exception) {
-      setState(() {
-        state = _State.error;
-      });
+      newsList = await Helper.instance.getNews();
     }
-    String newsString = remoteConfig.getString(Constants.NEWS_DATA);
-    newsList = News.toList(jsonDecode(newsString));
     newsList.sort((a, b) {
       return b.weight.compareTo(a.weight);
     });
