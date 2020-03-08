@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ap_common/models/course_data.dart';
+import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:big5/big5.dart';
 import 'package:crypto/crypto.dart';
@@ -683,5 +684,13 @@ class Helper {
 //    File file = new File('$dir/$filename');
 //    await file.writeAsBytes(bytes);
     return response.bodyBytes;
+  }
+
+  Future<List<News>> getNews() async {
+    var response = await http.get(
+      'https://raw.githubusercontent.com/abc873693/NSYSU-AP/master/assets/news_data.json',
+      headers: {'Cookie': tsfCookie},
+    );
+    return NewsResponse.fromRawJson(response.body).data;
   }
 }
