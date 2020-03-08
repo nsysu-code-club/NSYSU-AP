@@ -1,10 +1,10 @@
 import 'dart:convert';
 
+import 'package:ap_common/models/course_data.dart';
 import 'package:big5/big5.dart';
 import 'package:crypto/crypto.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
-import 'package:nsysu_ap/models/course_data.dart';
 import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/models/options.dart';
@@ -105,7 +105,8 @@ class Helper {
     //print('text =  $text');
     if (text.contains("學號碼密碼不符"))
       course = false;
-    else if (courseResponse.statusCode != 302 && courseResponse.statusCode != 200) throw '';
+    else if (courseResponse.statusCode != 302 &&
+        courseResponse.statusCode != 200) throw '';
     courseCookie = courseResponse.headers['set-cookie'];
     print(DateTime.now());
     if (score && course)
@@ -207,44 +208,84 @@ class Helper {
     var startTime = DateTime.now().millisecondsSinceEpoch;
     var document = parse(text, encoding: 'BIG-5');
     var trDoc = document.getElementsByTagName('tr');
-    var courseData = CourseData(
-        status: (trDoc.length == 0) ? 204 : 200,
-        messages: '',
-        courseTables: (trDoc.length == 0) ? null : CourseTables());
+    var courseData =
+        CourseData(courseTables: (trDoc.length == 0) ? null : CourseTables());
+    courseData.courseTables.timeCode = [
+      'A',
+      '1',
+      '2',
+      '3',
+      '4',
+      'B',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      'C',
+      'D',
+      'E',
+      'F'
+    ];
     //print(DateTime.now());
     for (var i = 0; i < trDoc.length; i++) {
       var tdDoc = trDoc[i].getElementsByTagName('td');
       if (i == 0) continue;
+      final title = tdDoc[4].text;
+      final instructors = tdDoc[8].text;
+      final location = Location(
+        building: '',
+        room: tdDoc[9].text,
+      );
+      String time = '';
       for (var j = 10; j < tdDoc.length; j++) {
         if (tdDoc[j].text.length > 0) {
-          for (var section in tdDoc[j].text.split('')) {
-            if (courseData.courseTables.timeCode.indexOf(section) == -1)
-              continue;
-            var course = Course(
-              title: tdDoc[4].text,
-              instructors: [tdDoc[8].text],
-              location: Location(
-                building: '',
-                room: tdDoc[9].text,
-              ),
-              date: Date(weekday: 'T', section: section),
-            );
-            if (j == 10)
-              courseData.courseTables.monday.add(course);
-            else if (j == 11)
-              courseData.courseTables.tuesday.add(course);
-            else if (j == 12)
-              courseData.courseTables.wednesday.add(course);
-            else if (j == 13)
-              courseData.courseTables.thursday.add(course);
-            else if (j == 14)
-              courseData.courseTables.friday.add(course);
-            else if (j == 15)
-              courseData.courseTables.saturday.add(course);
-            else if (j == 16) courseData.courseTables.sunday.add(course);
+          List<String> sections = tdDoc[j].text.split('');
+          if (sections.length > 0 && sections[0] != ' ') {
+            String tmp = '';
+            for (var section in sections) {
+              if (courseData.courseTables.timeCode.indexOf(section) == -1)
+                continue;
+              tmp += '$section';
+              var course = Course(
+                title: title,
+                instructors: [instructors],
+                location: location,
+                date: Date(weekday: 'T', section: section),
+              );
+              if (j == 10)
+                courseData.courseTables.monday.add(course);
+              else if (j == 11)
+                courseData.courseTables.tuesday.add(course);
+              else if (j == 12)
+                courseData.courseTables.wednesday.add(course);
+              else if (j == 13)
+                courseData.courseTables.thursday.add(course);
+              else if (j == 14)
+                courseData.courseTables.friday.add(course);
+              else if (j == 15)
+                courseData.courseTables.saturday.add(course);
+              else if (j == 16) courseData.courseTables.sunday.add(course);
+            }
+            if (tmp.isNotEmpty) {
+              time += '${trDoc[0].getElementsByTagName('td')[j].text}$tmp';
+            }
           }
         }
       }
+      courseData.courses.add(
+        CourseDetail(
+          code: tdDoc[2].text,
+          className: '${tdDoc[1].text} ${tdDoc[3].text}',
+          title: title,
+          units: tdDoc[5].text,
+          required:
+              tdDoc[7].text.length == 1 ? '${tdDoc[7].text}修' : tdDoc[7].text,
+          location: location,
+          instructors: [instructors],
+          times: time,
+        ),
+      );
     }
     if (trDoc.length != 0) {
       if (courseData.courseTables.saturday.length == 0)
