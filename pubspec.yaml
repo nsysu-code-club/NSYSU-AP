@@ -1,7 +1,7 @@
 name: nsysu_ap
 description: NSYSU AP
 
-version: 0.2.1+201
+version: 0.2.2+202
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
