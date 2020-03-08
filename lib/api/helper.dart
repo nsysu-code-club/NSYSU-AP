@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ap_common/models/course_data.dart';
+import 'package:ap_common/models/time_code.dart';
 import 'package:big5/big5.dart';
 import 'package:crypto/crypto.dart';
 import 'package:html/parser.dart';
@@ -190,7 +191,8 @@ class Helper {
     return courseSemesterData;
   }
 
-  Future<CourseData> getCourseData(String username, String semester) async {
+  Future<CourseData> getCourseData(
+      String username, TimeCodeConfig timeCodeConfig, String semester) async {
     var url = 'http://$selcrsUrl/menu4/query/stu_slt_data.asp';
     var response = await http.post(
       url,
@@ -211,23 +213,7 @@ class Helper {
     var courseData =
         CourseData(courseTables: (trDoc.length == 0) ? null : CourseTables());
     if (courseData.courseTables != null)
-      courseData.courseTables.timeCode = [
-        'A',
-        '1',
-        '2',
-        '3',
-        '4',
-        'B',
-        '5',
-        '6',
-        '7',
-        '8',
-        '9',
-        'C',
-        'D',
-        'E',
-        'F'
-      ];
+      courseData.courseTables.timeCode = timeCodeConfig.textList;
     //print(DateTime.now());
     for (var i = 0; i < trDoc.length; i++) {
       var tdDoc = trDoc[i].getElementsByTagName('td');
@@ -245,14 +231,20 @@ class Helper {
           if (sections.length > 0 && sections[0] != ' ') {
             String tmp = '';
             for (var section in sections) {
-              if (courseData.courseTables.timeCode.indexOf(section) == -1)
-                continue;
+              int index = timeCodeConfig.indexOf(section);
+              if (index == -1) continue;
+              TimeCode timeCode = timeCodeConfig.timeCodes[index];
               tmp += '$section';
               var course = Course(
                 title: title,
                 instructors: [instructors],
                 location: location,
-                date: Date(weekday: 'T', section: section),
+                date: Date(
+                  weekday: 'T',
+                  section: section,
+                  startTime: timeCode?.startTime ?? '',
+                  endTime: timeCode?.endTime ?? '',
+                ),
               );
               if (j == 10)
                 courseData.courseTables.monday.add(course);
