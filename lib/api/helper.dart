@@ -210,23 +210,24 @@ class Helper {
     var trDoc = document.getElementsByTagName('tr');
     var courseData =
         CourseData(courseTables: (trDoc.length == 0) ? null : CourseTables());
-    courseData.courseTables.timeCode = [
-      'A',
-      '1',
-      '2',
-      '3',
-      '4',
-      'B',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      'C',
-      'D',
-      'E',
-      'F'
-    ];
+    if (courseData.courseTables != null)
+      courseData.courseTables.timeCode = [
+        'A',
+        '1',
+        '2',
+        '3',
+        '4',
+        'B',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        'C',
+        'D',
+        'E',
+        'F'
+      ];
     //print(DateTime.now());
     for (var i = 0; i < trDoc.length; i++) {
       var tdDoc = trDoc[i].getElementsByTagName('td');
