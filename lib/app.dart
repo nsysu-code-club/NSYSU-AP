@@ -87,7 +87,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           onGenerateTitle: (context) => AppLocalizations.of(context).appName,
           debugShowCheckedModeBanner: false,
           routes: <String, WidgetBuilder>{
-            Navigator.defaultRouteName: (context) => LoginPage(),
+            Navigator.defaultRouteName: (context) => HomePage(),
             HomePage.routerName: (context) => HomePage(),
             CoursePage.routerName: (context) => CoursePage(),
             ScorePage.routerName: (context) => ScorePage(),

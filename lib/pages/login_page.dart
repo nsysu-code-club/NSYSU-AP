@@ -453,7 +453,7 @@ class LoginPageState extends State<LoginPage> {
                 encrypter.encrypt(_password.text, iv: Constants.iv).base64);
           }
           prefs.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
-          _navigateToFilterObject(context);
+          Navigator.of(context).pop(true);
         }
       }).catchError((e) {
         if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
