@@ -328,7 +328,7 @@ class AppLocalizations {
       'printing': 'Printing',
       'tuitionAndFeesPageDialogTitle': 'Pick method of export.',
       'courseYear': 'Year',
-      'continuingSummerEducationProgram': 'Continuing Summer\nEducation Program',
+      'continuingSummerEducationProgram': 'Continuing Summer Education Program',
       'fallSemester': 'Fall Semester',
       'springSemester': 'Spring Semester',
       'summerSemester': 'Summer Semester',
