@@ -7,6 +7,7 @@ import 'package:ap_common/utils/preferences.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/search_student_id_page.dart';
@@ -35,8 +36,8 @@ class LoginPageState extends State<LoginPage> {
   var isRememberPassword = true;
   var isAutoLogin = false;
 
-  FocusNode usernameFocusNode;
-  FocusNode passwordFocusNode;
+  FocusNode usernameFocusNode = FocusNode();
+  FocusNode passwordFocusNode = FocusNode();
 
   final encrypter = Encrypter(AES(Constants.key, mode: AESMode.cbc));
 
@@ -44,10 +45,8 @@ class LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     FA.setCurrentScreen("LoginPage", "login_page.dart");
-    usernameFocusNode = FocusNode();
-    passwordFocusNode = FocusNode();
-    if (Platform.isAndroid || Platform.isIOS) {
-      _getPreference();
+    _getPreference();
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       _checkUpdate();
     }
   }
@@ -390,36 +389,15 @@ class LoginPageState extends State<LoginPage> {
   _getPreference() async {
     isRememberPassword =
         Preferences.getBool(Constants.PREF_REMEMBER_PASSWORD, true);
-    isAutoLogin = Preferences.getBool(Constants.PREF_AUTO_LOGIN, false);
     var username = Preferences.getString(Constants.PREF_USERNAME, '');
-    var password = "";
+    var password = '';
     if (isRememberPassword) {
-      var encryptPassword = Preferences.getString(Constants.PREF_PASSWORD, '');
-      if (encryptPassword != "") {
-        try {
-          password = encrypter.decrypt64(encryptPassword, iv: Constants.iv);
-        } catch (e) {
-          password = encryptPassword;
-          await Preferences.setString(
-              Constants.PREF_PASSWORD,
-              encrypter
-                  .encrypt(
-                    encryptPassword,
-                    iv: Constants.iv,
-                  )
-                  .base64);
-          throw e;
-        }
-      }
+      password = Preferences.getStringSecurity(Constants.PREF_PASSWORD, '');
     }
     setState(() {
       _username.text = username;
       _password.text = password;
     });
-    await Future.delayed(Duration(microseconds: 50));
-    if (isAutoLogin) {
-      _login();
-    }
   }
 
   _login() async {
@@ -427,16 +405,15 @@ class LoginPageState extends State<LoginPage> {
       ApUtils.showToast(context, app.doNotEmpty);
     } else {
       showDialog(
-          context: context,
-          builder: (BuildContext context) => WillPopScope(
-              child: ProgressDialog(app.logining),
-              onWillPop: () async {
-                return false;
-              }),
-          barrierDismissible: false);
-
-      if (Platform.isAndroid || Platform.isIOS)
-        Preferences.setString(Constants.PREF_USERNAME, _username.text);
+        context: context,
+        builder: (BuildContext context) => WillPopScope(
+            child: ProgressDialog(app.logining),
+            onWillPop: () async {
+              return false;
+            }),
+        barrierDismissible: false,
+      );
+      Preferences.setString(Constants.PREF_USERNAME, _username.text);
       Helper.instance
           .selcrsLogin(_username.text, _password.text)
           .then((response) async {
@@ -445,11 +422,13 @@ class LoginPageState extends State<LoginPage> {
         if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
         if (response == 403) {
           ApUtils.showToast(context, app.loginFail);
-        } else if (Platform.isAndroid || Platform.isIOS) {
+        } else {
           Preferences.setString(Constants.PREF_USERNAME, _username.text);
           if (isRememberPassword) {
-            await Preferences.setString(Constants.PREF_PASSWORD,
-                encrypter.encrypt(_password.text, iv: Constants.iv).base64);
+            await Preferences.setStringSecurity(
+              Constants.PREF_PASSWORD,
+              _password.text,
+            );
           }
           Preferences.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
           Navigator.of(context).pop(true);

@@ -11,7 +11,10 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Preferences.init();
+  await Preferences.init(
+    key: Constants.key,
+    iv: Constants.iv,
+  );
   if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
     Crashlytics.instance.enableInDevMode = Constants.isInDebugMode;
 
