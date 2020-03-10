@@ -63,6 +63,16 @@ class Helper {
     print(selcrsUrl);
   }
 
+  clearSession() {
+    courseCookie = '';
+    scoreCookie = '';
+    graduationCookie = '';
+    tsfCookie = '';
+    username = '';
+    index = 0;
+    error = 0;
+  }
+
   String base64md5(String text) {
     var bytes = utf8.encode(text);
     var digest = md5.convert(bytes);

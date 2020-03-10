@@ -1,7 +1,6 @@
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
-import 'package:encrypt/encrypt.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -283,7 +282,7 @@ class LoginPageState extends State<LoginPage> {
           .then((response) async {
         ShareDataWidget.of(context).data.username = _username.text;
         ShareDataWidget.of(context).data.password = _password.text;
-        if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
+        if (Navigator.canPop(context)) Navigator.pop(context);
         if (response == 403) {
           ApUtils.showToast(context, app.loginFail);
         } else {
@@ -298,7 +297,7 @@ class LoginPageState extends State<LoginPage> {
           Navigator.of(context).pop(true);
         }
       }).catchError((e) {
-        if (Navigator.canPop(context)) Navigator.pop(context, 'dialog');
+        if (Navigator.canPop(context)) Navigator.pop(context);
         Helper.changeSelcrsUrl();
         Helper.error++;
         if (Helper.error < 5) {
@@ -309,13 +308,5 @@ class LoginPageState extends State<LoginPage> {
         }
       });
     }
-  }
-
-  void clearSetting() async {
-    Preferences.setBool(Constants.PREF_AUTO_LOGIN, false);
-    setState(() {
-      isAutoLogin = false;
-      //pictureUrl = "";
-    });
   }
 }

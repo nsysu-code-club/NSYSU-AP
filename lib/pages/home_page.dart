@@ -66,8 +66,10 @@ class HomePageState extends State<HomePage> {
     super.initState();
     FA.setCurrentScreen("HomePage", "home_page.dart");
     _getAllNews();
-    _checkLoginState();
-    //TODO add check auto login
+    if (Preferences.getBool(Constants.PREF_AUTO_LOGIN, false))
+      _login();
+    else
+      _checkLoginState();
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       _checkUpdate();
     }
@@ -187,8 +189,9 @@ class HomePageState extends State<HomePage> {
               onTap: () {
                 Navigator.of(context).pop();
                 isLogin = false;
+                Preferences.setBool(Constants.PREF_AUTO_LOGIN, false);
+                Helper.instance.clearSession();
                 _checkLoginState();
-                //TODO clear session
               },
               title: Text(
                 app.logout,
@@ -329,6 +332,29 @@ class HomePageState extends State<HomePage> {
         },
       );
     }
+  }
+
+  _login() async {
+    var username = Preferences.getString(Constants.PREF_USERNAME, '');
+    var password = Preferences.getStringSecurity(Constants.PREF_PASSWORD, '');
+    Helper.instance.selcrsLogin(username, password).then((response) async {
+      if (response == 403) {
+        ApUtils.showToast(context, app.loginFail);
+      } else {
+        ApUtils.showToast(context, ApLocalizations.of(context).loginSuccess);
+        setState(() {
+          isLogin = true;
+        });
+      }
+    }).catchError((e) {
+      Helper.changeSelcrsUrl();
+      Helper.error++;
+      if (Helper.error < 5) {
+        _login();
+      } else {
+        ApUtils.showToast(context, app.timeoutMessage);
+      }
+    });
   }
 
   _checkUpdate() async {
