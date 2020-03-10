@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common/utils/preferences.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
@@ -18,23 +19,19 @@ import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:ap_common/widgets/yes_no_dialog.dart';
 import 'package:package_info/package_info.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routerName = "/login";
 
   @override
-  LoginPageState createState() => new LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
 class LoginPageState extends State<LoginPage> {
   AppLocalizations app;
-  SharedPreferences prefs;
 
-  final TextEditingController _username = new TextEditingController();
-  final TextEditingController _password = new TextEditingController();
+  final TextEditingController _username = TextEditingController();
+  final TextEditingController _password = TextEditingController();
   var isRememberPassword = true;
   var isAutoLogin = false;
 
@@ -60,7 +57,7 @@ class LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  _editTextStyle() => new TextStyle(
+  _editTextStyle() => TextStyle(
       color: Colors.white, fontSize: 18.0, decorationColor: Colors.white);
 
   @override
@@ -249,10 +246,10 @@ class LoginPageState extends State<LoginPage> {
   }
 
   _checkUpdate() async {
-    prefs = await SharedPreferences.getInstance();
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await Future.delayed(Duration(milliseconds: 50));
-    var currentVersion = prefs.getString(Constants.PREF_CURRENT_VERSION) ?? "";
+    var currentVersion =
+        Preferences.getString(Constants.PREF_CURRENT_VERSION, '');
     if (currentVersion != packageInfo.buildNumber) {
       showDialog(
         context: context,
@@ -269,7 +266,8 @@ class LoginPageState extends State<LoginPage> {
               Navigator.of(context, rootNavigator: true).pop('dialog'),
         ),
       );
-      prefs.setString(Constants.PREF_CURRENT_VERSION, packageInfo.buildNumber);
+      Preferences.setString(
+          Constants.PREF_CURRENT_VERSION, packageInfo.buildNumber);
     }
     if (!Constants.isInDebugMode) {
       final RemoteConfig remoteConfig = await RemoteConfig.instance;
@@ -370,8 +368,9 @@ class LoginPageState extends State<LoginPage> {
       isRememberPassword = value;
       if (!isRememberPassword) isAutoLogin = false;
       if (Platform.isAndroid || Platform.isIOS) {
-        prefs.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
-        prefs.setBool(Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
+        Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
+        Preferences.setBool(
+            Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
       }
     });
   }
@@ -381,27 +380,27 @@ class LoginPageState extends State<LoginPage> {
       isAutoLogin = value;
       isRememberPassword = isAutoLogin;
       if (Platform.isAndroid || Platform.isIOS) {
-        prefs.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
-        prefs.setBool(Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
+        Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
+        Preferences.setBool(
+            Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
       }
     });
   }
 
   _getPreference() async {
-    prefs = await SharedPreferences.getInstance();
     isRememberPassword =
-        prefs.getBool(Constants.PREF_REMEMBER_PASSWORD) ?? true;
-    isAutoLogin = prefs.getBool(Constants.PREF_AUTO_LOGIN) ?? false;
-    var username = prefs.getString(Constants.PREF_USERNAME) ?? "";
+        Preferences.getBool(Constants.PREF_REMEMBER_PASSWORD, true);
+    isAutoLogin = Preferences.getBool(Constants.PREF_AUTO_LOGIN, false);
+    var username = Preferences.getString(Constants.PREF_USERNAME, '');
     var password = "";
     if (isRememberPassword) {
-      var encryptPassword = prefs.getString(Constants.PREF_PASSWORD) ?? "";
+      var encryptPassword = Preferences.getString(Constants.PREF_PASSWORD, '');
       if (encryptPassword != "") {
         try {
           password = encrypter.decrypt64(encryptPassword, iv: Constants.iv);
         } catch (e) {
           password = encryptPassword;
-          await prefs.setString(
+          await Preferences.setString(
               Constants.PREF_PASSWORD,
               encrypter
                   .encrypt(
@@ -437,7 +436,7 @@ class LoginPageState extends State<LoginPage> {
           barrierDismissible: false);
 
       if (Platform.isAndroid || Platform.isIOS)
-        prefs.setString(Constants.PREF_USERNAME, _username.text);
+        Preferences.setString(Constants.PREF_USERNAME, _username.text);
       Helper.instance
           .selcrsLogin(_username.text, _password.text)
           .then((response) async {
@@ -447,12 +446,12 @@ class LoginPageState extends State<LoginPage> {
         if (response == 403) {
           ApUtils.showToast(context, app.loginFail);
         } else if (Platform.isAndroid || Platform.isIOS) {
-          prefs.setString(Constants.PREF_USERNAME, _username.text);
+          Preferences.setString(Constants.PREF_USERNAME, _username.text);
           if (isRememberPassword) {
-            await prefs.setString(Constants.PREF_PASSWORD,
+            await Preferences.setString(Constants.PREF_PASSWORD,
                 encrypter.encrypt(_password.text, iv: Constants.iv).base64);
           }
-          prefs.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
+          Preferences.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
           Navigator.of(context).pop(true);
         }
       }).catchError((e) {
@@ -469,16 +468,8 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
-  _navigateToFilterObject(BuildContext context) async {
-    final result = await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => HomePage()));
-    print(result);
-    clearSetting();
-  }
-
   void clearSetting() async {
-    var prefs = await SharedPreferences.getInstance();
-    prefs.setBool(Constants.PREF_AUTO_LOGIN, false);
+    Preferences.setBool(Constants.PREF_AUTO_LOGIN, false);
     setState(() {
       isAutoLogin = false;
       //pictureUrl = "";
