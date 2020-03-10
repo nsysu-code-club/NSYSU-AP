@@ -107,7 +107,7 @@ packages:
       name: encrypt
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.0"
+    version: "4.0.0"
   firebase:
     dependency: transitive
     description:
