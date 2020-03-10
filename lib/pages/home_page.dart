@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/pages/about_us_page.dart';
 import 'package:ap_common/pages/news/news_content_page.dart';
 import 'package:ap_common/resources/ap_icon.dart';
@@ -7,9 +8,12 @@ import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/home_page_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/ap_drawer.dart';
+import 'package:ap_common/widgets/default_dialog.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:ap_common/models/new_response.dart';
@@ -23,6 +27,7 @@ import 'package:nsysu_ap/api/helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:ap_common/widgets/yes_no_dialog.dart';
+import 'package:package_info/package_info.dart';
 
 import 'admission_guide_page.dart';
 import 'course_page.dart';
@@ -63,6 +68,9 @@ class HomePageState extends State<HomePage> {
     _getAllNews();
     _checkLoginState();
     //TODO add check auto login
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      _checkUpdate();
+    }
   }
 
   @override
@@ -289,7 +297,7 @@ class HomePageState extends State<HomePage> {
   }
 
   void _checkLoginState() async {
-    await Future.delayed(Duration(microseconds: 30));
+    await Future.delayed(Duration(microseconds: 50));
     if (isLogin) {
       _homeKey.currentState.hideSnackBar();
     } else {
@@ -320,6 +328,62 @@ class HomePageState extends State<HomePage> {
           _checkLoginState();
         },
       );
+    }
+  }
+
+  _checkUpdate() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    await Future.delayed(Duration(milliseconds: 50));
+    var currentVersion =
+        Preferences.getString(Constants.PREF_CURRENT_VERSION, '');
+    if (currentVersion != packageInfo.buildNumber) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => DefaultDialog(
+          title: app.updateNoteTitle,
+          contentWidget: Text(
+            "v${packageInfo.version}\n"
+            "${app.updateNoteContent}",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: ApTheme.of(context).grey),
+          ),
+          actionText: app.iKnow,
+          actionFunction: () =>
+              Navigator.of(context, rootNavigator: true).pop(),
+        ),
+      );
+      Preferences.setString(
+        Constants.PREF_CURRENT_VERSION,
+        packageInfo.buildNumber,
+      );
+    }
+    if (Constants.isInDebugMode) {
+      final RemoteConfig remoteConfig = await RemoteConfig.instance;
+      try {
+        await remoteConfig.fetch(expiration: const Duration(seconds: 10));
+        await remoteConfig.activateFetched();
+      } on FetchThrottledException catch (exception) {} catch (exception) {} finally {
+        String versionContent = '';
+        switch (AppLocalizations.locale.languageCode) {
+          case ApSupportLanguageConstants.ZH:
+            versionContent =
+                remoteConfig.getString(Constants.NEW_VERSION_CONTENT_ZH);
+            break;
+          case ApSupportLanguageConstants.EN:
+          default:
+            versionContent =
+                remoteConfig.getString(Constants.NEW_VERSION_CONTENT_EN);
+            break;
+        }
+        ApUtils.showNewVersionDialog(
+          context: context,
+          newVersionCode: remoteConfig.getInt(Constants.APP_VERSION),
+          iOSAppId: '146752219',
+          defaultUrl: 'https://www.facebook.com/NKUST.ITC/',
+          newVersionContent: versionContent,
+          appName: AppLocalizations.of(context).appName,
+        );
+      }
     }
   }
 }

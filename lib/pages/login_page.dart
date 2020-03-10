@@ -1,25 +1,16 @@
-import 'dart:async';
-import 'dart:io';
-
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:encrypt/encrypt.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/search_student_id_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';
-import 'package:nsysu_ap/utils/utils.dart';
-import 'package:ap_common/widgets/default_dialog.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
-import 'package:ap_common/widgets/yes_no_dialog.dart';
-import 'package:package_info/package_info.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routerName = "/login";
@@ -33,22 +24,18 @@ class LoginPageState extends State<LoginPage> {
 
   final TextEditingController _username = TextEditingController();
   final TextEditingController _password = TextEditingController();
+
   var isRememberPassword = true;
   var isAutoLogin = false;
 
   FocusNode usernameFocusNode = FocusNode();
   FocusNode passwordFocusNode = FocusNode();
 
-  final encrypter = Encrypter(AES(Constants.key, mode: AESMode.cbc));
-
   @override
   void initState() {
     super.initState();
     FA.setCurrentScreen("LoginPage", "login_page.dart");
     _getPreference();
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      _checkUpdate();
-    }
   }
 
   @override
@@ -244,133 +231,12 @@ class LoginPageState extends State<LoginPage> {
     return list;
   }
 
-  _checkUpdate() async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    await Future.delayed(Duration(milliseconds: 50));
-    var currentVersion =
-        Preferences.getString(Constants.PREF_CURRENT_VERSION, '');
-    if (currentVersion != packageInfo.buildNumber) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) => DefaultDialog(
-          title: app.updateNoteTitle,
-          contentWidget: Text(
-            "v${packageInfo.version}\n"
-            "${app.updateNoteContent}",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: ApTheme.of(context).grey),
-          ),
-          actionText: app.iKnow,
-          actionFunction: () =>
-              Navigator.of(context, rootNavigator: true).pop('dialog'),
-        ),
-      );
-      Preferences.setString(
-          Constants.PREF_CURRENT_VERSION, packageInfo.buildNumber);
-    }
-    if (!Constants.isInDebugMode) {
-      final RemoteConfig remoteConfig = await RemoteConfig.instance;
-      try {
-        await remoteConfig.fetch(expiration: const Duration(seconds: 10));
-        await remoteConfig.activateFetched();
-      } on FetchThrottledException catch (exception) {} catch (exception) {}
-      String url = "";
-      int versionDiff = 0, newVersion;
-      if (Platform.isAndroid) {
-        url = "market://details?id=${packageInfo.packageName}";
-        newVersion = remoteConfig.getInt(Constants.ANDROID_APP_VERSION);
-      } else if (Platform.isIOS) {
-        url =
-            "itms-apps://itunes.apple.com/tw/app/apple-store/id1467522198?mt=8";
-        newVersion = remoteConfig.getInt(Constants.IOS_APP_VERSION);
-      } else {
-        url = "https://www.facebook.com/NKUST.ITC/";
-        newVersion = remoteConfig.getInt(Constants.APP_VERSION);
-      }
-      versionDiff = newVersion - int.parse(packageInfo.buildNumber);
-      String versionContent =
-          "\nv${newVersion ~/ 10000}.${newVersion % 1000 ~/ 100}.${newVersion % 100}\n";
-      switch (AppLocalizations.locale.languageCode) {
-        case 'zh':
-          versionContent +=
-              remoteConfig.getString(Constants.NEW_VERSION_CONTENT_ZH);
-          break;
-        default:
-          versionContent +=
-              remoteConfig.getString(Constants.NEW_VERSION_CONTENT_EN);
-          break;
-      }
-      if (versionDiff < 5 && versionDiff > 0) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) => YesNoDialog(
-            title: app.updateTitle,
-            contentWidget: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                  style: TextStyle(
-                      color: ApTheme.of(context).grey,
-                      height: 1.3,
-                      fontSize: 16.0),
-                  children: [
-                    TextSpan(
-                      text:
-                          '${Utils.getPlatformUpdateContent(app)}\n${versionContent.replaceAll('\\n', '\n')}',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ]),
-            ),
-            leftActionText: app.skip,
-            rightActionText: app.update,
-            leftActionFunction: null,
-            rightActionFunction: () {
-              Utils.launchUrl(url);
-            },
-          ),
-        );
-      } else if (versionDiff >= 5) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) => WillPopScope(
-            child: DefaultDialog(
-                title: app.updateTitle,
-                actionText: app.update,
-                contentWidget: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                      style: TextStyle(
-                          color: ApTheme.of(context).grey,
-                          height: 1.3,
-                          fontSize: 16.0),
-                      children: [
-                        TextSpan(
-                            text:
-                                '${Utils.getPlatformUpdateContent(app)}\n${versionContent.replaceAll('\\n', '\n')}',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                      ]),
-                ),
-                actionFunction: () {
-                  Utils.launchUrl(url);
-                }),
-            onWillPop: () async {
-              return false;
-            },
-          ),
-        );
-      }
-    }
-  }
-
   _onRememberPasswordChanged(bool value) async {
     setState(() {
       isRememberPassword = value;
       if (!isRememberPassword) isAutoLogin = false;
-      if (Platform.isAndroid || Platform.isIOS) {
-        Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
-        Preferences.setBool(
-            Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
-      }
+      Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
+      Preferences.setBool(Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
     });
   }
 
@@ -378,11 +244,8 @@ class LoginPageState extends State<LoginPage> {
     setState(() {
       isAutoLogin = value;
       isRememberPassword = isAutoLogin;
-      if (Platform.isAndroid || Platform.isIOS) {
-        Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
-        Preferences.setBool(
-            Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
-      }
+      Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
+      Preferences.setBool(Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
     });
   }
 
@@ -407,10 +270,11 @@ class LoginPageState extends State<LoginPage> {
       showDialog(
         context: context,
         builder: (BuildContext context) => WillPopScope(
-            child: ProgressDialog(app.logining),
-            onWillPop: () async {
-              return false;
-            }),
+          child: ProgressDialog(app.logining),
+          onWillPop: () async {
+            return false;
+          },
+        ),
         barrierDismissible: false,
       );
       Preferences.setString(Constants.PREF_USERNAME, _username.text);
