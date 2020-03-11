@@ -107,14 +107,17 @@ class HomePageState extends State<HomePage> {
       },
       drawer: ApDrawer(
         builder: () async {
-          var userInfo = await Helper.instance.getUserInfo();
-          FA.setUserProperty('department', userInfo.department);
-          FA.logUserInfo(userInfo.department);
-          FA.setUserId(userInfo.studentId);
-          return UserInfo(
-            id: userInfo.studentId,
-            name: userInfo.studentNameCht,
-          );
+          if (isLogin) {
+            var userInfo = await Helper.instance.getUserInfo();
+            FA.setUserProperty('department', userInfo.department);
+            FA.logUserInfo(userInfo.department);
+            FA.setUserId(userInfo.studentId);
+            return UserInfo(
+              id: userInfo.studentId,
+              name: userInfo.studentNameCht,
+            );
+          }
+          return null;
         },
         widgets: <Widget>[
           ExpansionTile(
@@ -219,7 +222,10 @@ class HomePageState extends State<HomePage> {
               ),
             ),
         ],
-        onTapHeader: () {},
+        onTapHeader: () {
+          Navigator.of(context).pop();
+          _showLoginPage();
+        },
       ),
       newsList: newsList,
       onTabTapped: onTabTapped,
@@ -328,22 +334,7 @@ class HomePageState extends State<HomePage> {
           .showSnackBar(
             text: ApLocalizations.of(context).notLogin,
             actionText: ApLocalizations.of(context).login,
-            onSnackBarTapped: () async {
-              var result = await Navigator.of(context).push(
-                CupertinoPageRoute(
-                  builder: (_) => LoginPage(),
-                ),
-              );
-              if (result ?? false) {
-                if (state != HomeState.finish) {
-                  _getAllNews();
-                }
-                isLogin = true;
-                _homeKey.currentState.hideSnackBar();
-              } else {
-                _checkLoginState();
-              }
-            },
+            onSnackBarTapped: _showLoginPage,
           )
           .closed
           .then(
@@ -430,6 +421,23 @@ class HomePageState extends State<HomePage> {
           appName: AppLocalizations.of(context).appName,
         );
       }
+    }
+  }
+
+  _showLoginPage() async {
+    var result = await Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (_) => LoginPage(),
+      ),
+    );
+    if (result ?? false) {
+      if (state != HomeState.finish) {
+        _getAllNews();
+      }
+      isLogin = true;
+      _homeKey.currentState.hideSnackBar();
+    } else {
+      _checkLoginState();
     }
   }
 }
