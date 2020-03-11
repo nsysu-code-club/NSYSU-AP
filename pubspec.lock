@@ -5,11 +5,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.0.2"
-      resolved-ref: e247abdf315975bc705af59cadf909106ad3a9d5
+      ref: "v0.0.3"
+      resolved-ref: "1860e0ab3fedf916e4339641d8516a2b3973dced"
       url: "https://github.com/abc873693/ap_common"
     source: git
-    version: "0.0.2"
+    version: "0.0.3"
   archive:
     dependency: transitive
     description:
@@ -73,6 +73,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.2"
+  clock:
+    dependency: transitive
+    description:
+      name: clock
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   collection:
     dependency: transitive
     description:
