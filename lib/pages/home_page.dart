@@ -126,7 +126,7 @@ class HomePageState extends State<HomePage> {
               setState(() => isStudyExpanded = bool);
             },
             leading: Icon(
-              Icons.collections_bookmark,
+              ApIcon.collectionsBookmark,
               color: isStudyExpanded
                   ? ApTheme.of(context).blueAccent
                   : ApTheme.of(context).grey,
@@ -134,19 +134,19 @@ class HomePageState extends State<HomePage> {
             title: Text(app.courseInfo, style: _defaultStyle),
             children: <Widget>[
               DrawerSubItem(
-                icon: Icons.class_,
+                icon: ApIcon.classIcon,
                 title: app.course,
                 page: CoursePage(),
               ),
               DrawerSubItem(
-                icon: Icons.assignment,
+                icon: ApIcon.assignment,
                 title: app.score,
                 page: ScorePage(),
               ),
             ],
           ),
           DrawerItem(
-            icon: Icons.school,
+            icon: ApIcon.school,
             title: app.graduationCheckChecklist,
             page: GraduationReportPage(
               username: ShareDataWidget.of(context).data.username,
@@ -154,7 +154,7 @@ class HomePageState extends State<HomePage> {
             ),
           ),
           DrawerItem(
-            icon: Icons.monetization_on,
+            icon: ApIcon.monetizationOn,
             title: app.tuitionAndFees,
             page: TuitionAndFeesPage(
               username: ShareDataWidget.of(context).data.username,
@@ -162,12 +162,12 @@ class HomePageState extends State<HomePage> {
             ),
           ),
           DrawerItem(
-            icon: Icons.accessibility_new,
+            icon: ApIcon.accessibilityNew,
             title: app.admissionGuide,
             page: AdmissionGuidePage(),
           ),
           DrawerItem(
-            icon: Icons.face,
+            icon: ApIcon.face,
             title: app.about,
             page: AboutUsPage(
               assetImage: 'assets/images/nsysu.webp',
@@ -199,14 +199,14 @@ class HomePageState extends State<HomePage> {
             ),
           ),
           DrawerItem(
-            icon: Icons.settings,
+            icon: ApIcon.settings,
             title: app.settings,
             page: SettingPage(),
           ),
           if (isLogin)
             ListTile(
               leading: Icon(
-                Icons.power_settings_new,
+                ApIcon.powerSettingsNew,
                 color: ApTheme.of(context).grey,
               ),
               onTap: () {
@@ -231,15 +231,15 @@ class HomePageState extends State<HomePage> {
       onTabTapped: onTabTapped,
       bottomNavigationBarItems: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.accessibility_new),
+          icon: Icon(ApIcon.accessibilityNew),
           title: Text(app.admissionGuide),
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.class_),
+          icon: Icon(ApIcon.classIcon),
           title: Text(app.course),
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.assignment),
+          icon: Icon(ApIcon.assignment),
           title: Text(app.score),
         ),
       ],
