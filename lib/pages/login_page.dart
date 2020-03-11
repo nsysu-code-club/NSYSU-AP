@@ -95,6 +95,7 @@ class LoginPageState extends State<LoginPage> {
                   fontSize: 120,
                   color: Colors.white,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
             SizedBox(height: orientation == Orientation.portrait ? 30.0 : 0.0),
