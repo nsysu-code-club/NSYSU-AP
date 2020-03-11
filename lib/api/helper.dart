@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ap_common/models/course_data.dart';
+import 'package:ap_common/models/score_data.dart';
 import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:big5/big5.dart';
@@ -10,7 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/models/options.dart';
-import 'package:nsysu_ap/models/score_data.dart';
+import 'package:nsysu_ap/models/pre_score.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/models/user_info.dart';
@@ -374,16 +375,16 @@ class Helper {
 //      }
       if (tableDoc.length == 3) {
         var fontDoc = tableDoc[1].getElementsByTagName('font');
-        detail.conduct =
-            '${fontDoc[0].text.split('：')[1]}/${fontDoc[1].text.split('：')[1]}';
-        detail.average = fontDoc[2].text.split('：')[1];
+        detail.creditTaken = double.parse(fontDoc[0].text.split('：')[1]);
+        detail.creditEarned = double.parse(fontDoc[1].text.split('：')[1]);
+        detail.average = double.parse(fontDoc[2].text.split('：')[1]);
         detail.classRank =
             '${fontDoc[4].text.split('：')[1]}/${fontDoc[5].text.split('：')[1]}';
         var percentage = double.parse(fontDoc[4].text.split('：')[1]) /
             double.parse(fontDoc[5].text.split('：')[1]);
         percentage = 1.0 - percentage;
         percentage *= 100;
-        detail.classPercentage = '${percentage.toStringAsFixed(2)}';
+        detail.classPercentage = double.parse(percentage.toStringAsFixed(2));
       }
       var trDoc = tableDoc[0].getElementsByTagName('tr');
       for (var i = 0; i < trDoc.length; i++) {
@@ -391,8 +392,9 @@ class Helper {
         if (fontDoc.length != 6) continue;
         if (i != 0)
           list.add(Score(
-            number:
-                '${fontDoc[2].text.substring(1, fontDoc[2].text.length - 1)}',
+            //TODO Revert 課號
+//            number:
+//                '${fontDoc[2].text.substring(1, fontDoc[2].text.length - 1)}',
             title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
                 '${fontDoc[3].text}',
             middleScore: '${fontDoc[4].text}',
@@ -417,14 +419,9 @@ class Helper {
       }
     }*/
     var scoreData = ScoreData(
-      status: 200,
-      messages: '',
-      content: Content(
-        scores: list,
-        detail: detail,
-      ),
+      scores: list,
+      detail: detail,
     );
-    if (list.length == 0) scoreData.status = 204;
     return scoreData;
   }
 
