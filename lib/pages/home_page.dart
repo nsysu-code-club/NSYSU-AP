@@ -46,6 +46,7 @@ class HomePageState extends State<HomePage> {
   final GlobalKey<HomePageScaffoldState> _homeKey =
       GlobalKey<HomePageScaffoldState>();
   AppLocalizations app;
+  ApLocalizations ap;
 
   HomeState state = HomeState.loading;
 
@@ -84,6 +85,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     app = AppLocalizations.of(context);
+    ap = ApLocalizations.of(context);
     return HomePageScaffold(
       key: _homeKey,
       isLogin: isLogin,
@@ -137,11 +139,13 @@ class HomePageState extends State<HomePage> {
                 icon: ApIcon.classIcon,
                 title: app.course,
                 page: CoursePage(),
+                needLogin: !isLogin,
               ),
               DrawerSubItem(
                 icon: ApIcon.assignment,
                 title: app.score,
                 page: ScorePage(),
+                needLogin: !isLogin,
               ),
             ],
           ),
@@ -152,6 +156,7 @@ class HomePageState extends State<HomePage> {
               username: ShareDataWidget.of(context).data.username,
               password: ShareDataWidget.of(context).data.password,
             ),
+            needLogin: !isLogin,
           ),
           DrawerItem(
             icon: ApIcon.monetizationOn,
@@ -160,6 +165,7 @@ class HomePageState extends State<HomePage> {
               username: ShareDataWidget.of(context).data.username,
               password: ShareDataWidget.of(context).data.password,
             ),
+            needLogin: !isLogin,
           ),
           DrawerItem(
             icon: ApIcon.accessibilityNew,
@@ -253,10 +259,16 @@ class HomePageState extends State<HomePage> {
           Utils.pushCupertinoStyle(context, AdmissionGuidePage());
           break;
         case 1:
-          Utils.pushCupertinoStyle(context, CoursePage());
+          if (isLogin)
+            Utils.pushCupertinoStyle(context, CoursePage());
+          else
+            ApUtils.showToast(context, ap.notLoginHint);
           break;
         case 2:
-          Utils.pushCupertinoStyle(context, ScorePage());
+          if (isLogin)
+            Utils.pushCupertinoStyle(context, ScorePage());
+          else
+            ApUtils.showToast(context, ap.notLoginHint);
           break;
       }
     });
