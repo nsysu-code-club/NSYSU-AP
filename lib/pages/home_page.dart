@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/pages/about_us_page.dart';
 import 'package:ap_common/pages/news/news_content_page.dart';
+import 'package:ap_common/pages/open_source_page.dart';
 import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/home_page_scaffold.dart';
@@ -173,6 +174,25 @@ class HomePageState extends State<HomePage> {
               fbFanPageId: '735951703168873',
               fbFanPageUrl: 'https://www.facebook.com/NKUST.ITC/',
               githubUrl: 'https://github.com/NKUST-ITC',
+              logEvent: (name, value) => FA.logAction(name, value),
+              setCurrentScreen: () =>
+                  FA.setCurrentScreen("AboutUsPage", "about_us_page.dart"),
+              actions: <Widget>[
+                IconButton(
+                  icon: Icon(ApIcon.codeIcon),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (_) => OpenSourcePage(
+                          setCurrentScreen: () => FA.setCurrentScreen(
+                              "OpenSourcePage", "open_source_page.dart"),
+                        ),
+                      ),
+                    );
+                    FA.logAction('open_source', 'click');
+                  },
+                )
+              ],
             ),
           ),
           DrawerItem(
