@@ -1,6 +1,10 @@
 import 'package:ap_common/models/time_code.dart';
+import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/course_scaffold.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/preferences.dart';
+import 'package:ap_common/widgets/dialog_option.dart';
+import 'package:ap_common/widgets/item_picker.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -30,12 +34,17 @@ class CoursePageState extends State<CoursePage> {
   int semesterIndex = 0;
 
   bool isOffline = false;
+  bool isShowSearchButton = false;
 
   @override
   void initState() {
     super.initState();
     FA.setCurrentScreen("CoursePage", "course_page.dart");
     _getSemester();
+    isShowSearchButton = Preferences.getBool(
+      Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
+      true,
+    );
   }
 
   @override
@@ -57,6 +66,48 @@ class CoursePageState extends State<CoursePage> {
       },
       onRefresh: _getCourseTables,
       isOffline: isOffline,
+      isShowSearchButton: isShowSearchButton,
+      actions: <Widget>[
+        PopupMenuButton<int>(
+          onSelected: (int value) {
+            switch (value) {
+              case 1:
+                setState(() {
+                  isShowSearchButton = !isShowSearchButton;
+                });
+                Preferences.setBool(
+                  Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
+                  isShowSearchButton,
+                );
+                break;
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              child: Center(
+                child: Text(
+                  app.settings,
+                  style: TextStyle(color: ApTheme.of(context).greyText),
+                ),
+              ),
+              value: -1,
+              enabled: false,
+            ),
+            PopupMenuDivider(
+              height: 10,
+            ),
+            PopupMenuItem(
+              child: DialogOption(
+                text: ApLocalizations.of(context).showSearchButton,
+                check: isShowSearchButton,
+                onPressed: null,
+              ),
+              value: 1,
+              enabled: true,
+            )
+          ],
+        ),
+      ],
     );
   }
 
