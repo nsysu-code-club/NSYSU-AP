@@ -4,6 +4,7 @@ import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/pages/about_us_page.dart';
 import 'package:ap_common/pages/news/news_content_page.dart';
 import 'package:ap_common/pages/open_source_page.dart';
+import 'package:ap_common/pages/user_info_page.dart';
 import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/home_page_scaffold.dart';
@@ -110,14 +111,11 @@ class HomePageState extends State<HomePage> {
       drawer: ApDrawer(
         builder: () async {
           if (isLogin) {
-            var userInfo = await Helper.instance.getUserInfo();
+            this.userInfo = await Helper.instance.getUserInfo();
             FA.setUserProperty('department', userInfo.department);
             FA.logUserInfo(userInfo.department);
-            FA.setUserId(userInfo.studentId);
-            return UserInfo(
-              id: userInfo.studentId,
-              name: userInfo.studentNameCht,
-            );
+            FA.setUserId(userInfo.id);
+            return this.userInfo;
           }
           return null;
         },
@@ -229,8 +227,28 @@ class HomePageState extends State<HomePage> {
             ),
         ],
         onTapHeader: () {
-          Navigator.of(context).pop();
-          _showLoginPage();
+          if (isLogin) {
+            if (userInfo != null) {
+              ApUtils.pushCupertinoStyle(
+                context,
+                UserInfoPage(
+                  userInfo: userInfo,
+                  setCurrentScreen: () => FA.setCurrentScreen(
+                      "UserInfoPage", "user_info_page.dart"),
+                  onRefresh: () async {
+                    this.userInfo = await Helper.instance.getUserInfo();
+                    FA.setUserProperty('department', userInfo.department);
+                    FA.logUserInfo(userInfo.department);
+                    FA.setUserId(userInfo.id);
+                    return this.userInfo;
+                  },
+                ),
+              );
+            }
+          } else {
+            Navigator.of(context).pop();
+            _showLoginPage();
+          }
         },
       ),
       newsList: newsList,
