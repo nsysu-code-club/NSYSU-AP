@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
-import 'package:nsysu_ap/pages/login/login_page.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
@@ -40,8 +39,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    if (kIsWeb) {
-    } else if (Platform.isAndroid || Platform.isIOS) {
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       _analytics = FirebaseAnalytics();
       _firebaseMessaging = FirebaseMessaging();
       _initFCM(_firebaseMessaging);
@@ -72,18 +70,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       child: ApTheme(
         themeMode,
         child: MaterialApp(
-          localeResolutionCallback:
-              (Locale locale, Iterable<Locale> supportedLocales) {
-//            print('Load ${locale.languageCode}');
-            String languageCode = Preferences.getString(
-              Constants.PREF_LANGUAGE_CODE,
-              ApSupportLanguageConstants.SYSTEM,
-            );
-            if (languageCode == ApSupportLanguageConstants.SYSTEM)
-              return locale;
-            else
-              return Locale(languageCode);
-          },
           onGenerateTitle: (context) => AppLocalizations.of(context).appName,
           debugShowCheckedModeBanner: false,
           routes: <String, WidgetBuilder>{
@@ -98,13 +84,23 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           theme: ApTheme.light,
           darkTheme: ApTheme.dark,
           themeMode: themeMode,
-          navigatorObservers: (kIsWeb)
-              ? []
-              : (Platform.isIOS || Platform.isAndroid)
-                  ? [
-                      FirebaseAnalyticsObserver(analytics: _analytics),
-                    ]
-                  : [],
+          navigatorObservers: !kIsWeb && (Platform.isAndroid || Platform.isIOS)
+              ? [
+                  FirebaseAnalyticsObserver(analytics: _analytics),
+                ]
+              : [],
+          localeResolutionCallback:
+              (Locale locale, Iterable<Locale> supportedLocales) {
+//            print('Load ${locale.languageCode}');
+            String languageCode = Preferences.getString(
+              Constants.PREF_LANGUAGE_CODE,
+              ApSupportLanguageConstants.SYSTEM,
+            );
+            if (languageCode == ApSupportLanguageConstants.SYSTEM)
+              return locale;
+            else
+              return Locale(languageCode);
+          },
           localizationsDelegates: [
             const AppLocalizationsDelegate(),
             const ApLocalizationsDelegate(),
