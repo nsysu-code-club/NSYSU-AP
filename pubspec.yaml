@@ -1,7 +1,7 @@
 name: nsysu_ap
 description: NSYSU AP
 
-version: 0.2.3+203
+version: 0.2.4+204
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -15,7 +15,7 @@ dependencies:
   ap_common:
     git:
       url: https://github.com/abc873693/ap_common
-      ref: v0.0.3
+      ref: v0.0.4
 #    path: ../../GitHub-NKUST-ITC/ap_common
 
   #official plugin
