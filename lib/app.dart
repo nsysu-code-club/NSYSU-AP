@@ -119,7 +119,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   void _initFCM(FirebaseMessaging firebaseMessaging) async {
     await Future.delayed(Duration(seconds: 2));
-    firebaseMessaging.requestNotificationPermissions();
     firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         if (Constants.isInDebugMode) print("onMessage: $message");
@@ -137,7 +136,8 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       },
     );
     firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(sound: true, badge: true, alert: true));
+      const IosNotificationSettings(sound: true, badge: true, alert: true),
+    );
     firebaseMessaging.onIosSettingsRegistered
         .listen((IosNotificationSettings settings) {
       print("Settings registered: $settings");
@@ -148,8 +148,8 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         print("Push Messaging token: $token");
       }
       if (Platform.isAndroid)
-        firebaseMessaging.subscribeToTopic("Android");
-      else if (Platform.isIOS) firebaseMessaging.subscribeToTopic("IOS");
+        firebaseMessaging.unsubscribeFromTopic("Android");
+      else if (Platform.isIOS) firebaseMessaging.unsubscribeFromTopic("IOS");
     });
   }
 
