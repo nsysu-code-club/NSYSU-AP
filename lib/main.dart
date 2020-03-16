@@ -15,9 +15,7 @@ void main() async {
     key: Constants.key,
     iv: Constants.iv,
   );
-  if (!kIsWeb &&
-      !Constants.isInDebugMode &&
-      (Platform.isIOS || Platform.isAndroid)) {
+  if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
     Crashlytics.instance.enableInDevMode = Constants.isInDebugMode;
 
     // Pass all uncaught errors from the framework to Crashlytics.
