@@ -391,15 +391,16 @@ class Helper {
         var fontDoc = trDoc[i].getElementsByTagName('font');
         if (fontDoc.length != 6) continue;
         if (i != 0)
-          list.add(Score(
-            //TODO Revert 課號
-//            number:
-//                '${fontDoc[2].text.substring(1, fontDoc[2].text.length - 1)}',
-            title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
-                '${fontDoc[3].text}',
-            middleScore: '${fontDoc[4].text}',
-            finalScore: fontDoc[5].text,
-          ));
+          list.add(
+            Score(
+              courseNumber:
+                  '${fontDoc[2].text.substring(1, fontDoc[2].text.length - 1)}',
+              title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
+                  '${fontDoc[3].text}',
+              middleScore: '${fontDoc[4].text}',
+              finalScore: fontDoc[5].text,
+            ),
+          );
       }
       var endTime = DateTime.now().millisecondsSinceEpoch;
       FA.logTimeEvent(FA.SCORE_HTML_PARSER, (endTime - startTime) / 1000.0);
