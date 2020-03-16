@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:nsysu_ap/config/constants.dart';
-import 'package:nsysu_ap/models/course_data.dart';
+import 'package:ap_common/models/course_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sprintf/sprintf.dart';
@@ -127,62 +127,6 @@ class Utils {
         platformChannelSpecifics,
         payload: payload,
       );
-    } else {
-      //TODO implement other platform system local notification
-    }
-  }
-
-  static Future<void> setCourseNotify(
-      BuildContext context, CourseTables courseTables) async {
-    var app = AppLocalizations.of(context);
-    //limit Android and iOS system
-    if (Platform.isAndroid || Platform.isIOS) {
-      var flutterLocalNotificationsPlugin =
-          initFlutterLocalNotificationsPlugin();
-      var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-          Constants.NOTIFICATION_COURSE_ID.toString(),
-          app.courseNotify,
-          app.courseNotify,
-          largeIconBitmapSource: BitmapSource.Drawable,
-          importance: Importance.High,
-          largeIcon: '@drawable/ic_launcher',
-          style: AndroidNotificationStyle.BigText,
-          enableVibration: false);
-      var iOSPlatformChannelSpecifics = IOSNotificationDetails();
-      var platformChannelSpecifics = NotificationDetails(
-          androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-      await flutterLocalNotificationsPlugin
-          .cancel(Constants.NOTIFICATION_COURSE_ID);
-      for (int i = 0; i < Day.values.length; i++) {
-        List<Course> course =
-            courseTables.getCourseListByDayObject(Day.values[i]);
-        List<String> keyList = [];
-        List<Course> saveCourseList = [];
-        if (course == null) continue;
-        for (int j = 0; j < course.length; j++) {
-          if (!keyList.contains(course[j].title)) {
-            keyList.add(course[j].title);
-            saveCourseList.add(course[j]);
-          }
-        }
-        saveCourseList.forEach((Course course) async {
-          String content = sprintf(app.courseNotifyContent, [
-            course.title,
-            course.location.room.isEmpty
-                ? app.courseNotifyUnknown
-                : course.location.room
-          ]);
-          await flutterLocalNotificationsPlugin.showWeeklyAtDayAndTime(
-            Constants.NOTIFICATION_BUS_ID,
-            app.courseNotify,
-            content,
-            Day.values[i],
-            course.getCourseNotifyTimeObject(),
-            platformChannelSpecifics,
-            payload: content,
-          );
-        });
-      }
     } else {
       //TODO implement other platform system local notification
     }
