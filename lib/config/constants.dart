@@ -54,7 +54,7 @@ class Constants {
   static const APP_VERSION = "app_version";
   static const NEW_VERSION_CONTENT_ZH = "new_version_content_zh";
   static const NEW_VERSION_CONTENT_EN = "new_version_content_en";
-  static const NEWS_DATA = 'news_data';
+  static const NEWS_DATA = 'news_data_v2';
   static const DEFAULT_COURSE_SEMESTER_CODE = "default_course_semester_code";
   static const TIME_CODE_CONFIG = "time_code_config";
 
