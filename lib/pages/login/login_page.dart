@@ -4,7 +4,7 @@ import 'package:ap_common/utils/preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
-import 'package:nsysu_ap/pages/search_student_id_page.dart';
+import 'package:nsysu_ap/pages/login/search_student_id_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';

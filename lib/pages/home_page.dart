@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/user_info.dart';
-import 'package:nsysu_ap/pages/score_page.dart';
+import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
@@ -31,9 +31,9 @@ import 'package:ap_common/widgets/yes_no_dialog.dart';
 import 'package:package_info/package_info.dart';
 
 import 'admission_guide_page.dart';
-import 'course_page.dart';
+import 'study/course_page.dart';
 import 'graduation_report_page.dart';
-import 'login_page.dart';
+import 'login/login_page.dart';
 
 class HomePage extends StatefulWidget {
   static const String routerName = "/home";
