@@ -362,9 +362,9 @@ class HomePageState extends State<HomePage> {
     var password = Preferences.getStringSecurity(Constants.PREF_PASSWORD, '');
     Helper.instance.selcrsLogin(username, password).then((response) async {
       if (response == 403) {
-        ApUtils.showToast(context, app.loginFail);
+        _homeKey.currentState.showBasicHint(text: ap.loginFail);
       } else {
-        ApUtils.showToast(context, ApLocalizations.of(context).loginSuccess);
+        _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
         setState(() {
           isLogin = true;
         });
@@ -375,7 +375,7 @@ class HomePageState extends State<HomePage> {
       if (Helper.error < 5) {
         _login();
       } else {
-        ApUtils.showToast(context, app.timeoutMessage);
+        _homeKey.currentState.showBasicHint(text: ap.timeoutMessage);
       }
     });
   }
