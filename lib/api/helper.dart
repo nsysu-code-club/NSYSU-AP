@@ -4,6 +4,7 @@ import 'package:ap_common/models/course_data.dart';
 import 'package:ap_common/models/score_data.dart';
 import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/time_code.dart';
+import 'package:ap_common/models/user_info.dart';
 import 'package:big5/big5.dart';
 import 'package:crypto/crypto.dart';
 import 'package:html/parser.dart';
@@ -14,7 +15,6 @@ import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/pre_score.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
-import 'package:nsysu_ap/models/user_info.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
 import '../utils/app_localizations.dart';
@@ -172,9 +172,10 @@ class Helper {
     if (tdDoc.length > 0)
       userInfo = UserInfo(
         department: tdDoc[1].text,
-        studentId: tdDoc[5].text,
-        studentNameCht: tdDoc[7].text,
-        educationSystem: tdDoc[9].text,
+        className: tdDoc[3].text.replaceAll(' ', ''),
+        id: tdDoc[5].text,
+        name: tdDoc[7].text,
+        email: tdDoc[9].text,
       );
     return userInfo;
   }
