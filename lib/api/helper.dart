@@ -347,7 +347,11 @@ class Helper {
     return scoreSemesterData;
   }
 
-  Future<ScoreData> getScoreData(String year, String semester) async {
+  Future<ScoreData> getScoreData({
+    String year,
+    String semester,
+    bool searchPreScore = false,
+  }) async {
     var url =
         'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=804&KIND=2&LANGS=$language';
     var response = await http.post(
@@ -390,17 +394,25 @@ class Helper {
       for (var i = 0; i < trDoc.length; i++) {
         var fontDoc = trDoc[i].getElementsByTagName('font');
         if (fontDoc.length != 6) continue;
-        if (i != 0)
-          list.add(
-            Score(
-              courseNumber:
-                  '${fontDoc[2].text.substring(1, fontDoc[2].text.length - 1)}',
-              title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
-                  '${fontDoc[3].text}',
-              middleScore: '${fontDoc[4].text}',
-              finalScore: fontDoc[5].text,
-            ),
+        if (i != 0) {
+          final score = Score(
+            courseNumber:
+                '${fontDoc[2].text.substring(1, fontDoc[2].text.length - 1)}',
+            title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
+                '${fontDoc[3].text}',
+            middleScore: '${fontDoc[4].text}',
+            finalScore: fontDoc[5].text,
           );
+          if (searchPreScore &&
+              (score.finalScore == null || (score.finalScore ?? '') == '--')) {
+            final preScore = await getPreScoreData(score.courseNumber);
+            if (preScore != null) {
+              score.finalScore = preScore.grades;
+              score.isPreScore = true;
+            }
+          }
+          list.add(score);
+        }
       }
       var endTime = DateTime.now().millisecondsSinceEpoch;
       FA.logTimeEvent(FA.SCORE_HTML_PARSER, (endTime - startTime) / 1000.0);

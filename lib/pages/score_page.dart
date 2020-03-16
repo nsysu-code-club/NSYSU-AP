@@ -118,8 +118,10 @@ class ScorePageState extends State<ScorePage> {
       state = ScoreState.loading;
     });
     Helper.instance
-        .getScoreData(scoreSemesterData.years[currentYearsIndex].value,
-            scoreSemesterData.semesters[currentSemesterIndex].value)
+        .getScoreData(
+      year: scoreSemesterData.years[currentYearsIndex].value,
+      semester: scoreSemesterData.semesters[currentSemesterIndex].value,
+    )
         .then((scoreData) {
       this.scoreData = scoreData;
       if (mounted) {
