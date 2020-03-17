@@ -1,6 +1,6 @@
-class Options {
+class SemesterOptions {
   String text;
   String value;
 
-  Options({this.text, this.value});
+  SemesterOptions({this.text, this.value});
 }

@@ -193,7 +193,7 @@ class Helper {
     for (var i = 0; i < options.length; i++) {
       //print('$i => ${tdDoc[i].text}');
       courseSemesterData.semesters.add(
-        Options(
+        SemesterOptions(
           text: options[i].text,
           value: options[i].attributes['value'],
         ),
@@ -323,7 +323,7 @@ class Helper {
       var options = selectDoc[0].getElementsByTagName('option');
       for (var i = 0; i < options.length; i++) {
         scoreSemesterData.years.add(
-          Options(
+          SemesterOptions(
             text: options[i].text,
             value: options[i].attributes['value'],
           ),
@@ -332,7 +332,7 @@ class Helper {
       options = selectDoc[1].getElementsByTagName('option');
       for (var i = 0; i < options.length; i++) {
         scoreSemesterData.semesters.add(
-          Options(
+          SemesterOptions(
             text: options[i].text,
             value: options[i].attributes['value'],
           ),

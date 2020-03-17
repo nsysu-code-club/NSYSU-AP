@@ -1,12 +1,12 @@
 import 'options.dart';
 
 class CourseSemesterData {
-  List<Options> semesters;
+  List<SemesterOptions> semesters;
 
   int selectSemesterIndex = 0;
 
-  Options get semester => semesters.length == 0
-      ? Options(text: '1072', value: '1072')
+  SemesterOptions get semester => semesters.length == 0
+      ? SemesterOptions(text: '1072', value: '1072')
       : semesters[selectSemesterIndex];
 
   void setDefault(String text) {
