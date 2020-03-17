@@ -16,23 +16,26 @@ import 'package:nsysu_ap/models/pre_score.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/utils.dart';
+import 'package:sprintf/sprintf.dart';
 
 import '../utils/app_localizations.dart';
 import '../utils/firebase_analytics_utils.dart';
 
-const HOST = "nsysu-ap.rainvisitor.me";
-const PORT = '8443';
-const BASE_URL = 'https://$HOST:$PORT';
-
 class Helper {
+  static const selcrsUrlFormat = 'selcrs%i.nsysu.edu.tw';
+  static const tfUrl = 'tfstu.nsysu.edu.tw';
+
   static Helper _instance;
+
   static String courseCookie = '';
   static String scoreCookie = '';
   static String graduationCookie = '';
   static String tsfCookie = '';
+
   static String username = '';
-  static String selcrsUrl = 'selcrs1.nsysu.edu.tw';
-  static const String tfUrl = 'tfstu.nsysu.edu.tw';
+
+  static String get selcrsUrl => sprintf(selcrsUrlFormat, [index]);
+
   static int index = 0;
   static int error = 0;
 
@@ -45,22 +48,17 @@ class Helper {
 
   String get language {
     switch (AppLocalizations.locale.languageCode) {
-      case 'zh':
-        return 'cht';
-        break;
       case 'en':
         return 'eng';
-        break;
+      case 'zh':
       default:
         return 'cht';
-        break;
     }
   }
 
   static changeSelcrsUrl() {
     index++;
     if (index == 5) index = 0;
-    selcrsUrl = 'selcrs${index == 0 ? '' : index}.nsysu.edu.tw';
     print(selcrsUrl);
   }
 
@@ -454,7 +452,6 @@ class Helper {
       encoding: Encoding.getByName('BIG-5'),
     );
     String text = big5.decode(response.bodyBytes);
-    var startTime = DateTime.now().millisecondsSinceEpoch;
     //print('text = $text}');
     var document = parse(text, encoding: 'BIG-5');
     PreScore detail;
