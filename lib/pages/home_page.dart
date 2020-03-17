@@ -46,6 +46,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final GlobalKey<HomePageScaffoldState> _homeKey =
       GlobalKey<HomePageScaffoldState>();
+
   AppLocalizations app;
   ApLocalizations ap;
 
@@ -96,7 +97,7 @@ class HomePageState extends State<HomePage> {
         IconButton(
           icon: Icon(ApIcon.info),
           onPressed: _showInformationDialog,
-        )
+        ),
       ],
       onImageTapped: (News news) {
         ApUtils.pushCupertinoStyle(
@@ -229,6 +230,7 @@ class HomePageState extends State<HomePage> {
         onTapHeader: () {
           if (isLogin) {
             if (userInfo != null) {
+              Navigator.of(context).pop();
               ApUtils.pushCupertinoStyle(
                 context,
                 UserInfoPage(
