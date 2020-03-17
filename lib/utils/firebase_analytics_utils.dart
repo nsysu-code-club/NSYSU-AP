@@ -41,44 +41,22 @@ class FA {
 
   static Future<void> logApiEvent(String type, int status,
       {String message = ''}) async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
     await analytics?.logEvent(
       name: 'ap_api',
       parameters: <String, dynamic>{
         'type': type,
         'status': status,
         'message': message,
-        'version': packageInfo.version,
-        'platform': Platform.operatingSystem,
       },
     );
     print('logEvent succeeded');
   }
 
-  static Future<void> logAESErrorEvent(String encryptPassword) async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
-    await analytics?.logEvent(
-      name: 'aes_error',
-      parameters: <String, dynamic>{
-        'encryptPassword': encryptPassword,
-        'version': packageInfo.version,
-        'platform': Platform.operatingSystem,
-      },
-    );
-    print('log encryptPassword succeeded');
-  }
-
   static Future<void> logCalculateUnits(double seconds) async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
     await analytics?.logEvent(
       name: 'calculate_units_time',
       parameters: <String, dynamic>{
         'time': seconds,
-        'version': packageInfo.version,
-        'platform': Platform.operatingSystem,
       },
     );
     print('log CalculateUnits succeeded');
@@ -88,14 +66,10 @@ class FA {
   static const String SCORE_HTML_PARSER = 'score_html_parser';
 
   static Future<void> logTimeEvent(String name, double seconds) async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
     await analytics?.logEvent(
       name: name,
       parameters: <String, dynamic>{
         'time': seconds,
-        'buildNumber': int.parse(packageInfo.buildNumber),
-        'platform': Platform.operatingSystem,
       },
     );
     print('log TimeEvent succeeded');
@@ -103,15 +77,11 @@ class FA {
 
   static Future<void> logAction(String name, String action,
       {String message = ''}) async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
     await analytics?.logEvent(
       name: name ?? '',
       parameters: <String, dynamic>{
         'action': action ?? '',
         'message': message ?? '',
-        'version': packageInfo.version,
-        'platform': Platform.operatingSystem,
       },
     );
   }
