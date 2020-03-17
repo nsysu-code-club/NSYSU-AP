@@ -385,6 +385,8 @@ class HomePageState extends State<HomePage> {
         _homeKey.currentState.showBasicHint(text: ap.loginFail);
       } else {
         _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
+        ShareDataWidget.of(context).data.username = username;
+        ShareDataWidget.of(context).data.password = password;
         setState(() {
           isLogin = true;
         });
