@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AppLocalizations {
+  String get hasPreScoreHint => _vocabularies['hasPreScoreHint'];
+
   AppLocalizations(Locale locale) {
     AppLocalizations.locale = locale;
   }
@@ -332,7 +334,8 @@ class AppLocalizations {
       'fallSemester': 'Fall Semester',
       'springSemester': 'Spring Semester',
       'summerSemester': 'Summer Semester',
-      'tuitionAndFeesEmpty': 'Oops！No tuition and fees data～\uD83D\uDE0B'
+      'tuitionAndFeesEmpty': 'Oops！No tuition and fees data～\uD83D\uDE0B',
+      'hasPreScoreHint': 'Yellow Text not final score, proved by instructor.',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -632,7 +635,8 @@ class AppLocalizations {
       'fallSemester': '上學期',
       'springSemester': '下學期',
       'summerSemester': '暑假',
-      'tuitionAndFeesEmpty': 'Oops！查無任何學雜費資料哦～\uD83D\uDE0B'
+      'tuitionAndFeesEmpty': 'Oops！查無任何學雜費資料哦～\uD83D\uDE0B',
+      'hasPreScoreHint': '黃字為授課老師開放成績查詢 並非最終成績',
     },
   };
 

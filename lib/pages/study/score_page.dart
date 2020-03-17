@@ -1,3 +1,4 @@
+import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/widgets/item_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
@@ -29,6 +30,14 @@ class ScorePageState extends State<ScorePage> {
   var currentYearsIndex = 0;
   var currentSemesterIndex = 0;
 
+  bool get hasPreScore {
+    bool _hasPreScore = false;
+    scoreData?.scores?.forEach((score) {
+      if (score.isPreScore) _hasPreScore = true;
+    });
+    return _hasPreScore;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -47,10 +56,10 @@ class ScorePageState extends State<ScorePage> {
     return ScoreScaffold(
       state: state,
       scoreData: scoreData,
-      isOffline: isOffline,
       middleTitle: app.credits,
       isShowConductScore: false,
       isShowCredit: true,
+      customHint: hasPreScore ? app.hasPreScoreHint : null,
       itemPicker: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -82,6 +91,17 @@ class ScorePageState extends State<ScorePage> {
       ),
       onRefresh: () async {
         _getSemesterScore();
+      },
+      finalScoreBuilder: (int index) {
+        return ScoreTextBorder(
+          text: scoreData.scores[index].finalScore,
+          style: TextStyle(
+            fontSize: 15.0,
+            color: scoreData.scores[index].isPreScore
+                ? ApTheme.of(context).yellow
+                : null,
+          ),
+        );
       },
     );
   }
