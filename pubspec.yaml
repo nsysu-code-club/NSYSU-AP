@@ -13,10 +13,10 @@ dependencies:
     sdk: flutter
 
   ap_common:
-    git:
-      url: https://github.com/abc873693/ap_common
-      ref: v0.0.4
-#    path: ../../GitHub-NKUST-ITC/ap_common
+#    git:
+#      url: https://github.com/abc873693/ap_common
+#      ref: v0.0.4
+    path: ../../GitHub-NKUST-ITC/ap_common
 
   #official plugin
   shared_preferences: 0.5.6

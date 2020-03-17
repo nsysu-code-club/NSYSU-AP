@@ -4,11 +4,9 @@ packages:
   ap_common:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "v0.0.4"
-      resolved-ref: "520b9d3af95b70bc2228f840d8c1d651ff53955c"
-      url: "https://github.com/abc873693/ap_common"
-    source: git
+      path: "../../GitHub-NKUST-ITC/ap_common"
+      relative: true
+    source: path
     version: "0.0.4"
   archive:
     dependency: transitive
@@ -108,6 +106,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
+  dio:
+    dependency: transitive
+    description:
+      name: dio
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.9"
   encrypt:
     dependency: "direct main"
     description:
@@ -246,7 +251,7 @@ packages:
       name: intl
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.16.0"
+    version: "0.16.1"
   js:
     dependency: transitive
     description:
@@ -454,7 +459,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.11"
+    version: "0.2.15"
   toast:
     dependency: transitive
     description:
