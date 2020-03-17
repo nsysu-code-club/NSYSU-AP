@@ -4,7 +4,6 @@ import 'package:ap_common/scaffold/course_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/dialog_option.dart';
-import 'package:ap_common/widgets/item_picker.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -65,7 +64,7 @@ class CoursePageState extends State<CoursePage> {
         _getCourseTables();
       },
       onRefresh: _getCourseTables,
-      isOffline: isOffline,
+      customHint: isOffline ? app.offlineCourse : null,
       isShowSearchButton: isShowSearchButton,
       actions: <Widget>[
         PopupMenuButton<int>(
