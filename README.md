@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# C++ algorhithms
-=======
 # 中山校務通
 ## 功能列表
 - 登入(列出對應系統所擁有的功能及串接狀態)
@@ -48,4 +45,3 @@
 - [ ] MacOS
 - [ ] Windows
 - [ ] Linux
->>>>>>> 726c1aeaadb9738ad394e63a9b6ef8bbada693a3
