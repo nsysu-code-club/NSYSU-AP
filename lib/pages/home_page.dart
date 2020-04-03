@@ -399,26 +399,39 @@ class HomePageState extends State<HomePage> {
   _login() async {
     var username = Preferences.getString(Constants.PREF_USERNAME, '');
     var password = Preferences.getStringSecurity(Constants.PREF_PASSWORD, '');
-    Helper.instance.selcrsLogin(username, password).then((response) async {
-      if (response == 403) {
-        _homeKey.currentState.showBasicHint(text: ap.loginFail);
-      } else {
-        _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
-        ShareDataWidget.of(context).data.username = username;
-        ShareDataWidget.of(context).data.password = password;
-        setState(() {
-          isLogin = true;
-        });
-      }
-    }).catchError((e) {
-      Helper.changeSelcrsUrl();
-      Helper.error++;
-      if (Helper.error < 5) {
-        _login();
-      } else {
-        _homeKey.currentState.showBasicHint(text: ap.timeoutMessage);
-      }
-    });
+    var response = await Helper.instance.selcrsLogin(
+      username: username,
+      password: password,
+      callback: GeneralCallback(
+        onError: (GeneralResponse e) {
+          if (e.statusCode == 400)
+            _homeKey.currentState.showBasicHint(text: ap.loginFail);
+          else
+            _changeHost();
+        },
+        onFailure: (DioError e) {
+          _changeHost();
+        },
+      ),
+    );
+    if (response != null) {
+      _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
+      ShareDataWidget.of(context).data.username = username;
+      ShareDataWidget.of(context).data.password = password;
+      setState(() {
+        isLogin = true;
+      });
+    }
+  }
+
+  void _changeHost() {
+    Helper.changeSelcrsUrl();
+    Helper.error++;
+    if (Helper.error < 5) {
+      _login();
+    } else {
+      _homeKey.currentState.showBasicHint(text: ap.timeoutMessage);
+    }
   }
 
   _checkUpdate() async {

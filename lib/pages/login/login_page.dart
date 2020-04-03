@@ -1,4 +1,7 @@
+import 'package:ap_common/callback/general_callback.dart';
+import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:flutter/cupertino.dart';
@@ -278,36 +281,45 @@ class LoginPageState extends State<LoginPage> {
         barrierDismissible: false,
       );
       Preferences.setString(Constants.PREF_USERNAME, _username.text);
-      Helper.instance
-          .selcrsLogin(_username.text, _password.text)
-          .then((response) async {
-        ShareDataWidget.of(context).data.username = _username.text;
-        ShareDataWidget.of(context).data.password = _password.text;
-        if (Navigator.canPop(context)) Navigator.pop(context);
-        if (response == 403) {
-          ApUtils.showToast(context, app.loginFail);
-        } else {
-          Preferences.setString(Constants.PREF_USERNAME, _username.text);
-          if (isRememberPassword) {
-            await Preferences.setStringSecurity(
-              Constants.PREF_PASSWORD,
-              _password.text,
-            );
-          }
-          Preferences.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
-          Navigator.of(context).pop(true);
+      var response = await Helper.instance.selcrsLogin(
+        username: _username.text,
+        password: _password.text,
+        callback: GeneralCallback(
+          onError: (GeneralResponse e) {
+            if (e.statusCode == 400)
+              ApUtils.showToast(context, app.loginFail);
+            else
+              _changeHost();
+          },
+          onFailure: (DioError e) {
+            _changeHost();
+          },
+        ),
+      );
+      if (response != null) {
+        Navigator.pop(context);
+        Preferences.setString(Constants.PREF_USERNAME, _username.text);
+        if (isRememberPassword) {
+          await Preferences.setStringSecurity(
+            Constants.PREF_PASSWORD,
+            _password.text,
+          );
         }
-      }).catchError((e) {
-        if (Navigator.canPop(context)) Navigator.pop(context);
-        Helper.changeSelcrsUrl();
-        Helper.error++;
-        if (Helper.error < 5) {
-          _login();
-          setState(() {});
-        } else {
-          ApUtils.showToast(context, app.timeoutMessage);
-        }
-      });
+        Preferences.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
+        Navigator.of(context).pop(true);
+      }
+    }
+  }
+
+  void _changeHost() {
+    if (Navigator.canPop(context)) Navigator.pop(context);
+    Helper.changeSelcrsUrl();
+    Helper.error++;
+    if (Helper.error < 5) {
+      _login();
+      setState(() {});
+    } else {
+      ApUtils.showToast(context, ApLocalizations.of(context).timeoutMessage);
     }
   }
 }

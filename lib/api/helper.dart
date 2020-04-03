@@ -7,9 +7,11 @@ import 'package:ap_common/models/score_data.dart';
 import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:big5/big5.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:nsysu_ap/models/course_semester_data.dart';
@@ -41,7 +43,7 @@ class Helper {
 
   static String get selcrsUrl => sprintf(selcrsUrlFormat, [index]);
 
-  static int index = 0;
+  static int index = 1;
   static int error = 0;
 
   static Helper get instance {
@@ -70,7 +72,7 @@ class Helper {
 
   static changeSelcrsUrl() {
     index++;
-    if (index == 5) index = 0;
+    if (index == 5) index = 1;
     print(selcrsUrl);
   }
 
@@ -90,52 +92,60 @@ class Helper {
     return base64.encode(digest.bytes);
   }
 
-  Future<int> selcrsLogin(String username, String password) async {
+  Future<GeneralResponse> selcrsLogin({
+    @required String username,
+    @required String password,
+    GeneralCallback callback,
+  }) async {
     var base64md5Password = base64md5(password);
     bool score = true, course = true;
-    var scoreResponse = await http.post(
-      'http://$selcrsUrl/scoreqry/sco_query_prs_sso2.asp',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: {
-        'SID': username,
-        'PASSWD': base64md5Password,
-        'ACTION': '0',
-        'INTYPE': '1',
-      },
-    ).timeout(Duration(seconds: 2));
-    String text = big5.decode(scoreResponse.bodyBytes);
-//    print('statusCode = ${scoreResponse.statusCode} text =  $text');
-    if (text.contains("資料錯誤請重新輸入"))
-      score = false;
-    else if (scoreResponse.statusCode != 302 && scoreResponse.statusCode != 200)
-      throw '';
-    scoreCookie = scoreResponse.headers['set-cookie'];
-    //print('scoreResponse statusCode =  ${scoreResponse.statusCode}');
-    var courseResponse = await http.post(
-      'http://$selcrsUrl/menu4/Studcheck_sso2.asp',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: {
-        'stuid': username,
-        'SPassword': base64md5Password,
-      },
-    ).timeout(Duration(seconds: 2));
-    //print('courseResponse statusCode =  ${courseResponse.statusCode}');
-    text = big5.decode(courseResponse.bodyBytes);
-    //print('text =  $text');
-    if (text.contains("學號碼密碼不符"))
-      course = false;
-    else if (courseResponse.statusCode != 302 &&
-        courseResponse.statusCode != 200) throw '';
-    courseCookie = courseResponse.headers['set-cookie'];
-    print(DateTime.now());
-    if (score && course)
-      return 200;
-    else
-      return 403;
+    dio.options.contentType = Headers.formUrlEncodedContentType;
+    try {
+      var scoreResponse = await dio.post(
+        'http://$selcrsUrl/scoreqry/sco_query_prs_sso2.asp',
+        data: {
+          'SID': username,
+          'PASSWD': base64md5Password,
+          'ACTION': '0',
+          'INTYPE': '1',
+        },
+      );
+      String text = big5.decode(scoreResponse.data);
+      if (text.contains("資料錯誤請重新輸入"))
+        callback?.onError(
+          GeneralResponse(statusCode: 400, message: 'score error'),
+        );
+      scoreCookie = scoreResponse.headers.value('set-cookie');
+    } on DioError catch (e) {
+      if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+        scoreCookie = e.response.headers.value('set-cookie');
+      } else
+        callback?.onFailure(e);
+    }
+    try {
+      var courseResponse = await dio.post(
+        'http://$selcrsUrl/menu4/Studcheck_sso2.asp',
+        data: {
+          'stuid': username,
+          'SPassword': base64md5Password,
+        },
+      );
+      String text = big5.decode(courseResponse.data);
+      print('text =  $text');
+      if (text.contains("學號碼密碼不符"))
+        callback?.onError(
+          GeneralResponse(statusCode: 400, message: 'course error'),
+        );
+      courseCookie = courseResponse.headers.value('set-cookie');
+      print(DateTime.now());
+    } on DioError catch (e) {
+      if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+        courseCookie = e.response.headers.value('set-cookie');
+      } else {
+        callback?.onFailure(e);
+      }
+    }
+    return GeneralResponse.success();
   }
 
   Future<int> graduationLogin(String username, String password) async {
