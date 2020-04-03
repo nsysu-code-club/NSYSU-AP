@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/ap_support_language.dart';
+import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/pages/about_us_page.dart';
 import 'package:ap_common/pages/news/news_content_page.dart';
 import 'package:ap_common/pages/open_source_page.dart';
@@ -12,6 +14,7 @@ import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/ap_drawer.dart';
 import 'package:ap_common/widgets/default_dialog.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -112,13 +115,20 @@ class HomePageState extends State<HomePage> {
       drawer: ApDrawer(
         builder: () async {
           if (isLogin) {
-            this.userInfo = await Helper.instance.getUserInfo();
-            FA.setUserProperty('department', userInfo.department);
-            FA.logUserInfo(userInfo.department);
-            FA.setUserId(userInfo.id);
-            return this.userInfo;
+            this.userInfo = await Helper.instance.getUserInfo(
+              callback: GeneralCallback(
+                onFailure: (DioError e) => ApUtils.handleDioError(context, e),
+                onError: (GeneralResponse e) =>
+                    ApUtils.showToast(context, ap.somethingError),
+              ),
+            );
+            if (userInfo != null) {
+              FA.setUserProperty('department', userInfo.department);
+              FA.logUserInfo(userInfo.department);
+              FA.setUserId(userInfo.id);
+            }
           }
-          return null;
+          return this.userInfo;
         },
         widgets: <Widget>[
           ExpansionTile(

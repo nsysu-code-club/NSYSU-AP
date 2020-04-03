@@ -1,12 +1,15 @@
 import 'dart:convert';
 
+import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/course_data.dart';
+import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/models/score_data.dart';
 import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:big5/big5.dart';
 import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:nsysu_ap/models/course_semester_data.dart';
@@ -27,6 +30,8 @@ class Helper {
 
   static Helper _instance;
 
+  static Dio dio;
+
   static String courseCookie = '';
   static String scoreCookie = '';
   static String graduationCookie = '';
@@ -42,6 +47,13 @@ class Helper {
   static Helper get instance {
     if (_instance == null) {
       _instance = Helper();
+      dio = Dio(
+        BaseOptions(
+          responseType: ResponseType.bytes,
+          sendTimeout: 10000,
+          receiveTimeout: 10000,
+        ),
+      );
     }
     return _instance;
   }
@@ -156,15 +168,24 @@ class Helper {
       return 403;
   }
 
-  Future<UserInfo> getUserInfo() async {
-    var url = 'http://$selcrsUrl/menu4/tools/changedat.asp';
-    var response = await http.get(
-      url,
-      headers: {'Cookie': courseCookie},
-    );
-    String text = big5.decode(response.bodyBytes);
-    //print('text =  ${text}');
-    return parserUserInfo(text);
+  Future<UserInfo> getUserInfo({GeneralCallback callback}) async {
+    var userInfo = UserInfo();
+    try {
+      dio.options.headers = {
+        'Cookie': courseCookie,
+      };
+      var response = await dio.get(
+        'http://$selcrsUrl/menu4/tools/changedat.asp',
+      );
+      String text = big5.decode(response.data);
+      return parserUserInfo(text);
+    } on DioError catch (e) {
+      callback?.onFailure(e);
+    } on Exception catch (e) {
+      callback?.onError(GeneralResponse.unknownError());
+      throw e;
+    }
+    return userInfo;
   }
 
   UserInfo parserUserInfo(String text) {
