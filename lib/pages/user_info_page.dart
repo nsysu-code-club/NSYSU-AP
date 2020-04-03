@@ -1,8 +1,11 @@
 import 'package:ap_common/models/user_info.dart';
 import 'package:ap_common/scaffold/user_info_scaffold.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
+import 'package:ap_common/utils/ap_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/helper.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
+import 'package:nsysu_ap/utils/utils.dart';
 
 class UserInfoPage extends StatefulWidget {
   final UserInfo userInfo;
@@ -15,6 +18,8 @@ class UserInfoPage extends StatefulWidget {
 
 class _UserInfoPageState extends State<UserInfoPage> {
   UserInfo userInfo;
+
+  TextEditingController newEmail;
 
   @override
   void initState() {
@@ -32,8 +37,41 @@ class _UserInfoPageState extends State<UserInfoPage> {
         FA.setUserProperty('department', userInfo.department);
         FA.logUserInfo(userInfo.department);
         FA.setUserId(userInfo.id);
-        return this.userInfo;
+        setState(() {});
+        return null;
       },
+      actions: <Widget>[
+        IconButton(
+          onPressed: () {
+            newEmail = TextEditingController(text: userInfo.email);
+            showDialog(
+              context: context,
+              builder: (_) {
+                return AlertDialog(
+                  title: Text('更改電子信箱'),
+                  content: TextField(
+                    controller: newEmail,
+                  ),
+                  actions: <Widget>[
+                    FlatButton(
+                      onPressed: () async {
+                        userInfo =
+                            await Helper.instance.changeMail(newEmail.text);
+                        Navigator.pop(context);
+                        ApUtils.showToast(
+                            context, ApLocalizations.of(context).updateSuccess);
+                        setState(() {});
+                      },
+                      child: Text(ApLocalizations.of(context).confirm),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          icon: Icon(Icons.edit),
+        )
+      ],
     );
   }
 }
