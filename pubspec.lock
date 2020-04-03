@@ -4,10 +4,12 @@ packages:
   ap_common:
     dependency: "direct main"
     description:
-      path: "../../GitHub-NKUST-ITC/ap_common"
-      relative: true
-    source: path
-    version: "0.0.4"
+      path: "."
+      ref: "v0.0.5"
+      resolved-ref: d980274b717be2b14dc47967f06f365ab25f5d9a
+      url: "https://github.com/abc873693/ap_common"
+    source: git
+    version: "0.0.5"
   archive:
     dependency: transitive
     description:
@@ -251,7 +253,7 @@ packages:
       name: intl
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.16.1"
+    version: "0.16.0"
   js:
     dependency: transitive
     description:
@@ -459,7 +461,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.15"
+    version: "0.2.11"
   toast:
     dependency: transitive
     description:
