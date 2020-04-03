@@ -4,7 +4,6 @@ import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/pages/about_us_page.dart';
 import 'package:ap_common/pages/news/news_content_page.dart';
 import 'package:ap_common/pages/open_source_page.dart';
-import 'package:ap_common/pages/user_info_page.dart';
 import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/home_page_scaffold.dart';
@@ -23,6 +22,7 @@ import 'package:ap_common/models/user_info.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
+import 'package:nsysu_ap/pages/user_info_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/helper.dart';
@@ -235,15 +235,6 @@ class HomePageState extends State<HomePage> {
                 context,
                 UserInfoPage(
                   userInfo: userInfo,
-                  setCurrentScreen: () => FA.setCurrentScreen(
-                      "UserInfoPage", "user_info_page.dart"),
-                  onRefresh: () async {
-                    this.userInfo = await Helper.instance.getUserInfo();
-                    FA.setUserProperty('department', userInfo.department);
-                    FA.logUserInfo(userInfo.department);
-                    FA.setUserId(userInfo.id);
-                    return this.userInfo;
-                  },
                 ),
               );
             }
