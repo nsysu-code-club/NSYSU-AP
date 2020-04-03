@@ -729,12 +729,19 @@ class Helper {
     return response.bodyBytes;
   }
 
-  Future<List<News>> getNews() async {
-    var response = await http.get(
-      'https://raw.githubusercontent.com/abc873693/NSYSU-AP/master/assets/news_data.json',
-      headers: {'Cookie': tsfCookie},
-    );
-    return NewsResponse.fromRawJson(response.body).data;
+  Future<List<News>> getNews({GeneralCallback callback}) async {
+    try {
+      var response = await Dio().get(
+        'https://raw.githubusercontent.com/abc873693/NSYSU-AP/master/assets/news_data.json',
+      );
+      return NewsResponse.fromRawJson(response.data).data;
+    } on DioError catch (e) {
+      callback?.onFailure(e);
+    } on Exception catch (e) {
+      callback?.onError(GeneralResponse.unknownError());
+      throw e;
+    }
+    return null;
   }
 
   Future<UserInfo> changeMail(String mail) async {

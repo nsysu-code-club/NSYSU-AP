@@ -296,20 +296,38 @@ class HomePageState extends State<HomePage> {
   }
 
   _getAllNews() async {
-    try {
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       RemoteConfig remoteConfig = await RemoteConfig.instance;
       await remoteConfig.fetch(expiration: const Duration(seconds: 10));
       await remoteConfig.activateFetched();
       String rawString = remoteConfig.getString(Constants.NEWS_DATA);
       newsList = NewsResponse.fromRawJson(rawString).data;
-    } catch (exception) {
-      newsList = await Helper.instance.getNews();
+    } else {
+      newsList = await Helper.instance.getNews(
+        callback: GeneralCallback(
+          onError: (GeneralResponse e) {
+            setState(() {
+              state = HomeState.error;
+            });
+          },
+          onFailure: (DioError e) {
+            setState(() {
+              state = HomeState.error;
+            });
+            ApUtils.handleDioError(context, e);
+          },
+        ),
+      );
     }
-    newsList.sort((a, b) {
-      return b.weight.compareTo(a.weight);
-    });
     setState(() {
-      state = HomeState.finish;
+      if (newsList == null || newsList.length == 0)
+        state = HomeState.empty;
+      else {
+        newsList.sort((a, b) {
+          return b.weight.compareTo(a.weight);
+        });
+        state = HomeState.finish;
+      }
     });
   }
 
