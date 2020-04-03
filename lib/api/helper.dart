@@ -711,4 +711,22 @@ class Helper {
     );
     return NewsResponse.fromRawJson(response.body).data;
   }
+
+  Future<int> changeMail(String mail) async {
+    var response = await http.post(
+      'http://selcrs1.nsysu.edu.tw/menu4/tools/changedat.asp',
+      headers: {
+        'Cookie': courseCookie,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: {
+        'T1': mail,
+      },
+    ).timeout(Duration(seconds: 2));
+    String text = big5.decode(response.bodyBytes);
+    //    print('Response =  $text');
+    //    print('response.statusCode = ${response.statusCode}');
+    tsfCookie = response.headers['set-cookie'];
+    return response.statusCode;
+  }
 }
