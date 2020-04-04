@@ -3,8 +3,10 @@ import 'package:ap_common/models/user_info.dart';
 import 'package:ap_common/scaffold/user_info_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
@@ -49,13 +51,25 @@ class _UserInfoPageState extends State<UserInfoPage> {
               context: context,
               builder: (_) {
                 return AlertDialog(
-                  title: Text('更改電子信箱'),
+                  title: Text(AppLocalizations.of(context).changeEmail),
                   content: TextField(
                     controller: newEmail,
                   ),
                   actions: <Widget>[
                     FlatButton(
                       onPressed: () async {
+                        Navigator.pop(context);
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) => WillPopScope(
+                            child: ProgressDialog(
+                                AppLocalizations.of(context).loading),
+                            onWillPop: () async {
+                              return false;
+                            },
+                          ),
+                          barrierDismissible: false,
+                        );
                         var userInfo = await Helper.instance.changeMail(
                           mail: newEmail.text,
                           callback: GeneralCallback.simple(context),
