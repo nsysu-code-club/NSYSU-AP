@@ -70,6 +70,18 @@ class Helper {
     }
   }
 
+  Options get _courseOption => Options(
+        responseType: ResponseType.bytes,
+        contentType: Headers.formUrlEncodedContentType,
+        headers: {'Cookie': courseCookie},
+      );
+
+  Options get _scoreOption => Options(
+        responseType: ResponseType.bytes,
+        contentType: Headers.formUrlEncodedContentType,
+        headers: {'Cookie': scoreCookie},
+      );
+
   static changeSelcrsUrl() {
     index++;
     if (index == 5) index = 1;
@@ -273,11 +285,7 @@ class Helper {
           'Stuid': username,
           'B1': '%BDT%A9w%B0e%A5X',
         },
-        options: Options(
-          responseType: ResponseType.bytes,
-          contentType: Headers.formUrlEncodedContentType,
-          headers: {'Cookie': courseCookie},
-        ),
+        options: _courseOption,
       );
       String text = big5.decode(response.data);
       //    print('text =  ${text}');
@@ -376,155 +384,175 @@ class Helper {
     return null;
   }
 
-  Future<ScoreSemesterData> getScoreSemesterData() async {
+  Future<ScoreSemesterData> getScoreSemesterData({
+    GeneralCallback callback,
+  }) async {
     var url =
         'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=702&KIND=2&LANGS=$language';
-    var response = await http.post(
-      url,
-      headers: {'Cookie': scoreCookie},
-      encoding: Encoding.getByName('BIG-5'),
-    );
-    String text = big5.decode(response.bodyBytes);
-    //print('text =  ${text}');
-    var document = parse(text, encoding: 'BIG-5');
-    var selectDoc = document.getElementsByTagName('select');
-    var scoreSemesterData = ScoreSemesterData(
-      semesters: [],
-      years: [],
-    );
-    if (selectDoc.length >= 2) {
-      var options = selectDoc[0].getElementsByTagName('option');
-      for (var i = 0; i < options.length; i++) {
-        scoreSemesterData.years.add(
-          SemesterOptions(
-            text: options[i].text,
-            value: options[i].attributes['value'],
-          ),
-        );
+    try {
+      var response = await Dio().post(
+        url,
+        options: _scoreOption,
+      );
+      String text = big5.decode(response.data);
+      //print('text =  ${text}');
+      var document = parse(text, encoding: 'BIG-5');
+      var selectDoc = document.getElementsByTagName('select');
+      var scoreSemesterData = ScoreSemesterData(
+        semesters: [],
+        years: [],
+      );
+      if (selectDoc.length >= 2) {
+        var options = selectDoc[0].getElementsByTagName('option');
+        for (var i = 0; i < options.length; i++) {
+          scoreSemesterData.years.add(
+            SemesterOptions(
+              text: options[i].text,
+              value: options[i].attributes['value'],
+            ),
+          );
+        }
+        options = selectDoc[1].getElementsByTagName('option');
+        for (var i = 0; i < options.length; i++) {
+          scoreSemesterData.semesters.add(
+            SemesterOptions(
+              text: options[i].text,
+              value: options[i].attributes['value'],
+            ),
+          );
+          if (options[i].attributes['selected'] != null)
+            scoreSemesterData.selectSemesterIndex = i;
+        }
+      } else {
+        print('document.text = ${document.text}');
       }
-      options = selectDoc[1].getElementsByTagName('option');
-      for (var i = 0; i < options.length; i++) {
-        scoreSemesterData.semesters.add(
-          SemesterOptions(
-            text: options[i].text,
-            value: options[i].attributes['value'],
-          ),
-        );
-        if (options[i].attributes['selected'] != null)
-          scoreSemesterData.selectSemesterIndex = i;
-      }
-    } else {
-      print('document.text = ${document.text}');
+      return scoreSemesterData;
+    } on DioError catch (e) {
+      if (callback != null)
+        callback.onFailure(e);
+      else
+        throw e;
+    } on Exception catch (e) {
+      callback?.onError(GeneralResponse.unknownError());
+      throw e;
     }
-    return scoreSemesterData;
+    return null;
   }
 
   Future<ScoreData> getScoreData({
-    String year,
-    String semester,
+    @required String year,
+    @required String semester,
     bool searchPreScore = false,
+    GeneralCallback callback,
   }) async {
     var url =
         'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=804&KIND=2&LANGS=$language';
-    var response = await http.post(
-      url,
-      headers: {'Cookie': scoreCookie},
-      body: {
-        'SYEAR': year,
-        'SEM': semester,
-      },
-      encoding: Encoding.getByName('BIG-5'),
-    );
-    String text = big5.decode(response.bodyBytes);
-    var startTime = DateTime.now().millisecondsSinceEpoch;
-    var document = parse(text, encoding: 'BIG-5');
-    List<Score> list = [];
-    Detail detail = Detail();
-    var tableDoc = document.getElementsByTagName('tbody');
-    if (tableDoc.length >= 2) {
-//      for (var i = 0; i < tableDoc.length; i++) {
-//        //print('i => ${tableDoc[i].text}');
-//        var fontDoc = tableDoc[i].getElementsByTagName('tr');
-//        for (var j = 0; j < fontDoc.length; j++) {
-//          print("i $i j $j => ${fontDoc[j].text}");
-//        }
-//      }
-      if (tableDoc.length == 3) {
-        var fontDoc = tableDoc[1].getElementsByTagName('font');
-        detail.creditTaken = double.parse(fontDoc[0].text.split('：')[1]);
-        detail.creditEarned = double.parse(fontDoc[1].text.split('：')[1]);
-        detail.average = double.parse(fontDoc[2].text.split('：')[1]);
-        detail.classRank =
-            '${fontDoc[4].text.split('：')[1]}/${fontDoc[5].text.split('：')[1]}';
-        var percentage = double.parse(fontDoc[4].text.split('：')[1]) /
-            double.parse(fontDoc[5].text.split('：')[1]);
-        percentage = 1.0 - percentage;
-        percentage *= 100;
-        detail.classPercentage = double.parse(percentage.toStringAsFixed(2));
-      }
-      var trDoc = tableDoc[0].getElementsByTagName('tr');
-      for (var i = 0; i < trDoc.length; i++) {
-        var fontDoc = trDoc[i].getElementsByTagName('font');
-        if (fontDoc.length != 6) continue;
-        if (i != 0) {
-          final score = Score(
-            courseNumber:
-                '${fontDoc[2].text.substring(1, fontDoc[2].text.length - 1)}',
-            title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
-                '${fontDoc[3].text}',
-            middleScore: '${fontDoc[4].text}',
-            finalScore: fontDoc[5].text,
-          );
-          if (searchPreScore &&
-              (score.finalScore == null || (score.finalScore ?? '') == '--')) {
-            final preScore = await getPreScoreData(score.courseNumber);
-            if (preScore != null) {
-              score.finalScore = preScore.grades;
-              score.isPreScore = true;
-            }
-          }
-          list.add(score);
+    try {
+      var response = await Dio().post(
+        url,
+        options: _scoreOption,
+        data: {
+          'SYEAR': year,
+          'SEM': semester,
+        },
+      );
+      String text = big5.decode(response.data);
+      var startTime = DateTime.now().millisecondsSinceEpoch;
+      var document = parse(text, encoding: 'BIG-5');
+      List<Score> list = [];
+      Detail detail = Detail();
+      var tableDoc = document.getElementsByTagName('tbody');
+      if (tableDoc.length >= 2) {
+        //      for (var i = 0; i < tableDoc.length; i++) {
+        //        //print('i => ${tableDoc[i].text}');
+        //        var fontDoc = tableDoc[i].getElementsByTagName('tr');
+        //        for (var j = 0; j < fontDoc.length; j++) {
+        //          print("i $i j $j => ${fontDoc[j].text}");
+        //        }
+        //      }
+        if (tableDoc.length == 3) {
+          var fontDoc = tableDoc[1].getElementsByTagName('font');
+          detail.creditTaken = double.parse(fontDoc[0].text.split('：')[1]);
+          detail.creditEarned = double.parse(fontDoc[1].text.split('：')[1]);
+          detail.average = double.parse(fontDoc[2].text.split('：')[1]);
+          detail.classRank =
+              '${fontDoc[4].text.split('：')[1]}/${fontDoc[5].text.split('：')[1]}';
+          var percentage = double.parse(fontDoc[4].text.split('：')[1]) /
+              double.parse(fontDoc[5].text.split('：')[1]);
+          percentage = 1.0 - percentage;
+          percentage *= 100;
+          detail.classPercentage = double.parse(percentage.toStringAsFixed(2));
         }
+        var trDoc = tableDoc[0].getElementsByTagName('tr');
+        for (var i = 0; i < trDoc.length; i++) {
+          var fontDoc = trDoc[i].getElementsByTagName('font');
+          if (fontDoc.length != 6) continue;
+          if (i != 0) {
+            final score = Score(
+              courseNumber:
+                  '${fontDoc[2].text.substring(1, fontDoc[2].text.length - 1)}',
+              title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
+                  '${fontDoc[3].text}',
+              middleScore: '${fontDoc[4].text}',
+              finalScore: fontDoc[5].text,
+            );
+            if (searchPreScore &&
+                (score.finalScore == null ||
+                    (score.finalScore ?? '') == '--')) {
+              final preScore = await getPreScoreData(score.courseNumber);
+              if (preScore != null) {
+                score.finalScore = preScore.grades;
+                score.isPreScore = true;
+              }
+            }
+            list.add(score);
+          }
+        }
+        var endTime = DateTime.now().millisecondsSinceEpoch;
+        FA.logTimeEvent(FA.SCORE_HTML_PARSER, (endTime - startTime) / 1000.0);
       }
-      var endTime = DateTime.now().millisecondsSinceEpoch;
-      FA.logTimeEvent(FA.SCORE_HTML_PARSER, (endTime - startTime) / 1000.0);
+      /*var trDoc = document.getElementsByTagName('tr');
+      for (var i = 0; i < trDoc.length; i++) {
+        if (trDoc[i].getElementsByTagName('font').length != 6) continue;
+        if (i != 0)
+          list.add(Score(
+            title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
+                '${trDoc[i].getElementsByTagName('font')[3].text}',
+            middleScore: '${trDoc[i].getElementsByTagName('font')[4].text}',
+            finalScore: trDoc[i].getElementsByTagName('font')[5].text,
+          ));
+        for (var j in trDoc[i].getElementsByTagName('font')) {
+          //print('${j.text}');
+        }
+      }*/
+      var scoreData = ScoreData(
+        scores: list,
+        detail: detail,
+      );
+      return scoreData;
+    } on DioError catch (e) {
+      if (callback != null)
+        callback.onFailure(e);
+      else
+        throw e;
+    } on Exception catch (e) {
+      callback?.onError(GeneralResponse.unknownError());
+      throw e;
     }
-    /*var trDoc = document.getElementsByTagName('tr');
-    for (var i = 0; i < trDoc.length; i++) {
-      if (trDoc[i].getElementsByTagName('font').length != 6) continue;
-      if (i != 0)
-        list.add(Score(
-          title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
-              '${trDoc[i].getElementsByTagName('font')[3].text}',
-          middleScore: '${trDoc[i].getElementsByTagName('font')[4].text}',
-          finalScore: trDoc[i].getElementsByTagName('font')[5].text,
-        ));
-      for (var j in trDoc[i].getElementsByTagName('font')) {
-        //print('${j.text}');
-      }
-    }*/
-    var scoreData = ScoreData(
-      scores: list,
-      detail: detail,
-    );
-    return scoreData;
+    return null;
   }
 
   Future<PreScore> getPreScoreData(String courseNumber) async {
     var url =
         'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=814&KIND=1&LANGS=$language';
-    var response = await http.post(
+    var response = await Dio().post(
       url,
-      headers: {
-        'Cookie': scoreCookie,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: {
+      options: _scoreOption,
+      data: {
         'CRSNO': courseNumber,
       },
-      encoding: Encoding.getByName('BIG-5'),
     );
-    String text = big5.decode(response.bodyBytes);
+    String text = big5.decode(response.data);
     //print('text = $text}');
     var document = parse(text, encoding: 'BIG-5');
     PreScore detail;

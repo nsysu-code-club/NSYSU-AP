@@ -1,3 +1,4 @@
+import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/widgets/item_picker.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,24 @@ class ScorePageState extends State<ScorePage> {
     });
     return _hasPreScore;
   }
+
+  GeneralCallback get callback => GeneralCallback(
+        onFailure: (DioError e) => setState(() {
+          state = ScoreState.error;
+          switch (e.type) {
+            case DioErrorType.CONNECT_TIMEOUT:
+            case DioErrorType.SEND_TIMEOUT:
+            case DioErrorType.RECEIVE_TIMEOUT:
+            case DioErrorType.RESPONSE:
+            case DioErrorType.CANCEL:
+              break;
+            case DioErrorType.DEFAULT:
+              throw e;
+              break;
+          }
+        }),
+        onError: (_) => setState(() => state = ScoreState.error),
+      );
 
   @override
   void initState() {
@@ -107,52 +126,43 @@ class ScorePageState extends State<ScorePage> {
   }
 
   void _getSemester() async {
-    try {
-      scoreSemesterData = await Helper.instance.getScoreSemesterData();
-    } catch (e) {
+    scoreSemesterData = await Helper.instance.getScoreSemesterData(
+      callback: callback,
+    );
+    if (scoreSemesterData != null) {
+      years = [];
+      semesters = [];
+      scoreSemesterData.years.forEach((option) {
+        years.add(option.text);
+      });
+      scoreSemesterData.semesters.forEach((option) {
+        semesters.add(option.text);
+      });
+      _getSemesterScore();
+    } else {
       setState(() {
         state = ScoreState.error;
       });
-    } finally {
-      if (scoreSemesterData.years.length != 0 &&
-          scoreSemesterData.semesters.length != 0) {
-        years = [];
-        semesters = [];
-        scoreSemesterData.years.forEach((option) {
-          years.add(option.text);
-        });
-        scoreSemesterData.semesters.forEach((option) {
-          semesters.add(option.text);
-        });
-        _getSemesterScore();
-      } else {
-        setState(() {
-          state = ScoreState.error;
-        });
-      }
     }
   }
 
   void _getSemesterScore() async {
-    setState(() {
-      state = ScoreState.loading;
-    });
-    Helper.instance
-        .getScoreData(
+    if (scoreSemesterData == null) {
+      _getSemester();
+      return;
+    }
+    this.scoreData = await Helper.instance.getScoreData(
       year: scoreSemesterData.years[currentYearsIndex].value,
       semester: scoreSemesterData.semesters[currentSemesterIndex].value,
-    )
-        .then((scoreData) {
-      this.scoreData = scoreData;
-      if (mounted) {
-        setState(() {
-          if (scoreData.scores.length == 0) {
-            state = ScoreState.empty;
-          } else {
-            state = ScoreState.finish;
-          }
-        });
-      }
-    });
+    );
+    if (mounted && this.scoreData != null) {
+      setState(() {
+        if (scoreData.scores == null || scoreData.scores.length == 0) {
+          state = ScoreState.empty;
+        } else {
+          state = ScoreState.finish;
+        }
+      });
+    }
   }
 }
