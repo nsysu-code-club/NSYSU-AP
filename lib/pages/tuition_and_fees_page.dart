@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
+import 'package:ap_common/utils/ap_utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
@@ -172,22 +177,46 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                       }),
                   barrierDismissible: false,
                 );
-                List<int> bytes =
-                    await Helper.instance.downloadFile(item.serialNumber);
+                List<int> bytes = await Helper.instance.downloadFile(
+                  serialNumber: item.serialNumber,
+                  callback: GeneralCallback(
+                    onError: (GeneralResponse e) {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      ApUtils.showToast(
+                        context,
+                        ApLocalizations.of(context).somethingError,
+                      );
+                    },
+                    onFailure: (DioError e) {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      ApUtils.showToast(
+                        context,
+                        ApLocalizations.dioError(context, e),
+                      );
+                    },
+                  ),
+                );
                 Navigator.of(context, rootNavigator: true).pop();
-                switch (index) {
-                  case 0:
-                    await Printing.layoutPdf(
-                      onLayout: (format) async => bytes,
-                      name: item.title,
-                    );
-                    FA.logAction('export_by_printing', '');
-                    break;
-                  case 1:
-                    await Printing.sharePdf(
-                        bytes: bytes, filename: '${item.title}.pdf');
-                    FA.logAction('export_by_share', '');
-                    break;
+                if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+                  switch (index) {
+                    case 0:
+                      await Printing.layoutPdf(
+                        onLayout: (format) async => bytes,
+                        name: item.title,
+                      );
+                      FA.logAction('export_by_printing', '');
+                      break;
+                    case 1:
+                      await Printing.sharePdf(
+                          bytes: bytes, filename: '${item.title}.pdf');
+                      FA.logAction('export_by_share', '');
+                      break;
+                  }
+                } else {
+                  ApUtils.showToast(
+                    context,
+                    ApLocalizations.of(context).platformError,
+                  );
                 }
               }
             });
