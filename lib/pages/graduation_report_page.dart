@@ -1,3 +1,4 @@
+import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
@@ -8,17 +9,6 @@ import 'package:ap_common/widgets/default_dialog.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 
 enum _State { loading, finish, error, empty, offlineEmpty }
-
-class GraduationReportPageRoute extends MaterialPageRoute {
-  GraduationReportPageRoute()
-      : super(builder: (BuildContext context) => GraduationReportPage());
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    return FadeTransition(opacity: animation, child: GraduationReportPage());
-  }
-}
 
 class GraduationReportPage extends StatefulWidget {
   static const String routerName = "/graduationReport";
@@ -41,6 +31,24 @@ class GraduationReportPageState extends State<GraduationReportPage>
   List<TableRow> scoreWeightList = [];
 
   GraduationReportData graduationReportData;
+
+  GeneralCallback get callback => GeneralCallback(
+        onFailure: (DioError e) => setState(() {
+          state = _State.error;
+          switch (e.type) {
+            case DioErrorType.CONNECT_TIMEOUT:
+            case DioErrorType.SEND_TIMEOUT:
+            case DioErrorType.RECEIVE_TIMEOUT:
+            case DioErrorType.RESPONSE:
+            case DioErrorType.CANCEL:
+              break;
+            case DioErrorType.DEFAULT:
+              throw e;
+              break;
+          }
+        }),
+        onError: (_) => setState(() => state = _State.error),
+      );
 
   @override
   void initState() {
@@ -330,15 +338,19 @@ class GraduationReportPageState extends State<GraduationReportPage>
     setState(() {
       state = _State.loading;
     });
-    await Helper.instance.graduationLogin(widget.username, widget.password);
-    Helper.instance.getGraduationReport().then((data) async {
-      graduationReportData = data;
-      setState(() {
-        if (graduationReportData == null)
-          state = _State.empty;
-        else
-          state = _State.finish;
-      });
+    await Helper.instance.graduationLogin(
+      username: widget.username,
+      password: widget.password,
+      callback: callback,
+    );
+    graduationReportData = await Helper.instance.getGraduationReport(
+      callback: callback,
+    );
+    setState(() {
+      if (graduationReportData == null)
+        state = _State.empty;
+      else
+        state = _State.finish;
     });
   }
 
