@@ -15,8 +15,8 @@ dependencies:
   ap_common:
     git:
       url: https://github.com/abc873693/ap_common
-  #      ref: v0.0.5
-  # path: ../../GitHub-NKUST-ITC/ap_common
+      ref: v0.0.6
+#   path: ../../GitHub-NKUST-ITC/ap_common
 
   #official plugin
   shared_preferences: 0.5.6

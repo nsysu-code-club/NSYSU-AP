@@ -5,11 +5,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: "0d8122a54eee4dd3c4a00b42db8d709c9384f469"
+      ref: "v0.0.6"
+      resolved-ref: "2fb79cd6f28327acaab6a39fffae91e16f5b38e2"
       url: "https://github.com/abc873693/ap_common"
     source: git
-    version: "0.0.5"
+    version: "0.0.6"
   archive:
     dependency: transitive
     description:
