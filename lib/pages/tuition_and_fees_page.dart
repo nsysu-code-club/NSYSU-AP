@@ -1,3 +1,4 @@
+import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
@@ -10,17 +11,6 @@ import 'package:printing/printing.dart';
 import 'package:sprintf/sprintf.dart';
 
 enum _State { loading, finish, error, empty }
-
-class TuitionAndFeesPageRoute extends MaterialPageRoute {
-  TuitionAndFeesPageRoute()
-      : super(builder: (BuildContext context) => TuitionAndFeesPage());
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    return FadeTransition(opacity: animation, child: TuitionAndFeesPage());
-  }
-}
 
 class TuitionAndFeesPage extends StatefulWidget {
   final String username;
@@ -39,6 +29,24 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   AppLocalizations app;
 
   List<TuitionAndFees> items;
+
+  GeneralCallback get callback => GeneralCallback(
+        onFailure: (DioError e) => setState(() {
+          state = _State.error;
+          switch (e.type) {
+            case DioErrorType.CONNECT_TIMEOUT:
+            case DioErrorType.SEND_TIMEOUT:
+            case DioErrorType.RECEIVE_TIMEOUT:
+            case DioErrorType.RESPONSE:
+            case DioErrorType.CANCEL:
+              break;
+            case DioErrorType.DEFAULT:
+              throw e;
+              break;
+          }
+        }),
+        onError: (_) => setState(() => state = _State.error),
+      );
 
   @override
   void initState() {
@@ -202,19 +210,22 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   }
 
   Future<Null> _getData() async {
-    await Helper.instance.tfLogin(widget.username, widget.password);
-    List<TuitionAndFees> data = await Helper.instance.getTfData();
-    setState(() {
-      if (data == null) {
+    var response = await Helper.instance.tfLogin(
+      username: widget.username,
+      password: widget.password,
+      callback: callback,
+    );
+    if (response != null) {
+      items = await Helper.instance.getTfData(
+        callback: callback,
+      );
+      if (mounted && items != null)
         setState(() {
-          state = _State.empty;
+          if (items.length == 0)
+            state = _State.empty;
+          else
+            state = _State.finish;
         });
-      } else {
-        setState(() {
-          state = _State.finish;
-          items = data;
-        });
-      }
-    });
+    }
   }
 }
