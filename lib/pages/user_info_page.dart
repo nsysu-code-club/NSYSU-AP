@@ -1,3 +1,4 @@
+import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:ap_common/scaffold/user_info_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
@@ -55,12 +56,18 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   actions: <Widget>[
                     FlatButton(
                       onPressed: () async {
-                        userInfo =
-                            await Helper.instance.changeMail(newEmail.text);
+                        var userInfo = await Helper.instance.changeMail(
+                          mail: newEmail.text,
+                          callback: GeneralCallback.simple(context),
+                        );
                         Navigator.pop(context);
-                        ApUtils.showToast(
-                            context, ApLocalizations.of(context).updateSuccess);
-                        setState(() {});
+                        if (userInfo != null) {
+                          ApUtils.showToast(context,
+                              ApLocalizations.of(context).updateSuccess);
+                          setState(() {
+                            this.userInfo = userInfo;
+                          });
+                        }
                       },
                       child: Text(ApLocalizations.of(context).confirm),
                     ),
