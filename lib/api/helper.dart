@@ -99,7 +99,7 @@ class Helper {
     graduationCookie = '';
     tsfCookie = '';
     username = '';
-    index = 0;
+    index = 1;
     error = 0;
   }
 
@@ -120,7 +120,6 @@ class Helper {
     GeneralCallback callback,
   }) async {
     var base64md5Password = base64md5(password);
-    bool score = true, course = true;
     dio.options.contentType = Headers.formUrlEncodedContentType;
     try {
       var scoreResponse = await dio.post(
@@ -133,10 +132,12 @@ class Helper {
         },
       );
       String text = big5.decode(scoreResponse.data);
-      if (text.contains("資料錯誤請重新輸入"))
+      if (text.contains("資料錯誤請重新輸入")) {
         callback?.onError(
           GeneralResponse(statusCode: 400, message: 'score error'),
         );
+        return null;
+      }
       scoreCookie = scoreResponse.headers.value('set-cookie');
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
@@ -154,10 +155,12 @@ class Helper {
       );
       String text = big5.decode(courseResponse.data);
       print('text =  $text');
-      if (text.contains("學號碼密碼不符"))
+      if (text.contains("學號碼密碼不符")) {
         callback?.onError(
           GeneralResponse(statusCode: 400, message: 'course error'),
         );
+        return null;
+      }
       courseCookie = courseResponse.headers.value('set-cookie');
       print(DateTime.now());
     } on DioError catch (e) {
