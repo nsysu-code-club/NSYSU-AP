@@ -87,6 +87,11 @@ class Helper {
         headers: {'Cookie': graduationCookie},
       );
 
+  Options get _tfOption => Options(
+        responseType: ResponseType.bytes,
+        headers: {'Cookie': tsfCookie},
+      );
+
   static changeSelcrsUrl() {
     index++;
     if (index == 5) index = 1;
@@ -803,12 +808,7 @@ class Helper {
     try {
       var response = await Dio().get(
         url,
-        options: Options(
-          responseType: ResponseType.bytes,
-          headers: {
-            'Cookie': tsfCookie,
-          },
-        ),
+        options: _tfOption,
       );
       String text = big5.decode(response.data);
       //print('text =  ${text}');
@@ -866,20 +866,34 @@ class Helper {
     }
   }
 
-  Future<List<int>> downloadFile(String serialNumber) async {
-    var response = await http.get(
-      'https://$tfUrl/tfstu/$serialNumber',
-      headers: {'Cookie': tsfCookie},
-    );
-//    var bytes = response.bodyBytes;
-//    await Printing.sharePdf(bytes: bytes, filename: filename);
-//    await Printing.layoutPdf(
-//      onLayout: (format) async => response.bodyBytes,
-//    );
-//    String dir = (await getApplicationDocumentsDirectory()).path;
-//    File file = new File('$dir/$filename');
-//    await file.writeAsBytes(bytes);
-    return response.bodyBytes;
+  Future<List<int>> downloadFile({
+    String serialNumber,
+    GeneralCallback callback,
+  }) async {
+    try {
+      var response = await Dio().get(
+        'https://$tfUrl/tfstu/$serialNumber',
+        options: _tfOption,
+      );
+      //    var bytes = response.bodyBytes;
+      //    await Printing.sharePdf(bytes: bytes, filename: filename);
+      //    await Printing.layoutPdf(
+      //      onLayout: (format) async => response.bodyBytes,
+      //    );
+      //    String dir = (await getApplicationDocumentsDirectory()).path;
+      //    File file = new File('$dir/$filename');
+      //    await file.writeAsBytes(bytes);
+      return response.data;
+    } on DioError catch (e) {
+      if (callback != null) {
+        callback.onFailure(e);
+        return null;
+      } else
+        throw e;
+    } on Exception catch (e) {
+      callback?.onError(GeneralResponse.unknownError());
+      throw e;
+    }
   }
 
   Future<List<News>> getNews({GeneralCallback callback}) async {
