@@ -416,9 +416,9 @@ class HomePageState extends State<HomePage> {
     );
     if (response != null) {
       _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
-      ShareDataWidget.of(context).data.username = username;
-      ShareDataWidget.of(context).data.password = password;
       setState(() {
+        ShareDataWidget.of(context).data.username = username;
+        ShareDataWidget.of(context).data.password = password;
         isLogin = true;
       });
     }
