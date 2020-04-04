@@ -1,3 +1,4 @@
+import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/course_scaffold.dart';
@@ -34,6 +35,24 @@ class CoursePageState extends State<CoursePage> {
 
   bool isOffline = false;
   bool isShowSearchButton = false;
+
+  GeneralCallback get callback => GeneralCallback(
+        onFailure: (DioError e) => setState(() {
+          state = CourseState.error;
+          switch (e.type) {
+            case DioErrorType.CONNECT_TIMEOUT:
+            case DioErrorType.SEND_TIMEOUT:
+            case DioErrorType.RECEIVE_TIMEOUT:
+            case DioErrorType.RESPONSE:
+            case DioErrorType.CANCEL:
+              break;
+            case DioErrorType.DEFAULT:
+              throw e;
+              break;
+          }
+        }),
+        onError: (_) => setState(() => state = CourseState.error),
+      );
 
   @override
   void initState() {
@@ -112,39 +131,43 @@ class CoursePageState extends State<CoursePage> {
 
   void _getSemester() async {
     String code;
-    semesterData = await Helper.instance.getCourseSemesterData();
-    RemoteConfig remoteConfig;
-    try {
-      remoteConfig = await RemoteConfig.instance;
-      await remoteConfig.fetch(expiration: const Duration(seconds: 10));
-      await remoteConfig.activateFetched();
-      code = remoteConfig?.getString(Constants.DEFAULT_COURSE_SEMESTER_CODE);
-      String rawTimeCodeConfig =
-          remoteConfig?.getString(Constants.TIME_CODE_CONFIG);
-      timeCodeConfig = TimeCodeConfig.fromRawJson(rawTimeCodeConfig);
-      Preferences.setString(Constants.DEFAULT_COURSE_SEMESTER_CODE, code);
-      Preferences.setString(Constants.TIME_CODE_CONFIG, rawTimeCodeConfig);
-    } catch (exception) {
-      code = Preferences.getString(
-        Constants.DEFAULT_COURSE_SEMESTER_CODE,
-        '${Constants.DEFAULT_YEAR}${Constants.DEFAULT_SEMESTER}',
-      );
-      timeCodeConfig = TimeCodeConfig.fromRawJson(
-        Preferences.getString(
-          Constants.TIME_CODE_CONFIG,
-          '{  "timeCodes":[{"title":"A",         "startTime": "7:00"         ,"endTime": "7:50"        },{       "title":"1",         "startTime": "8:10"         ,"endTime": "9:00"        },{       "title":"2",         "startTime": "9:10"         ,"endTime": "10:00"        },{       "title":"3",         "startTime": "10:10"         ,"endTime": "11:00"        },{       "title":"4",         "startTime": "11:10"         ,"endTime": "12:00"        },{       "title":"B",         "startTime": "12:10"         ,"endTime": "13:00"        },{       "title":"5",         "startTime": "13:10"         ,"endTime": "14:00"        },{       "title":"6",         "startTime": "14:10"         ,"endTime": "15:00"        },{       "title":"7",         "startTime": "15:10"         ,"endTime": "16:00"        },{       "title":"8",         "startTime": "16:10"         ,"endTime": "17:00"        },{       "title":"9",         "startTime": "17:10"         ,"endTime": "18:00"        },{       "title":"C",         "startTime": "18:20"         ,"endTime": "19:10"        },{       "title":"D",         "startTime": "19:15"         ,"endTime": "20:05"        },{       "title":"E",         "startTime": "20:10"         ,"endTime": "21:00"        },{       "title":"F",         "startTime": "21:05"         ,"endTime": "21:55"        }] }',
-        ),
-      );
+    semesterData = await Helper.instance.getCourseSemesterData(
+      callback: callback,
+    );
+    if (semesterData != null) {
+      RemoteConfig remoteConfig;
+      try {
+        remoteConfig = await RemoteConfig.instance;
+        await remoteConfig.fetch(expiration: const Duration(seconds: 10));
+        await remoteConfig.activateFetched();
+        code = remoteConfig?.getString(Constants.DEFAULT_COURSE_SEMESTER_CODE);
+        String rawTimeCodeConfig =
+            remoteConfig?.getString(Constants.TIME_CODE_CONFIG);
+        timeCodeConfig = TimeCodeConfig.fromRawJson(rawTimeCodeConfig);
+        Preferences.setString(Constants.DEFAULT_COURSE_SEMESTER_CODE, code);
+        Preferences.setString(Constants.TIME_CODE_CONFIG, rawTimeCodeConfig);
+      } catch (exception) {
+        code = Preferences.getString(
+          Constants.DEFAULT_COURSE_SEMESTER_CODE,
+          '${Constants.DEFAULT_YEAR}${Constants.DEFAULT_SEMESTER}',
+        );
+        timeCodeConfig = TimeCodeConfig.fromRawJson(
+          Preferences.getString(
+            Constants.TIME_CODE_CONFIG,
+            '{  "timeCodes":[{"title":"A",         "startTime": "7:00"         ,"endTime": "7:50"        },{       "title":"1",         "startTime": "8:10"         ,"endTime": "9:00"        },{       "title":"2",         "startTime": "9:10"         ,"endTime": "10:00"        },{       "title":"3",         "startTime": "10:10"         ,"endTime": "11:00"        },{       "title":"4",         "startTime": "11:10"         ,"endTime": "12:00"        },{       "title":"B",         "startTime": "12:10"         ,"endTime": "13:00"        },{       "title":"5",         "startTime": "13:10"         ,"endTime": "14:00"        },{       "title":"6",         "startTime": "14:10"         ,"endTime": "15:00"        },{       "title":"7",         "startTime": "15:10"         ,"endTime": "16:00"        },{       "title":"8",         "startTime": "16:10"         ,"endTime": "17:00"        },{       "title":"9",         "startTime": "17:10"         ,"endTime": "18:00"        },{       "title":"C",         "startTime": "18:20"         ,"endTime": "19:10"        },{       "title":"D",         "startTime": "19:15"         ,"endTime": "20:05"        },{       "title":"E",         "startTime": "20:10"         ,"endTime": "21:00"        },{       "title":"F",         "startTime": "21:05"         ,"endTime": "21:55"        }] }',
+          ),
+        );
+      }
+      items = [];
+      var i = 0;
+      semesterData.setDefault(code);
+      semesterData.semesters.forEach((option) {
+        items.add(parser(option.text));
+        if (option.value == code) semesterIndex = i;
+        i++;
+      });
+      _getCourseTables();
     }
-    items = [];
-    var i = 0;
-    semesterData.setDefault(code);
-    semesterData.semesters.forEach((option) {
-      items.add(parser(option.text));
-      if (option.value == code) semesterIndex = i;
-      i++;
-    });
-    _getCourseTables();
   }
 
   String parser(String text) {
@@ -178,24 +201,22 @@ class CoursePageState extends State<CoursePage> {
   }
 
   _getCourseTables() async {
-    setState(() {
-      state = CourseState.loading;
-    });
-    Helper.instance
-        .getCourseData(
-      Preferences.getString(Constants.PREF_USERNAME, ''),
-      timeCodeConfig,
-      semesterData.semesters[semesterIndex].value,
-    )
-        .then((courseData) {
-      this.courseData = courseData;
-      if (mounted)
-        setState(() {
-          if (this.courseData.courseTables == null)
-            state = CourseState.empty;
-          else
-            state = CourseState.finish;
-        });
-    });
+    if (semesterData == null) {
+      _getSemester();
+      return;
+    }
+    this.courseData = await Helper.instance.getCourseData(
+      username: Preferences.getString(Constants.PREF_USERNAME, ''),
+      timeCodeConfig: timeCodeConfig,
+      semester: semesterData.semesters[semesterIndex].value,
+      callback: callback,
+    );
+    if (mounted && this.courseData != null)
+      setState(() {
+        if (this.courseData?.courseTables == null)
+          state = CourseState.empty;
+        else
+          state = CourseState.finish;
+      });
   }
 }

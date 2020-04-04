@@ -92,6 +92,11 @@ class Helper {
     return base64.encode(digest.bytes);
   }
 
+  /*
+  * 選課系統&成績系統登入
+  * error status code
+  * 400: 帳號密碼錯誤
+  * */
   Future<GeneralResponse> selcrsLogin({
     @required String username,
     @required String password,
@@ -178,6 +183,11 @@ class Helper {
       return 403;
   }
 
+  /*
+  * 取得使用者資訊
+  * error status code
+  * 400: 帳號密碼錯誤
+  * */
   Future<UserInfo> getUserInfo({GeneralCallback callback}) async {
     var userInfo = UserInfo();
     try {
@@ -213,129 +223,157 @@ class Helper {
     return userInfo;
   }
 
-  Future<CourseSemesterData> getCourseSemesterData() async {
+  Future<CourseSemesterData> getCourseSemesterData({
+    GeneralCallback callback,
+  }) async {
     var url = 'http://$selcrsUrl/menu4/query/stu_slt_up.asp';
-    var response = await http.post(
-      url,
-      headers: {'Cookie': courseCookie},
-      encoding: Encoding.getByName('BIG-5'),
-    );
-    String text = big5.decode(response.bodyBytes);
-    //print('text =  ${text}');
-    var document = parse(text, encoding: 'BIG-5');
-    var options = document.getElementsByTagName('option');
-    var courseSemesterData = CourseSemesterData(semesters: []);
-    for (var i = 0; i < options.length; i++) {
-      //print('$i => ${tdDoc[i].text}');
-      courseSemesterData.semesters.add(
-        SemesterOptions(
-          text: options[i].text,
-          value: options[i].attributes['value'],
-        ),
-      );
+    try {
+      dio.options.headers = {'Cookie': courseCookie};
+      var response = await dio.post(url);
+      String text = big5.decode(response.data);
+      //print('text =  ${text}');
+      var document = parse(text, encoding: 'BIG-5');
+      var options = document.getElementsByTagName('option');
+      var courseSemesterData = CourseSemesterData(semesters: []);
+      for (var i = 0; i < options.length; i++) {
+        //print('$i => ${tdDoc[i].text}');
+        courseSemesterData.semesters.add(
+          SemesterOptions(
+            text: options[i].text,
+            value: options[i].attributes['value'],
+          ),
+        );
+      }
+      return courseSemesterData;
+    } on DioError catch (e) {
+      if (callback != null)
+        callback.onFailure(e);
+      else
+        throw e;
+    } on Exception catch (e) {
+      callback?.onError(GeneralResponse.unknownError());
+      throw e;
     }
-    return courseSemesterData;
+    return null;
   }
 
-  Future<CourseData> getCourseData(
-      String username, TimeCodeConfig timeCodeConfig, String semester) async {
+  Future<CourseData> getCourseData({
+    @required String username,
+    @required TimeCodeConfig timeCodeConfig,
+    @required String semester,
+    GeneralCallback callback,
+  }) async {
     var url = 'http://$selcrsUrl/menu4/query/stu_slt_data.asp';
-    var response = await http.post(
-      url,
-      headers: {'Cookie': courseCookie},
-      body: {
-        'stuact': 'B',
-        'YRSM': semester,
-        'Stuid': username,
-        'B1': '%BDT%A9w%B0e%A5X',
-      },
-      encoding: Encoding.getByName('BIG-5'),
-    );
-    String text = big5.decode(response.bodyBytes);
-    //print('text =  ${text}');
-    var startTime = DateTime.now().millisecondsSinceEpoch;
-    var document = parse(text, encoding: 'BIG-5');
-    var trDoc = document.getElementsByTagName('tr');
-    var courseData =
-        CourseData(courseTables: (trDoc.length == 0) ? null : CourseTables());
-    if (courseData.courseTables != null)
-      courseData.courseTables.timeCode = timeCodeConfig.textList;
-    //print(DateTime.now());
-    for (var i = 0; i < trDoc.length; i++) {
-      var tdDoc = trDoc[i].getElementsByTagName('td');
-      if (i == 0) continue;
-      final title = tdDoc[4].text;
-      final instructors = tdDoc[8].text;
-      final location = Location(
-        building: '',
-        room: tdDoc[9].text,
+    try {
+      var response = await Dio().post(
+        url,
+        data: {
+          'stuact': 'B',
+          'YRSM': semester,
+          'Stuid': username,
+          'B1': '%BDT%A9w%B0e%A5X',
+        },
+        options: Options(
+          responseType: ResponseType.bytes,
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {'Cookie': courseCookie},
+        ),
       );
-      String time = '';
-      for (var j = 10; j < tdDoc.length; j++) {
-        if (tdDoc[j].text.length > 0) {
-          List<String> sections = tdDoc[j].text.split('');
-          if (sections.length > 0 && sections[0] != ' ') {
-            String tmp = '';
-            for (var section in sections) {
-              int index = timeCodeConfig.indexOf(section);
-              if (index == -1) continue;
-              TimeCode timeCode = timeCodeConfig.timeCodes[index];
-              tmp += '$section';
-              var course = Course(
-                title: title,
-                instructors: [instructors],
-                location: location,
-                date: Date(
-                  weekday: 'T',
-                  section: section,
-                  startTime: timeCode?.startTime ?? '',
-                  endTime: timeCode?.endTime ?? '',
-                ),
-              );
-              if (j == 10)
-                courseData.courseTables.monday.add(course);
-              else if (j == 11)
-                courseData.courseTables.tuesday.add(course);
-              else if (j == 12)
-                courseData.courseTables.wednesday.add(course);
-              else if (j == 13)
-                courseData.courseTables.thursday.add(course);
-              else if (j == 14)
-                courseData.courseTables.friday.add(course);
-              else if (j == 15)
-                courseData.courseTables.saturday.add(course);
-              else if (j == 16) courseData.courseTables.sunday.add(course);
-            }
-            if (tmp.isNotEmpty) {
-              time += '${trDoc[0].getElementsByTagName('td')[j].text}$tmp';
+      String text = big5.decode(response.data);
+      //    print('text =  ${text}');
+      var startTime = DateTime.now().millisecondsSinceEpoch;
+      var document = parse(text, encoding: 'BIG-5');
+      var trDoc = document.getElementsByTagName('tr');
+      var courseData =
+          CourseData(courseTables: (trDoc.length == 0) ? null : CourseTables());
+      if (courseData.courseTables != null)
+        courseData.courseTables.timeCode = timeCodeConfig.textList;
+      //print(DateTime.now());
+      for (var i = 0; i < trDoc.length; i++) {
+        var tdDoc = trDoc[i].getElementsByTagName('td');
+        if (i == 0) continue;
+        final title = tdDoc[4].text;
+        final instructors = tdDoc[8].text;
+        final location = Location(
+          building: '',
+          room: tdDoc[9].text,
+        );
+        String time = '';
+        for (var j = 10; j < tdDoc.length; j++) {
+          if (tdDoc[j].text.length > 0) {
+            List<String> sections = tdDoc[j].text.split('');
+            if (sections.length > 0 && sections[0] != ' ') {
+              String tmp = '';
+              for (var section in sections) {
+                int index = timeCodeConfig.indexOf(section);
+                if (index == -1) continue;
+                TimeCode timeCode = timeCodeConfig.timeCodes[index];
+                tmp += '$section';
+                var course = Course(
+                  title: title,
+                  instructors: [instructors],
+                  location: location,
+                  date: Date(
+                    weekday: 'T',
+                    section: section,
+                    startTime: timeCode?.startTime ?? '',
+                    endTime: timeCode?.endTime ?? '',
+                  ),
+                );
+                if (j == 10)
+                  courseData.courseTables.monday.add(course);
+                else if (j == 11)
+                  courseData.courseTables.tuesday.add(course);
+                else if (j == 12)
+                  courseData.courseTables.wednesday.add(course);
+                else if (j == 13)
+                  courseData.courseTables.thursday.add(course);
+                else if (j == 14)
+                  courseData.courseTables.friday.add(course);
+                else if (j == 15)
+                  courseData.courseTables.saturday.add(course);
+                else if (j == 16) courseData.courseTables.sunday.add(course);
+              }
+              if (tmp.isNotEmpty) {
+                time += '${trDoc[0].getElementsByTagName('td')[j].text}$tmp';
+              }
             }
           }
         }
+        courseData.courses.add(
+          CourseDetail(
+            code: tdDoc[2].text,
+            className: '${tdDoc[1].text} ${tdDoc[3].text}',
+            title: title,
+            units: tdDoc[5].text,
+            required:
+                tdDoc[7].text.length == 1 ? '${tdDoc[7].text}修' : tdDoc[7].text,
+            location: location,
+            instructors: [instructors],
+            times: time,
+          ),
+        );
       }
-      courseData.courses.add(
-        CourseDetail(
-          code: tdDoc[2].text,
-          className: '${tdDoc[1].text} ${tdDoc[3].text}',
-          title: title,
-          units: tdDoc[5].text,
-          required:
-              tdDoc[7].text.length == 1 ? '${tdDoc[7].text}修' : tdDoc[7].text,
-          location: location,
-          instructors: [instructors],
-          times: time,
-        ),
-      );
+      if (trDoc.length != 0) {
+        if (courseData.courseTables.saturday.length == 0)
+          courseData.courseTables.saturday = null;
+        if (courseData.courseTables.sunday.length == 0)
+          courseData.courseTables.sunday = null;
+        var endTime = DateTime.now().millisecondsSinceEpoch;
+        FA.logTimeEvent(FA.COURSE_HTML_PARSER, (endTime - startTime) / 1000.0);
+      }
+      //print(DateTime.now());
+      return courseData;
+    } on DioError catch (e) {
+      if (callback != null)
+        callback.onFailure(e);
+      else
+        throw e;
+    } on Exception catch (e) {
+      callback?.onError(GeneralResponse.unknownError());
+      throw e;
     }
-    if (trDoc.length != 0) {
-      if (courseData.courseTables.saturday.length == 0)
-        courseData.courseTables.saturday = null;
-      if (courseData.courseTables.sunday.length == 0)
-        courseData.courseTables.sunday = null;
-      var endTime = DateTime.now().millisecondsSinceEpoch;
-      FA.logTimeEvent(FA.COURSE_HTML_PARSER, (endTime - startTime) / 1000.0);
-    }
-    //print(DateTime.now());
-    return courseData;
+    return null;
   }
 
   Future<ScoreSemesterData> getScoreSemesterData() async {
