@@ -10,6 +10,8 @@ class AppLocalizations {
 
   static Locale locale;
 
+  String get changeEmail => _vocabularies['changeEmail'];
+
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
@@ -336,6 +338,7 @@ class AppLocalizations {
       'summerSemester': 'Summer Semester',
       'tuitionAndFeesEmpty': 'Oops！No tuition and fees data～\uD83D\uDE0B',
       'hasPreScoreHint': 'Yellow Text not final score, proved by instructor.',
+      'changeEmail': 'Change Email',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -637,6 +640,7 @@ class AppLocalizations {
       'summerSemester': '暑假',
       'tuitionAndFeesEmpty': 'Oops！查無任何學雜費資料哦～\uD83D\uDE0B',
       'hasPreScoreHint': '黃字為授課老師開放成績查詢 並非最終成績',
+      'changeEmail': '更改電子信箱',
     },
   };
 
