@@ -753,74 +753,114 @@ class Helper {
       return '';
   }
 
-  Future<int> tfLogin(String username, String password) async {
-    var response = await http.post(
-      'https://$tfUrl/tfstu/tfstu_login_chk.asp',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: {
-        'ID': username,
-        'passwd': password,
-      },
-    ).timeout(Duration(seconds: 2));
-    String text = big5.decode(response.bodyBytes);
-//    print('Response =  $text');
-//    print('response.statusCode = ${response.statusCode}');
-    tsfCookie = response.headers['set-cookie'];
-    return response.statusCode;
+  Future<GeneralResponse> tfLogin({
+    @required String username,
+    @required String password,
+    GeneralCallback callback,
+  }) async {
+    try {
+      var response = await dio.post(
+        'https://$tfUrl/tfstu/tfstu_login_chk.asp',
+        options: Options(
+          responseType: ResponseType.bytes,
+          contentType: Headers.formUrlEncodedContentType,
+        ),
+        data: {
+          'ID': username,
+          'passwd': password,
+        },
+      );
+      String text = big5.decode(response.data);
+      print('Request =  ${response.request.data}');
+      print('Response =  $text');
+      //    print('response.statusCode = ${response.statusCode}');
+      tsfCookie = response.headers.value('set-cookie');
+    } on DioError catch (e) {
+      if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+        tsfCookie = e.response.headers.value('set-cookie');
+      } else {
+        if (callback != null) {
+          callback.onFailure(e);
+          print(big5.decode(e.response.data));
+          return null;
+        } else
+          throw e;
+      }
+    } on Exception catch (e) {
+      callback?.onError(GeneralResponse.unknownError());
+      throw e;
+    }
+    return GeneralResponse.success();
   }
 
-  Future<List<TuitionAndFees>> getTfData() async {
+  Future<List<TuitionAndFees>> getTfData({
+    GeneralCallback callback,
+  }) async {
     var url = 'https://$tfUrl/tfstu/tfstudata.asp?act=11';
-    var response = await http.get(
-      url,
-      headers: {'Cookie': tsfCookie},
-    );
-    String text = big5.decode(response.bodyBytes);
-    //print('text =  ${text}');
-    if (text.contains('沒有合乎查詢條件的資料')) {
-      return null;
-    }
-    var document = parse(text, encoding: 'BIG-5');
-    var tbody = document.getElementsByTagName('tbody');
-    List<TuitionAndFees> list = [];
-    var trElements = tbody[1].getElementsByTagName('tr');
-    for (var i = 1; i < trElements.length; i++) {
-      var tdDoc = trElements[i].getElementsByTagName('td');
-      var aTag = tdDoc[4].getElementsByTagName('a');
-      String serialNumber;
-      if (aTag.length > 0) {
-        serialNumber = aTag[0]
-            .attributes['onclick']
-            .split('javascript:window.location.href=\'')
-            .last;
-        serialNumber = serialNumber.substring(0, serialNumber.length - 1);
-      }
-      String paymentStatus = '', paymentStatusEn = '';
-      for (var charCode in tdDoc[2].text.codeUnits) {
-        if (charCode < 200) {
-          if (charCode == 32)
-            paymentStatusEn += '\n';
-          else
-            paymentStatusEn += String.fromCharCode(charCode);
-        } else
-          paymentStatus += String.fromCharCode(charCode);
-      }
-      final titleEN = tdDoc[0].getElementsByTagName('span')[0].text;
-      list.add(
-        TuitionAndFees(
-          titleZH: tdDoc[0].text.replaceAll(titleEN, ''),
-          titleEN: titleEN,
-          amount: tdDoc[1].text,
-          paymentStatusZH: paymentStatus,
-          paymentStatusEN: paymentStatusEn,
-          dateOfPayment: tdDoc[3].text,
-          serialNumber: serialNumber ?? '',
+    try {
+      var response = await Dio().get(
+        url,
+        options: Options(
+          responseType: ResponseType.bytes,
+          headers: {
+            'Cookie': tsfCookie,
+          },
         ),
       );
+      String text = big5.decode(response.data);
+      //print('text =  ${text}');
+      if (text.contains('沒有合乎查詢條件的資料')) {
+        return [];
+      }
+      var document = parse(text, encoding: 'BIG-5');
+      var tbody = document.getElementsByTagName('tbody');
+      List<TuitionAndFees> list = [];
+      var trElements = tbody[1].getElementsByTagName('tr');
+      for (var i = 1; i < trElements.length; i++) {
+        var tdDoc = trElements[i].getElementsByTagName('td');
+        var aTag = tdDoc[4].getElementsByTagName('a');
+        String serialNumber;
+        if (aTag.length > 0) {
+          serialNumber = aTag[0]
+              .attributes['onclick']
+              .split('javascript:window.location.href=\'')
+              .last;
+          serialNumber = serialNumber.substring(0, serialNumber.length - 1);
+        }
+        String paymentStatus = '', paymentStatusEn = '';
+        for (var charCode in tdDoc[2].text.codeUnits) {
+          if (charCode < 200) {
+            if (charCode == 32)
+              paymentStatusEn += '\n';
+            else
+              paymentStatusEn += String.fromCharCode(charCode);
+          } else
+            paymentStatus += String.fromCharCode(charCode);
+        }
+        final titleEN = tdDoc[0].getElementsByTagName('span')[0].text;
+        list.add(
+          TuitionAndFees(
+            titleZH: tdDoc[0].text.replaceAll(titleEN, ''),
+            titleEN: titleEN,
+            amount: tdDoc[1].text,
+            paymentStatusZH: paymentStatus,
+            paymentStatusEN: paymentStatusEn,
+            dateOfPayment: tdDoc[3].text,
+            serialNumber: serialNumber ?? '',
+          ),
+        );
+      }
+      return list;
+    } on DioError catch (e) {
+      if (callback != null) {
+        callback.onFailure(e);
+        return null;
+      } else
+        throw e;
+    } on Exception catch (e) {
+      callback?.onError(GeneralResponse.unknownError());
+      throw e;
     }
-    return list;
   }
 
   Future<List<int>> downloadFile(String serialNumber) async {
