@@ -13,7 +13,6 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
-import 'package:http/http.dart' as http;
 import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/models/options.dart';
@@ -903,7 +902,10 @@ class Helper {
       );
       return NewsResponse.fromRawJson(response.data).data;
     } on DioError catch (e) {
-      callback?.onFailure(e);
+      if (callback != null)
+        callback?.onFailure(e);
+      else
+        throw e;
     } on Exception catch (e) {
       callback?.onError(GeneralResponse.unknownError());
       throw e;
@@ -911,20 +913,29 @@ class Helper {
     return null;
   }
 
-  Future<UserInfo> changeMail(String mail) async {
-    var response = await http.post(
-      'http://$selcrsUrl/menu4/tools/changedat.asp',
-      headers: {
-        'Cookie': courseCookie,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: {
-        'T1': mail,
-      },
-    ).timeout(Duration(seconds: 2));
-    String text = big5.decode(response.bodyBytes);
-//    print('Response =  $text');
-    //    print('response.statusCode = ${response.statusCode}');
-    return parserUserInfo(text);
+  Future<UserInfo> changeMail({
+    @required String mail,
+    GeneralCallback callback,
+  }) async {
+    try {
+      var response = await Dio().post(
+        'http://$selcrsUrl/menu4/tools/changedat.asp',
+        options: _courseOption,
+        data: {
+          'T1': mail,
+        },
+      );
+      String text = big5.decode(response.data);
+      return parserUserInfo(text);
+    } on DioError catch (e) {
+      if (callback != null)
+        callback?.onFailure(e);
+      else
+        throw e;
+    } on Exception catch (e) {
+      callback?.onError(GeneralResponse.unknownError());
+      throw e;
+    }
+    return null;
   }
 }
