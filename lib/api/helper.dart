@@ -915,7 +915,7 @@ class Helper {
 
   Future<UserInfo> changeMail({
     @required String mail,
-    GeneralCallback callback,
+    @required GeneralCallback<UserInfo> callback,
   }) async {
     try {
       var response = await Dio().post(
@@ -926,7 +926,7 @@ class Helper {
         },
       );
       String text = big5.decode(response.data);
-      return parserUserInfo(text);
+      return callback?.onSuccess(parserUserInfo(text));
     } on DioError catch (e) {
       if (callback != null)
         callback?.onFailure(e);

@@ -72,7 +72,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
                         );
                         var userInfo = await Helper.instance.changeMail(
                           mail: newEmail.text,
-                          callback: GeneralCallback.simple(context),
+                          callback: GeneralCallback.simple(
+                            context,
+                            (userInfo) => userInfo,
+                          ),
                         );
                         Navigator.pop(context);
                         if (userInfo != null) {
