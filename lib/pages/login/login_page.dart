@@ -281,7 +281,7 @@ class LoginPageState extends State<LoginPage> {
         barrierDismissible: false,
       );
       Preferences.setString(Constants.PREF_USERNAME, _username.text);
-      var response = await Helper.instance.selcrsLogin(
+      Helper.instance.selcrsLogin(
         username: _username.text,
         password: _password.text,
         callback: GeneralCallback(
@@ -294,22 +294,22 @@ class LoginPageState extends State<LoginPage> {
           onFailure: (DioError e) {
             _changeHost();
           },
+          onSuccess: (GeneralResponse data) async {
+            Navigator.pop(context);
+            Preferences.setString(Constants.PREF_USERNAME, _username.text);
+            ShareDataWidget.of(context).data.username = _username.text;
+            ShareDataWidget.of(context).data.password = _password.text;
+            if (isRememberPassword) {
+              await Preferences.setStringSecurity(
+                Constants.PREF_PASSWORD,
+                _password.text,
+              );
+            }
+            Preferences.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
+            Navigator.of(context).pop(true);
+          },
         ),
       );
-      if (response != null) {
-        Navigator.pop(context);
-        Preferences.setString(Constants.PREF_USERNAME, _username.text);
-        ShareDataWidget.of(context).data.username = _username.text;
-        ShareDataWidget.of(context).data.password = _password.text;
-        if (isRememberPassword) {
-          await Preferences.setStringSecurity(
-            Constants.PREF_PASSWORD,
-            _password.text,
-          );
-        }
-        Preferences.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
-        Navigator.of(context).pop(true);
-      }
     }
   }
 

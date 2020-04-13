@@ -399,7 +399,7 @@ class HomePageState extends State<HomePage> {
   _login() async {
     var username = Preferences.getString(Constants.PREF_USERNAME, '');
     var password = Preferences.getStringSecurity(Constants.PREF_PASSWORD, '');
-    var response = await Helper.instance.selcrsLogin(
+    Helper.instance.selcrsLogin(
       username: username,
       password: password,
       callback: GeneralCallback(
@@ -412,16 +412,16 @@ class HomePageState extends State<HomePage> {
         onFailure: (DioError e) {
           _changeHost();
         },
+        onSuccess: (GeneralResponse data) {
+          _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
+          setState(() {
+            ShareDataWidget.of(context).data.username = username;
+            ShareDataWidget.of(context).data.password = password;
+            isLogin = true;
+          });
+        },
       ),
     );
-    if (response != null) {
-      _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
-      setState(() {
-        ShareDataWidget.of(context).data.username = username;
-        ShareDataWidget.of(context).data.password = password;
-        isLogin = true;
-      });
-    }
   }
 
   void _changeHost() {

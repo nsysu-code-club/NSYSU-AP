@@ -118,10 +118,10 @@ class Helper {
   * error status code
   * 400: 帳號密碼錯誤
   * */
-  Future<GeneralResponse> selcrsLogin({
+  Future<void> selcrsLogin({
     @required String username,
     @required String password,
-    GeneralCallback callback,
+    @required GeneralCallback<GeneralResponse> callback,
   }) async {
     var base64md5Password = base64md5(password);
     dio.options.contentType = Headers.formUrlEncodedContentType;
@@ -140,7 +140,6 @@ class Helper {
         callback?.onError(
           GeneralResponse(statusCode: 400, message: 'score error'),
         );
-        return null;
       }
       scoreCookie = scoreResponse.headers.value('set-cookie');
     } on DioError catch (e) {
@@ -163,18 +162,17 @@ class Helper {
         callback?.onError(
           GeneralResponse(statusCode: 400, message: 'course error'),
         );
-        return null;
       }
       courseCookie = courseResponse.headers.value('set-cookie');
       print(DateTime.now());
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
         courseCookie = e.response.headers.value('set-cookie');
+        callback?.onSuccess(GeneralResponse.success());
       } else {
         callback?.onFailure(e);
       }
     }
-    return GeneralResponse.success();
   }
 
   /*
