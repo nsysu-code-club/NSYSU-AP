@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/course_data.dart';
 import 'package:ap_common/models/general_response.dart';
@@ -7,19 +5,14 @@ import 'package:ap_common/models/score_data.dart';
 import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:big5/big5.dart';
-import 'package:crypto/crypto.dart';
-import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
 import 'package:nsysu_ap/models/course_semester_data.dart';
-import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/pre_score.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
-import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:sprintf/sprintf.dart';
 
@@ -35,8 +28,6 @@ class Helper {
 
   static String courseCookie = '';
   static String scoreCookie = '';
-  static String graduationCookie = '';
-  static String tsfCookie = '';
 
   static String username = '';
 
@@ -81,11 +72,6 @@ class Helper {
         headers: {'Cookie': scoreCookie},
       );
 
-  Options get _graduationOption => Options(
-        responseType: ResponseType.bytes,
-        headers: {'Cookie': graduationCookie},
-      );
-
   static changeSelcrsUrl() {
     index++;
     if (index == 5) index = 1;
@@ -95,8 +81,6 @@ class Helper {
   clearSession() {
     courseCookie = '';
     scoreCookie = '';
-    graduationCookie = '';
-    tsfCookie = '';
     username = '';
     index = 1;
     error = 0;
