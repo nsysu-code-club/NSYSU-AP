@@ -107,12 +107,6 @@ class Helper {
     error = 0;
   }
 
-  String base64md5(String text) {
-    var bytes = utf8.encode(text);
-    var digest = md5.convert(bytes);
-    return base64.encode(digest.bytes);
-  }
-
   /*
   * 選課系統&成績系統登入
   * error status code
@@ -123,7 +117,7 @@ class Helper {
     @required String password,
     @required GeneralCallback<GeneralResponse> callback,
   }) async {
-    var base64md5Password = base64md5(password);
+    var base64md5Password = Utils.base64md5(password);
     dio.options.contentType = Headers.formUrlEncodedContentType;
     try {
       var scoreResponse = await dio.post(
@@ -186,7 +180,7 @@ class Helper {
     GeneralCallback<GeneralResponse> callback,
   }) async {
     try {
-      var base64md5Password = base64md5(password);
+      var base64md5Password = Utils.base64md5(password);
       var response = await Dio().post(
         'http://$selcrsUrl/gadchk/gad_chk_login_prs_sso2.asp',
         options: Options(
