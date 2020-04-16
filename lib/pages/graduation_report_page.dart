@@ -1,6 +1,7 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/graduation_helper.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
@@ -354,7 +355,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
   }
 
   void _login() {
-    Helper.instance.graduationLogin(
+    GraduationHelper.instance.login(
       username: widget.username,
       password: widget.password,
       callback: GeneralCallback(
@@ -368,7 +369,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
   }
 
   void _getGraduationReport() async {
-    graduationReportData = await Helper.instance.getGraduationReport(
+    graduationReportData = await GraduationHelper.instance.getGraduationReport(
       callback: callback,
     );
     setState(() {
