@@ -6,10 +6,10 @@ import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/api/helper.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:printing/printing.dart';
@@ -177,7 +177,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                       }),
                   barrierDismissible: false,
                 );
-                List<int> bytes = await Helper.instance.downloadFile(
+                List<int> bytes = await TuitionHelper.instance.downloadFdf(
                   serialNumber: item.serialNumber,
                   callback: GeneralCallback(
                     onError: (GeneralResponse e) {
@@ -239,13 +239,13 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   }
 
   Future<Null> _getData() async {
-    var response = await Helper.instance.tfLogin(
+    var response = await TuitionHelper.instance.login(
       username: widget.username,
       password: widget.password,
       callback: callback,
     );
     if (response != null) {
-      items = await Helper.instance.getTfData(
+      items = await TuitionHelper.instance.getData(
         callback: callback,
       );
       if (mounted && items != null)
