@@ -178,12 +178,12 @@ class Helper {
   /*
   * 畢業審查系統登入
   * error status code
-  * 400: 帳號密碼錯誤
+  * 401: 帳號密碼錯誤
   * */
   Future<GeneralResponse> graduationLogin({
     @required String username,
     @required String password,
-    GeneralCallback callback,
+    GeneralCallback<GeneralResponse> callback,
   }) async {
     try {
       var base64md5Password = base64md5(password);
@@ -204,21 +204,25 @@ class Helper {
       //    print('response.statusCode = ${response.statusCode}');
       if (text.contains("資料錯誤請重新輸入"))
         callback?.onError(
-          GeneralResponse(statusCode: 400, message: 'graduation login error'),
+          GeneralResponse(statusCode: 401, message: 'graduation login error'),
         );
-      graduationCookie = response.headers.value('set-cookie');
+      else {
+        callback?.onError(
+          GeneralResponse.unknownError(),
+        );
+      }
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
         graduationCookie = e.response.headers.value('set-cookie');
+        return callback.onSuccess(GeneralResponse.success());
       } else {
         callback?.onFailure(e);
-        return null;
       }
     } on Exception catch (e) {
       callback?.onError(GeneralResponse.unknownError());
       throw e;
     }
-    return GeneralResponse.success();
+    return null;
   }
 
   /*

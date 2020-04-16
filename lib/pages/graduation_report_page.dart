@@ -32,8 +32,26 @@ class GraduationReportPageState extends State<GraduationReportPage>
 
   GraduationReportData graduationReportData;
 
-  GeneralCallback get callback => GeneralCallback(
+  Function get _onFailure => (DioError e) => setState(() {
+        state = _State.error;
+        switch (e.type) {
+          case DioErrorType.CONNECT_TIMEOUT:
+          case DioErrorType.SEND_TIMEOUT:
+          case DioErrorType.RECEIVE_TIMEOUT:
+          case DioErrorType.RESPONSE:
+          case DioErrorType.CANCEL:
+            break;
+          case DioErrorType.DEFAULT:
+            throw e;
+            break;
+        }
+      });
+
+  Function get _onError => (_) => setState(() => state = _State.error);
+
+  GeneralCallback get callback => GeneralCallback<GeneralResponse>(
         onFailure: (DioError e) => setState(() {
+          print(e.response.statusCode);
           state = _State.error;
           switch (e.type) {
             case DioErrorType.CONNECT_TIMEOUT:
@@ -48,13 +66,14 @@ class GraduationReportPageState extends State<GraduationReportPage>
           }
         }),
         onError: (_) => setState(() => state = _State.error),
+        onSuccess: (GeneralResponse data) {},
       );
 
   @override
   void initState() {
     super.initState();
     FA.setCurrentScreen("GraduationReportPage", "graduation_report_page.dart");
-    _getGraduationReport();
+    _login();
   }
 
   @override
@@ -334,15 +353,21 @@ class GraduationReportPageState extends State<GraduationReportPage>
     );
   }
 
-  void _getGraduationReport() async {
-    setState(() {
-      state = _State.loading;
-    });
-    await Helper.instance.graduationLogin(
+  void _login() {
+    Helper.instance.graduationLogin(
       username: widget.username,
       password: widget.password,
-      callback: callback,
+      callback: GeneralCallback(
+        onError: _onError,
+        onFailure: _onFailure,
+        onSuccess: (GeneralResponse data) {
+          _getGraduationReport();
+        },
+      ),
     );
+  }
+
+  void _getGraduationReport() async {
     graduationReportData = await Helper.instance.getGraduationReport(
       callback: callback,
     );
