@@ -113,23 +113,7 @@ class HomePageState extends State<HomePage> {
         FA.logAction('news_image', 'click', message: message);
       },
       drawer: ApDrawer(
-        builder: () async {
-          if (isLogin) {
-            this.userInfo = await Helper.instance.getUserInfo(
-              callback: GeneralCallback(
-                onFailure: (DioError e) => ApUtils.handleDioError(context, e),
-                onError: (GeneralResponse e) =>
-                    ApUtils.showToast(context, ap.somethingError),
-              ),
-            );
-            if (userInfo != null) {
-              FA.setUserProperty('department', userInfo.department);
-              FA.logUserInfo(userInfo.department);
-              FA.setUserId(userInfo.id);
-            }
-          }
-          return this.userInfo;
-        },
+        userInfo: userInfo,
         widgets: <Widget>[
           ExpansionTile(
             initiallyExpanded: isStudyExpanded,
@@ -331,6 +315,31 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  _getUserInfo() {
+    Helper.instance.getUserInfo(
+      callback: GeneralCallback<UserInfo>(
+        onFailure: (DioError e) => ApUtils.handleDioError(context, e),
+        onError: (GeneralResponse e) =>
+            ApUtils.showToast(context, ap.somethingError),
+        onSuccess: (UserInfo data) {
+          setState(() {
+            userInfo = data;
+          });
+          if (userInfo != null) {
+            FA.setUserProperty('department', userInfo.department);
+            FA.logUserInfo(userInfo.department);
+            FA.setUserId(userInfo.id);
+          }
+        },
+      ),
+    );
+    if (userInfo != null) {
+      FA.setUserProperty('department', userInfo.department);
+      FA.logUserInfo(userInfo.department);
+      FA.setUserId(userInfo.id);
+    }
+  }
+
   void _showInformationDialog() {
     FA.logAction('news_rule', 'click');
     showDialog(
@@ -419,6 +428,7 @@ class HomePageState extends State<HomePage> {
             ShareDataWidget.of(context).data.password = password;
             isLogin = true;
           });
+          _getUserInfo();
         },
       ),
     );
@@ -499,6 +509,7 @@ class HomePageState extends State<HomePage> {
     if (result ?? false) {
       if (state != HomeState.finish) {
         _getAllNews();
+        _getUserInfo();
       }
       isLogin = true;
       _homeKey.currentState.hideSnackBar();

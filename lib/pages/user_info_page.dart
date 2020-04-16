@@ -36,12 +36,21 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return UserInfoScaffold(
       userInfo: userInfo,
       onRefresh: () async {
-        this.userInfo = await Helper.instance.getUserInfo();
-        FA.setUserProperty('department', userInfo.department);
-        FA.logUserInfo(userInfo.department);
-        FA.setUserId(userInfo.id);
-        setState(() {});
-        return null;
+        return await Helper.instance.getUserInfo(
+          callback: GeneralCallback(
+            onSuccess: (UserInfo data) {
+              setState(() {
+                userInfo = data;
+              });
+              FA.setUserProperty('department', userInfo.department);
+              FA.logUserInfo(userInfo.department);
+              FA.setUserId(userInfo.id);
+              return data;
+            },
+            onFailure: (DioError e) {},
+            onError: (GeneralResponse e) {},
+          ),
+        );
       },
       actions: <Widget>[
         IconButton(
