@@ -226,8 +226,9 @@ class Helper {
   * error status code
   * 400: 帳號密碼錯誤
   * */
-  Future<UserInfo> getUserInfo({GeneralCallback callback}) async {
-    var userInfo = UserInfo();
+  Future<UserInfo> getUserInfo({
+    GeneralCallback<UserInfo> callback,
+  }) async {
     try {
       dio.options.headers = {
         'Cookie': courseCookie,
@@ -236,14 +237,14 @@ class Helper {
         'http://$selcrsUrl/menu4/tools/changedat.asp',
       );
       String text = big5.decode(response.data);
-      return parserUserInfo(text);
+      return callback?.onSuccess(parserUserInfo(text));
     } on DioError catch (e) {
       callback?.onFailure(e);
     } on Exception catch (e) {
       callback?.onError(GeneralResponse.unknownError());
       throw e;
     }
-    return userInfo;
+    return null;
   }
 
   UserInfo parserUserInfo(String text) {
