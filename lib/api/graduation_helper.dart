@@ -85,10 +85,11 @@ class GraduationHelper {
   }
 
   Future<GraduationReportData> getGraduationReport({
+    @required String username,
     GeneralCallback callback,
   }) async {
     var url = '${Helper.selcrsUrl}/gadchk/gad_chk_stu_list.asp?'
-        'stno=${Helper.username}&KIND=5&frm=1';
+        'stno=$username&KIND=5&frm=1';
     try {
       var response = await dio.get(
         url,

@@ -147,8 +147,6 @@ class HomePageState extends State<HomePage> {
             icon: ApIcon.school,
             title: app.graduationCheckChecklist,
             page: GraduationReportPage(
-              username: ShareDataWidget.of(context).data.username,
-              password: ShareDataWidget.of(context).data.password,
             ),
             needLogin: !isLogin,
           ),
@@ -156,8 +154,6 @@ class HomePageState extends State<HomePage> {
             icon: ApIcon.monetizationOn,
             title: app.tuitionAndFees,
             page: TuitionAndFeesPage(
-              username: ShareDataWidget.of(context).data.username,
-              password: ShareDataWidget.of(context).data.password,
             ),
             needLogin: !isLogin,
           ),
@@ -430,8 +426,6 @@ class HomePageState extends State<HomePage> {
         onSuccess: (GeneralResponse data) {
           _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
           setState(() {
-            ShareDataWidget.of(context).data.username = username;
-            ShareDataWidget.of(context).data.password = password;
             isLogin = true;
           });
           _getUserInfo();

@@ -297,8 +297,6 @@ class LoginPageState extends State<LoginPage> {
           onSuccess: (GeneralResponse data) async {
             Navigator.pop(context);
             Preferences.setString(Constants.PREF_USERNAME, _username.text);
-            ShareDataWidget.of(context).data.username = _username.text;
-            ShareDataWidget.of(context).data.password = _password.text;
             if (isRememberPassword) {
               await Preferences.setStringSecurity(
                 Constants.PREF_PASSWORD,

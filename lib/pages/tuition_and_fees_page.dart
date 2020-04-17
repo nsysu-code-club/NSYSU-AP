@@ -6,6 +6,7 @@ import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
@@ -18,11 +19,7 @@ import 'package:sprintf/sprintf.dart';
 enum _State { loading, finish, error, empty }
 
 class TuitionAndFeesPage extends StatefulWidget {
-  final String username;
-  final String password;
-
-  const TuitionAndFeesPage({Key key, this.username, this.password})
-      : super(key: key);
+  const TuitionAndFeesPage({Key key}) : super(key: key);
 
   @override
   _TuitionAndFeesPageState createState() => _TuitionAndFeesPageState();
@@ -240,8 +237,8 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   Future<Null> _getData() async {
     var response = await TuitionHelper.instance.login(
-      username: widget.username,
-      password: widget.password,
+      username: Helper.instance.username,
+      password: Helper.instance.password,
       callback: callback,
     );
     if (response != null) {

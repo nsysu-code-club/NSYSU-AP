@@ -13,11 +13,8 @@ enum _State { loading, finish, error, empty, offlineEmpty }
 
 class GraduationReportPage extends StatefulWidget {
   static const String routerName = "/graduationReport";
-  final String username;
-  final String password;
 
-  const GraduationReportPage({Key key, this.username, this.password})
-      : super(key: key);
+  const GraduationReportPage({Key key}) : super(key: key);
 
   @override
   GraduationReportPageState createState() => GraduationReportPageState();
@@ -356,8 +353,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
 
   void _login() {
     GraduationHelper.instance.login(
-      username: widget.username,
-      password: widget.password,
+      username: Helper.instance.username,
+      password: Helper.instance.password,
       callback: GeneralCallback(
         onError: _onError,
         onFailure: _onFailure,
@@ -370,6 +367,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
 
   void _getGraduationReport() async {
     graduationReportData = await GraduationHelper.instance.getGraduationReport(
+      username: Helper.instance.username,
       callback: callback,
     );
     setState(() {

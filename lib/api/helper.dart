@@ -31,7 +31,8 @@ class Helper {
   static Dio dio;
   static CookieJar cookieJar;
 
-  static String username = '';
+  String username = '';
+  String password = '';
 
   static String get selcrsUrl => sprintf(selcrsUrlFormat, [index]);
 
@@ -84,6 +85,7 @@ class Helper {
 
   void logout() {
     username = '';
+    password = '';
     index = 1;
     error = 0;
     dio.interceptors.clear();
@@ -153,6 +155,8 @@ class Helper {
       print(DateTime.now());
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+        this.username = username;
+        this.password = password;
         callback?.onSuccess(GeneralResponse.success());
       } else {
         error++;
