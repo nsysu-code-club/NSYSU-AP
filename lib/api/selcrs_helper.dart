@@ -360,7 +360,7 @@ class SelcrsHelper {
   }
 
   Future<ScoreSemesterData> getScoreSemesterData({
-    GeneralCallback callback,
+    GeneralCallback<ScoreSemesterData> callback,
   }) async {
     var url =
         '$selcrsUrl/scoreqry/sco_query.asp?ACTION=702&KIND=2&LANGS=$language';
@@ -401,7 +401,7 @@ class SelcrsHelper {
       } else {
         print('document.text = ${document.text}');
       }
-      return scoreSemesterData;
+      return callback.onSuccess(scoreSemesterData);
     } on DioError catch (e) {
       if (callback != null)
         callback.onFailure(e);
@@ -418,7 +418,7 @@ class SelcrsHelper {
     @required String year,
     @required String semester,
     bool searchPreScore = false,
-    GeneralCallback callback,
+    GeneralCallback<ScoreData> callback,
   }) async {
     var url =
         '$selcrsUrl/scoreqry/sco_query.asp?ACTION=804&KIND=2&LANGS=$language';
@@ -504,7 +504,7 @@ class SelcrsHelper {
         scores: list,
         detail: detail,
       );
-      return scoreData;
+      return callback?.onSuccess(scoreData);
     } on DioError catch (e) {
       if (callback != null)
         callback.onFailure(e);
