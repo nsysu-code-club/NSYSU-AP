@@ -30,48 +30,14 @@ class GraduationReportPageState extends State<GraduationReportPage>
 
   GraduationReportData graduationReportData;
 
-  Function get _onFailure => (DioError e) => setState(() {
-        state = _State.error;
-        switch (e.type) {
-          case DioErrorType.CONNECT_TIMEOUT:
-          case DioErrorType.SEND_TIMEOUT:
-          case DioErrorType.RECEIVE_TIMEOUT:
-          case DioErrorType.RESPONSE:
-          case DioErrorType.CANCEL:
-            break;
-          case DioErrorType.DEFAULT:
-            throw e;
-            break;
-        }
-      });
-
-  Function get _onError => (_) => setState(() => state = _State.error);
-
-  GeneralCallback get callback => GeneralCallback<GeneralResponse>(
-        onFailure: (DioError e) => setState(() {
-          print(e.response.statusCode);
-          state = _State.error;
-          switch (e.type) {
-            case DioErrorType.CONNECT_TIMEOUT:
-            case DioErrorType.SEND_TIMEOUT:
-            case DioErrorType.RECEIVE_TIMEOUT:
-            case DioErrorType.RESPONSE:
-            case DioErrorType.CANCEL:
-              break;
-            case DioErrorType.DEFAULT:
-              throw e;
-              break;
-          }
-        }),
-        onError: (_) => setState(() => state = _State.error),
-        onSuccess: (GeneralResponse data) {},
-      );
-
   @override
   void initState() {
     super.initState();
     FA.setCurrentScreen("GraduationReportPage", "graduation_report_page.dart");
-    _login();
+    if (GraduationHelper.isLogin)
+      _getGraduationReport();
+    else
+      _login();
   }
 
   @override
@@ -351,6 +317,23 @@ class GraduationReportPageState extends State<GraduationReportPage>
     );
   }
 
+  Function get _onFailure => (DioError e) => setState(() {
+        state = _State.error;
+        switch (e.type) {
+          case DioErrorType.CONNECT_TIMEOUT:
+          case DioErrorType.SEND_TIMEOUT:
+          case DioErrorType.RECEIVE_TIMEOUT:
+          case DioErrorType.RESPONSE:
+          case DioErrorType.CANCEL:
+            break;
+          case DioErrorType.DEFAULT:
+            throw e;
+            break;
+        }
+      });
+
+  Function get _onError => (_) => setState(() => state = _State.error);
+
   void _login() {
     GraduationHelper.instance.login(
       username: Helper.instance.username,
@@ -365,17 +348,23 @@ class GraduationReportPageState extends State<GraduationReportPage>
     );
   }
 
-  void _getGraduationReport() async {
-    graduationReportData = await GraduationHelper.instance.getGraduationReport(
+  void _getGraduationReport() {
+    GraduationHelper.instance.getGraduationReport(
       username: Helper.instance.username,
-      callback: callback,
+      callback: GeneralCallback(
+        onError: _onError,
+        onFailure: _onFailure,
+        onSuccess: (GraduationReportData data) {
+          graduationReportData = data;
+          setState(() {
+            if (graduationReportData == null)
+              state = _State.empty;
+            else
+              state = _State.finish;
+          });
+        },
+      ),
     );
-    setState(() {
-      if (graduationReportData == null)
-        state = _State.empty;
-      else
-        state = _State.finish;
-    });
   }
 
   void _showGeneralEducationCourseDetail(GeneralEducationItem course) {

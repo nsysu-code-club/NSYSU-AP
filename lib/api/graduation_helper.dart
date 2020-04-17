@@ -72,6 +72,7 @@ class GraduationHelper {
       }
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+        isLogin = true;
         return callback.onSuccess(GeneralResponse.success());
       } else {
         callback?.onFailure(e);
@@ -85,7 +86,7 @@ class GraduationHelper {
 
   Future<GraduationReportData> getGraduationReport({
     @required String username,
-    GeneralCallback callback,
+    @required GeneralCallback<GraduationReportData> callback,
   }) async {
     var url = '${Helper.selcrsUrl}/gadchk/gad_chk_stu_list.asp?'
         'stno=$username&KIND=5&frm=1';
@@ -205,7 +206,7 @@ class GraduationHelper {
       //    });
       var endTime = DateTime.now().millisecondsSinceEpoch;
       print((endTime - startTime) / 1000.0);
-      return graduationReportData;
+      return callback?.onSuccess(graduationReportData);
     } on DioError catch (e) {
       if (callback != null)
         callback.onFailure(e);
