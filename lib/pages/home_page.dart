@@ -259,17 +259,17 @@ class HomePageState extends State<HomePage> {
     setState(() {
       switch (index) {
         case 0:
-          Utils.pushCupertinoStyle(context, AdmissionGuidePage());
+          ApUtils.pushCupertinoStyle(context, AdmissionGuidePage());
           break;
         case 1:
           if (isLogin)
-            Utils.pushCupertinoStyle(context, CoursePage());
+            ApUtils.pushCupertinoStyle(context, CoursePage());
           else
             ApUtils.showToast(context, ap.notLoginHint);
           break;
         case 2:
           if (isLogin)
-            Utils.pushCupertinoStyle(context, ScorePage());
+            ApUtils.pushCupertinoStyle(context, ScorePage());
           else
             ApUtils.showToast(context, ap.notLoginHint);
           break;
