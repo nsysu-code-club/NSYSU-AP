@@ -212,7 +212,7 @@ class SelcrsHelper {
   }
 
   Future<CourseSemesterData> getCourseSemesterData({
-    GeneralCallback callback,
+    GeneralCallback<CourseSemesterData> callback,
   }) async {
     var url = '$selcrsUrl/menu4/query/stu_slt_up.asp';
     try {
@@ -231,7 +231,7 @@ class SelcrsHelper {
           ),
         );
       }
-      return courseSemesterData;
+      return callback?.onSuccess(courseSemesterData);
     } on DioError catch (e) {
       if (callback != null)
         callback.onFailure(e);
@@ -248,7 +248,7 @@ class SelcrsHelper {
     @required String username,
     @required TimeCodeConfig timeCodeConfig,
     @required String semester,
-    GeneralCallback callback,
+    GeneralCallback<CourseData> callback,
   }) async {
     var url = '$selcrsUrl/menu4/query/stu_slt_data.asp';
     try {
@@ -346,7 +346,7 @@ class SelcrsHelper {
         FA.logTimeEvent(FA.COURSE_HTML_PARSER, (endTime - startTime) / 1000.0);
       }
       //print(DateTime.now());
-      return courseData;
+      return callback?.onSuccess(courseData);
     } on DioError catch (e) {
       if (callback != null)
         callback.onFailure(e);
