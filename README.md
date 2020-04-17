@@ -7,7 +7,7 @@
         - [ ] 歷年學生缺曠課資料
         - [ ] 通識教育講座次數查詢
         - [x] 學生基本資料
-            - [ ] 修改Email信箱
+            - [x] 修改Email信箱
         - [ ] 修改登錄密碼
     - [x] 成績查詢系統
         - [ ] 授課教師開放成績查詢
@@ -38,7 +38,7 @@
     - [x] 開啟粉絲專頁
 
 ## 開發環境
-- Flutter stable version v1.12.13.hotfix8
+- Flutter stable version v1.12.13.hotfix9
 ## 支援系統
 - [x] Android
 - [x] iOS
