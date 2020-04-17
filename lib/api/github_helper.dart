@@ -3,6 +3,7 @@ import 'package:ap_common/models/new_response.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:flutter/cupertino.dart';
 
 class GitHubHelper {
   static const BASE_PATH = 'https://raw.githubusercontent.com';
@@ -25,12 +26,14 @@ class GitHubHelper {
     return _instance;
   }
 
-  Future<List<News>> getNews({GeneralCallback callback}) async {
+  Future<List<News>> getNews({
+    @required GeneralCallback<List<News>> callback,
+  }) async {
     try {
       var response = await Dio().get(
         '$BASE_PATH/abc873693/NSYSU-AP/master/assets/news_data.json',
       );
-      return NewsResponse.fromRawJson(response.data).data;
+      return callback?.onSuccess(NewsResponse.fromRawJson(response.data).data);
     } on DioError catch (e) {
       if (callback != null)
         callback?.onFailure(e);

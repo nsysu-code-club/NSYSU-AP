@@ -281,7 +281,7 @@ class HomePageState extends State<HomePage> {
       String rawString = remoteConfig.getString(Constants.NEWS_DATA);
       newsList = NewsResponse.fromRawJson(rawString).data;
     } else {
-      newsList = await GitHubHelper.instance.getNews(
+      GitHubHelper.instance.getNews(
         callback: GeneralCallback(
           onError: (GeneralResponse e) {
             setState(() {
@@ -294,19 +294,22 @@ class HomePageState extends State<HomePage> {
             });
             ApUtils.handleDioError(context, e);
           },
+          onSuccess: (List<News> data) {
+            newsList = data;
+            setState(() {
+              if (newsList == null || newsList.length == 0)
+                state = HomeState.empty;
+              else {
+                newsList.sort((a, b) {
+                  return b.weight.compareTo(a.weight);
+                });
+                state = HomeState.finish;
+              }
+            });
+          },
         ),
       );
     }
-    setState(() {
-      if (newsList == null || newsList.length == 0)
-        state = HomeState.empty;
-      else {
-        newsList.sort((a, b) {
-          return b.weight.compareTo(a.weight);
-        });
-        state = HomeState.finish;
-      }
-    });
   }
 
   _getUserInfo() {
