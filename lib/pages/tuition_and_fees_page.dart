@@ -32,28 +32,13 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   List<TuitionAndFees> items;
 
-  GeneralCallback get callback => GeneralCallback(
-        onFailure: (DioError e) => setState(() {
-          state = _State.error;
-          switch (e.type) {
-            case DioErrorType.CONNECT_TIMEOUT:
-            case DioErrorType.SEND_TIMEOUT:
-            case DioErrorType.RECEIVE_TIMEOUT:
-            case DioErrorType.RESPONSE:
-            case DioErrorType.CANCEL:
-              break;
-            case DioErrorType.DEFAULT:
-              throw e;
-              break;
-          }
-        }),
-        onError: (_) => setState(() => state = _State.error),
-      );
-
   @override
   void initState() {
     FA.setCurrentScreen("TuitionAndFeesPage", "tuition_and_fees_page.dart");
-    _getData();
+    if (TuitionHelper.isLogin)
+      _getData();
+    else
+      _login();
     super.initState();
   }
 
@@ -235,23 +220,53 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     );
   }
 
-  Future<Null> _getData() async {
-    var response = await TuitionHelper.instance.login(
+  Function get _onFailure => (DioError e) => setState(() {
+        state = _State.error;
+        switch (e.type) {
+          case DioErrorType.CONNECT_TIMEOUT:
+          case DioErrorType.SEND_TIMEOUT:
+          case DioErrorType.RECEIVE_TIMEOUT:
+          case DioErrorType.RESPONSE:
+          case DioErrorType.CANCEL:
+            break;
+          case DioErrorType.DEFAULT:
+            throw e;
+            break;
+        }
+      });
+
+  Function get _onError => (_) => setState(() => state = _State.error);
+
+  _login() {
+    TuitionHelper.instance.login(
       username: Helper.instance.username,
       password: Helper.instance.password,
-      callback: callback,
+      callback: GeneralCallback(
+        onFailure: _onFailure,
+        onError: _onError,
+        onSuccess: (GeneralResponse data) {
+          _getData();
+        },
+      ),
     );
-    if (response != null) {
-      items = await TuitionHelper.instance.getData(
-        callback: callback,
-      );
-      if (mounted && items != null)
-        setState(() {
-          if (items.length == 0)
-            state = _State.empty;
-          else
-            state = _State.finish;
-        });
-    }
+  }
+
+  Future<Null> _getData() async {
+    TuitionHelper.instance.getData(
+      callback: GeneralCallback(
+        onFailure: _onFailure,
+        onError: _onError,
+        onSuccess: (List<TuitionAndFees> data) {
+          items = data;
+          if (mounted && items != null)
+            setState(() {
+              if (items.length == 0)
+                state = _State.empty;
+              else
+                state = _State.finish;
+            });
+        },
+      ),
+    );
   }
 }

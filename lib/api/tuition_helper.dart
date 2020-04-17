@@ -40,7 +40,7 @@ class TuitionHelper {
   Future<GeneralResponse> login({
     @required String username,
     @required String password,
-    GeneralCallback callback,
+    GeneralCallback<GeneralResponse> callback,
   }) async {
     try {
       var response = await dio.post(
@@ -60,6 +60,8 @@ class TuitionHelper {
       //    print('response.statusCode = ${response.statusCode}');
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+        isLogin = true;
+        return callback?.onSuccess(GeneralResponse.success());
       } else {
         if (callback != null) {
           callback.onFailure(e);
@@ -72,11 +74,11 @@ class TuitionHelper {
       callback?.onError(GeneralResponse.unknownError());
       throw e;
     }
-    return GeneralResponse.success();
+    return null;
   }
 
   Future<List<TuitionAndFees>> getData({
-    GeneralCallback callback,
+    GeneralCallback<List<TuitionAndFees>> callback,
   }) async {
     var url = '$BASE_PATH/tfstu/tfstudata.asp?act=11';
     try {
@@ -127,7 +129,7 @@ class TuitionHelper {
           ),
         );
       }
-      return list;
+      return callback?.onSuccess(list);
     } on DioError catch (e) {
       if (callback != null) {
         callback.onFailure(e);
