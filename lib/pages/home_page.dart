@@ -330,11 +330,6 @@ class HomePageState extends State<HomePage> {
         },
       ),
     );
-    if (userInfo != null) {
-      FA.setUserProperty('department', userInfo.department);
-      FA.logUserInfo(userInfo.department);
-      FA.setUserId(userInfo.id);
-    }
   }
 
   void _showInformationDialog() {
@@ -499,9 +494,9 @@ class HomePageState extends State<HomePage> {
     if (result ?? false) {
       if (state != HomeState.finish) {
         _getAllNews();
-        _getUserInfo();
       }
       isLogin = true;
+      _getUserInfo();
       _homeKey.currentState.hideSnackBar();
     } else {
       _checkLoginState();
