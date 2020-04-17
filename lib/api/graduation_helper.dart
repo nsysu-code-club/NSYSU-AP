@@ -20,17 +20,21 @@ class GraduationHelper {
   static GraduationHelper get instance {
     if (_instance == null) {
       _instance = GraduationHelper();
-      cookieJar = CookieJar();
       dio = Dio();
-      dio.interceptors.add(CookieManager(cookieJar));
-      cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.selcrsUrl}'));
+      initCookiesJar();
     }
     return _instance;
   }
 
+  static initCookiesJar() {
+    cookieJar = CookieJar();
+    dio.interceptors.add(CookieManager(cookieJar));
+    cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.selcrsUrl}'));
+  }
+
   void logout() {
     isLogin = false;
-    dio.interceptors.clear();
+    initCookiesJar();
   }
 
   /*

@@ -20,10 +20,8 @@ class TuitionHelper {
   static TuitionHelper get instance {
     if (_instance == null) {
       _instance = TuitionHelper();
-      cookieJar = CookieJar();
       dio = Dio();
-      dio.interceptors.add(CookieManager(cookieJar));
-      cookieJar.loadForRequest(Uri.parse(BASE_PATH));
+      initCookiesJar();
     }
     return _instance;
   }
@@ -32,9 +30,15 @@ class TuitionHelper {
         responseType: ResponseType.bytes,
       );
 
+  static initCookiesJar() {
+    cookieJar = CookieJar();
+    dio.interceptors.add(CookieManager(cookieJar));
+    cookieJar.loadForRequest(Uri.parse(BASE_PATH));
+  }
+
   void logout() {
     isLogin = false;
-    dio.interceptors.clear();
+    initCookiesJar();
   }
 
   Future<GeneralResponse> login({

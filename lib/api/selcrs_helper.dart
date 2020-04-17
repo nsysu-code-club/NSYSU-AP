@@ -49,9 +49,7 @@ class SelcrsHelper {
           receiveTimeout: 10000,
         ),
       );
-      cookieJar = CookieJar();
-      dio.interceptors.add(CookieManager(cookieJar));
-      cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.selcrsUrl}'));
+      initCookiesJar();
     }
     return _instance;
   }
@@ -83,14 +81,18 @@ class SelcrsHelper {
     cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.selcrsUrl}'));
   }
 
+  static initCookiesJar() {
+    cookieJar = CookieJar();
+    dio.interceptors.add(CookieManager(cookieJar));
+    cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.selcrsUrl}'));
+  }
+
   void logout() {
     username = '';
     password = '';
     index = 1;
     error = 0;
-    dio.interceptors.clear();
-    GraduationHelper.instance.logout();
-    TuitionHelper.instance.logout();
+    initCookiesJar();
   }
 
   /*

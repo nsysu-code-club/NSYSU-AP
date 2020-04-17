@@ -20,6 +20,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/github_helper.dart';
+import 'package:nsysu_ap/api/graduation_helper.dart';
+import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/user_info.dart';
@@ -207,6 +209,8 @@ class HomePageState extends State<HomePage> {
                 isLogin = false;
                 Preferences.setBool(Constants.PREF_AUTO_LOGIN, false);
                 SelcrsHelper.instance.logout();
+                GraduationHelper.instance.logout();
+                TuitionHelper.instance.logout();
                 _checkLoginState();
               },
               title: Text(
