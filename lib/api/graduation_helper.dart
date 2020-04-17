@@ -47,8 +47,9 @@ class GraduationHelper {
     try {
       var base64md5Password = Utils.base64md5(password);
       var response = await dio.post(
-        'http://${Helper.selcrsUrl}/gadchk/gad_chk_login_prs_sso2.asp',
+        '${Helper.selcrsUrl}/gadchk/gad_chk_login_prs_sso2.asp',
         options: Options(
+          responseType: ResponseType.bytes,
           contentType: Headers.formUrlEncodedContentType,
         ),
         data: {
@@ -86,7 +87,7 @@ class GraduationHelper {
   Future<GraduationReportData> getGraduationReport({
     GeneralCallback callback,
   }) async {
-    var url = 'http://${Helper.selcrsUrl}/gadchk/gad_chk_stu_list.asp?'
+    var url = '${Helper.selcrsUrl}/gadchk/gad_chk_stu_list.asp?'
         'stno=${Helper.username}&KIND=5&frm=1';
     try {
       var response = await dio.get(
