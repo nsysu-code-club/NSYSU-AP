@@ -4,6 +4,7 @@ import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/models/score_data.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
+import 'package:ap_common/resources/ap_colors.dart';
 import 'package:big5/big5.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
@@ -334,6 +335,7 @@ class SelcrsHelper {
             location: location,
             instructors: [instructors],
             times: time,
+            color: ApColors.colors[i][300],
           ),
         );
       }
