@@ -29,7 +29,7 @@ import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/pages/user_info_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:ap_common/widgets/yes_no_dialog.dart';
 import 'package:package_info/package_info.dart';
@@ -206,7 +206,7 @@ class HomePageState extends State<HomePage> {
                 Navigator.of(context).pop();
                 isLogin = false;
                 Preferences.setBool(Constants.PREF_AUTO_LOGIN, false);
-                Helper.instance.logout();
+                SelcrsHelper.instance.logout();
                 _checkLoginState();
               },
               title: Text(
@@ -313,7 +313,7 @@ class HomePageState extends State<HomePage> {
   }
 
   _getUserInfo() {
-    Helper.instance.getUserInfo(
+    SelcrsHelper.instance.getUserInfo(
       callback: GeneralCallback<UserInfo>(
         onFailure: (DioError e) => ApUtils.handleDioError(context, e),
         onError: (GeneralResponse e) =>
@@ -405,7 +405,7 @@ class HomePageState extends State<HomePage> {
   _login() async {
     var username = Preferences.getString(Constants.PREF_USERNAME, '');
     var password = Preferences.getStringSecurity(Constants.PREF_PASSWORD, '');
-    Helper.instance.selcrsLogin(
+    SelcrsHelper.instance.login(
       username: username,
       password: password,
       callback: GeneralCallback(

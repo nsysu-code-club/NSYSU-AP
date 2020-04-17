@@ -22,10 +22,10 @@ import 'package:cookie_jar/cookie_jar.dart';
 import '../utils/app_localizations.dart';
 import '../utils/firebase_analytics_utils.dart';
 
-class Helper {
+class SelcrsHelper {
   static const selcrsUrlFormat = 'http://selcrs%i.nsysu.edu.tw';
 
-  static Helper _instance;
+  static SelcrsHelper _instance;
 
   static Dio dio;
   static CookieJar cookieJar;
@@ -38,9 +38,9 @@ class Helper {
   static int index = 1;
   static int error = 0;
 
-  static Helper get instance {
+  static SelcrsHelper get instance {
     if (_instance == null) {
-      _instance = Helper();
+      _instance = SelcrsHelper();
       dio = Dio(
         BaseOptions(
           responseType: ResponseType.bytes,
@@ -50,7 +50,7 @@ class Helper {
       );
       cookieJar = CookieJar();
       dio.interceptors.add(CookieManager(cookieJar));
-      cookieJar.loadForRequest(Uri.parse('${Helper.selcrsUrl}'));
+      cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.selcrsUrl}'));
     }
     return _instance;
   }
@@ -79,7 +79,7 @@ class Helper {
     index++;
     if (index == 5) index = 1;
     print(selcrsUrl);
-    cookieJar.loadForRequest(Uri.parse('${Helper.selcrsUrl}'));
+    cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.selcrsUrl}'));
   }
 
   void logout() {
@@ -97,7 +97,7 @@ class Helper {
   * error status code
   * 400: 帳號密碼錯誤
   * */
-  Future<void> selcrsLogin({
+  Future<void> login({
     @required String username,
     @required String password,
     @required GeneralCallback<GeneralResponse> callback,
@@ -128,7 +128,7 @@ class Helper {
           callback?.onFailure(e);
         else {
           changeSelcrsUrl();
-          return selcrsLogin(
+          return login(
             username: username,
             password: password,
             callback: callback,
@@ -163,7 +163,7 @@ class Helper {
           callback?.onFailure(e);
         else {
           changeSelcrsUrl();
-          return selcrsLogin(
+          return login(
             username: username,
             password: password,
             callback: callback,

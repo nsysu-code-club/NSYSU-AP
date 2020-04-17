@@ -5,7 +5,7 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/widgets.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:html/parser.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
@@ -23,7 +23,7 @@ class GraduationHelper {
       cookieJar = CookieJar();
       dio = Dio();
       dio.interceptors.add(CookieManager(cookieJar));
-      cookieJar.loadForRequest(Uri.parse('${Helper.selcrsUrl}'));
+      cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.selcrsUrl}'));
     }
     return _instance;
   }
@@ -46,7 +46,7 @@ class GraduationHelper {
     try {
       var base64md5Password = Utils.base64md5(password);
       var response = await dio.post(
-        '${Helper.selcrsUrl}/gadchk/gad_chk_login_prs_sso2.asp',
+        '${SelcrsHelper.selcrsUrl}/gadchk/gad_chk_login_prs_sso2.asp',
         options: Options(
           responseType: ResponseType.bytes,
           contentType: Headers.formUrlEncodedContentType,
@@ -88,7 +88,7 @@ class GraduationHelper {
     @required String username,
     @required GeneralCallback<GraduationReportData> callback,
   }) async {
-    var url = '${Helper.selcrsUrl}/gadchk/gad_chk_stu_list.asp?'
+    var url = '${SelcrsHelper.selcrsUrl}/gadchk/gad_chk_stu_list.asp?'
         'stno=$username&KIND=5&frm=1';
     try {
       var response = await dio.get(

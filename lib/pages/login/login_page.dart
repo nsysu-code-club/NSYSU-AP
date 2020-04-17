@@ -10,7 +10,7 @@ import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/login/search_student_id_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 
@@ -191,7 +191,7 @@ class LoginPageState extends State<LoginPage> {
           padding: EdgeInsets.all(14.0),
           onPressed: () {
             FA.logAction('login', 'click');
-            Helper.error = 0;
+            SelcrsHelper.error = 0;
             _login();
           },
           color: Colors.white,
@@ -281,7 +281,7 @@ class LoginPageState extends State<LoginPage> {
         barrierDismissible: false,
       );
       Preferences.setString(Constants.PREF_USERNAME, _username.text);
-      Helper.instance.selcrsLogin(
+      SelcrsHelper.instance.login(
         username: _username.text,
         password: _password.text,
         callback: GeneralCallback(

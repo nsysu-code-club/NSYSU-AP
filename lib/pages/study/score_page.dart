@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/models/score_data.dart';
 import 'package:ap_common/scaffold/score_scaffold.dart';
 
@@ -126,7 +126,7 @@ class ScorePageState extends State<ScorePage> {
   }
 
   void _getSemester() async {
-    scoreSemesterData = await Helper.instance.getScoreSemesterData(
+    scoreSemesterData = await SelcrsHelper.instance.getScoreSemesterData(
       callback: callback,
     );
     if (scoreSemesterData != null) {
@@ -151,7 +151,7 @@ class ScorePageState extends State<ScorePage> {
       _getSemester();
       return;
     }
-    this.scoreData = await Helper.instance.getScoreData(
+    this.scoreData = await SelcrsHelper.instance.getScoreData(
       year: scoreSemesterData.years[currentYearsIndex].value,
       semester: scoreSemesterData.semesters[currentSemesterIndex].value,
     );

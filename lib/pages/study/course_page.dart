@@ -11,7 +11,7 @@ import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 
 class CoursePage extends StatefulWidget {
   static const String routerName = "/course";
@@ -131,7 +131,7 @@ class CoursePageState extends State<CoursePage> {
 
   void _getSemester() async {
     String code;
-    semesterData = await Helper.instance.getCourseSemesterData(
+    semesterData = await SelcrsHelper.instance.getCourseSemesterData(
       callback: callback,
     );
     if (semesterData != null) {
@@ -205,7 +205,7 @@ class CoursePageState extends State<CoursePage> {
       _getSemester();
       return;
     }
-    this.courseData = await Helper.instance.getCourseData(
+    this.courseData = await SelcrsHelper.instance.getCourseData(
       username: Preferences.getString(Constants.PREF_USERNAME, ''),
       timeCodeConfig: timeCodeConfig,
       semester: semesterData.semesters[semesterIndex].value,

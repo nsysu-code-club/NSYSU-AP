@@ -5,7 +5,7 @@ import 'package:nsysu_ap/api/graduation_helper.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/default_dialog.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 
@@ -336,8 +336,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
 
   void _login() {
     GraduationHelper.instance.login(
-      username: Helper.instance.username,
-      password: Helper.instance.password,
+      username: SelcrsHelper.instance.username,
+      password: SelcrsHelper.instance.password,
       callback: GeneralCallback(
         onError: _onError,
         onFailure: _onFailure,
@@ -350,7 +350,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
 
   void _getGraduationReport() {
     GraduationHelper.instance.getGraduationReport(
-      username: Helper.instance.username,
+      username: SelcrsHelper.instance.username,
       callback: GeneralCallback(
         onError: _onError,
         onFailure: _onFailure,

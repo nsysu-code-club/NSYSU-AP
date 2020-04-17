@@ -3,7 +3,7 @@ import 'package:ap_common/utils/ap_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:ap_common/widgets/default_dialog.dart';
 
@@ -203,7 +203,10 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     if (_name.text.isEmpty || _id.text.isEmpty) {
       ApUtils.showToast(context, app.doNotEmpty);
     } else {
-      String result = await Helper.instance.getUsername(_name.text, _id.text);
+      String result = await SelcrsHelper.instance.getUsername(
+        name: _name.text,
+        id: _id.text,
+      );
       List<String> list = result.split('--');
       if (list.length == 2 && isAutoFill) {
         Navigator.pop(context, list[1]);

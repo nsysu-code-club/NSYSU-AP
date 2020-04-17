@@ -6,7 +6,7 @@ import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
@@ -239,8 +239,8 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   _login() {
     TuitionHelper.instance.login(
-      username: Helper.instance.username,
-      password: Helper.instance.password,
+      username: SelcrsHelper.instance.username,
+      password: SelcrsHelper.instance.password,
       callback: GeneralCallback(
         onFailure: _onFailure,
         onError: _onError,
