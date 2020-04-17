@@ -33,6 +33,11 @@ class TuitionHelper {
         responseType: ResponseType.bytes,
       );
 
+  void logout() {
+    isLogin = false;
+    dio.interceptors.clear();
+  }
+
   Future<GeneralResponse> login({
     @required String username,
     @required String password,

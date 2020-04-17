@@ -29,6 +29,11 @@ class GraduationHelper {
     return _instance;
   }
 
+  void logout() {
+    isLogin = false;
+    dio.interceptors.clear();
+  }
+
   /*
   * 畢業審查系統登入
   * error status code

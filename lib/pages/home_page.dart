@@ -213,7 +213,7 @@ class HomePageState extends State<HomePage> {
                 Navigator.of(context).pop();
                 isLogin = false;
                 Preferences.setBool(Constants.PREF_AUTO_LOGIN, false);
-                Helper.instance.clearSession();
+                Helper.instance.logout();
                 _checkLoginState();
               },
               title: Text(

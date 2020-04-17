@@ -10,6 +10,8 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
+import 'package:nsysu_ap/api/graduation_helper.dart';
+import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/pre_score.dart';
@@ -80,10 +82,13 @@ class Helper {
     cookieJar.loadForRequest(Uri.parse('${Helper.selcrsUrl}'));
   }
 
-  clearSession() {
+  void logout() {
     username = '';
     index = 1;
     error = 0;
+    dio.interceptors.clear();
+    GraduationHelper.instance.logout();
+    TuitionHelper.instance.logout();
   }
 
   /*
