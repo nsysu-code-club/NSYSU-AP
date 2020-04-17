@@ -583,24 +583,6 @@ class Helper {
     return null;
   }
 
-  Future<List<News>> getNews({GeneralCallback callback}) async {
-    try {
-      var response = await Dio().get(
-        'https://raw.githubusercontent.com/abc873693/NSYSU-AP/master/assets/news_data.json',
-      );
-      return NewsResponse.fromRawJson(response.data).data;
-    } on DioError catch (e) {
-      if (callback != null)
-        callback?.onFailure(e);
-      else
-        throw e;
-    } on Exception catch (e) {
-      callback?.onError(GeneralResponse.unknownError());
-      throw e;
-    }
-    return null;
-  }
-
   Future<UserInfo> changeMail({
     @required String mail,
     @required GeneralCallback<UserInfo> callback,

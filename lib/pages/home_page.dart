@@ -19,6 +19,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/github_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/user_info.dart';
@@ -287,7 +288,7 @@ class HomePageState extends State<HomePage> {
       String rawString = remoteConfig.getString(Constants.NEWS_DATA);
       newsList = NewsResponse.fromRawJson(rawString).data;
     } else {
-      newsList = await Helper.instance.getNews(
+      newsList = await GitHubHelper.instance.getNews(
         callback: GeneralCallback(
           onError: (GeneralResponse e) {
             setState(() {
