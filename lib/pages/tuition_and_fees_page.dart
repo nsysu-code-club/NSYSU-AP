@@ -6,10 +6,11 @@ import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
+import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/api/helper.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:printing/printing.dart';
@@ -18,11 +19,7 @@ import 'package:sprintf/sprintf.dart';
 enum _State { loading, finish, error, empty }
 
 class TuitionAndFeesPage extends StatefulWidget {
-  final String username;
-  final String password;
-
-  const TuitionAndFeesPage({Key key, this.username, this.password})
-      : super(key: key);
+  const TuitionAndFeesPage({Key key}) : super(key: key);
 
   @override
   _TuitionAndFeesPageState createState() => _TuitionAndFeesPageState();
@@ -56,7 +53,10 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   @override
   void initState() {
     FA.setCurrentScreen("TuitionAndFeesPage", "tuition_and_fees_page.dart");
-    _getData();
+    if (TuitionHelper.isLogin)
+      _getData();
+    else
+      _login();
     super.initState();
   }
 
@@ -177,7 +177,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                       }),
                   barrierDismissible: false,
                 );
-                List<int> bytes = await Helper.instance.downloadFile(
+                List<int> bytes = await TuitionHelper.instance.downloadFdf(
                   serialNumber: item.serialNumber,
                   callback: GeneralCallback(
                     onError: (GeneralResponse e) {
@@ -238,23 +238,53 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     );
   }
 
-  Future<Null> _getData() async {
-    var response = await Helper.instance.tfLogin(
-      username: widget.username,
-      password: widget.password,
-      callback: callback,
+  Function get _onFailure => (DioError e) => setState(() {
+        state = _State.error;
+        switch (e.type) {
+          case DioErrorType.CONNECT_TIMEOUT:
+          case DioErrorType.SEND_TIMEOUT:
+          case DioErrorType.RECEIVE_TIMEOUT:
+          case DioErrorType.RESPONSE:
+          case DioErrorType.CANCEL:
+            break;
+          case DioErrorType.DEFAULT:
+            throw e;
+            break;
+        }
+      });
+
+  Function get _onError => (_) => setState(() => state = _State.error);
+
+  _login() {
+    TuitionHelper.instance.login(
+      username: SelcrsHelper.instance.username,
+      password: SelcrsHelper.instance.password,
+      callback: GeneralCallback(
+        onFailure: _onFailure,
+        onError: _onError,
+        onSuccess: (GeneralResponse data) {
+          _getData();
+        },
+      ),
     );
-    if (response != null) {
-      items = await Helper.instance.getTfData(
-        callback: callback,
-      );
-      if (mounted && items != null)
-        setState(() {
-          if (items.length == 0)
-            state = _State.empty;
-          else
-            state = _State.finish;
-        });
-    }
+  }
+
+  Future<Null> _getData() async {
+    TuitionHelper.instance.getData(
+      callback: GeneralCallback(
+        onFailure: _onFailure,
+        onError: _onError,
+        onSuccess: (List<TuitionAndFees> data) {
+          items = data;
+          if (mounted && items != null)
+            setState(() {
+              if (items.length == 0)
+                state = _State.empty;
+              else
+                state = _State.finish;
+            });
+        },
+      ),
+    );
   }
 }

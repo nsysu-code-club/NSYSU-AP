@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/models/score_data.dart';
 import 'package:ap_common/scaffold/score_scaffold.dart';
 
@@ -38,24 +38,6 @@ class ScorePageState extends State<ScorePage> {
     });
     return _hasPreScore;
   }
-
-  GeneralCallback get callback => GeneralCallback(
-        onFailure: (DioError e) => setState(() {
-          state = ScoreState.error;
-          switch (e.type) {
-            case DioErrorType.CONNECT_TIMEOUT:
-            case DioErrorType.SEND_TIMEOUT:
-            case DioErrorType.RECEIVE_TIMEOUT:
-            case DioErrorType.RESPONSE:
-            case DioErrorType.CANCEL:
-              break;
-            case DioErrorType.DEFAULT:
-              throw e;
-              break;
-          }
-        }),
-        onError: (_) => setState(() => state = ScoreState.error),
-      );
 
   @override
   void initState() {
@@ -125,25 +107,42 @@ class ScorePageState extends State<ScorePage> {
     );
   }
 
-  void _getSemester() async {
-    scoreSemesterData = await Helper.instance.getScoreSemesterData(
-      callback: callback,
-    );
-    if (scoreSemesterData != null) {
-      years = [];
-      semesters = [];
-      scoreSemesterData.years.forEach((option) {
-        years.add(option.text);
-      });
-      scoreSemesterData.semesters.forEach((option) {
-        semesters.add(option.text);
-      });
-      _getSemesterScore();
-    } else {
-      setState(() {
+  Function get _onFailure => (DioError e) => setState(() {
         state = ScoreState.error;
+        switch (e.type) {
+          case DioErrorType.CONNECT_TIMEOUT:
+          case DioErrorType.SEND_TIMEOUT:
+          case DioErrorType.RECEIVE_TIMEOUT:
+          case DioErrorType.RESPONSE:
+          case DioErrorType.CANCEL:
+            break;
+          case DioErrorType.DEFAULT:
+            throw e;
+            break;
+        }
       });
-    }
+
+  Function get _onError => (_) => setState(() => state = ScoreState.error);
+
+  void _getSemester() async {
+    SelcrsHelper.instance.getScoreSemesterData(
+      callback: GeneralCallback(
+        onFailure: _onFailure,
+        onError: _onError,
+        onSuccess: (ScoreSemesterData data) {
+          scoreSemesterData = data;
+          years = [];
+          semesters = [];
+          scoreSemesterData.years.forEach((option) {
+            years.add(option.text);
+          });
+          scoreSemesterData.semesters.forEach((option) {
+            semesters.add(option.text);
+          });
+          _getSemesterScore();
+        },
+      ),
+    );
   }
 
   void _getSemesterScore() async {
@@ -151,18 +150,25 @@ class ScorePageState extends State<ScorePage> {
       _getSemester();
       return;
     }
-    this.scoreData = await Helper.instance.getScoreData(
+    SelcrsHelper.instance.getScoreData(
       year: scoreSemesterData.years[currentYearsIndex].value,
       semester: scoreSemesterData.semesters[currentSemesterIndex].value,
+      callback: GeneralCallback(
+        onFailure: _onFailure,
+        onError: _onError,
+        onSuccess: (ScoreData data) {
+          scoreData = data;
+          if (mounted && this.scoreData != null) {
+            setState(() {
+              if (scoreData.scores == null || scoreData.scores.length == 0) {
+                state = ScoreState.empty;
+              } else {
+                state = ScoreState.finish;
+              }
+            });
+          }
+        },
+      ),
     );
-    if (mounted && this.scoreData != null) {
-      setState(() {
-        if (scoreData.scores == null || scoreData.scores.length == 0) {
-          state = ScoreState.empty;
-        } else {
-          state = ScoreState.finish;
-        }
-      });
-    }
   }
 }

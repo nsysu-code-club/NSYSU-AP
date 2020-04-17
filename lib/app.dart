@@ -32,8 +32,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   FirebaseAnalytics _analytics;
   FirebaseMessaging _firebaseMessaging;
   Brightness brightness = Brightness.light;
-  String username;
-  String password;
 
   ThemeMode themeMode = ThemeMode.system;
 

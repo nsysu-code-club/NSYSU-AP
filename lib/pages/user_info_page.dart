@@ -5,7 +5,7 @@ import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/utils.dart';
@@ -36,12 +36,21 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return UserInfoScaffold(
       userInfo: userInfo,
       onRefresh: () async {
-        this.userInfo = await Helper.instance.getUserInfo();
-        FA.setUserProperty('department', userInfo.department);
-        FA.logUserInfo(userInfo.department);
-        FA.setUserId(userInfo.id);
-        setState(() {});
-        return null;
+        return await SelcrsHelper.instance.getUserInfo(
+          callback: GeneralCallback(
+            onSuccess: (UserInfo data) {
+              setState(() {
+                userInfo = data;
+              });
+              FA.setUserProperty('department', userInfo.department);
+              FA.logUserInfo(userInfo.department);
+              FA.setUserId(userInfo.id);
+              return data;
+            },
+            onFailure: (DioError e) {},
+            onError: (GeneralResponse e) {},
+          ),
+        );
       },
       actions: <Widget>[
         IconButton(
@@ -70,9 +79,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           ),
                           barrierDismissible: false,
                         );
-                        var userInfo = await Helper.instance.changeMail(
+                        var userInfo = await SelcrsHelper.instance.changeMail(
                           mail: newEmail.text,
-                          callback: GeneralCallback.simple(context),
+                          callback: GeneralCallback.simple(
+                            context,
+                            (userInfo) => userInfo,
+                          ),
                         );
                         Navigator.pop(context);
                         if (userInfo != null) {

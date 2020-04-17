@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:big5/big5.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -12,6 +14,12 @@ import 'package:sprintf/sprintf.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Utils {
+  static String base64md5(String text) {
+    var bytes = utf8.encode(text);
+    var digest = md5.convert(bytes);
+    return base64.encode(digest.bytes);
+  }
+
   static String getPlatformUpdateContent(AppLocalizations app) {
     if (Platform.isAndroid)
       return app.updateAndroidContent;

@@ -1,10 +1,11 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/graduation_helper.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/default_dialog.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 
@@ -12,11 +13,8 @@ enum _State { loading, finish, error, empty, offlineEmpty }
 
 class GraduationReportPage extends StatefulWidget {
   static const String routerName = "/graduationReport";
-  final String username;
-  final String password;
 
-  const GraduationReportPage({Key key, this.username, this.password})
-      : super(key: key);
+  const GraduationReportPage({Key key}) : super(key: key);
 
   @override
   GraduationReportPageState createState() => GraduationReportPageState();
@@ -32,29 +30,14 @@ class GraduationReportPageState extends State<GraduationReportPage>
 
   GraduationReportData graduationReportData;
 
-  GeneralCallback get callback => GeneralCallback(
-        onFailure: (DioError e) => setState(() {
-          state = _State.error;
-          switch (e.type) {
-            case DioErrorType.CONNECT_TIMEOUT:
-            case DioErrorType.SEND_TIMEOUT:
-            case DioErrorType.RECEIVE_TIMEOUT:
-            case DioErrorType.RESPONSE:
-            case DioErrorType.CANCEL:
-              break;
-            case DioErrorType.DEFAULT:
-              throw e;
-              break;
-          }
-        }),
-        onError: (_) => setState(() => state = _State.error),
-      );
-
   @override
   void initState() {
     super.initState();
     FA.setCurrentScreen("GraduationReportPage", "graduation_report_page.dart");
-    _getGraduationReport();
+    if (GraduationHelper.isLogin)
+      _getGraduationReport();
+    else
+      _login();
   }
 
   @override
@@ -334,24 +317,54 @@ class GraduationReportPageState extends State<GraduationReportPage>
     );
   }
 
-  void _getGraduationReport() async {
-    setState(() {
-      state = _State.loading;
-    });
-    await Helper.instance.graduationLogin(
-      username: widget.username,
-      password: widget.password,
-      callback: callback,
+  Function get _onFailure => (DioError e) => setState(() {
+        state = _State.error;
+        switch (e.type) {
+          case DioErrorType.CONNECT_TIMEOUT:
+          case DioErrorType.SEND_TIMEOUT:
+          case DioErrorType.RECEIVE_TIMEOUT:
+          case DioErrorType.RESPONSE:
+          case DioErrorType.CANCEL:
+            break;
+          case DioErrorType.DEFAULT:
+            throw e;
+            break;
+        }
+      });
+
+  Function get _onError => (_) => setState(() => state = _State.error);
+
+  void _login() {
+    GraduationHelper.instance.login(
+      username: SelcrsHelper.instance.username,
+      password: SelcrsHelper.instance.password,
+      callback: GeneralCallback(
+        onError: _onError,
+        onFailure: _onFailure,
+        onSuccess: (GeneralResponse data) {
+          _getGraduationReport();
+        },
+      ),
     );
-    graduationReportData = await Helper.instance.getGraduationReport(
-      callback: callback,
+  }
+
+  void _getGraduationReport() {
+    GraduationHelper.instance.getGraduationReport(
+      username: SelcrsHelper.instance.username,
+      callback: GeneralCallback(
+        onError: _onError,
+        onFailure: _onFailure,
+        onSuccess: (GraduationReportData data) {
+          graduationReportData = data;
+          setState(() {
+            if (graduationReportData == null)
+              state = _State.empty;
+            else
+              state = _State.finish;
+          });
+        },
+      ),
     );
-    setState(() {
-      if (graduationReportData == null)
-        state = _State.empty;
-      else
-        state = _State.finish;
-    });
   }
 
   void _showGeneralEducationCourseDetail(GeneralEducationItem course) {

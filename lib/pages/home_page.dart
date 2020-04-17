@@ -19,6 +19,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/github_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/user_info.dart';
@@ -28,9 +29,8 @@ import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/pages/user_info_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/api/helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
-import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:ap_common/widgets/yes_no_dialog.dart';
 import 'package:package_info/package_info.dart';
 
@@ -113,23 +113,7 @@ class HomePageState extends State<HomePage> {
         FA.logAction('news_image', 'click', message: message);
       },
       drawer: ApDrawer(
-        builder: () async {
-          if (isLogin) {
-            this.userInfo = await Helper.instance.getUserInfo(
-              callback: GeneralCallback(
-                onFailure: (DioError e) => ApUtils.handleDioError(context, e),
-                onError: (GeneralResponse e) =>
-                    ApUtils.showToast(context, ap.somethingError),
-              ),
-            );
-            if (userInfo != null) {
-              FA.setUserProperty('department', userInfo.department);
-              FA.logUserInfo(userInfo.department);
-              FA.setUserId(userInfo.id);
-            }
-          }
-          return this.userInfo;
-        },
+        userInfo: userInfo,
         widgets: <Widget>[
           ExpansionTile(
             initiallyExpanded: isStudyExpanded,
@@ -161,19 +145,13 @@ class HomePageState extends State<HomePage> {
           DrawerItem(
             icon: ApIcon.school,
             title: app.graduationCheckChecklist,
-            page: GraduationReportPage(
-              username: ShareDataWidget.of(context).data.username,
-              password: ShareDataWidget.of(context).data.password,
-            ),
+            page: GraduationReportPage(),
             needLogin: !isLogin,
           ),
           DrawerItem(
             icon: ApIcon.monetizationOn,
             title: app.tuitionAndFees,
-            page: TuitionAndFeesPage(
-              username: ShareDataWidget.of(context).data.username,
-              password: ShareDataWidget.of(context).data.password,
-            ),
+            page: TuitionAndFeesPage(),
             needLogin: !isLogin,
           ),
           DrawerItem(
@@ -228,7 +206,7 @@ class HomePageState extends State<HomePage> {
                 Navigator.of(context).pop();
                 isLogin = false;
                 Preferences.setBool(Constants.PREF_AUTO_LOGIN, false);
-                Helper.instance.clearSession();
+                SelcrsHelper.instance.logout();
                 _checkLoginState();
               },
               title: Text(
@@ -303,7 +281,7 @@ class HomePageState extends State<HomePage> {
       String rawString = remoteConfig.getString(Constants.NEWS_DATA);
       newsList = NewsResponse.fromRawJson(rawString).data;
     } else {
-      newsList = await Helper.instance.getNews(
+      GitHubHelper.instance.getNews(
         callback: GeneralCallback(
           onError: (GeneralResponse e) {
             setState(() {
@@ -316,19 +294,42 @@ class HomePageState extends State<HomePage> {
             });
             ApUtils.handleDioError(context, e);
           },
+          onSuccess: (List<News> data) {
+            newsList = data;
+            setState(() {
+              if (newsList == null || newsList.length == 0)
+                state = HomeState.empty;
+              else {
+                newsList.sort((a, b) {
+                  return b.weight.compareTo(a.weight);
+                });
+                state = HomeState.finish;
+              }
+            });
+          },
         ),
       );
     }
-    setState(() {
-      if (newsList == null || newsList.length == 0)
-        state = HomeState.empty;
-      else {
-        newsList.sort((a, b) {
-          return b.weight.compareTo(a.weight);
-        });
-        state = HomeState.finish;
-      }
-    });
+  }
+
+  _getUserInfo() {
+    SelcrsHelper.instance.getUserInfo(
+      callback: GeneralCallback<UserInfo>(
+        onFailure: (DioError e) => ApUtils.handleDioError(context, e),
+        onError: (GeneralResponse e) =>
+            ApUtils.showToast(context, ap.somethingError),
+        onSuccess: (UserInfo data) {
+          setState(() {
+            userInfo = data;
+          });
+          if (userInfo != null) {
+            FA.setUserProperty('department', userInfo.department);
+            FA.logUserInfo(userInfo.department);
+            FA.setUserId(userInfo.id);
+          }
+        },
+      ),
+    );
   }
 
   void _showInformationDialog() {
@@ -399,7 +400,7 @@ class HomePageState extends State<HomePage> {
   _login() async {
     var username = Preferences.getString(Constants.PREF_USERNAME, '');
     var password = Preferences.getStringSecurity(Constants.PREF_PASSWORD, '');
-    var response = await Helper.instance.selcrsLogin(
+    SelcrsHelper.instance.login(
       username: username,
       password: password,
       callback: GeneralCallback(
@@ -407,31 +408,25 @@ class HomePageState extends State<HomePage> {
           if (e.statusCode == 400)
             _homeKey.currentState.showBasicHint(text: ap.loginFail);
           else
-            _changeHost();
+            _homeKey.currentState.showBasicHint(text: app.somethingError);
         },
         onFailure: (DioError e) {
-          _changeHost();
+          _homeKey.currentState.showBasicHint(
+            text: ApLocalizations.dioError(
+              context,
+              e,
+            ),
+          );
+        },
+        onSuccess: (GeneralResponse data) {
+          _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
+          setState(() {
+            isLogin = true;
+          });
+          _getUserInfo();
         },
       ),
     );
-    if (response != null) {
-      _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
-      setState(() {
-        ShareDataWidget.of(context).data.username = username;
-        ShareDataWidget.of(context).data.password = password;
-        isLogin = true;
-      });
-    }
-  }
-
-  void _changeHost() {
-    Helper.changeSelcrsUrl();
-    Helper.error++;
-    if (Helper.error < 5) {
-      _login();
-    } else {
-      _homeKey.currentState.showBasicHint(text: ap.timeoutMessage);
-    }
   }
 
   _checkUpdate() async {
@@ -501,6 +496,7 @@ class HomePageState extends State<HomePage> {
         _getAllNews();
       }
       isLogin = true;
+      _getUserInfo();
       _homeKey.currentState.hideSnackBar();
     } else {
       _checkLoginState();
