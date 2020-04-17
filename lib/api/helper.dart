@@ -7,6 +7,7 @@ import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:big5/big5.dart';
 import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
 import 'package:nsysu_ap/models/course_semester_data.dart';
@@ -15,6 +16,7 @@ import 'package:nsysu_ap/models/pre_score.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:sprintf/sprintf.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 
 import '../utils/app_localizations.dart';
 import '../utils/firebase_analytics_utils.dart';
@@ -25,9 +27,7 @@ class Helper {
   static Helper _instance;
 
   static Dio dio;
-
-  static String courseCookie = '';
-  static String scoreCookie = '';
+  static CookieJar cookieJar;
 
   static String username = '';
 
@@ -46,6 +46,9 @@ class Helper {
           receiveTimeout: 10000,
         ),
       );
+      cookieJar = CookieJar();
+      dio.interceptors.add(CookieManager(cookieJar));
+      cookieJar.loadForRequest(Uri.parse('${Helper.selcrsUrl}'));
     }
     return _instance;
   }
@@ -63,24 +66,21 @@ class Helper {
   Options get _courseOption => Options(
         responseType: ResponseType.bytes,
         contentType: Headers.formUrlEncodedContentType,
-        headers: {'Cookie': courseCookie},
       );
 
   Options get _scoreOption => Options(
         responseType: ResponseType.bytes,
         contentType: Headers.formUrlEncodedContentType,
-        headers: {'Cookie': scoreCookie},
       );
 
   static changeSelcrsUrl() {
     index++;
     if (index == 5) index = 1;
     print(selcrsUrl);
+    cookieJar.loadForRequest(Uri.parse('${Helper.selcrsUrl}'));
   }
 
   clearSession() {
-    courseCookie = '';
-    scoreCookie = '';
     username = '';
     index = 1;
     error = 0;
@@ -114,10 +114,9 @@ class Helper {
           GeneralResponse(statusCode: 400, message: 'score error'),
         );
       }
-      scoreCookie = scoreResponse.headers.value('set-cookie');
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
-        scoreCookie = e.response.headers.value('set-cookie');
+      } else {
       } else
         callback?.onFailure(e);
     }
@@ -136,11 +135,9 @@ class Helper {
           GeneralResponse(statusCode: 400, message: 'course error'),
         );
       }
-      courseCookie = courseResponse.headers.value('set-cookie');
       print(DateTime.now());
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
-        courseCookie = e.response.headers.value('set-cookie');
         callback?.onSuccess(GeneralResponse.success());
       } else {
         callback?.onFailure(e);
@@ -157,9 +154,6 @@ class Helper {
     GeneralCallback<UserInfo> callback,
   }) async {
     try {
-      dio.options.headers = {
-        'Cookie': courseCookie,
-      };
       var response = await dio.get(
         'http://$selcrsUrl/menu4/tools/changedat.asp',
       );
@@ -194,7 +188,6 @@ class Helper {
   }) async {
     var url = 'http://$selcrsUrl/menu4/query/stu_slt_up.asp';
     try {
-      dio.options.headers = {'Cookie': courseCookie};
       var response = await dio.post(url);
       String text = big5.decode(response.data);
       //print('text =  ${text}');
@@ -231,7 +224,7 @@ class Helper {
   }) async {
     var url = 'http://$selcrsUrl/menu4/query/stu_slt_data.asp';
     try {
-      var response = await Dio().post(
+      var response = await dio.post(
         url,
         data: {
           'stuact': 'B',
@@ -344,7 +337,7 @@ class Helper {
     var url =
         'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=702&KIND=2&LANGS=$language';
     try {
-      var response = await Dio().post(
+      var response = await dio.post(
         url,
         options: _scoreOption,
       );
@@ -402,7 +395,7 @@ class Helper {
     var url =
         'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=804&KIND=2&LANGS=$language';
     try {
-      var response = await Dio().post(
+      var response = await dio.post(
         url,
         options: _scoreOption,
         data: {
@@ -499,7 +492,7 @@ class Helper {
   Future<PreScore> getPreScoreData(String courseNumber) async {
     var url =
         'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=814&KIND=1&LANGS=$language';
-    var response = await Dio().post(
+    var response = await dio.post(
       url,
       options: _scoreOption,
       data: {
@@ -537,25 +530,37 @@ class Helper {
     GeneralCallback callback,
   }) async {
     var url = 'http://$selcrsUrl/newstu/stu_new.asp?action=16';
-    var encoded = Utils.uriEncodeBig5(name);
-    var response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: {
-        'CNAME': encoded,
-        'T_CID': id,
-        'B1': '%BDT%A9w%B0e%A5X',
-      },
-    );
-    String text = big5.decode(response.bodyBytes);
-    var document = parse(text, encoding: 'BIG-5');
-    var elements = document.getElementsByTagName('b');
-    if (elements.length > 0)
-      return elements[0].text;
-    else
-      return '';
+    try {
+      var encoded = Utils.uriEncodeBig5(name);
+      var response = await dio.post(
+        url,
+        options: Options(
+          responseType: ResponseType.bytes,
+          contentType: Headers.formUrlEncodedContentType,
+        ),
+        data: {
+          'CNAME': encoded,
+          'T_CID': id,
+          'B1': '%BDT%A9w%B0e%A5X',
+        },
+      );
+      String text = big5.decode(response.data);
+      var document = parse(text, encoding: 'BIG-5');
+      var elements = document.getElementsByTagName('b');
+      if (elements.length > 0)
+        return elements[0].text;
+      else
+        return '';
+    } on DioError catch (e) {
+      if (callback != null)
+        callback.onFailure(e);
+      else
+        throw e;
+    } on Exception catch (e) {
+      callback?.onError(GeneralResponse.unknownError());
+      throw e;
+    }
+    return null;
   }
 
   Future<List<News>> getNews({GeneralCallback callback}) async {
@@ -581,7 +586,7 @@ class Helper {
     @required GeneralCallback<UserInfo> callback,
   }) async {
     try {
-      var response = await Dio().post(
+      var response = await dio.post(
         'http://$selcrsUrl/menu4/tools/changedat.asp',
         options: _courseOption,
         data: {
