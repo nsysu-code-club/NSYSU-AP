@@ -25,10 +25,12 @@ import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/user_info.dart';
+import 'package:nsysu_ap/pages/school_map_page.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/pages/user_info_page.dart';
+import 'package:nsysu_ap/resources/image_assets.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
@@ -64,6 +66,7 @@ class HomePageState extends State<HomePage> {
   List<News> newsList = [];
 
   bool isStudyExpanded = false;
+  bool isSchoolNavigationExpanded = false;
 
   TextStyle get _defaultStyle => TextStyle(
         color: ApTheme.of(context).grey,
@@ -144,6 +147,31 @@ class HomePageState extends State<HomePage> {
               ),
             ],
           ),
+          ExpansionTile(
+            initiallyExpanded: isSchoolNavigationExpanded,
+            onExpansionChanged: (bool) {
+              setState(() => isSchoolNavigationExpanded = bool);
+            },
+            leading: Icon(
+              ApIcon.navigation,
+              color: isSchoolNavigationExpanded
+                  ? ApTheme.of(context).blueAccent
+                  : ApTheme.of(context).grey,
+            ),
+            title: Text(ap.schoolNavigation, style: _defaultStyle),
+            children: <Widget>[
+              DrawerSubItem(
+                icon: ApIcon.map,
+                title: ap.schoolMap,
+                page: SchoolMapPage(),
+              ),
+              DrawerSubItem(
+                icon: ApIcon.accessibilityNew,
+                title: app.admissionGuide,
+                page: AdmissionGuidePage(),
+              ),
+            ],
+          ),
           DrawerItem(
             icon: ApIcon.school,
             title: app.graduationCheckChecklist,
@@ -157,15 +185,10 @@ class HomePageState extends State<HomePage> {
             needLogin: !isLogin,
           ),
           DrawerItem(
-            icon: ApIcon.accessibilityNew,
-            title: app.admissionGuide,
-            page: AdmissionGuidePage(),
-          ),
-          DrawerItem(
             icon: ApIcon.face,
             title: app.about,
             page: AboutUsPage(
-              assetImage: 'assets/images/nsysu.webp',
+              assetImage: ImageAssets.nsysu,
               githubName: 'NKUST-ITC',
               email: 'abc873693@gmail.com',
               appLicense: app.aboutOpenSourceContent,
