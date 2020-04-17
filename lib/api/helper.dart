@@ -22,7 +22,7 @@ import '../utils/app_localizations.dart';
 import '../utils/firebase_analytics_utils.dart';
 
 class Helper {
-  static const selcrsUrlFormat = 'selcrs%i.nsysu.edu.tw';
+  static const selcrsUrlFormat = 'http://selcrs%i.nsysu.edu.tw';
 
   static Helper _instance;
 
@@ -100,7 +100,7 @@ class Helper {
     dio.options.contentType = Headers.formUrlEncodedContentType;
     try {
       var scoreResponse = await dio.post(
-        'http://$selcrsUrl/scoreqry/sco_query_prs_sso2.asp',
+        '$selcrsUrl/scoreqry/sco_query_prs_sso2.asp',
         data: {
           'SID': username,
           'PASSWD': base64md5Password,
@@ -132,7 +132,7 @@ class Helper {
     }
     try {
       var courseResponse = await dio.post(
-        'http://$selcrsUrl/menu4/Studcheck_sso2.asp',
+        '$selcrsUrl/menu4/Studcheck_sso2.asp',
         data: {
           'stuid': username,
           'SPassword': base64md5Password,
@@ -175,7 +175,7 @@ class Helper {
   }) async {
     try {
       var response = await dio.get(
-        'http://$selcrsUrl/menu4/tools/changedat.asp',
+        '$selcrsUrl/menu4/tools/changedat.asp',
       );
       String text = big5.decode(response.data);
       return callback?.onSuccess(parserUserInfo(text));
@@ -206,7 +206,7 @@ class Helper {
   Future<CourseSemesterData> getCourseSemesterData({
     GeneralCallback callback,
   }) async {
-    var url = 'http://$selcrsUrl/menu4/query/stu_slt_up.asp';
+    var url = '$selcrsUrl/menu4/query/stu_slt_up.asp';
     try {
       var response = await dio.post(url);
       String text = big5.decode(response.data);
@@ -242,7 +242,7 @@ class Helper {
     @required String semester,
     GeneralCallback callback,
   }) async {
-    var url = 'http://$selcrsUrl/menu4/query/stu_slt_data.asp';
+    var url = '$selcrsUrl/menu4/query/stu_slt_data.asp';
     try {
       var response = await dio.post(
         url,
@@ -355,7 +355,7 @@ class Helper {
     GeneralCallback callback,
   }) async {
     var url =
-        'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=702&KIND=2&LANGS=$language';
+        '$selcrsUrl/scoreqry/sco_query.asp?ACTION=702&KIND=2&LANGS=$language';
     try {
       var response = await dio.post(
         url,
@@ -413,7 +413,7 @@ class Helper {
     GeneralCallback callback,
   }) async {
     var url =
-        'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=804&KIND=2&LANGS=$language';
+        '$selcrsUrl/scoreqry/sco_query.asp?ACTION=804&KIND=2&LANGS=$language';
     try {
       var response = await dio.post(
         url,
@@ -511,7 +511,7 @@ class Helper {
 
   Future<PreScore> getPreScoreData(String courseNumber) async {
     var url =
-        'http://$selcrsUrl/scoreqry/sco_query.asp?ACTION=814&KIND=1&LANGS=$language';
+        '$selcrsUrl/scoreqry/sco_query.asp?ACTION=814&KIND=1&LANGS=$language';
     var response = await dio.post(
       url,
       options: _scoreOption,
@@ -549,7 +549,7 @@ class Helper {
     @required String id,
     GeneralCallback callback,
   }) async {
-    var url = 'http://$selcrsUrl/newstu/stu_new.asp?action=16';
+    var url = '$selcrsUrl/newstu/stu_new.asp?action=16';
     try {
       var encoded = Utils.uriEncodeBig5(name);
       var response = await dio.post(
@@ -589,7 +589,7 @@ class Helper {
   }) async {
     try {
       var response = await dio.post(
-        'http://$selcrsUrl/menu4/tools/changedat.asp',
+        '$selcrsUrl/menu4/tools/changedat.asp',
         options: _courseOption,
         data: {
           'T1': mail,
