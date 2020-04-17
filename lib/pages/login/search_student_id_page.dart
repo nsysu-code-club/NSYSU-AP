@@ -1,3 +1,4 @@
+import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:flutter/material.dart';
@@ -203,43 +204,48 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     if (_name.text.isEmpty || _id.text.isEmpty) {
       ApUtils.showToast(context, app.doNotEmpty);
     } else {
-      String result = await SelcrsHelper.instance.getUsername(
+      SelcrsHelper.instance.getUsername(
         name: _name.text,
         id: _id.text,
-      );
-      List<String> list = result.split('--');
-      if (list.length == 2 && isAutoFill) {
-        Navigator.pop(context, list[1]);
-      } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) => DefaultDialog(
-            title: app.searchResult,
-            actionText: app.iKnow,
-            actionFunction: () =>
-                Navigator.of(context, rootNavigator: true).pop('dialog'),
-            contentWidget: RichText(
-              text: TextSpan(
-                style: TextStyle(
-                  color: ApTheme.of(context).grey,
-                  height: 1.3,
-                  fontSize: 16.0,
-                ),
-                children: [
-                  TextSpan(
-                    text: result ?? '',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  if (list.length == 2)
-                    TextSpan(
-                      text: '\n\n${app.firstLoginHint}',
+        callback: GeneralCallback.simple(
+          context,
+          (String result) {
+            List<String> list = result.split('--');
+            if (list.length == 2 && isAutoFill) {
+              Navigator.pop(context, list[1]);
+            } else {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => DefaultDialog(
+                  title: app.searchResult,
+                  actionText: app.iKnow,
+                  actionFunction: () =>
+                      Navigator.of(context, rootNavigator: true).pop('dialog'),
+                  contentWidget: RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        color: ApTheme.of(context).grey,
+                        height: 1.3,
+                        fontSize: 16.0,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: result ?? '',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        if (list.length == 2)
+                          TextSpan(
+                            text: '\n\n${app.firstLoginHint}',
+                          ),
+                      ],
                     ),
-                ],
-              ),
-            ),
-          ),
-        );
-      }
+                  ),
+                ),
+              );
+            }
+          },
+        ),
+      );
     }
   }
 }

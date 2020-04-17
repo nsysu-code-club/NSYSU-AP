@@ -555,7 +555,7 @@ class SelcrsHelper {
   Future<String> getUsername({
     @required String name,
     @required String id,
-    GeneralCallback callback,
+    GeneralCallback<String> callback,
   }) async {
     var url = '$selcrsUrl/newstu/stu_new.asp?action=16';
     try {
@@ -575,10 +575,7 @@ class SelcrsHelper {
       String text = big5.decode(response.data);
       var document = parse(text, encoding: 'BIG-5');
       var elements = document.getElementsByTagName('b');
-      if (elements.length > 0)
-        return elements[0].text;
-      else
-        return '';
+      return callback.onSuccess(elements.length > 0 ? elements[0].text : '');
     } on DioError catch (e) {
       if (callback != null)
         callback.onFailure(e);
