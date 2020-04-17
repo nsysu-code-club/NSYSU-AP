@@ -117,8 +117,18 @@ class Helper {
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
       } else {
-      } else
-        callback?.onFailure(e);
+        error++;
+        if (error > 5)
+          callback?.onFailure(e);
+        else {
+          changeSelcrsUrl();
+          return selcrsLogin(
+            username: username,
+            password: password,
+            callback: callback,
+          );
+        }
+      }
     }
     try {
       var courseResponse = await dio.post(
@@ -140,7 +150,17 @@ class Helper {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
         callback?.onSuccess(GeneralResponse.success());
       } else {
-        callback?.onFailure(e);
+        error++;
+        if (error > 5)
+          callback?.onFailure(e);
+        else {
+          changeSelcrsUrl();
+          return selcrsLogin(
+            username: username,
+            password: password,
+            callback: callback,
+          );
+        }
       }
     }
   }

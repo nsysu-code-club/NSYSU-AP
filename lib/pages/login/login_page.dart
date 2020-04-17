@@ -289,10 +289,10 @@ class LoginPageState extends State<LoginPage> {
             if (e.statusCode == 400)
               ApUtils.showToast(context, app.loginFail);
             else
-              _changeHost();
+              ApUtils.showToast(context, app.somethingError);
           },
           onFailure: (DioError e) {
-            _changeHost();
+            ApUtils.showToast(context, ApLocalizations.dioError(context, e));
           },
           onSuccess: (GeneralResponse data) async {
             Navigator.pop(context);
@@ -310,18 +310,6 @@ class LoginPageState extends State<LoginPage> {
           },
         ),
       );
-    }
-  }
-
-  void _changeHost() {
-    if (Navigator.canPop(context)) Navigator.pop(context);
-    Helper.changeSelcrsUrl();
-    Helper.error++;
-    if (Helper.error < 5) {
-      _login();
-      setState(() {});
-    } else {
-      ApUtils.showToast(context, ApLocalizations.of(context).timeoutMessage);
     }
   }
 }

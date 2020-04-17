@@ -416,10 +416,15 @@ class HomePageState extends State<HomePage> {
           if (e.statusCode == 400)
             _homeKey.currentState.showBasicHint(text: ap.loginFail);
           else
-            _changeHost();
+            _homeKey.currentState.showBasicHint(text: app.somethingError);
         },
         onFailure: (DioError e) {
-          _changeHost();
+          _homeKey.currentState.showBasicHint(
+            text: ApLocalizations.dioError(
+              context,
+              e,
+            ),
+          );
         },
         onSuccess: (GeneralResponse data) {
           _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
@@ -432,16 +437,6 @@ class HomePageState extends State<HomePage> {
         },
       ),
     );
-  }
-
-  void _changeHost() {
-    Helper.changeSelcrsUrl();
-    Helper.error++;
-    if (Helper.error < 5) {
-      _login();
-    } else {
-      _homeKey.currentState.showBasicHint(text: ap.timeoutMessage);
-    }
   }
 
   _checkUpdate() async {
