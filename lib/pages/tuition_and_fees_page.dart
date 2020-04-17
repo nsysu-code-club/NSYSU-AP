@@ -32,24 +32,6 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   List<TuitionAndFees> items;
 
-  GeneralCallback get callback => GeneralCallback(
-        onFailure: (DioError e) => setState(() {
-          state = _State.error;
-          switch (e.type) {
-            case DioErrorType.CONNECT_TIMEOUT:
-            case DioErrorType.SEND_TIMEOUT:
-            case DioErrorType.RECEIVE_TIMEOUT:
-            case DioErrorType.RESPONSE:
-            case DioErrorType.CANCEL:
-              break;
-            case DioErrorType.DEFAULT:
-              throw e;
-              break;
-          }
-        }),
-        onError: (_) => setState(() => state = _State.error),
-      );
-
   @override
   void initState() {
     FA.setCurrentScreen("TuitionAndFeesPage", "tuition_and_fees_page.dart");
