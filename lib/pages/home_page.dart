@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ap_common/api/github_helper.dart';
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/models/general_response.dart';
@@ -19,7 +20,6 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/api/github_helper.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -300,43 +300,48 @@ class HomePageState extends State<HomePage> {
     });
   }
 
-  _getAllNews() async {
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      RemoteConfig remoteConfig = await RemoteConfig.instance;
-      await remoteConfig.fetch(expiration: const Duration(seconds: 10));
-      await remoteConfig.activateFetched();
-      String rawString = remoteConfig.getString(Constants.NEWS_DATA);
-      newsList = NewsResponse.fromRawJson(rawString).data;
-    } else {
-      GitHubHelper.instance.getNews(
-        callback: GeneralCallback(
-          onError: (GeneralResponse e) {
-            setState(() {
-              state = HomeState.error;
-            });
-          },
-          onFailure: (DioError e) {
-            setState(() {
-              state = HomeState.error;
-            });
-            ApUtils.handleDioError(context, e);
-          },
-          onSuccess: (List<News> data) {
-            newsList = data;
-            setState(() {
-              if (newsList == null || newsList.length == 0)
-                state = HomeState.empty;
-              else {
-                newsList.sort((a, b) {
-                  return b.weight.compareTo(a.weight);
-                });
-                state = HomeState.finish;
-              }
-            });
-          },
-        ),
-      );
+  String get code {
+    switch (AppLocalizations.locale.languageCode) {
+      case ApSupportLanguageConstants.EN:
+        return '436be09da3acfe4d5bb35b8a4b5fa627';
+      case ApSupportLanguageConstants.ZH:
+      default:
+        return 'cbf1ad8ebcad400bc759a0b4a73f5907';
     }
+  }
+
+  _getAllNews() async {
+    GitHubHelper.instance.getNews(
+      gitHubUsername: 'abc873693',
+      hashCode: code,
+      languageCode: AppLocalizations.locale.languageCode,
+      callback: GeneralCallback(
+        onError: (GeneralResponse e) {
+          setState(() {
+            state = HomeState.error;
+          });
+        },
+        onFailure: (DioError e) {
+          setState(() {
+            state = HomeState.error;
+          });
+          ApUtils.handleDioError(context, e);
+        },
+        onSuccess: (List<News> data) {
+          newsList = data;
+          setState(() {
+            if (newsList == null || newsList.length == 0)
+              state = HomeState.empty;
+            else {
+              newsList.sort((a, b) {
+                return b.weight.compareTo(a.weight);
+              });
+              state = HomeState.finish;
+            }
+          });
+        },
+      ),
+    );
   }
 
   _getUserInfo() {
