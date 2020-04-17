@@ -11,7 +11,6 @@ class TuitionHelper {
   static const BASE_PATH = 'https://tfstu.nsysu.edu.tw';
 
   static Dio dio;
-
   static CookieJar cookieJar;
 
   static TuitionHelper _instance;

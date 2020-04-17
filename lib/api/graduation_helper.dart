@@ -11,7 +11,6 @@ import 'package:nsysu_ap/utils/utils.dart';
 
 class GraduationHelper {
   static Dio dio;
-
   static CookieJar cookieJar;
 
   static GraduationHelper _instance;

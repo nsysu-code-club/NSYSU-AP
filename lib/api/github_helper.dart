@@ -1,18 +1,13 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/new_response.dart';
-import 'package:big5/big5.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:flutter/widgets.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:html/parser.dart';
-import 'package:nsysu_ap/models/tuition_and_fees.dart';
 
 class GitHubHelper {
   static const BASE_PATH = 'https://raw.githubusercontent.com';
 
   static Dio dio;
-
   static CookieJar cookieJar;
 
   static GitHubHelper _instance;

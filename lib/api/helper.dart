@@ -2,7 +2,6 @@ import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/course_data.dart';
 import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/models/score_data.dart';
-import 'package:ap_common/models/new_response.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:big5/big5.dart';
