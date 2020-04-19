@@ -145,9 +145,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       if (Constants.isInDebugMode) {
         print("Push Messaging token: $token");
       }
-      if (Platform.isAndroid)
-        firebaseMessaging.unsubscribeFromTopic("Android");
-      else if (Platform.isIOS) firebaseMessaging.unsubscribeFromTopic("IOS");
     });
   }
 
