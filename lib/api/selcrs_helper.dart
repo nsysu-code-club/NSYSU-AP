@@ -337,7 +337,7 @@ class SelcrsHelper {
             location: location,
             instructors: [instructors],
             times: time,
-            color: ApColors.colors[i][300],
+            detailIndex: i,
           ),
         );
       }
