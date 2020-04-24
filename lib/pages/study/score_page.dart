@@ -58,8 +58,7 @@ class ScorePageState extends State<ScorePage> {
       state: state,
       scoreData: scoreData,
       middleTitle: app.credits,
-      isShowConductScore: false,
-      isShowCredit: true,
+      isShowSearchButton: false,
       customHint: hasPreScore ? app.hasPreScoreHint : null,
       itemPicker: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -104,6 +103,17 @@ class ScorePageState extends State<ScorePage> {
           ),
         );
       },
+      details: (scoreData == null)
+          ? null
+          : [
+              '${app.creditsTakenEarned}：'
+                  '${scoreData.detail.creditTaken ?? ''}'
+                  '${scoreData.detail.isCreditEmpty ? '' : ' / '}'
+                  '${scoreData.detail.creditEarned ?? ''}',
+              '${app.average}：${scoreData.detail.average ?? ''}',
+              '${app.rank}：${scoreData.detail.classRank ?? ''}',
+              '${app.percentage}：${scoreData.detail.classPercentage ?? ''}',
+            ],
     );
   }
 
