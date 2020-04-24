@@ -275,9 +275,8 @@ class SelcrsHelper {
       if (courseData.courseTables != null)
         courseData.courseTables.timeCode = timeCodeConfig.textList;
       //print(DateTime.now());
-      for (var i = 0; i < trDoc.length; i++) {
+      for (var i = 1; i < trDoc.length; i++) {
         var tdDoc = trDoc[i].getElementsByTagName('td');
-        if (i == 0) continue;
         final title = tdDoc[4].text;
         final instructors = tdDoc[8].text;
         final location = Location(
@@ -305,7 +304,7 @@ class SelcrsHelper {
                     startTime: timeCode?.startTime ?? '',
                     endTime: timeCode?.endTime ?? '',
                   ),
-                  detailIndex: i,
+                  detailIndex: i - 1,
                 );
                 if (j == 10)
                   courseData.courseTables.monday.add(course);
