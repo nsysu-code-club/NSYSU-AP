@@ -305,6 +305,7 @@ class SelcrsHelper {
                     startTime: timeCode?.startTime ?? '',
                     endTime: timeCode?.endTime ?? '',
                   ),
+                  detailIndex: i,
                 );
                 if (j == 10)
                   courseData.courseTables.monday.add(course);
@@ -337,7 +338,6 @@ class SelcrsHelper {
             location: location,
             instructors: [instructors],
             times: time,
-            detailIndex: i,
           ),
         );
       }
