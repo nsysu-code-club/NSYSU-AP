@@ -385,19 +385,7 @@ class HomePageState extends State<HomePage> {
         rightActionText: app.contactFansPage,
         leftActionFunction: () {},
         rightActionFunction: () {
-          if (Platform.isAndroid)
-            Utils.launchUrl('fb://messaging/${Constants.FANS_PAGE_ID}')
-                .catchError(
-                    (onError) => Utils.launchUrl(Constants.FANS_PAGE_URL));
-          else if (Platform.isIOS)
-            Utils.launchUrl(
-                    'fb-messenger://user-thread/${Constants.FANS_PAGE_ID}')
-                .catchError(
-                    (onError) => Utils.launchUrl(Constants.FANS_PAGE_URL));
-          else {
-            Utils.launchUrl(Constants.FANS_PAGE_URL).catchError(
-                (onError) => ApUtils.showToast(context, app.platformError));
-          }
+          ApUtils.launchFbFansPage(context, Constants.FANS_PAGE_ID);
           FirebaseAnalyticsUtils.instance.logAction('contact_fans_page', 'click');
         },
       ),

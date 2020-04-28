@@ -63,13 +63,5 @@ class Constants {
   static const TAG_NEWS_ICON = "tag_news_icon";
   static const TAG_NEWS_TITLE = "tag_news_title";
 
-  static const ANDROID_DEFAULT_NOTIFICATION_NAME = 'ic_stat_name';
-
-  // Notification ID
-  static const int NOTIFICATION_BUS_ID = 100;
-  static const int NOTIFICATION_COURSE_ID = 101;
-  static const int NOTIFICATION_FCM_ID = 200;
-
   static const FANS_PAGE_ID = '301942414015612';
-  static const FANS_PAGE_URL = 'https://www.facebook.com/$FANS_PAGE_ID/';
 }
