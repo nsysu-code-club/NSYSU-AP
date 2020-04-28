@@ -4,14 +4,12 @@ import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/models/score_data.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
-import 'package:ap_common/resources/ap_colors.dart';
+import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:big5/big5.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
-import 'package:nsysu_ap/api/graduation_helper.dart';
-import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/pre_score.dart';
@@ -21,7 +19,6 @@ import 'package:sprintf/sprintf.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 
 import '../utils/app_localizations.dart';
-import '../utils/firebase_analytics_utils.dart';
 
 class SelcrsHelper {
   static const selcrsUrlFormat = 'http://selcrs%i.nsysu.edu.tw';
@@ -346,7 +343,8 @@ class SelcrsHelper {
         if (courseData.courseTables.sunday.length == 0)
           courseData.courseTables.sunday = null;
         var endTime = DateTime.now().millisecondsSinceEpoch;
-        FA.logTimeEvent(FA.COURSE_HTML_PARSER, (endTime - startTime) / 1000.0);
+        FirebaseAnalyticsUtils.instance
+            .logTimeEvent('course_html_parser', (endTime - startTime) / 1000.0);
       }
       //print(DateTime.now());
       return callback?.onSuccess(courseData);
@@ -487,7 +485,8 @@ class SelcrsHelper {
           }
         }
         var endTime = DateTime.now().millisecondsSinceEpoch;
-        FA.logTimeEvent(FA.SCORE_HTML_PARSER, (endTime - startTime) / 1000.0);
+        FirebaseAnalyticsUtils.instance
+            .logTimeEvent('score_html_parser', (endTime - startTime) / 1000.0);
       }
       /*var trDoc = document.getElementsByTagName('tr');
       for (var i = 0; i < trDoc.length; i++) {

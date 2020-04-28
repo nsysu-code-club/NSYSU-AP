@@ -1,10 +1,10 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/default_dialog.dart';
 import 'package:ap_common/widgets/hint_content.dart';
@@ -33,7 +33,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
   @override
   void initState() {
     super.initState();
-    FA.setCurrentScreen("GraduationReportPage", "graduation_report_page.dart");
+    FirebaseAnalyticsUtils.instance.setCurrentScreen("GraduationReportPage", "graduation_report_page.dart");
     if (GraduationHelper.isLogin)
       _getGraduationReport();
     else
@@ -71,7 +71,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
               child: RefreshIndicator(
                 onRefresh: () async {
                   _getGraduationReport();
-                  FA.logAction('refresh', 'swipe');
+                  FirebaseAnalyticsUtils.instance.logAction('refresh', 'swipe');
                   return null;
                 },
                 child: _body(),
@@ -93,7 +93,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
         return FlatButton(
           onPressed: () {
             _getGraduationReport();
-            FA.logAction('retry', 'click');
+            FirebaseAnalyticsUtils.instance.logAction('retry', 'click');
           },
           child: HintContent(
             icon: Icons.assignment,

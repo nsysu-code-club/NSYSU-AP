@@ -4,11 +4,10 @@ import 'package:ap_common/scaffold/user_info_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
+import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
-import 'package:nsysu_ap/utils/utils.dart';
 
 class UserInfoPage extends StatefulWidget {
   final UserInfo userInfo;
@@ -26,7 +25,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
   @override
   void initState() {
-    FA.setCurrentScreen("UserInfoPage", "user_info_page.dart");
+    FirebaseAnalyticsUtils.instance.setCurrentScreen("UserInfoPage", "user_info_page.dart");
     userInfo = widget.userInfo;
     super.initState();
   }
@@ -42,9 +41,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
               setState(() {
                 userInfo = data;
               });
-              FA.setUserProperty('department', userInfo.department);
-              FA.logUserInfo(userInfo.department);
-              FA.setUserId(userInfo.id);
+              FirebaseAnalyticsUtils.instance.setUserProperty('department', userInfo.department);
+              FirebaseAnalyticsUtils.instance.logUserInfo(userInfo.department);
+              FirebaseAnalyticsUtils.instance.setUserId(userInfo.id);
               return data;
             },
             onFailure: (DioError e) {},

@@ -4,13 +4,13 @@ import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:printing/printing.dart';
@@ -34,7 +34,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   @override
   void initState() {
-    FA.setCurrentScreen("TuitionAndFeesPage", "tuition_and_fees_page.dart");
+    FirebaseAnalyticsUtils.instance.setCurrentScreen("TuitionAndFeesPage", "tuition_and_fees_page.dart");
     if (TuitionHelper.isLogin)
       _getData();
     else
@@ -77,7 +77,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
               state = _State.loading;
             });
             await _getData();
-            FA.logAction('refresh', 'swipe');
+            FirebaseAnalyticsUtils.instance.logAction('refresh', 'swipe');
             return null;
           },
           child: ListView.builder(
@@ -186,12 +186,12 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                         onLayout: (format) async => bytes,
                         name: item.title,
                       );
-                      FA.logAction('export_by_printing', '');
+                      FirebaseAnalyticsUtils.instance.logAction('export_by_printing', '');
                       break;
                     case 1:
                       await Printing.sharePdf(
                           bytes: bytes, filename: '${item.title}.pdf');
-                      FA.logAction('export_by_share', '');
+                      FirebaseAnalyticsUtils.instance.logAction('export_by_share', '');
                       break;
                   }
                 } else {

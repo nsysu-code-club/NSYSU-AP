@@ -1,11 +1,10 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:nsysu_ap/utils/utils.dart';
 import 'package:ap_common/widgets/default_dialog.dart';
 
 class SearchStudentIdPage extends StatefulWidget {
@@ -27,7 +26,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
 
   @override
   void initState() {
-    FA.setCurrentScreen("SearchStudentIdPage", "search_student_id_page.dart");
+    FirebaseAnalyticsUtils.instance.setCurrentScreen("SearchStudentIdPage", "search_student_id_page.dart");
     nameFocusNode = FocusNode();
     idFocusNode = FocusNode();
     super.initState();
@@ -168,7 +167,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
           ),
           padding: EdgeInsets.all(14.0),
           onPressed: () {
-            FA.logAction('search_student_id', 'click');
+            FirebaseAnalyticsUtils.instance.logAction('search_student_id', 'click');
             _search();
           },
           color: Colors.white,

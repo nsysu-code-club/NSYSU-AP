@@ -15,6 +15,7 @@ import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/ap_drawer.dart';
 import 'package:ap_common/widgets/default_dialog.dart';
+import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
@@ -32,7 +33,6 @@ import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/pages/user_info_page.dart';
 import 'package:nsysu_ap/resources/image_assets.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:ap_common/widgets/yes_no_dialog.dart';
@@ -79,7 +79,7 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    FA.setCurrentScreen("HomePage", "home_page.dart");
+    FirebaseAnalyticsUtils.instance.setCurrentScreen("HomePage", "home_page.dart");
     _getAllNews();
     if (Preferences.getBool(Constants.PREF_AUTO_LOGIN, false))
       _login();
@@ -118,7 +118,7 @@ class HomePageState extends State<HomePage> {
         String message = news.description.length > 12
             ? news.description
             : news.description.substring(0, 12);
-        FA.logAction('news_image', 'click', message: message);
+        FirebaseAnalyticsUtils.instance.logAction('news_image', 'click', message: message);
       },
       drawer: ApDrawer(
         userInfo: userInfo,
@@ -198,9 +198,9 @@ class HomePageState extends State<HomePage> {
               fbFanPageId: '735951703168873',
               fbFanPageUrl: 'https://www.facebook.com/NKUST.ITC/',
               githubUrl: 'https://github.com/NKUST-ITC',
-              logEvent: (name, value) => FA.logAction(name, value),
+              logEvent: (name, value) => FirebaseAnalyticsUtils.instance.logAction(name, value),
               setCurrentScreen: () =>
-                  FA.setCurrentScreen("AboutUsPage", "about_us_page.dart"),
+                  FirebaseAnalyticsUtils.instance.setCurrentScreen("AboutUsPage", "about_us_page.dart"),
               actions: <Widget>[
                 IconButton(
                   icon: Icon(ApIcon.codeIcon),
@@ -208,12 +208,12 @@ class HomePageState extends State<HomePage> {
                     Navigator.of(context).push(
                       CupertinoPageRoute(
                         builder: (_) => OpenSourcePage(
-                          setCurrentScreen: () => FA.setCurrentScreen(
+                          setCurrentScreen: () => FirebaseAnalyticsUtils.instance.setCurrentScreen(
                               "OpenSourcePage", "open_source_page.dart"),
                         ),
                       ),
                     );
-                    FA.logAction('open_source', 'click');
+                    FirebaseAnalyticsUtils.instance.logAction('open_source', 'click');
                   },
                 )
               ],
@@ -350,9 +350,9 @@ class HomePageState extends State<HomePage> {
             userInfo = data;
           });
           if (userInfo != null) {
-            FA.setUserProperty('department', userInfo.department);
-            FA.logUserInfo(userInfo.department);
-            FA.setUserId(userInfo.id);
+            FirebaseAnalyticsUtils.instance.setUserProperty('department', userInfo.department);
+            FirebaseAnalyticsUtils.instance.logUserInfo(userInfo.department);
+            FirebaseAnalyticsUtils.instance.setUserId(userInfo.id);
           }
         },
       ),
@@ -360,7 +360,7 @@ class HomePageState extends State<HomePage> {
   }
 
   void _showInformationDialog() {
-    FA.logAction('news_rule', 'click');
+    FirebaseAnalyticsUtils.instance.logAction('news_rule', 'click');
     showDialog(
       context: context,
       builder: (BuildContext context) => YesNoDialog(
@@ -398,7 +398,7 @@ class HomePageState extends State<HomePage> {
             Utils.launchUrl(Constants.FANS_PAGE_URL).catchError(
                 (onError) => ApUtils.showToast(context, app.platformError));
           }
-          FA.logAction('contact_fans_page', 'click');
+          FirebaseAnalyticsUtils.instance.logAction('contact_fans_page', 'click');
         },
       ),
     );

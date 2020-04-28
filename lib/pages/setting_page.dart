@@ -7,10 +7,10 @@ import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:ap_common/widgets/setting_page_widgets.dart';
+import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:package_info/package_info.dart';
@@ -38,7 +38,7 @@ class SettingPageState extends State<SettingPage> {
   @override
   void initState() {
     super.initState();
-    FA.setCurrentScreen("SettingPage", "setting_page.dart");
+    FirebaseAnalyticsUtils.instance.setCurrentScreen("SettingPage", "setting_page.dart");
     _getPreference();
   }
 
@@ -158,7 +158,7 @@ class SettingPageState extends State<SettingPage> {
                       (onError) =>
                           ApUtils.showToast(context, ap.platformError));
                 }
-                FA.logAction('feedback', 'click');
+                FirebaseAnalyticsUtils.instance.logAction('feedback', 'click');
               },
             ),
             SettingItem(
@@ -167,7 +167,7 @@ class SettingPageState extends State<SettingPage> {
               onTap: () {
                 Utils.launchUrl("https://p.ecpay.com.tw/3D54D").catchError(
                     (onError) => ApUtils.showToast(context, ap.platformError));
-                FA.logAction('donate', 'click');
+                FirebaseAnalyticsUtils.instance.logAction('donate', 'click');
               },
             ),
             SettingItem(

@@ -4,12 +4,12 @@ import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
+import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/login/search_student_id_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
@@ -36,7 +36,7 @@ class LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    FA.setCurrentScreen("LoginPage", "login_page.dart");
+    FirebaseAnalyticsUtils.instance.setCurrentScreen("LoginPage", "login_page.dart");
     _getPreference();
   }
 
@@ -190,7 +190,7 @@ class LoginPageState extends State<LoginPage> {
           ),
           padding: EdgeInsets.all(14.0),
           onPressed: () {
-            FA.logAction('login', 'click');
+            FirebaseAnalyticsUtils.instance.logAction('login', 'click');
             SelcrsHelper.error = 0;
             _login();
           },

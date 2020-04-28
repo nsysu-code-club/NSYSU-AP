@@ -6,12 +6,12 @@ import 'package:ap_common/scaffold/course_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/dialog_option.dart';
+import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/utils/firebase_analytics_utils.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 
 class CoursePage extends StatefulWidget {
@@ -49,7 +49,7 @@ class CoursePageState extends State<CoursePage> {
   @override
   void initState() {
     super.initState();
-    FA.setCurrentScreen("CoursePage", "course_page.dart");
+    FirebaseAnalyticsUtils.instance.setCurrentScreen("CoursePage", "course_page.dart");
     _getSemester();
     isShowSearchButton = Preferences.getBool(
       Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
