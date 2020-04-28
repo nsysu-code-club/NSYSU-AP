@@ -16,6 +16,7 @@ import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/ap_drawer.dart';
 import 'package:ap_common/widgets/default_dialog.dart';
 import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common_firbase/utils/firebase_remote_config_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
@@ -465,38 +466,19 @@ class HomePageState extends State<HomePage> {
         Constants.PREF_CURRENT_VERSION,
         packageInfo.buildNumber,
       );
-      Preferences.setString(
-        Constants.PREF_CURRENT_VERSION,
-        packageInfo.buildNumber,
-      );
     }
-    if (Constants.isInDebugMode) {
-      final RemoteConfig remoteConfig = await RemoteConfig.instance;
-      try {
-        await remoteConfig.fetch(expiration: const Duration(seconds: 10));
-        await remoteConfig.activateFetched();
-      } on FetchThrottledException catch (exception) {} catch (exception) {} finally {
-        String versionContent = '';
-        switch (AppLocalizations.locale.languageCode) {
-          case ApSupportLanguageConstants.ZH:
-            versionContent =
-                remoteConfig.getString(Constants.NEW_VERSION_CONTENT_ZH);
-            break;
-          case ApSupportLanguageConstants.EN:
-          default:
-            versionContent =
-                remoteConfig.getString(Constants.NEW_VERSION_CONTENT_EN);
-            break;
-        }
+    if (!Constants.isInDebugMode) {
+      VersionInfo versionInfo =
+          await FirebaseRemoteConfigUtils.getVersionInfo();
+      if (versionInfo != null)
         ApUtils.showNewVersionDialog(
           context: context,
-          newVersionCode: remoteConfig.getInt(Constants.APP_VERSION),
+          newVersionCode: versionInfo.code,
           iOSAppId: '146752219',
           defaultUrl: 'https://www.facebook.com/NKUST.ITC/',
-          newVersionContent: versionContent,
+          newVersionContent: versionInfo.content,
           appName: app.appName,
         );
-      }
     }
   }
 
