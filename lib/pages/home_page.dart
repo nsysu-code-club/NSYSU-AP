@@ -63,7 +63,10 @@ class HomePageState extends State<HomePage> {
 
   UserInfo userInfo = UserInfo();
 
-  List<News> newsList = [];
+  Map<String, List<News>> newsMap;
+
+  List<News> get newsList =>
+      (newsMap == null) ? null : newsMap[AppLocalizations.locale.languageCode];
 
   bool isStudyExpanded = false;
   bool isSchoolNavigationExpanded = false;
@@ -300,21 +303,11 @@ class HomePageState extends State<HomePage> {
     });
   }
 
-  String get code {
-    switch (AppLocalizations.locale.languageCode) {
-      case ApSupportLanguageConstants.EN:
-        return '436be09da3acfe4d5bb35b8a4b5fa627';
-      case ApSupportLanguageConstants.ZH:
-      default:
-        return 'cbf1ad8ebcad400bc759a0b4a73f5907';
-    }
-  }
-
   _getAllNews() async {
     GitHubHelper.instance.getNews(
       gitHubUsername: 'abc873693',
-      hashCode: code,
-      languageCode: AppLocalizations.locale.languageCode,
+      hashCode: '8f04a1051cb019a62ee8c3965e2d642b',
+      tag: 'nsysu',
       callback: GeneralCallback(
         onError: (GeneralResponse e) {
           setState(() {
@@ -327,14 +320,16 @@ class HomePageState extends State<HomePage> {
           });
           ApUtils.handleDioError(context, e);
         },
-        onSuccess: (List<News> data) {
-          newsList = data;
+        onSuccess: (Map<String, List<News>> data) {
+          newsMap = data;
           setState(() {
             if (newsList == null || newsList.length == 0)
               state = HomeState.empty;
             else {
-              newsList.sort((a, b) {
-                return b.weight.compareTo(a.weight);
+              newsMap.forEach((_, data) {
+                data.sort((a, b) {
+                  return b.weight.compareTo(a.weight);
+                });
               });
               state = HomeState.finish;
             }
