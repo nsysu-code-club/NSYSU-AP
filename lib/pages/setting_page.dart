@@ -121,7 +121,10 @@ class SettingPageState extends State<SettingPage> {
                           locale = Localizations.localeOf(context);
                           break;
                         default:
-                          locale = Locale(code);
+                          locale = Locale(
+                            code,
+                            code == ApSupportLanguageConstants.ZH ? 'TW' : null,
+                          );
                           break;
                       }
                       Preferences.setString(Constants.PREF_LANGUAGE_CODE, code);

@@ -97,14 +97,17 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
             if (languageCode == ApSupportLanguageConstants.SYSTEM)
               return locale;
             else
-              return Locale(languageCode);
+              return Locale(
+                languageCode,
+                languageCode == ApSupportLanguageConstants.ZH ? 'TW' : null,
+              );
           },
           localizationsDelegates: [
             const AppLocalizationsDelegate(),
             const ApLocalizationsDelegate(),
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
-            CupertinoEnDefaultLocalizationsDelegate(),
+            GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: [
             const Locale('en', 'US'), // English
