@@ -4,12 +4,19 @@ packages:
   ap_common:
     dependency: "direct main"
     description:
+      name: ap_common
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.8+1"
+  ap_common_firbase:
+    dependency: "direct main"
+    description:
       path: "."
-      ref: "v0.1.0"
-      resolved-ref: fb0a767e4639184a3c2013dfd463a280cdf9cd9d
-      url: "https://github.com/abc873693/ap_common"
+      ref: "v0.0.1"
+      resolved-ref: a8dc4b543618f31dd2efc74b260f03b89942dc7a
+      url: "https://github.com/abc873693/ap_common_firebase"
     source: git
-    version: "0.1.0"
+    version: "0.0.1"
   archive:
     dependency: transitive
     description:
