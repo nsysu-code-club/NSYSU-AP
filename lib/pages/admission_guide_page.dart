@@ -1,6 +1,6 @@
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class AdmissionGuidePage extends StatefulWidget {
@@ -11,7 +11,7 @@ class AdmissionGuidePage extends StatefulWidget {
 enum _State { loading, finish, error, empty, offlineEmpty }
 
 class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
-  AppLocalizations app;
+  ApLocalizations ap;
 
   _State state = _State.loading;
 
@@ -19,10 +19,10 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
 
   @override
   Widget build(BuildContext context) {
-    app = AppLocalizations.of(context);
+    ap = ApLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(app.admissionGuide),
+        title: Text(ap.admissionGuide),
         backgroundColor: ApTheme.of(context).blue,
         actions: <Widget>[
           IconButton(
