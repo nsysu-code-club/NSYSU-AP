@@ -14,6 +14,74 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
+  Map get _vocabularies {
+    return _localizedValues[locale.languageCode] ?? _localizedValues['en'];
+  }
+
+  String get appName => _vocabularies['app_name'];
+
+  String get updateNoteContent => _vocabularies['update_note_content'];
+
+  String get aboutOpenSourceContent =>
+      _vocabularies['about_open_source_content'];
+
+  String get graduationCheckChecklist =>
+      _vocabularies['graduationCheckChecklist'];
+
+  String get missingRequiredCourses => _vocabularies['missingRequiredCourses'];
+
+  String get generalEducationCourse => _vocabularies['generalEducationCourse'];
+
+  String get otherEducationsCourse => _vocabularies['otherEducationsCourse'];
+
+  String get check => _vocabularies['check'];
+
+  String get shouldCredits => _vocabularies['shouldCredits'];
+
+  String get actualCredits => _vocabularies['actualCredits'];
+
+  String get totalCredits => _vocabularies['totalCredits'];
+
+  String get practiceSituation => _vocabularies['practiceSituation'];
+
+  String get courseClickHint => _vocabularies['courseClickHint'];
+
+  String get graduationCheckChecklistHint =>
+      _vocabularies['graduationCheckChecklistHint'];
+
+  String get graduationCheckChecklistEmpty =>
+      _vocabularies['graduationCheckChecklistEmpty'];
+
+  String get noData => _vocabularies['noData'];
+
+  String get graduationCheckChecklistSummary =>
+      _vocabularies['graduationCheckChecklistSummary'];
+
+  String get firstLoginHint => _vocabularies['firstLoginHint'];
+
+  String get tuitionAndFees => _vocabularies['tuitionAndFees'];
+
+  String get tuitionAndFeesItemTitleFormat =>
+      _vocabularies['tuitionAndFeesItemTitleFormat'];
+
+  String get tuitionAndFeesPageHint => _vocabularies['tuitionAndFeesPageHint'];
+
+  String get tuitionAndFeesPageDialogTitle =>
+      _vocabularies['tuitionAndFeesPageDialogTitle'];
+
+  String get courseYear => _vocabularies['courseYear'];
+
+  String get continuingSummerEducationProgram =>
+      _vocabularies['continuingSummerEducationProgram'];
+
+  String get fallSemester => _vocabularies['fallSemester'];
+
+  String get springSemester => _vocabularies['springSemester'];
+
+  String get summerSemester => _vocabularies['summerSemester'];
+
+  String get tuitionAndFeesEmpty => _vocabularies['tuitionAndFeesEmpty'];
+
   static Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'app_name': 'NSYSU AP',
@@ -84,74 +152,6 @@ class AppLocalizations {
       'hasPreScoreHint': '黃字為授課老師開放成績查詢 並非最終成績',
     },
   };
-
-  Map get _vocabularies {
-    return _localizedValues[locale.languageCode] ?? _localizedValues['en'];
-  }
-
-  String get appName => _vocabularies['app_name'];
-
-  String get updateNoteContent => _vocabularies['update_note_content'];
-
-  String get aboutOpenSourceContent =>
-      _vocabularies['about_open_source_content'];
-
-  String get graduationCheckChecklist =>
-      _vocabularies['graduationCheckChecklist'];
-
-  String get missingRequiredCourses => _vocabularies['missingRequiredCourses'];
-
-  String get generalEducationCourse => _vocabularies['generalEducationCourse'];
-
-  String get otherEducationsCourse => _vocabularies['otherEducationsCourse'];
-
-  String get check => _vocabularies['check'];
-
-  String get shouldCredits => _vocabularies['shouldCredits'];
-
-  String get actualCredits => _vocabularies['actualCredits'];
-
-  String get totalCredits => _vocabularies['totalCredits'];
-
-  String get practiceSituation => _vocabularies['practiceSituation'];
-
-  String get courseClickHint => _vocabularies['courseClickHint'];
-
-  String get graduationCheckChecklistHint =>
-      _vocabularies['graduationCheckChecklistHint'];
-
-  String get graduationCheckChecklistEmpty =>
-      _vocabularies['graduationCheckChecklistEmpty'];
-
-  String get noData => _vocabularies['noData'];
-
-  String get graduationCheckChecklistSummary =>
-      _vocabularies['graduationCheckChecklistSummary'];
-
-  String get firstLoginHint => _vocabularies['firstLoginHint'];
-
-  String get tuitionAndFees => _vocabularies['tuitionAndFees'];
-
-  String get tuitionAndFeesItemTitleFormat =>
-      _vocabularies['tuitionAndFeesItemTitleFormat'];
-
-  String get tuitionAndFeesPageHint => _vocabularies['tuitionAndFeesPageHint'];
-
-  String get tuitionAndFeesPageDialogTitle =>
-      _vocabularies['tuitionAndFeesPageDialogTitle'];
-
-  String get courseYear => _vocabularies['courseYear'];
-
-  String get continuingSummerEducationProgram =>
-      _vocabularies['continuingSummerEducationProgram'];
-
-  String get fallSemester => _vocabularies['fallSemester'];
-
-  String get springSemester => _vocabularies['springSemester'];
-
-  String get summerSemester => _vocabularies['summerSemester'];
-
-  String get tuitionAndFeesEmpty => _vocabularies['tuitionAndFeesEmpty'];
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -167,22 +167,4 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
 
   @override
   bool shouldReload(AppLocalizationsDelegate old) => false;
-}
-
-class CupertinoEnDefaultLocalizationsDelegate
-    extends LocalizationsDelegate<CupertinoLocalizations> {
-  const CupertinoEnDefaultLocalizationsDelegate();
-
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<CupertinoLocalizations> load(Locale locale) =>
-      DefaultCupertinoLocalizations.load(Locale('zh'));
-
-  @override
-  bool shouldReload(CupertinoEnDefaultLocalizationsDelegate old) => false;
-
-  @override
-  String toString() => 'DefaultCupertinoLocalizations.delegate(en_US)';
 }

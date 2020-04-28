@@ -78,7 +78,8 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance.setCurrentScreen("HomePage", "home_page.dart");
+    FirebaseAnalyticsUtils.instance
+        .setCurrentScreen("HomePage", "home_page.dart");
     _getAllNews();
     if (Preferences.getBool(Constants.PREF_AUTO_LOGIN, false))
       _login();

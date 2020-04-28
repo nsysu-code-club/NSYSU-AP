@@ -36,7 +36,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance.setCurrentScreen("GraduationReportPage", "graduation_report_page.dart");
+    FirebaseAnalyticsUtils.instance.setCurrentScreen(
+        "GraduationReportPage", "graduation_report_page.dart");
     if (GraduationHelper.isLogin)
       _getGraduationReport();
     else

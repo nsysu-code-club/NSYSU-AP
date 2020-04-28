@@ -41,7 +41,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
               setState(() {
                 userInfo = data;
               });
-              FirebaseAnalyticsUtils.instance.setUserProperty('department', userInfo.department);
+              FirebaseAnalyticsUtils.instance
+                  .setUserProperty('department', userInfo.department);
               FirebaseAnalyticsUtils.instance.logUserInfo(userInfo.department);
               FirebaseAnalyticsUtils.instance.setUserId(userInfo.id);
               return data;

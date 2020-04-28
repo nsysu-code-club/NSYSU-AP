@@ -11,6 +11,7 @@ import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/login/search_student_id_page.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
+import 'package:nsysu_ap/utils/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routerName = "/login";
@@ -34,7 +35,8 @@ class LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance.setCurrentScreen("LoginPage", "login_page.dart");
+    FirebaseAnalyticsUtils.instance
+        .setCurrentScreen("LoginPage", "login_page.dart");
     _getPreference();
   }
 
