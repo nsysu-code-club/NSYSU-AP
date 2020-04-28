@@ -5,6 +5,7 @@ import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/preferences.dart';
+import 'package:ap_common_firbase/utils/firebase_utils.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -30,19 +31,14 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   FirebaseAnalytics _analytics;
-  FirebaseMessaging _firebaseMessaging;
+
   Brightness brightness = Brightness.light;
 
   ThemeMode themeMode = ThemeMode.system;
 
   @override
   void initState() {
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      _analytics = FirebaseAnalytics();
-      _firebaseMessaging = FirebaseMessaging();
-      _initFCM(_firebaseMessaging);
-      FA.analytics = _analytics;
-    }
+    _analytics = FirebaseUtils.init();
     themeMode = ThemeMode
         .values[Preferences.getInt(Constants.PREF_THEME_MODE_INDEX, 0)];
     WidgetsBinding.instance.addObserver(this);
@@ -116,39 +112,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ),
       ),
     );
-  }
-
-  void _initFCM(FirebaseMessaging firebaseMessaging) async {
-    await Future.delayed(Duration(seconds: 2));
-    firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        if (Constants.isInDebugMode) print("onMessage: $message");
-        Utils.showFCMNotification(
-            message['notification']['title'] ?? '',
-            message['notification']['title'] ?? '',
-            message['notification']['body'] ?? '');
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        if (Constants.isInDebugMode) print("onLaunch: $message");
-        //_navigateToItemDetail(message);
-      },
-      onResume: (Map<String, dynamic> message) async {
-        if (Constants.isInDebugMode) print("onResume: $message");
-      },
-    );
-    firebaseMessaging.requestNotificationPermissions(
-      const IosNotificationSettings(sound: true, badge: true, alert: true),
-    );
-    firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-    firebaseMessaging.getToken().then((String token) {
-      if (token == null) return;
-      if (Constants.isInDebugMode) {
-        print("Push Messaging token: $token");
-      }
-    });
   }
 
   void update(ThemeMode mode) {
