@@ -1,4 +1,5 @@
 import 'package:ap_common/callback/general_callback.dart';
+import 'package:ap_common/models/course_notify_data.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/course_scaffold.dart';
@@ -29,12 +30,18 @@ class CoursePageState extends State<CoursePage> {
 
   CourseSemesterData semesterData;
   CourseData courseData;
+  CourseNotifyData notifyData;
 
   List<String> items;
   int semesterIndex = 0;
 
   bool isOffline = false;
   bool isShowSearchButton = false;
+
+  String defaultSemesterCode = '';
+
+  String get courseNotifyCacheKey => '${SelcrsHelper.instance.username}'
+      '_latest';
 
   @override
   void initState() {
@@ -58,6 +65,7 @@ class CoursePageState extends State<CoursePage> {
     return CourseScaffold(
       state: state,
       courseData: courseData,
+      notifyData: notifyData,
       semesterIndex: semesterIndex,
       semesters: items,
       onSelect: (index) {
@@ -67,6 +75,9 @@ class CoursePageState extends State<CoursePage> {
       onRefresh: _getCourseTables,
       customHint: isOffline ? app.offlineCourse : null,
       isShowSearchButton: isShowSearchButton,
+      enableNotifyControl: semesterData != null &&
+          semesterData?.semesters[semesterIndex].value == defaultSemesterCode,
+      courseNotifySaveKey: courseNotifyCacheKey,
       actions: <Widget>[
         PopupMenuButton<int>(
           onSelected: (int value) {
@@ -141,16 +152,17 @@ class CoursePageState extends State<CoursePage> {
             remoteConfig = await RemoteConfig.instance;
             await remoteConfig.fetch(expiration: const Duration(seconds: 10));
             await remoteConfig.activateFetched();
-            code =
+            defaultSemesterCode =
                 remoteConfig?.getString(Constants.DEFAULT_COURSE_SEMESTER_CODE);
             String rawTimeCodeConfig =
                 remoteConfig?.getString(Constants.TIME_CODE_CONFIG);
             timeCodeConfig = TimeCodeConfig.fromRawJson(rawTimeCodeConfig);
-            Preferences.setString(Constants.DEFAULT_COURSE_SEMESTER_CODE, code);
+            Preferences.setString(
+                Constants.DEFAULT_COURSE_SEMESTER_CODE, defaultSemesterCode);
             Preferences.setString(
                 Constants.TIME_CODE_CONFIG, rawTimeCodeConfig);
           } catch (exception) {
-            code = Preferences.getString(
+            defaultSemesterCode = Preferences.getString(
               Constants.DEFAULT_COURSE_SEMESTER_CODE,
               '${Constants.DEFAULT_YEAR}${Constants.DEFAULT_SEMESTER}',
             );
@@ -163,10 +175,10 @@ class CoursePageState extends State<CoursePage> {
           }
           items = [];
           var i = 0;
-          semesterData.setDefault(code);
+          semesterData.setDefault(defaultSemesterCode);
           semesterData.semesters.forEach((option) {
             items.add(parser(option.text));
-            if (option.value == code) semesterIndex = i;
+            if (option.value == defaultSemesterCode) semesterIndex = i;
             i++;
           });
           _getCourseTables();
@@ -210,6 +222,7 @@ class CoursePageState extends State<CoursePage> {
       _getSemester();
       return;
     }
+    notifyData = CourseNotifyData.load(courseNotifyCacheKey);
     SelcrsHelper.instance.getCourseData(
       username: Preferences.getString(Constants.PREF_USERNAME, ''),
       timeCodeConfig: timeCodeConfig,

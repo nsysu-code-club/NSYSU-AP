@@ -75,34 +75,7 @@ class SettingPageState extends State<SettingPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            SettingTitle(text: ap.notificationItem),
-            SettingSwitch(
-              text: ap.courseNotify,
-              subText: ap.courseNotifyHint,
-              value: courseNotify,
-              onChanged: (state) async {
-                ApUtils.showToast(
-                  context,
-                  ap.functionNotOpen,
-                );
-//            FA.logAction('notify_course', 'create');
-//            setState(() {
-//              courseNotify = !courseNotify;
-//            });
-//            if (courseNotify)
-//              _setupCourseNotify(context);
-//            else {
-//              await Utils.cancelCourseNotify();
-//            }
-//            FA.logAction('notify_course', 'create', message: '$courseNotify');
-//            prefs.setBool(Constants.PREF_COURSE_NOTIFY, courseNotify);
-              },
-            ),
-            Container(
-              color: Colors.grey,
-              height: 0.5,
-            ),
-            SettingTitle(text: ap.otherSettings),
+            SettingTitle(text: ap.environmentSettings),
             SettingItem(
               text: ap.language,
               subText: languageTextList[languageIndex],
