@@ -22,7 +22,7 @@ class CoursePage extends StatefulWidget {
 }
 
 class CoursePageState extends State<CoursePage> {
-  AppLocalizations app;
+  ApLocalizations ap;
 
   CourseState state = CourseState.loading;
 
@@ -34,6 +34,9 @@ class CoursePageState extends State<CoursePage> {
 
   List<String> items;
   int semesterIndex = 0;
+
+  String customStateHint;
+  String customHint;
 
   bool isOffline = false;
   bool isShowSearchButton = false;
@@ -61,7 +64,7 @@ class CoursePageState extends State<CoursePage> {
 
   @override
   Widget build(BuildContext context) {
-    app = AppLocalizations.of(context);
+    ap = ApLocalizations.of(context);
     return CourseScaffold(
       state: state,
       courseData: courseData,
@@ -73,7 +76,7 @@ class CoursePageState extends State<CoursePage> {
         _getCourseTables();
       },
       onRefresh: _getCourseTables,
-      customHint: isOffline ? app.offlineCourse : null,
+      customHint: isOffline ? ap.offlineCourse : null,
       isShowSearchButton: isShowSearchButton,
       enableNotifyControl: semesterData != null &&
           semesterData?.semesters[semesterIndex].value == defaultSemesterCode,
@@ -97,7 +100,7 @@ class CoursePageState extends State<CoursePage> {
             PopupMenuItem(
               child: Center(
                 child: Text(
-                  app.settings,
+                  ap.settings,
                   style: TextStyle(color: ApTheme.of(context).greyText),
                 ),
               ),
@@ -122,25 +125,21 @@ class CoursePageState extends State<CoursePage> {
     );
   }
 
-  Function get _onFailure => (DioError e) => setState(() {
-        state = CourseState.error;
-        switch (e.type) {
-          case DioErrorType.CONNECT_TIMEOUT:
-          case DioErrorType.SEND_TIMEOUT:
-          case DioErrorType.RECEIVE_TIMEOUT:
-          case DioErrorType.RESPONSE:
-          case DioErrorType.CANCEL:
-            break;
-          case DioErrorType.DEFAULT:
-            throw e;
-            break;
-        }
-      });
+  Function(DioError) get _onFailure => (DioError e) {
+        setState(() {
+          if (courseData != null) {
+            customHint = '${ap.offlineCourse}';
+            state = CourseState.finish;
+          } else {
+            customStateHint = ApLocalizations.dioError(context, e);
+            state = CourseState.error;
+          }
+        });
+      };
 
   Function get _onError => (_) => setState(() => state = CourseState.error);
 
   void _getSemester() async {
-    String code;
     SelcrsHelper.instance.getCourseSemesterData(
       callback: GeneralCallback(
         onFailure: _onFailure,
@@ -188,6 +187,7 @@ class CoursePageState extends State<CoursePage> {
   }
 
   String parser(String text) {
+    final app = AppLocalizations.of(context);
     if (text.length == 4) {
       String lastCode = text.substring(3);
       String last = '';
