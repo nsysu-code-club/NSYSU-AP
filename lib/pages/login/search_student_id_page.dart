@@ -1,9 +1,9 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/default_dialog.dart';
 
@@ -15,7 +15,7 @@ class SearchStudentIdPage extends StatefulWidget {
 }
 
 class SearchStudentIdPageState extends State<SearchStudentIdPage> {
-  AppLocalizations app;
+  ApLocalizations ap;
 
   final TextEditingController _name = TextEditingController();
   final TextEditingController _id = TextEditingController();
@@ -26,7 +26,8 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
 
   @override
   void initState() {
-    FirebaseAnalyticsUtils.instance.setCurrentScreen("SearchStudentIdPage", "search_student_id_page.dart");
+    FirebaseAnalyticsUtils.instance
+        .setCurrentScreen("SearchStudentIdPage", "search_student_id_page.dart");
     nameFocusNode = FocusNode();
     idFocusNode = FocusNode();
     super.initState();
@@ -42,7 +43,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
 
   @override
   Widget build(BuildContext context) {
-    app = AppLocalizations.of(context);
+    ap = ApLocalizations.of(context);
     return OrientationBuilder(
       builder: (_, orientation) {
         return Scaffold(
@@ -109,7 +110,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
           FocusScope.of(context).requestFocus(idFocusNode);
         },
         decoration: InputDecoration(
-          labelText: app.name,
+          labelText: ap.name,
         ),
         style: _editTextStyle(),
       ),
@@ -123,7 +124,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
           _search();
         },
         decoration: InputDecoration(
-          labelText: app.id,
+          labelText: ap.id,
         ),
         style: _editTextStyle(),
       ),
@@ -147,7 +148,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                   ),
                 ),
                 Text(
-                  app.autoFill,
+                  ap.autoFill,
                   style: TextStyle(color: Colors.white),
                 )
               ],
@@ -167,12 +168,13 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
           ),
           padding: EdgeInsets.all(14.0),
           onPressed: () {
-            FirebaseAnalyticsUtils.instance.logAction('search_student_id', 'click');
+            FirebaseAnalyticsUtils.instance
+                .logAction('search_student_id', 'click');
             _search();
           },
           color: Colors.white,
           child: Text(
-            app.search,
+            ap.search,
             style: TextStyle(color: ApTheme.of(context).blue, fontSize: 18.0),
           ),
         ),
@@ -201,7 +203,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
 
   _search() async {
     if (_name.text.isEmpty || _id.text.isEmpty) {
-      ApUtils.showToast(context, app.doNotEmpty);
+      ApUtils.showToast(context, ap.doNotEmpty);
     } else {
       SelcrsHelper.instance.getUsername(
         name: _name.text,
@@ -216,8 +218,8 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
               showDialog(
                 context: context,
                 builder: (BuildContext context) => DefaultDialog(
-                  title: app.searchResult,
-                  actionText: app.iKnow,
+                  title: ap.searchResult,
+                  actionText: ap.iKnow,
                   actionFunction: () =>
                       Navigator.of(context, rootNavigator: true).pop('dialog'),
                   contentWidget: RichText(
@@ -234,7 +236,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                         ),
                         if (list.length == 2)
                           TextSpan(
-                            text: '\n\n${app.firstLoginHint}',
+                            text: '\n\n${ap.firstLoginHint}',
                           ),
                       ],
                     ),
