@@ -1,8 +1,22 @@
 # 中山校務通
+
+<a href='https://play.google.com/store/apps/details?id=com.nsysu.ap&hl=zh_TW'><img alt='Get it on the App Store' src='screenshots/google_play.png' height='48px'/></a>
+<a href='https://apps.apple.com/tw/app/id1467522198'><img alt='Get it on the App Store' src='screenshots/app_store.png' height='48px'/></a>
+
+## 開發環境
+- Flutter stable version v1.12.13+hotfix9
+
+## 支援系統
+- [x] Android
+- [x] iOS
+- [ ] MacOS
+- [ ] Windows
+- [ ] Linux
+
 ## 功能列表
 - 登入(列出對應系統所擁有的功能及串接狀態)
     - [x] 選課系統
-        - [ ] 選課登記
+        - [ ] 選課登記(無期限不實作)
         - [x] 歷年學期選課清單
         - [ ] 歷年學生缺曠課資料
         - [ ] 通識教育講座次數查詢
@@ -10,7 +24,7 @@
             - [x] 修改Email信箱
         - [ ] 修改登錄密碼
     - [x] 成績查詢系統
-        - [ ] 授課教師開放成績查詢
+        - [x] 授課教師開放成績查詢
         - [ ] 學生預警查詢
         - [x] 學期成績查詢
         - [ ] 歷年成績查詢
@@ -31,17 +45,9 @@
     - [ ] 各類所得郵局劃帳暨歸戶查詢系統
 - 關於我們
 - 設定
-    - [ ] 上課提醒
+    - [x] 上課提醒
+    - [x] 主題切換
     - [x] 切換語言
         - [x] 中文
         - [x] 英文
     - [x] 開啟粉絲專頁
-
-## 開發環境
-- Flutter stable version v1.12.13.hotfix9
-## 支援系統
-- [x] Android
-- [x] iOS
-- [ ] MacOS
-- [ ] Windows
-- [ ] Linux
