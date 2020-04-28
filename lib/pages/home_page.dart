@@ -194,7 +194,7 @@ class HomePageState extends State<HomePage> {
               assetImage: ImageAssets.nsysu,
               githubName: 'NKUST-ITC',
               email: 'abc873693@gmail.com',
-              appLicense: ap.aboutOpenSourceContent,
+              appLicense: app.aboutOpenSourceContent,
               fbFanPageId: '735951703168873',
               fbFanPageUrl: 'https://www.facebook.com/NKUST.ITC/',
               githubUrl: 'https://github.com/NKUST-ITC',

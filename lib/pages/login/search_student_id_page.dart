@@ -6,6 +6,7 @@ import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/default_dialog.dart';
+import 'package:nsysu_ap/utils/app_localizations.dart';
 
 class SearchStudentIdPage extends StatefulWidget {
   static const String routerName = "/searchUsername";
@@ -236,7 +237,8 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                         ),
                         if (list.length == 2)
                           TextSpan(
-                            text: '\n\n${ap.firstLoginHint}',
+                            text:
+                                '\n\n${AppLocalizations.of(context).firstLoginHint}',
                           ),
                       ],
                     ),

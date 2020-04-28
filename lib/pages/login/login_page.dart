@@ -212,7 +212,10 @@ class LoginPageState extends State<LoginPage> {
               setState(() {
                 _username.text = username;
               });
-              ApUtils.showToast(context, ap.firstLoginHint);
+              ApUtils.showToast(
+                context,
+                AppLocalizations.of(context).firstLoginHint,
+              );
             }
           },
           child: Text(
