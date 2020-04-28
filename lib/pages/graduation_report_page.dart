@@ -1,5 +1,6 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
@@ -23,6 +24,8 @@ class GraduationReportPage extends StatefulWidget {
 class GraduationReportPageState extends State<GraduationReportPage>
     with SingleTickerProviderStateMixin {
   AppLocalizations app;
+  ApLocalizations ap;
+
   _State state = _State.loading;
   bool isOffline = false;
 
@@ -47,6 +50,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
 
   @override
   Widget build(BuildContext context) {
+    ap = ApLocalizations.of(context);
     app = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -62,7 +66,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
             Container(
               child: isOffline
                   ? Text(
-                      app.offlineScore,
+                      ap.offlineScore,
                       style: TextStyle(color: ApTheme.of(context).grey),
                     )
                   : null,
@@ -98,14 +102,14 @@ class GraduationReportPageState extends State<GraduationReportPage>
           child: HintContent(
             icon: Icons.assignment,
             content: state == _State.error
-                ? app.clickToRetry
+                ? ap.clickToRetry
                 : app.graduationCheckChecklistEmpty,
           ),
         );
       case _State.offlineEmpty:
         return HintContent(
           icon: Icons.class_,
-          content: app.noOfflineData,
+          content: ap.noOfflineData,
         );
       default:
         return SingleChildScrollView(
@@ -129,7 +133,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                 ),
                 graduationReportData.missingRequiredCourse.length == 0
                     ? Text(
-                        app.noData,
+                        ap.noData,
                         style: TextStyle(
                             color: ApTheme.of(context).grey, fontSize: 14.0),
                       )
@@ -151,9 +155,9 @@ class GraduationReportPageState extends State<GraduationReportPage>
                           children: [
                             TableRow(
                               children: <Widget>[
-                                _scoreTextBorder(app.subject, true),
-                                _scoreTextBorder(app.credits, true),
-                                _scoreTextBorder(app.description, true),
+                                _scoreTextBorder(ap.subject, true),
+                                _scoreTextBorder(ap.credits, true),
+                                _scoreTextBorder(ap.description, true),
                               ],
                             ),
                             for (var missingRequiredCourse
@@ -182,7 +186,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                 Text(
                   graduationReportData.generalEducationCourse.length != 0
                       ? app.courseClickHint
-                      : app.noData,
+                      : ap.noData,
                   style: TextStyle(
                       color: ApTheme.of(context).grey, fontSize: 14.0),
                 ),
@@ -210,7 +214,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                       children: [
                         TableRow(
                           children: <Widget>[
-                            _scoreTextBorder(app.subject, true),
+                            _scoreTextBorder(ap.subject, true),
                             _scoreTextBorder(app.check, true),
                           ],
                         ),
@@ -258,9 +262,9 @@ class GraduationReportPageState extends State<GraduationReportPage>
                     children: [
                       TableRow(
                         children: <Widget>[
-                          _scoreTextBorder(app.subject, true),
-                          _scoreTextBorder(app.semester, true),
-                          _scoreTextBorder(app.credits, true),
+                          _scoreTextBorder(ap.subject, true),
+                          _scoreTextBorder(ap.semester, true),
+                          _scoreTextBorder(ap.credits, true),
                         ],
                       ),
                       for (var course
@@ -371,8 +375,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
     showDialog(
       context: context,
       builder: (BuildContext context) => DefaultDialog(
-        title: app.courseDialogTitle,
-        actionText: app.iKnow,
+        title: ap.courseDialogTitle,
+        actionText: ap.iKnow,
         actionFunction: () =>
             Navigator.of(context, rootNavigator: true).pop('dialog'),
         contentWidget: RichText(
@@ -381,7 +385,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   color: ApTheme.of(context).grey, height: 1.3, fontSize: 16.0),
               children: [
                 TextSpan(
-                    text: '${app.subject}：',
+                    text: '${ap.subject}：',
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 TextSpan(text: '${course.name}\n'),
                 TextSpan(

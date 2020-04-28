@@ -26,9 +26,10 @@ class TuitionAndFeesPage extends StatefulWidget {
 }
 
 class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
-  _State state = _State.loading;
-
+  ApLocalizations ap;
   AppLocalizations app;
+
+  _State state = _State.loading;
 
   List<TuitionAndFees> items;
 
@@ -44,6 +45,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   @override
   Widget build(BuildContext context) {
+    ap = ApLocalizations.of(context);
     app = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -66,7 +68,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
           child: HintContent(
             icon: Icons.assignment,
             content: state == _State.error
-                ? app.clickToRetry
+                ? ApLocalizations.of(context).clickToRetry
                 : app.tuitionAndFeesEmpty,
           ),
         );
@@ -134,14 +136,14 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                 children: <Widget>[
                   ListTile(
                     leading: Icon(Icons.print),
-                    title: Text(app.printing),
+                    title: Text(ap.printing),
                     onTap: () {
                       Navigator.of(context).pop(0);
                     },
                   ),
                   ListTile(
                     leading: Icon(Icons.share),
-                    title: Text(app.share),
+                    title: Text(ap.share),
                     onTap: () {
                       Navigator.of(context).pop(1);
                     },
@@ -153,7 +155,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) => WillPopScope(
-                      child: ProgressDialog(app.loading),
+                      child: ProgressDialog(ap.loading),
                       onWillPop: () async {
                         return false;
                       }),

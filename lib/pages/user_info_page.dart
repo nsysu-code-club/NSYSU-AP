@@ -59,7 +59,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
               context: context,
               builder: (_) {
                 return AlertDialog(
-                  title: Text(AppLocalizations.of(context).changeEmail),
+                  title: Text(ApLocalizations.of(context).changeEmail),
                   content: TextField(
                     controller: newEmail,
                   ),
@@ -71,7 +71,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           context: context,
                           builder: (BuildContext context) => WillPopScope(
                             child: ProgressDialog(
-                                AppLocalizations.of(context).loading),
+                                ApLocalizations.of(context).loading),
                             onWillPop: () async {
                               return false;
                             },
