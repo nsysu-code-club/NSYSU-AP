@@ -11,14 +11,6 @@ class Utils {
     return base64.encode(digest.bytes);
   }
 
-  static Future<void> launchUrl(var url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
   static String uriEncodeBig5(String text) {
     var list = big5.encode(text);
     var result = '';
