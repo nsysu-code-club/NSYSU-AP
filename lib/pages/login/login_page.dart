@@ -9,10 +9,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/login/search_student_id_page.dart';
-import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
-import 'package:nsysu_ap/widgets/share_data_widget.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routerName = "/login";
@@ -22,7 +20,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  AppLocalizations app;
+  ApLocalizations ap;
 
   final TextEditingController _username = TextEditingController();
   final TextEditingController _password = TextEditingController();
@@ -50,7 +48,7 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    app = AppLocalizations.of(context);
+    ap = ApLocalizations.of(context);
     return OrientationBuilder(
       builder: (_, orientation) {
         return Scaffold(
@@ -114,7 +112,7 @@ class LoginPageState extends State<LoginPage> {
           FocusScope.of(context).requestFocus(passwordFocusNode);
         },
         decoration: InputDecoration(
-          labelText: app.username,
+          labelText: ap.username,
         ),
         style: _editTextStyle(),
       ),
@@ -129,7 +127,7 @@ class LoginPageState extends State<LoginPage> {
           _login();
         },
         decoration: InputDecoration(
-          labelText: app.password,
+          labelText: ap.password,
         ),
         style: _editTextStyle(),
       ),
@@ -152,7 +150,7 @@ class LoginPageState extends State<LoginPage> {
                     onChanged: _onAutoLoginChanged,
                   ),
                 ),
-                Text(app.autoLogin, style: TextStyle(color: Colors.white))
+                Text(ap.autoLogin, style: TextStyle(color: Colors.white))
               ],
             ),
             onTap: () => _onAutoLoginChanged(!isAutoLogin),
@@ -172,7 +170,7 @@ class LoginPageState extends State<LoginPage> {
                     onChanged: _onRememberPasswordChanged,
                   ),
                 ),
-                Text(app.remember, style: TextStyle(color: Colors.white))
+                Text(ap.remember, style: TextStyle(color: Colors.white))
               ],
             ),
             onTap: () => _onRememberPasswordChanged(!isRememberPassword),
@@ -196,7 +194,7 @@ class LoginPageState extends State<LoginPage> {
           },
           color: Colors.white,
           child: Text(
-            app.login,
+            ap.login,
             style: TextStyle(color: ApTheme.of(context).blue, fontSize: 18.0),
           ),
         ),
@@ -214,11 +212,11 @@ class LoginPageState extends State<LoginPage> {
               setState(() {
                 _username.text = username;
               });
-              ApUtils.showToast(context, app.firstLoginHint);
+              ApUtils.showToast(context, ap.firstLoginHint);
             }
           },
           child: Text(
-            app.searchUsername,
+            ap.searchUsername,
             style: TextStyle(color: Colors.white, fontSize: 16.0),
           ),
         ),
@@ -268,12 +266,12 @@ class LoginPageState extends State<LoginPage> {
 
   _login() async {
     if (_username.text.isEmpty || _password.text.isEmpty) {
-      ApUtils.showToast(context, app.doNotEmpty);
+      ApUtils.showToast(context, ap.doNotEmpty);
     } else {
       showDialog(
         context: context,
         builder: (BuildContext context) => WillPopScope(
-          child: ProgressDialog(app.logining),
+          child: ProgressDialog(ap.logining),
           onWillPop: () async {
             return false;
           },
@@ -287,9 +285,9 @@ class LoginPageState extends State<LoginPage> {
         callback: GeneralCallback(
           onError: (GeneralResponse e) {
             if (e.statusCode == 400)
-              ApUtils.showToast(context, app.loginFail);
+              ApUtils.showToast(context, ap.loginFail);
             else
-              ApUtils.showToast(context, app.somethingError);
+              ApUtils.showToast(context, ap.somethingError);
           },
           onFailure: (DioError e) {
             ApUtils.showToast(context, ApLocalizations.dioError(context, e));
