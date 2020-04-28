@@ -224,7 +224,7 @@ class CoursePageState extends State<CoursePage> {
     }
     notifyData = CourseNotifyData.load(courseNotifyCacheKey);
     SelcrsHelper.instance.getCourseData(
-      username: Preferences.getString(Constants.PREF_USERNAME, ''),
+      username: SelcrsHelper.instance.username,
       timeCodeConfig: timeCodeConfig,
       semester: semesterData.semesters[semesterIndex].value,
       callback: GeneralCallback(
