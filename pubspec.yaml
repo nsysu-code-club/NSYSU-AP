@@ -31,7 +31,6 @@ dependencies:
   #third party plugin
   encrypt: 4.0.0
   cached_network_image: 2.0.0
-  carousel_slider: ^1.2.0
   sprintf: ^4.0.2
   crypto: ^2.0.6
   big5: 0.0.4
