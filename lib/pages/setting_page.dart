@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/resources/ap_theme.dart';
@@ -146,15 +145,6 @@ class SettingPageState extends State<SettingPage> {
               onTap: () {
                 ApUtils.launchFbFansPage(context, Constants.FANS_PAGE_ID);
                 FirebaseAnalyticsUtils.instance.logAction('feedback', 'click');
-              },
-            ),
-            SettingItem(
-              text: ap.donateTitle,
-              subText: ap.donateContent,
-              onTap: () {
-                Utils.launchUrl("https://p.ecpay.com.tw/3D54D").catchError(
-                    (onError) => ApUtils.showToast(context, ap.platformError));
-                FirebaseAnalyticsUtils.instance.logAction('donate', 'click');
               },
             ),
             SettingItem(
