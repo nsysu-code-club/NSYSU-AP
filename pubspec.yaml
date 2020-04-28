@@ -35,7 +35,7 @@ dependencies:
   sprintf: ^4.0.2
   crypto: ^2.0.6
   big5: 0.0.4
-  printing: 2.1.3
+  printing: 3.3.1
   dio: 3.0.9
   dio_cookie_manager: 1.0.0
 
