@@ -1,5 +1,6 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/widgets/item_picker.dart';
 import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class ScorePage extends StatefulWidget {
 }
 
 class ScorePageState extends State<ScorePage> {
-  AppLocalizations app;
+  ApLocalizations ap;
 
   ScoreState state = ScoreState.loading;
   bool isOffline = false;
@@ -53,19 +54,19 @@ class ScorePageState extends State<ScorePage> {
 
   @override
   Widget build(BuildContext context) {
-    app = AppLocalizations.of(context);
+    ap = ApLocalizations.of(context);
     return ScoreScaffold(
       state: state,
       scoreData: scoreData,
-      middleTitle: app.credits,
+      middleTitle: ap.credits,
       isShowSearchButton: false,
-      customHint: hasPreScore ? app.hasPreScoreHint : null,
+      customHint: hasPreScore ? AppLocalizations.of(context).hasPreScoreHint : null,
       itemPicker: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           ItemPicker(
             width: MediaQuery.of(context).size.width * 0.45,
-            dialogTitle: app.picksSemester,
+            dialogTitle: ap.picksSemester,
             items: years,
             currentIndex: currentYearsIndex,
             onSelected: (int index) {
@@ -77,7 +78,7 @@ class ScorePageState extends State<ScorePage> {
           ),
           ItemPicker(
             width: MediaQuery.of(context).size.width * 0.45,
-            dialogTitle: app.picksSemester,
+            dialogTitle: ap.picksSemester,
             items: semesters,
             currentIndex: currentSemesterIndex,
             onSelected: (int index) {
@@ -106,13 +107,13 @@ class ScorePageState extends State<ScorePage> {
       details: (scoreData == null)
           ? null
           : [
-              '${app.creditsTakenEarned}：'
+              '${ap.creditsTakenEarned}：'
                   '${scoreData.detail.creditTaken ?? ''}'
                   '${scoreData.detail.isCreditEmpty ? '' : ' / '}'
                   '${scoreData.detail.creditEarned ?? ''}',
-              '${app.average}：${scoreData.detail.average ?? ''}',
-              '${app.rank}：${scoreData.detail.classRank ?? ''}',
-              '${app.percentage}：${scoreData.detail.classPercentage ?? ''}',
+              '${ap.average}：${scoreData.detail.average ?? ''}',
+              '${ap.rank}：${scoreData.detail.classRank ?? ''}',
+              '${ap.percentage}：${scoreData.detail.classPercentage ?? ''}',
             ],
     );
   }
