@@ -117,7 +117,8 @@ class HomePageState extends State<HomePage> {
         String message = news.description.length > 12
             ? news.description
             : news.description.substring(0, 12);
-        FirebaseAnalyticsUtils.instance.logAction('news_image', 'click', message: message);
+        FirebaseAnalyticsUtils.instance
+            .logAction('news_image', 'click', message: message);
       },
       drawer: ApDrawer(
         userInfo: userInfo,
@@ -133,17 +134,17 @@ class HomePageState extends State<HomePage> {
                   ? ApTheme.of(context).blueAccent
                   : ApTheme.of(context).grey,
             ),
-            title: Text(app.courseInfo, style: _defaultStyle),
+            title: Text(ap.courseInfo, style: _defaultStyle),
             children: <Widget>[
               DrawerSubItem(
                 icon: ApIcon.classIcon,
-                title: app.course,
+                title: ap.course,
                 page: CoursePage(),
                 needLogin: !isLogin,
               ),
               DrawerSubItem(
                 icon: ApIcon.assignment,
-                title: app.score,
+                title: ap.score,
                 page: ScorePage(),
                 needLogin: !isLogin,
               ),
@@ -169,7 +170,7 @@ class HomePageState extends State<HomePage> {
               ),
               DrawerSubItem(
                 icon: ApIcon.accessibilityNew,
-                title: app.admissionGuide,
+                title: ap.admissionGuide,
                 page: AdmissionGuidePage(),
               ),
             ],
@@ -188,18 +189,19 @@ class HomePageState extends State<HomePage> {
           ),
           DrawerItem(
             icon: ApIcon.face,
-            title: app.about,
+            title: ap.about,
             page: AboutUsPage(
               assetImage: ImageAssets.nsysu,
               githubName: 'NKUST-ITC',
               email: 'abc873693@gmail.com',
-              appLicense: app.aboutOpenSourceContent,
+              appLicense: ap.aboutOpenSourceContent,
               fbFanPageId: '735951703168873',
               fbFanPageUrl: 'https://www.facebook.com/NKUST.ITC/',
               githubUrl: 'https://github.com/NKUST-ITC',
-              logEvent: (name, value) => FirebaseAnalyticsUtils.instance.logAction(name, value),
-              setCurrentScreen: () =>
-                  FirebaseAnalyticsUtils.instance.setCurrentScreen("AboutUsPage", "about_us_page.dart"),
+              logEvent: (name, value) =>
+                  FirebaseAnalyticsUtils.instance.logAction(name, value),
+              setCurrentScreen: () => FirebaseAnalyticsUtils.instance
+                  .setCurrentScreen("AboutUsPage", "about_us_page.dart"),
               actions: <Widget>[
                 IconButton(
                   icon: Icon(ApIcon.codeIcon),
@@ -207,12 +209,14 @@ class HomePageState extends State<HomePage> {
                     Navigator.of(context).push(
                       CupertinoPageRoute(
                         builder: (_) => OpenSourcePage(
-                          setCurrentScreen: () => FirebaseAnalyticsUtils.instance.setCurrentScreen(
-                              "OpenSourcePage", "open_source_page.dart"),
+                          setCurrentScreen: () =>
+                              FirebaseAnalyticsUtils.instance.setCurrentScreen(
+                                  "OpenSourcePage", "open_source_page.dart"),
                         ),
                       ),
                     );
-                    FirebaseAnalyticsUtils.instance.logAction('open_source', 'click');
+                    FirebaseAnalyticsUtils.instance
+                        .logAction('open_source', 'click');
                   },
                 )
               ],
@@ -220,7 +224,7 @@ class HomePageState extends State<HomePage> {
           ),
           DrawerItem(
             icon: ApIcon.settings,
-            title: app.settings,
+            title: ap.settings,
             page: SettingPage(),
           ),
           if (isLogin)
@@ -239,7 +243,7 @@ class HomePageState extends State<HomePage> {
                 _checkLoginState();
               },
               title: Text(
-                app.logout,
+                ap.logout,
                 style: _defaultStyle,
               ),
             ),
@@ -266,15 +270,15 @@ class HomePageState extends State<HomePage> {
       bottomNavigationBarItems: [
         BottomNavigationBarItem(
           icon: Icon(ApIcon.accessibilityNew),
-          title: Text(app.admissionGuide),
+          title: Text(ap.admissionGuide),
         ),
         BottomNavigationBarItem(
           icon: Icon(ApIcon.classIcon),
-          title: Text(app.course),
+          title: Text(ap.course),
         ),
         BottomNavigationBarItem(
           icon: Icon(ApIcon.assignment),
-          title: Text(app.score),
+          title: Text(ap.score),
         ),
       ],
     );
@@ -349,7 +353,8 @@ class HomePageState extends State<HomePage> {
             userInfo = data;
           });
           if (userInfo != null) {
-            FirebaseAnalyticsUtils.instance.setUserProperty('department', userInfo.department);
+            FirebaseAnalyticsUtils.instance
+                .setUserProperty('department', userInfo.department);
             FirebaseAnalyticsUtils.instance.logUserInfo(userInfo.department);
             FirebaseAnalyticsUtils.instance.setUserId(userInfo.id);
           }
@@ -363,29 +368,30 @@ class HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) => YesNoDialog(
-        title: app.newsRuleTitle,
+        title: ap.newsRuleTitle,
         contentWidget: RichText(
           text: TextSpan(
             style: TextStyle(color: ApTheme.of(context).grey, fontSize: 16.0),
             children: [
               TextSpan(
-                  text: '${app.newsRuleDescription1}',
+                  text: '${ap.newsRuleDescription1}',
                   style: TextStyle(fontWeight: FontWeight.normal)),
               TextSpan(
-                  text: '${app.newsRuleDescription2}',
+                  text: '${ap.newsRuleDescription2}',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               TextSpan(
-                  text: '${app.newsRuleDescription3}',
+                  text: '${ap.newsRuleDescription3}',
                   style: TextStyle(fontWeight: FontWeight.normal)),
             ],
           ),
         ),
-        leftActionText: app.cancel,
-        rightActionText: app.contactFansPage,
+        leftActionText: ap.cancel,
+        rightActionText: ap.contactFansPage,
         leftActionFunction: () {},
         rightActionFunction: () {
           ApUtils.launchFbFansPage(context, Constants.FANS_PAGE_ID);
-          FirebaseAnalyticsUtils.instance.logAction('contact_fans_page', 'click');
+          FirebaseAnalyticsUtils.instance
+              .logAction('contact_fans_page', 'click');
         },
       ),
     );
@@ -422,7 +428,7 @@ class HomePageState extends State<HomePage> {
           if (e.statusCode == 400)
             _homeKey.currentState.showBasicHint(text: ap.loginFail);
           else
-            _homeKey.currentState.showBasicHint(text: app.somethingError);
+            _homeKey.currentState.showBasicHint(text: ap.somethingError);
         },
         onFailure: (DioError e) {
           _homeKey.currentState.showBasicHint(
@@ -449,20 +455,14 @@ class HomePageState extends State<HomePage> {
     var currentVersion =
         Preferences.getString(Constants.PREF_CURRENT_VERSION, '');
     if (currentVersion != packageInfo.buildNumber) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) => DefaultDialog(
-          title: app.updateNoteTitle,
-          contentWidget: Text(
-            "v${packageInfo.version}\n"
-            "${app.updateNoteContent}",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: ApTheme.of(context).grey),
-          ),
-          actionText: app.iKnow,
-          actionFunction: () =>
-              Navigator.of(context, rootNavigator: true).pop(),
-        ),
+      DefaultDialog.showUpdateContent(
+        context,
+        "v${packageInfo.version}\n"
+        "${app.updateNoteContent}",
+      );
+      Preferences.setString(
+        Constants.PREF_CURRENT_VERSION,
+        packageInfo.buildNumber,
       );
       Preferences.setString(
         Constants.PREF_CURRENT_VERSION,
@@ -493,7 +493,7 @@ class HomePageState extends State<HomePage> {
           iOSAppId: '146752219',
           defaultUrl: 'https://www.facebook.com/NKUST.ITC/',
           newVersionContent: versionContent,
-          appName: AppLocalizations.of(context).appName,
+          appName: app.appName,
         );
       }
     }
