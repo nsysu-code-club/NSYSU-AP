@@ -60,7 +60,7 @@ class HomePageState extends State<HomePage> {
 
   bool isLogin = false;
 
-  UserInfo userInfo = UserInfo();
+  UserInfo userInfo;
 
   Map<String, List<News>> newsMap;
 
