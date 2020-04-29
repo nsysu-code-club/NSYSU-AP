@@ -1,4 +1,3 @@
-
 import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
@@ -6,6 +5,7 @@ import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:ap_common/widgets/setting_page_widgets.dart';
+import 'package:ap_common_firbase/constants/fiirebase_constants.dart';
 import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -35,7 +35,8 @@ class SettingPageState extends State<SettingPage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance.setCurrentScreen("SettingPage", "setting_page.dart");
+    FirebaseAnalyticsUtils.instance
+        .setCurrentScreen("SettingPage", "setting_page.dart");
     _getPreference();
   }
 
@@ -101,6 +102,14 @@ class SettingPageState extends State<SettingPage> {
                         AppLocalizationsDelegate().load(locale);
                         ApLocalizationsDelegate().load(locale);
                       });
+                      FirebaseAnalyticsUtils.instance.logAction(
+                        'change_language',
+                        code,
+                      );
+                      FirebaseAnalyticsUtils.instance.setUserProperty(
+                        FirebaseConstants.LANGUAGE,
+                        AppLocalizations.locale.languageCode,
+                      );
                     },
                   ),
                 );
@@ -126,6 +135,10 @@ class SettingPageState extends State<SettingPage> {
                           .update(ThemeMode.values[index]);
                       Preferences.setInt(
                           Constants.PREF_THEME_MODE_INDEX, index);
+                      FirebaseAnalyticsUtils.instance.logAction(
+                        'change_theme',
+                        ThemeMode.values[index].toString(),
+                      );
                     },
                   ),
                 );

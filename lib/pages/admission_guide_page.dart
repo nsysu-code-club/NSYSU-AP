@@ -1,5 +1,6 @@
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
+import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -16,6 +17,13 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
   _State state = _State.loading;
 
   WebViewController webViewController;
+
+  @override
+  void initState() {
+    FirebaseAnalyticsUtils.instance
+        .setCurrentScreen("AdmissionGuidePage", "admission_guide_page.dart");
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
