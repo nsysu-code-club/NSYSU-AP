@@ -21,17 +21,17 @@ dependencies:
   #     path: ../ap_common_firebase
 
   #official plugin
-  http: 0.12.0+4
-  html: ^0.14.0+2
-  path_provider: 1.5.1
+  http: 0.12.1
+  html: ^0.14.0+3
+  path_provider: 1.6.8
   webview_flutter: 0.3.21
 
   #third party plugin
-  encrypt: 4.0.0
+  encrypt: 4.0.1
   sprintf: ^4.0.2
-  crypto: ^2.0.6
+  crypto: ^2.1.4
   big5: 0.0.4
-  printing: 3.3.1
+  printing: 3.4.0
   dio: 3.0.9
   dio_cookie_manager: 1.0.0
 
