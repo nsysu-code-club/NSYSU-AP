@@ -285,7 +285,7 @@ class LoginPageState extends State<LoginPage> {
       );
       Preferences.setString(Constants.PREF_USERNAME, _username.text);
       SelcrsHelper.instance.login(
-        username: _username.text,
+        username: _username.text.toUpperCase(),
         password: _password.text,
         callback: GeneralCallback(
           onError: (GeneralResponse e) {
