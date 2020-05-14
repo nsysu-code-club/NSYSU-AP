@@ -2,7 +2,7 @@ import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/widgets/item_picker.dart';
-import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
@@ -68,11 +68,11 @@ class ScorePageState extends State<ScorePage> {
             width: MediaQuery.of(context).size.width * 0.45,
             dialogTitle: ap.picksSemester,
             items: years,
-            currentIndex: currentYearsIndex,
-            onSelected: (int index) {
-              setState(() {
-                currentYearsIndex = index;
-              });
+              currentIndex: currentYearsIndex,
+              onSelected: (int index) {
+                setState(() {
+                  currentYearsIndex = index;
+                });
               _getSemesterScore();
             },
           ),
@@ -80,11 +80,11 @@ class ScorePageState extends State<ScorePage> {
             width: MediaQuery.of(context).size.width * 0.45,
             dialogTitle: ap.picksSemester,
             items: semesters,
-            currentIndex: currentSemesterIndex,
-            onSelected: (int index) {
-              setState(() {
-                currentSemesterIndex = index;
-              });
+              currentIndex: currentSemesterIndex,
+              onSelected: (int index) {
+                setState(() {
+                  currentSemesterIndex = index;
+                });
               _getSemesterScore();
             },
           ),

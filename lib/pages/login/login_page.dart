@@ -4,7 +4,7 @@ import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
-import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';

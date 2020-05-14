@@ -6,7 +6,7 @@ import 'package:ap_common/scaffold/course_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/dialog_option.dart';
-import 'package:ap_common_firbase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
