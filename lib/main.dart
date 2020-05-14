@@ -11,22 +11,20 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  bool isInDebugMode = Constants.isInDebugMode;
+  HttpClient.enableTimelineLogging = isInDebugMode;
   await Preferences.init(
     key: Constants.key,
     iv: Constants.iv,
   );
-  if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
-    Crashlytics.instance.enableInDevMode = Constants.isInDebugMode;
-
+  if (isInDebugMode || kIsWeb || !(Platform.isIOS || Platform.isAndroid)) {
+    runApp(MyApp());
+  } else if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
+    Crashlytics.instance.enableInDevMode = isInDebugMode;
     // Pass all uncaught errors from the framework to Crashlytics.
     FlutterError.onError = Crashlytics.instance.recordFlutterError;
-    runZoned<Future<void>>(() async {
+    runZonedGuarded(() async {
       runApp(MyApp());
-    }, onError: Crashlytics.instance.recordError);
-  } else {
-    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
-    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-    runApp(MyApp());
-    //TODO add other platform Crashlytics
+    }, Crashlytics.instance.recordError);
   }
 }
