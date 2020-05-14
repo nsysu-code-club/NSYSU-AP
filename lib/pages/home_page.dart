@@ -472,13 +472,12 @@ class HomePageState extends State<HomePage> {
       VersionInfo versionInfo =
           await FirebaseRemoteConfigUtils.getVersionInfo();
       if (versionInfo != null)
-        ApUtils.showNewVersionDialog(
+        DialogUtils.showNewVersionContent(
           context: context,
-          newVersionCode: versionInfo.code,
           iOSAppId: '146752219',
           defaultUrl: 'https://www.facebook.com/NKUST.ITC/',
-          newVersionContent: versionInfo.content,
           appName: app.appName,
+          versionInfo: versionInfo,
         );
     }
   }
