@@ -43,7 +43,8 @@ class ScorePageState extends State<ScorePage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance.setCurrentScreen("ScorePage", "score_page.dart");
+    FirebaseAnalyticsUtils.instance
+        .setCurrentScreen("ScorePage", "score_page.dart");
     _getSemester();
   }
 
@@ -60,7 +61,8 @@ class ScorePageState extends State<ScorePage> {
       scoreData: scoreData,
       middleTitle: ap.credits,
       isShowSearchButton: false,
-      customHint: hasPreScore ? AppLocalizations.of(context).hasPreScoreHint : null,
+      customHint:
+          hasPreScore ? AppLocalizations.of(context).hasPreScoreHint : null,
       itemPicker: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -165,9 +167,11 @@ class ScorePageState extends State<ScorePage> {
       _getSemester();
       return;
     }
+    final month = DateTime.now().month;
     SelcrsHelper.instance.getScoreData(
       year: scoreSemesterData.years[currentYearsIndex].value,
       semester: scoreSemesterData.semesters[currentSemesterIndex].value,
+      searchPreScore: (month == 6 || month == 7 || month == 1 || month == 2),
       callback: GeneralCallback(
         onFailure: _onFailure,
         onError: _onError,
