@@ -3,5 +3,5 @@ class ImageAssets {
 
   static const nsysu = '$basePath/nsysu.webp';
 
-  static const schoolMap = '$basePath/map.jpeg';
+  static const schoolMap = '$basePath/map.webp';
 }
