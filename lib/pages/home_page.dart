@@ -458,7 +458,7 @@ class HomePageState extends State<HomePage> {
     var currentVersion =
         Preferences.getString(Constants.PREF_CURRENT_VERSION, '');
     if (currentVersion != packageInfo.buildNumber) {
-      DefaultDialog.showUpdateContent(
+      DialogUtils.showUpdateContent(
         context,
         "v${packageInfo.version}\n"
         "${app.updateNoteContent}",
