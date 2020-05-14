@@ -4,13 +4,14 @@ import 'package:ap_common/api/github_helper.dart';
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/pages/about_us_page.dart';
-import 'package:ap_common/pages/news/news_content_page.dart';
+import 'package:ap_common/pages/announcement_content_page.dart';
 import 'package:ap_common/pages/open_source_page.dart';
 import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/home_page_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common/utils/dialog_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/ap_drawer.dart';
 import 'package:ap_common/widgets/default_dialog.dart';
@@ -24,7 +25,7 @@ import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
-import 'package:ap_common/models/new_response.dart';
+import 'package:ap_common/models/announcement_data.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:nsysu_ap/pages/school_map_page.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
@@ -62,9 +63,9 @@ class HomePageState extends State<HomePage> {
 
   UserInfo userInfo;
 
-  Map<String, List<News>> newsMap;
+  Map<String, List<Announcement>> newsMap;
 
-  List<News> get newsList =>
+  List<Announcement> get newsList =>
       (newsMap == null) ? null : newsMap[AppLocalizations.locale.languageCode];
 
   bool isStudyExpanded = false;
@@ -80,7 +81,7 @@ class HomePageState extends State<HomePage> {
     super.initState();
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen("HomePage", "home_page.dart");
-    _getAllNews();
+    _getAllAnnouncement();
     if (Preferences.getBool(Constants.PREF_AUTO_LOGIN, false))
       _login();
     else
@@ -114,14 +115,14 @@ class HomePageState extends State<HomePage> {
           onPressed: _showInformationDialog,
         ),
       ],
-      onImageTapped: (News news) {
+      onImageTapped: (Announcement announcement) {
         ApUtils.pushCupertinoStyle(
           context,
-          NewsContentPage(news: news),
+          AnnouncementContentPage(announcement: announcement),
         );
-        String message = news.description.length > 12
-            ? news.description
-            : news.description.substring(0, 12);
+        String message = announcement.description.length > 12
+            ? announcement.description
+            : announcement.description.substring(0, 12);
         FirebaseAnalyticsUtils.instance
             .logAction('news_image', 'click', message: message);
       },
@@ -270,7 +271,7 @@ class HomePageState extends State<HomePage> {
           }
         },
       ),
-      newsList: newsList,
+      announcements: newsList,
       onTabTapped: onTabTapped,
       bottomNavigationBarItems: [
         BottomNavigationBarItem(
@@ -311,8 +312,8 @@ class HomePageState extends State<HomePage> {
     });
   }
 
-  _getAllNews() async {
-    GitHubHelper.instance.getNews(
+  _getAllAnnouncement() async {
+    GitHubHelper.instance.getAnnouncement(
       gitHubUsername: 'abc873693',
       hashCode: '8f04a1051cb019a62ee8c3965e2d642b',
       tag: 'nsysu',
@@ -328,7 +329,7 @@ class HomePageState extends State<HomePage> {
           });
           ApUtils.handleDioError(context, e);
         },
-        onSuccess: (Map<String, List<News>> data) {
+        onSuccess: (Map<String, List<Announcement>> data) {
           newsMap = data;
           setState(() {
             if (newsList == null || newsList.length == 0)
@@ -493,7 +494,7 @@ class HomePageState extends State<HomePage> {
     );
     if (result ?? false) {
       if (state != HomeState.finish) {
-        _getAllNews();
+        _getAllAnnouncement();
       }
       isLogin = true;
       _getUserInfo();
