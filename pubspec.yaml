@@ -12,18 +12,15 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  ap_common: 0.1.8+1
+  ap_common: 0.2.7
   #   path: ../../GitHub-NKUST-ITC/ap_common
-  ap_common_firbase:
+  ap_common_firebase:
     git:
       url: https://github.com/abc873693/ap_common_firebase
-      ref: v0.0.1
+      ref: v0.1.1
   #     path: ../ap_common_firebase
 
   #official plugin
-  shared_preferences: 0.5.6
-  package_info: 0.4.0+13
-  url_launcher: 5.4.1
   http: 0.12.0+4
   html: ^0.14.0+2
   path_provider: 1.5.1
@@ -31,7 +28,6 @@ dependencies:
 
   #third party plugin
   encrypt: 4.0.0
-  cached_network_image: 2.0.0
   sprintf: ^4.0.2
   crypto: ^2.0.6
   big5: 0.0.4
