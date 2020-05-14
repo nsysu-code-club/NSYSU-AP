@@ -64,29 +64,33 @@ class ScorePageState extends State<ScorePage> {
       itemPicker: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          ItemPicker(
-            width: MediaQuery.of(context).size.width * 0.45,
-            dialogTitle: ap.picksSemester,
-            items: years,
+          Expanded(
+            child: ItemPicker(
+              width: MediaQuery.of(context).size.width * 0.45,
+              dialogTitle: ap.picksSemester,
+              items: years,
               currentIndex: currentYearsIndex,
               onSelected: (int index) {
                 setState(() {
                   currentYearsIndex = index;
                 });
-              _getSemesterScore();
-            },
+                _getSemesterScore();
+              },
+            ),
           ),
-          ItemPicker(
-            width: MediaQuery.of(context).size.width * 0.45,
-            dialogTitle: ap.picksSemester,
-            items: semesters,
+          Expanded(
+            child: ItemPicker(
+              width: MediaQuery.of(context).size.width * 0.45,
+              dialogTitle: ap.picksSemester,
+              items: semesters,
               currentIndex: currentSemesterIndex,
               onSelected: (int index) {
                 setState(() {
                   currentSemesterIndex = index;
                 });
-              _getSemesterScore();
-            },
+                _getSemesterScore();
+              },
+            ),
           ),
         ],
       ),
