@@ -359,10 +359,7 @@ class HomePageState extends State<HomePage> {
             userInfo = data;
           });
           if (userInfo != null) {
-            FirebaseAnalyticsUtils.instance
-                .setUserProperty('department', userInfo.department);
-            FirebaseAnalyticsUtils.instance.logUserInfo(userInfo.department);
-            FirebaseAnalyticsUtils.instance.setUserId(userInfo.id);
+            FirebaseAnalyticsUtils.instance.logUserInfo(userInfo);
           }
         },
       ),
