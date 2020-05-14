@@ -12,7 +12,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  ap_common: 0.2.7
+  ap_common: 0.2.8
   #   path: ../../GitHub-NKUST-ITC/ap_common
   ap_common_firebase:
     git:
