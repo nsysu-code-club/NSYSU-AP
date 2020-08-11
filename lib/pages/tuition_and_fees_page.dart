@@ -181,7 +181,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                   ),
                 );
                 Navigator.of(context, rootNavigator: true).pop();
-                if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+                if (!kIsWeb && (Platform.isAndroid || Platform.isIOS|| Platform.isMacOS)) {
                   switch (index) {
                     case 0:
                       await Printing.layoutPdf(
