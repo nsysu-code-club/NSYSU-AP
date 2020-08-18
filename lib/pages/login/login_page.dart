@@ -289,12 +289,14 @@ class LoginPageState extends State<LoginPage> {
         password: _password.text,
         callback: GeneralCallback(
           onError: (GeneralResponse e) {
+            Navigator.pop(context);
             if (e.statusCode == 400)
               ApUtils.showToast(context, ap.loginFail);
             else
               ApUtils.showToast(context, ap.somethingError);
           },
           onFailure: (DioError e) {
+            Navigator.pop(context);
             ApUtils.showToast(context, ApLocalizations.dioError(context, e));
           },
           onSuccess: (GeneralResponse data) async {
