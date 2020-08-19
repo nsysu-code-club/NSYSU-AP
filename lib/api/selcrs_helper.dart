@@ -96,6 +96,8 @@ class SelcrsHelper {
   * 選課系統&成績系統登入
   * error status code
   * 400: 帳號密碼錯誤
+  * 401: 需要填寫表單
+  * 499: 未知錯誤
   * */
   Future<void> login({
     @required String username,
@@ -118,6 +120,10 @@ class SelcrsHelper {
       if (text.contains("資料錯誤請重新輸入")) {
         callback?.onError(
           GeneralResponse(statusCode: 400, message: 'score error'),
+        );
+      } else {
+        callback?.onError(
+          GeneralResponse(statusCode: 499, message: 'unknown error'),
         );
       }
     } on DioError catch (e) {
@@ -149,6 +155,14 @@ class SelcrsHelper {
       if (text.contains("學號碼密碼不符")) {
         callback?.onError(
           GeneralResponse(statusCode: 400, message: 'course error'),
+        );
+      } else if (text.contains('請先填寫')) {
+        callback?.onError(
+          GeneralResponse(statusCode: 401, message: 'need to fill out form'),
+        );
+      } else {
+        callback?.onError(
+          GeneralResponse(statusCode: 499, message: 'unknown error'),
         );
       }
       print(DateTime.now());

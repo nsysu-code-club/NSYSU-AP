@@ -12,6 +12,7 @@ import 'package:nsysu_ap/pages/login/search_student_id_page.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/utils/utils.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routerName = "/login";
@@ -292,7 +293,11 @@ class LoginPageState extends State<LoginPage> {
             Navigator.pop(context);
             if (e.statusCode == 400)
               ApUtils.showToast(context, ap.loginFail);
-            else
+            else if (e.statusCode == 401) {
+              ApUtils.showToast(
+                  context, AppLocalizations.of(context).pleaseConfirmForm);
+              Utils.openConfirmForm(_username.text);
+            } else
               ApUtils.showToast(context, ap.somethingError);
           },
           onFailure: (DioError e) {

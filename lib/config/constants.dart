@@ -63,5 +63,7 @@ class Constants {
   static const TAG_NEWS_ICON = "tag_news_icon";
   static const TAG_NEWS_TITLE = "tag_news_title";
 
+  static const CONFIRM_FORM_URL = "confirm_form_url";
+
   static const FANS_PAGE_ID = '301942414015612';
 }

@@ -36,6 +36,7 @@ import 'package:nsysu_ap/resources/image_assets.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/yes_no_dialog.dart';
+import 'package:nsysu_ap/utils/utils.dart';
 import 'package:package_info/package_info.dart';
 
 import 'admission_guide_page.dart';
@@ -430,7 +431,11 @@ class HomePageState extends State<HomePage> {
         onError: (GeneralResponse e) {
           if (e.statusCode == 400)
             _homeKey.currentState.showBasicHint(text: ap.loginFail);
-          else
+          else if (e.statusCode == 401) {
+            ApUtils.showToast(
+                context, AppLocalizations.of(context).pleaseConfirmForm);
+            Utils.openConfirmForm(username);
+          } else
             _homeKey.currentState.showBasicHint(text: ap.somethingError);
         },
         onFailure: (DioError e) {
