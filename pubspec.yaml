@@ -12,12 +12,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  ap_common: 0.4.0
+  ap_common: 0.7.0-beta
   #   path: ../../GitHub-NKUST-ITC/ap_common
   ap_common_firebase:
     git:
       url: https://github.com/abc873693/ap_common_firebase
-      ref: v0.2.0
+      ref: v0.3.0
   #     path: ../ap_common_firebase
 
   #official plugin
