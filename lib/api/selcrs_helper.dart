@@ -2,6 +2,7 @@ import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/course_data.dart';
 import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/models/score_data.dart';
+import 'package:ap_common/models/semester_data.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
@@ -10,7 +11,6 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
-import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/pre_score.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
@@ -225,8 +225,8 @@ class SelcrsHelper {
     return userInfo;
   }
 
-  Future<CourseSemesterData> getCourseSemesterData({
-    GeneralCallback<CourseSemesterData> callback,
+  Future<SemesterData> getCourseSemesterData({
+    GeneralCallback<SemesterData> callback,
   }) async {
     var url = '$selcrsUrl/menu4/query/stu_slt_up.asp';
     try {
@@ -235,13 +235,14 @@ class SelcrsHelper {
       //print('text =  ${text}');
       var document = parse(text, encoding: 'BIG-5');
       var options = document.getElementsByTagName('option');
-      var courseSemesterData = CourseSemesterData(semesters: []);
+      var courseSemesterData = SemesterData(data: []);
       for (var i = 0; i < options.length; i++) {
         //print('$i => ${tdDoc[i].text}');
-        courseSemesterData.semesters.add(
-          SemesterOptions(
+        courseSemesterData.data.add(
+          Semester(
             text: options[i].text,
-            value: options[i].attributes['value'],
+            year: options[i].attributes['value'].substring(0, 3),
+            value: options[i].attributes['value'].substring(3),
           ),
         );
       }
@@ -251,9 +252,6 @@ class SelcrsHelper {
         callback.onFailure(e);
       else
         throw e;
-    } on Exception catch (e) {
-      callback?.onError(GeneralResponse.unknownError());
-      throw e;
     }
     return null;
   }
@@ -310,7 +308,6 @@ class SelcrsHelper {
                   instructors: [instructors],
                   location: location,
                   date: Date(
-                    weekday: 'T',
                     section: section,
                     startTime: timeCode?.startTime ?? '',
                     endTime: timeCode?.endTime ?? '',

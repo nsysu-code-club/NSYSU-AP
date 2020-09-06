@@ -1,5 +1,6 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/course_notify_data.dart';
+import 'package:ap_common/models/semester_data.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/course_scaffold.dart';
@@ -10,7 +11,6 @@ import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
-import 'package:nsysu_ap/models/course_semester_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 
@@ -28,12 +28,9 @@ class CoursePageState extends State<CoursePage> {
 
   TimeCodeConfig timeCodeConfig;
 
-  CourseSemesterData semesterData;
+  SemesterData semesterData;
   CourseData courseData;
   CourseNotifyData notifyData;
-
-  List<String> items;
-  int semesterIndex = 0;
 
   String customStateHint;
   String customHint;
@@ -49,7 +46,8 @@ class CoursePageState extends State<CoursePage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance.setCurrentScreen("CoursePage", "course_page.dart");
+    FirebaseAnalyticsUtils.instance
+        .setCurrentScreen("CoursePage", "course_page.dart");
     _getSemester();
     isShowSearchButton = Preferences.getBool(
       Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
@@ -69,17 +67,16 @@ class CoursePageState extends State<CoursePage> {
       state: state,
       courseData: courseData,
       notifyData: notifyData,
-      semesterIndex: semesterIndex,
-      semesters: items,
+      semesterData: semesterData,
       onSelect: (index) {
-        this.semesterIndex = index;
+        this.semesterData.currentIndex = index;
         _getCourseTables();
       },
       onRefresh: _getCourseTables,
       customHint: isOffline ? ap.offlineCourse : null,
       isShowSearchButton: isShowSearchButton,
       enableNotifyControl: semesterData != null &&
-          semesterData?.semesters[semesterIndex].value == defaultSemesterCode,
+          semesterData?.currentSemester?.code == defaultSemesterCode,
       courseNotifySaveKey: courseNotifyCacheKey,
       actions: <Widget>[
         PopupMenuButton<int>(
@@ -144,7 +141,7 @@ class CoursePageState extends State<CoursePage> {
       callback: GeneralCallback(
         onFailure: _onFailure,
         onError: _onError,
-        onSuccess: (CourseSemesterData data) async {
+        onSuccess: (SemesterData data) async {
           semesterData = data;
           RemoteConfig remoteConfig;
           try {
@@ -172,14 +169,14 @@ class CoursePageState extends State<CoursePage> {
               ),
             );
           }
-          items = [];
-          var i = 0;
-          semesterData.setDefault(defaultSemesterCode);
-          semesterData.semesters.forEach((option) {
-            items.add(parser(option.text));
-            if (option.value == defaultSemesterCode) semesterIndex = i;
-            i++;
-          });
+          semesterData.defaultSemester = Semester(
+            year: defaultSemesterCode.substring(0, 3),
+            value: defaultSemesterCode.substring(3),
+            text: parser(defaultSemesterCode),
+          );
+          semesterData.data
+              .forEach((option) => option.text = parser(option.text));
+          semesterData.currentIndex = semesterData.defaultIndex;
           _getCourseTables();
         },
       ),
@@ -226,7 +223,7 @@ class CoursePageState extends State<CoursePage> {
     SelcrsHelper.instance.getCourseData(
       username: SelcrsHelper.instance.username,
       timeCodeConfig: timeCodeConfig,
-      semester: semesterData.semesters[semesterIndex].value,
+      semester: semesterData.currentSemester.code,
       callback: GeneralCallback(
         onFailure: _onFailure,
         onError: _onError,
