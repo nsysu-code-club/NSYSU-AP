@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:ap_common/api/github_helper.dart';
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/general_response.dart';
@@ -17,6 +15,7 @@ import 'package:ap_common/widgets/ap_drawer.dart';
 import 'package:ap_common_firebase/constants/fiirebase_constants.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
+import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -90,7 +89,7 @@ class HomePageState extends State<HomePage> {
       _login();
     else
       _checkLoginState();
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    if (FirebaseUtils.isSupportRemoteConfig) {
       _checkUpdate();
     }
     FirebaseAnalyticsUtils.instance.setUserProperty(
@@ -482,6 +481,7 @@ class HomePageState extends State<HomePage> {
   }
 
   _checkUpdate() async {
+    if (kIsWeb) return;
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await Future.delayed(Duration(milliseconds: 50));
     var currentVersion =

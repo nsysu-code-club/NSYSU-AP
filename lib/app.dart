@@ -9,7 +9,6 @@ import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -78,7 +77,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           theme: ApTheme.light,
           darkTheme: ApTheme.dark,
           themeMode: themeMode,
-          navigatorObservers: !kIsWeb && (Platform.isAndroid || Platform.isIOS)
+          navigatorObservers: FirebaseUtils.isSupportAnalytics
               ? [
                   FirebaseAnalyticsObserver(analytics: _analytics),
                 ]

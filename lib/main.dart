@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:ap_common/utils/preferences.dart';
+import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,14 +18,15 @@ void main() async {
     key: Constants.key,
     iv: Constants.iv,
   );
+  await Firebase.initializeApp();
   if (isInDebugMode || kIsWeb || !(Platform.isIOS || Platform.isAndroid)) {
     runApp(MyApp());
   } else if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
-    Crashlytics.instance.enableInDevMode = isInDebugMode;
+    FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(isInDebugMode);
     // Pass all uncaught errors from the framework to Crashlytics.
-    FlutterError.onError = Crashlytics.instance.recordFlutterError;
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
     runZonedGuarded(() async {
       runApp(MyApp());
-    }, Crashlytics.instance.recordError);
+    }, FirebaseCrashlytics.instance.recordError);
   }
 }
