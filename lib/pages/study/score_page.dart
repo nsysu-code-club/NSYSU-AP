@@ -68,7 +68,6 @@ class ScorePageState extends State<ScorePage> {
         children: <Widget>[
           Expanded(
             child: ItemPicker(
-              width: MediaQuery.of(context).size.width * 0.45,
               dialogTitle: ap.picksSemester,
               items: years,
               currentIndex: currentYearsIndex,
@@ -82,7 +81,6 @@ class ScorePageState extends State<ScorePage> {
           ),
           Expanded(
             child: ItemPicker(
-              width: MediaQuery.of(context).size.width * 0.45,
               dialogTitle: ap.picksSemester,
               items: semesters,
               currentIndex: currentSemesterIndex,
