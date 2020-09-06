@@ -1,6 +1,11 @@
+import 'dart:io';
+
+import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
+import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -49,14 +54,19 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
           ),
         ],
       ),
-      body: WebView(
-        initialUrl: 'https://leslietsai1.wixsite.com/nsysufreshman',
-        javascriptMode: JavascriptMode.unrestricted,
-        onWebViewCreated: (WebViewController webViewController) {
-          this.webViewController = webViewController;
-          //_controller.complete(webViewController);
-        },
-      ),
+      body: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+          ? WebView(
+              initialUrl: 'https://leslietsai1.wixsite.com/nsysufreshman',
+              javascriptMode: JavascriptMode.unrestricted,
+              onWebViewCreated: (WebViewController webViewController) {
+                this.webViewController = webViewController;
+                //_controller.complete(webViewController);
+              },
+            )
+          : HintContent(
+              icon: ApIcon.apps,
+              content: ap.platformError,
+            ),
     );
   }
 
