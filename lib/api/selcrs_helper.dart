@@ -25,6 +25,7 @@ class SelcrsHelper {
   static const selcrsUrlFormat = 'http://selcrs%i.nsysu.edu.tw';
 
   static const courseTimeoutText = '請重新登錄';
+  static const scoreTimeoutText = '請重新登錄';
 
   static SelcrsHelper _instance;
 
@@ -459,6 +460,18 @@ class SelcrsHelper {
       }
       return callback.onSuccess(scoreSemesterData);
     } on DioError catch (e) {
+      if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+        String text = big5.decode(e.response.data);
+        if (text.contains(scoreTimeoutText) && canReLogin) {
+          await reLogin();
+          return getScoreSemesterData(
+            callback: callback,
+          );
+        }
+        if (!canReLogin)
+          return dumpError('getScoreSemesterData', text, callback);
+        reLoginCount = 0;
+      }
       if (callback != null)
         callback.onFailure(e);
       else
@@ -563,6 +576,20 @@ class SelcrsHelper {
       );
       return callback?.onSuccess(scoreData);
     } on DioError catch (e) {
+      if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+        String text = big5.decode(e.response.data);
+        if (text.contains(scoreTimeoutText) && canReLogin) {
+          await reLogin();
+          return getScoreData(
+            year: year,
+            semester: semester,
+            searchPreScore: searchPreScore,
+            callback: callback,
+          );
+        }
+        if (!canReLogin) return dumpError('getScoreData', text, callback);
+        reLoginCount = 0;
+      }
       if (callback != null)
         callback.onFailure(e);
       else
