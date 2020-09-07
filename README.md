@@ -9,7 +9,7 @@
 ## 支援系統
 - [x] Android
 - [x] iOS
-- [ ] MacOS
+- [x] MacOS
 - [ ] Windows
 - [ ] Linux
 
