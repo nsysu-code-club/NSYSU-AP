@@ -1,6 +1,7 @@
 import 'package:encrypt/encrypt.dart';
 
 class Constants {
+
   static bool get isInDebugMode {
     bool inDebugMode = false;
     assert(inDebugMode = true);
@@ -57,6 +58,7 @@ class Constants {
   static const NEWS_DATA = 'news_data_v2';
   static const DEFAULT_COURSE_SEMESTER_CODE = "default_course_semester_code";
   static const TIME_CODE_CONFIG = "time_code_config";
+  static const SCHEDULE_PDF_URL = "schedule_pdf_url";
 
   static const TAG_STUDENT_PICTURE = "tag_student_picture";
   static const TAG_NEWS_PICTURE = "tag_news_picture";

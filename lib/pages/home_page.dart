@@ -38,6 +38,7 @@ import 'package:nsysu_ap/utils/utils.dart';
 import 'package:package_info/package_info.dart';
 
 import 'admission_guide_page.dart';
+import 'info/shcool_info_page.dart';
 import 'study/course_page.dart';
 import 'graduation_report_page.dart';
 import 'login/login_page.dart';
@@ -201,12 +202,13 @@ class HomePageState extends State<HomePage> {
             ],
           ),
           DrawerItem(
-              icon: ApIcon.school,
-              title: app.graduationCheckChecklist,
-              onTap: () => _openPage(
-                    GraduationReportPage(),
-                    needLogin: true,
-                  )),
+            icon: ApIcon.school,
+            title: app.graduationCheckChecklist,
+            onTap: () => _openPage(
+              GraduationReportPage(),
+              needLogin: true,
+            ),
+          ),
           DrawerItem(
             icon: ApIcon.monetizationOn,
             title: app.tuitionAndFees,
@@ -214,6 +216,11 @@ class HomePageState extends State<HomePage> {
               TuitionAndFeesPage(),
               needLogin: true,
             ),
+          ),
+          DrawerItem(
+            icon: ApIcon.info,
+            title: ap.schoolInfo,
+            onTap: () => _openPage(SchoolInfoPage()),
           ),
           DrawerItem(
             icon: ApIcon.face,
