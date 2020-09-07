@@ -19,14 +19,9 @@ void main() async {
     iv: Constants.iv,
   );
   await Firebase.initializeApp();
-  if (isInDebugMode || kIsWeb || !(Platform.isIOS || Platform.isAndroid)) {
-    runApp(MyApp());
-  } else if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
-    FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(isInDebugMode);
-    // Pass all uncaught errors from the framework to Crashlytics.
+  if (FirebaseUtils.isSupportCrashlytics) {
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
-    runZonedGuarded(() async {
-      runApp(MyApp());
-    }, FirebaseCrashlytics.instance.recordError);
   }
+  runApp(MyApp());
 }
