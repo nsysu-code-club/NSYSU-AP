@@ -17,11 +17,14 @@ import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 import '../utils/app_localizations.dart';
 
 class SelcrsHelper {
   static const selcrsUrlFormat = 'http://selcrs%i.nsysu.edu.tw';
+
+  static const courseTimeoutText = '請重新登錄';
 
   static SelcrsHelper _instance;
 
@@ -30,6 +33,10 @@ class SelcrsHelper {
 
   String username = '';
   String password = '';
+
+  int reLoginCount = 0;
+
+  bool get canReLogin => reLoginCount < 5;
 
   static String get selcrsUrl => sprintf(selcrsUrlFormat, [index]);
 
@@ -99,10 +106,10 @@ class SelcrsHelper {
   * 401: 需要填寫表單
   * 499: 未知錯誤
   * */
-  Future<void> login({
+  Future<GeneralResponse> login({
     @required String username,
     @required String password,
-    @required GeneralCallback<GeneralResponse> callback,
+    GeneralCallback<GeneralResponse> callback,
   }) async {
     var base64md5Password = Utils.base64md5(password);
     dio.options.contentType = Headers.formUrlEncodedContentType;
@@ -170,7 +177,10 @@ class SelcrsHelper {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
         this.username = username;
         this.password = password;
-        callback?.onSuccess(GeneralResponse.success());
+        if (callback == null)
+          return GeneralResponse.success();
+        else
+          return callback?.onSuccess(GeneralResponse.success());
       } else {
         error++;
         if (error > 5)
@@ -185,6 +195,12 @@ class SelcrsHelper {
         }
       }
     }
+    return null;
+  }
+
+  Future<void> reLogin() async {
+    reLoginCount++;
+    return await login(username: username, password: password);
   }
 
   /*
@@ -200,6 +216,14 @@ class SelcrsHelper {
         '$selcrsUrl/menu4/tools/changedat.asp',
       );
       String text = big5.decode(response.data);
+      if (text.contains(courseTimeoutText) && canReLogin) {
+        await reLogin();
+        return getUserInfo(
+          callback: callback,
+        );
+      }
+      if (!canReLogin) return dumpError('getUserInfo', text, callback);
+      reLoginCount = 0;
       return callback?.onSuccess(parserUserInfo(text));
     } on DioError catch (e) {
       callback?.onFailure(e);
@@ -232,7 +256,16 @@ class SelcrsHelper {
     try {
       var response = await dio.post(url);
       String text = big5.decode(response.data);
-      //print('text =  ${text}');
+//      print('text =  ${text}');
+      if (text.contains(courseTimeoutText) && canReLogin) {
+        await reLogin();
+        return getCourseSemesterData(
+          callback: callback,
+        );
+      }
+      if (!canReLogin)
+        return dumpError('getCourseSemesterData', text, callback);
+      reLoginCount = 0;
       var document = parse(text, encoding: 'BIG-5');
       var options = document.getElementsByTagName('option');
       var courseSemesterData = SemesterData(data: []);
@@ -275,7 +308,18 @@ class SelcrsHelper {
         options: _courseOption,
       );
       String text = big5.decode(response.data);
-      //    print('text =  ${text}');
+//      debugPrint('text =  ${text}');
+      if (text.contains(courseTimeoutText) && canReLogin) {
+        await reLogin();
+        return getCourseData(
+          username: username,
+          timeCodeConfig: timeCodeConfig,
+          semester: semester,
+          callback: callback,
+        );
+      }
+      if (!canReLogin) return dumpError('getCourseData', text, callback);
+      reLoginCount = 0;
       var startTime = DateTime.now().millisecondsSinceEpoch;
       var document = parse(text, encoding: 'BIG-5');
       var trDoc = document.getElementsByTagName('tr');
@@ -614,6 +658,15 @@ class SelcrsHelper {
         },
       );
       String text = big5.decode(response.data);
+      if (text.contains(courseTimeoutText) && canReLogin) {
+        await reLogin();
+        return changeMail(
+          mail: mail,
+          callback: callback,
+        );
+      }
+      if (!canReLogin) return dumpError('getCourseData', text, callback);
+      reLoginCount = 0;
       return callback?.onSuccess(parserUserInfo(text));
     } on DioError catch (e) {
       if (callback != null)
@@ -625,5 +678,15 @@ class SelcrsHelper {
       throw e;
     }
     return null;
+  }
+
+  Future<dynamic> dumpError(
+    String feature,
+    String text,
+    GeneralCallback<dynamic> callback,
+  ) {
+    reLoginCount = 0;
+    FirebaseCrashlytics.instance.setCustomKey('crawler_error_$feature', text);
+    return callback?.onError(GeneralResponse.unknownError());
   }
 }
