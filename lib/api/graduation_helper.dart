@@ -63,7 +63,7 @@ class GraduationHelper {
         },
       );
       String text = big5.decode(response.data);
-      //    print('Response =  $text');
+//          print('Response =  $text');
       //    print('response.statusCode = ${response.statusCode}');
       if (text.contains("資料錯誤請重新輸入"))
         callback?.onError(
@@ -108,8 +108,8 @@ class GraduationHelper {
       );
       String text = big5.decode(response.data);
       var startTime = DateTime.now().millisecondsSinceEpoch;
-      //print('text = $text');
-      print(DateTime.now());
+//      debugPrint('text = $text');
+//      debugPrint(DateTime.now().toString());
       var document = parse(text, encoding: 'BIG-5');
       var tableDoc = document.getElementsByTagName('tbody');
       if (tableDoc.length >= 2) {
@@ -203,20 +203,20 @@ class GraduationHelper {
         }
         print(DateTime.now());
       } else {
-        return null;
+        return callback?.onSuccess(null);
       }
       //    graduationReportData.generalEducationCourse.forEach((i) {
       //      print('type = ${i.type}');
       //    });
       var endTime = DateTime.now().millisecondsSinceEpoch;
-      print((endTime - startTime) / 1000.0);
+      debugPrint(((endTime - startTime) / 1000.0).toString());
       return callback?.onSuccess(graduationReportData);
     } on DioError catch (e) {
       if (callback != null)
-        callback.onFailure(e);
+        return callback.onFailure(e);
       else
         throw e;
-    } on Exception catch (e) {
+    } catch (e) {
       callback?.onError(GeneralResponse.unknownError());
       throw e;
     }
