@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/course_data.dart';
 import 'package:ap_common/models/general_response.dart';
@@ -106,7 +108,7 @@ class SelcrsHelper {
   * error status code
   * 400: 帳號密碼錯誤
   * 401: 需要填寫表單
-  * 499: 未知錯誤
+  * 1000: 未知錯誤
   * */
   Future<GeneralResponse> login({
     @required String username,
@@ -125,13 +127,14 @@ class SelcrsHelper {
           'INTYPE': '1',
         },
       );
-      String text = big5.decode(scoreResponse.data);
+      String text = utf8.decode(scoreResponse.data);
+//      debugPrint(text);
       if (text.contains("資料錯誤請重新輸入")) {
         return callback?.onError(
           GeneralResponse(statusCode: 400, message: 'score error'),
         );
       } else {
-        dumpError('score', text, callback);
+        dumpError('score', text, null);
       }
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
@@ -158,7 +161,7 @@ class SelcrsHelper {
         },
       );
       String text = big5.decode(courseResponse.data);
-      print('text =  $text');
+//      debugPrint('course =  $text');
       if (text.contains("學號碼密碼不符")) {
         return callback?.onError(
           GeneralResponse(statusCode: 400, message: 'course error'),
@@ -172,6 +175,8 @@ class SelcrsHelper {
       }
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+        String text = big5.decode(e.response.data);
+//        debugPrint('text =  $text');
         this.username = username;
         this.password = password;
         if (callback == null)
