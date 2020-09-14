@@ -284,6 +284,9 @@ class LoginPageState extends State<LoginPage> {
         ),
         barrierDismissible: false,
       );
+      if (_username.text.indexOf(' ') != -1)
+        FirebaseAnalyticsUtils.instance.logAction('username_has_empty', '');
+      _username.text = _username.text.replaceAll(' ', '');
       Preferences.setString(Constants.PREF_USERNAME, _username.text);
       SelcrsHelper.instance.login(
         username: _username.text.toUpperCase(),
