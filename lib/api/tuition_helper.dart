@@ -59,9 +59,9 @@ class TuitionHelper {
         },
       );
       String text = big5.decode(response.data);
-      print('Request =  ${response.request.data}');
-      print('Response =  $text');
-      //    print('response.statusCode = ${response.statusCode}');
+      debugPrint('Request =  ${response.request.data}');
+      debugPrint('Response =  $text');
+      //    debugPrint('response.statusCode = ${response.statusCode}');
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
         isLogin = true;
@@ -69,7 +69,7 @@ class TuitionHelper {
       } else {
         if (callback != null) {
           callback.onFailure(e);
-          print(big5.decode(e.response.data));
+          debugPrint(big5.decode(e.response.data));
           return null;
         } else
           throw e;
