@@ -298,7 +298,7 @@ class LoginPageState extends State<LoginPage> {
                   context, AppLocalizations.of(context).pleaseConfirmForm);
               Utils.openConfirmForm(_username.text);
             } else
-              ApUtils.showToast(context, ap.somethingError);
+              ApUtils.showToast(context, ap.unknownError);
           },
           onFailure: (DioError e) {
             Navigator.pop(context);

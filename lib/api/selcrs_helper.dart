@@ -6,6 +6,7 @@ import 'package:ap_common/models/semester_data.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:big5/big5.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
@@ -126,13 +127,11 @@ class SelcrsHelper {
       );
       String text = big5.decode(scoreResponse.data);
       if (text.contains("資料錯誤請重新輸入")) {
-        callback?.onError(
+        return callback?.onError(
           GeneralResponse(statusCode: 400, message: 'score error'),
         );
       } else {
-        callback?.onError(
-          GeneralResponse(statusCode: 499, message: 'unknown error'),
-        );
+        dumpError('score', text, callback);
       }
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
@@ -161,19 +160,16 @@ class SelcrsHelper {
       String text = big5.decode(courseResponse.data);
       print('text =  $text');
       if (text.contains("學號碼密碼不符")) {
-        callback?.onError(
+        return callback?.onError(
           GeneralResponse(statusCode: 400, message: 'course error'),
         );
       } else if (text.contains('請先填寫')) {
-        callback?.onError(
+        return callback?.onError(
           GeneralResponse(statusCode: 401, message: 'need to fill out form'),
         );
       } else {
-        callback?.onError(
-          GeneralResponse(statusCode: 499, message: 'unknown error'),
-        );
+        return dumpError('course', text, callback);
       }
-      print(DateTime.now());
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
         this.username = username;
@@ -713,7 +709,8 @@ class SelcrsHelper {
     GeneralCallback<dynamic> callback,
   ) {
     reLoginCount = 0;
-    FirebaseCrashlytics.instance.setCustomKey('crawler_error_$feature', text);
+    if (FirebaseUtils.isSupportCrashlytics)
+      FirebaseCrashlytics.instance.setCustomKey('crawler_error_$feature', text);
     return callback?.onError(GeneralResponse.unknownError());
   }
 }

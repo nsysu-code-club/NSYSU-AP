@@ -466,7 +466,7 @@ class HomePageState extends State<HomePage> {
                 context, AppLocalizations.of(context).pleaseConfirmForm);
             Utils.openConfirmForm(username);
           } else
-            _homeKey.currentState.showBasicHint(text: ap.somethingError);
+            _homeKey.currentState.showBasicHint(text: ap.unknownError);
         },
         onFailure: (DioError e) {
           _homeKey.currentState.showBasicHint(
