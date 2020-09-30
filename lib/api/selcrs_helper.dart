@@ -332,7 +332,20 @@ class SelcrsHelper {
       //print(DateTime.now());
       for (var i = 1; i < trDoc.length; i++) {
         var tdDoc = trDoc[i].getElementsByTagName('td');
-        final title = tdDoc[4].text;
+        final titleElement = tdDoc[4].getElementsByTagName('a')?.first;
+        final titles = titleElement.innerHtml.split('<br>');
+        var title = titleElement.text;
+        if (titles.length >= 2) {
+          switch (AppLocalizations.locale.languageCode) {
+            case 'en':
+              title = titles[1];
+              break;
+            case 'zh':
+            default:
+              title = titles[0];
+              break;
+          }
+        }
         final instructors = tdDoc[8].text;
         final location = Location(
           building: '',
