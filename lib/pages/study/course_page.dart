@@ -1,10 +1,12 @@
 import 'package:ap_common/callback/general_callback.dart';
+import 'package:ap_common/config/ap_constants.dart';
 import 'package:ap_common/models/course_notify_data.dart';
 import 'package:ap_common/models/semester_data.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/course_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
+import 'package:ap_common/utils/notification_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/dialog_option.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
@@ -40,14 +42,18 @@ class CoursePageState extends State<CoursePage> {
 
   String defaultSemesterCode = '';
 
-  String get courseNotifyCacheKey => '${SelcrsHelper.instance.username}'
-      '_latest';
+  String get courseNotifyCacheKey =>
+      semesterData?.defaultSemester?.code ?? '1091';
 
   @override
   void initState() {
     super.initState();
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen("CoursePage", "course_page.dart");
+    CourseNotifyData.clearOldVersionNotification(
+      tag: '${SelcrsHelper.instance.username}_latest',
+      newTag: courseNotifyCacheKey,
+    );
     _getSemester();
     isShowSearchButton = Preferences.getBool(
       Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
@@ -167,6 +173,18 @@ class CoursePageState extends State<CoursePage> {
                 Constants.TIME_CODE_CONFIG,
                 '{  "timeCodes":[{"title":"A",         "startTime": "7:00"         ,"endTime": "7:50"        },{       "title":"1",         "startTime": "8:10"         ,"endTime": "9:00"        },{       "title":"2",         "startTime": "9:10"         ,"endTime": "10:00"        },{       "title":"3",         "startTime": "10:10"         ,"endTime": "11:00"        },{       "title":"4",         "startTime": "11:10"         ,"endTime": "12:00"        },{       "title":"B",         "startTime": "12:10"         ,"endTime": "13:00"        },{       "title":"5",         "startTime": "13:10"         ,"endTime": "14:00"        },{       "title":"6",         "startTime": "14:10"         ,"endTime": "15:00"        },{       "title":"7",         "startTime": "15:10"         ,"endTime": "16:00"        },{       "title":"8",         "startTime": "16:10"         ,"endTime": "17:00"        },{       "title":"9",         "startTime": "17:10"         ,"endTime": "18:00"        },{       "title":"C",         "startTime": "18:20"         ,"endTime": "19:10"        },{       "title":"D",         "startTime": "19:15"         ,"endTime": "20:05"        },{       "title":"E",         "startTime": "20:10"         ,"endTime": "21:00"        },{       "title":"F",         "startTime": "21:05"         ,"endTime": "21:55"        }] }',
               ),
+            );
+          }
+          var semester = Preferences.getString(
+            ApConstants.CURRENT_SEMESTER_CODE,
+            ApConstants.SEMESTER_LATEST,
+          );
+          if (semester != defaultSemesterCode) {
+            CourseNotifyData.clearOldVersionNotification(
+                tag: semester, newTag: defaultSemesterCode);
+            Preferences.setString(
+              ApConstants.CURRENT_SEMESTER_CODE,
+              defaultSemesterCode,
             );
           }
           semesterData.defaultSemester = Semester(

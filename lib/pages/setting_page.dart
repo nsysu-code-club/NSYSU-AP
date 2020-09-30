@@ -8,6 +8,7 @@ import 'package:ap_common/widgets/setting_page_widgets.dart';
 import 'package:ap_common_firebase/constants/fiirebase_constants.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
@@ -72,6 +73,13 @@ class SettingPageState extends State<SettingPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            SettingTitle(text: ap.otherSettings),
+            CheckCourseNotifyItem(),
+            ClearAllNotifyItem(),
+            Divider(
+              color: Colors.grey,
+              height: 0.5,
+            ),
             SettingTitle(text: ap.environmentSettings),
             SettingItem(
               text: ap.language,
