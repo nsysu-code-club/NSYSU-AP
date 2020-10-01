@@ -10,7 +10,7 @@ PODS:
   - firebase_core (0.5.0):
     - Firebase/CoreOnly (~> 6.26.0)
     - FlutterMacOS
-  - firebase_crashlytics (0.2.0-dev.5):
+  - firebase_crashlytics (0.2.0):
     - Firebase/CoreOnly (~> 6.26.0)
     - Firebase/Crashlytics (~> 6.26.0)
     - firebase_core
@@ -106,7 +106,7 @@ DEPENDENCIES:
   - firebase_crashlytics (from `Flutter/ephemeral/.symlinks/plugins/firebase_crashlytics/macos`)
   - firebase_remote_config (from `Flutter/ephemeral/.symlinks/plugins/firebase_remote_config/macos`)
   - flutter_local_notifications (from `Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos`)
-  - FlutterMacOS (from `Flutter/ephemeral/.symlinks/flutter/darwin-x64-release`)
+  - FlutterMacOS (from `Flutter/ephemeral/.symlinks/flutter/darwin-x64`)
   - in_app_review (from `Flutter/ephemeral/.symlinks/plugins/in_app_review/macos`)
   - native_pdf_renderer (from `Flutter/ephemeral/.symlinks/plugins/native_pdf_renderer/macos`)
   - package_info (from `Flutter/ephemeral/.symlinks/plugins/package_info/macos`)
@@ -148,7 +148,7 @@ EXTERNAL SOURCES:
   flutter_local_notifications:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos
   FlutterMacOS:
-    :path: Flutter/ephemeral/.symlinks/flutter/darwin-x64-release
+    :path: Flutter/ephemeral/.symlinks/flutter/darwin-x64
   in_app_review:
     :path: Flutter/ephemeral/.symlinks/plugins/in_app_review/macos
   native_pdf_renderer:
@@ -175,7 +175,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Firebase: 7cf5f9c67f03cb3b606d1d6535286e1080e57eb6
   firebase_core: dd6486c333f1bceec3f20fc59fd2519ba6eda067
-  firebase_crashlytics: e76684c82ff23aa44bf07aa3d4fc3716f15e565c
+  firebase_crashlytics: 143108ccbde8c5cb94da9db2765f695e8b1bd404
   firebase_remote_config: 84e666511dda24550d77241add30bd55204048fc
   FirebaseABTesting: 821a3a3e4a145987e80fee3657c4de1cb9adf693
   FirebaseAnalyticsInterop: 3f86269c38ae41f47afeb43ebf32a001f58fcdae
