@@ -247,6 +247,7 @@ class CoursePageState extends State<CoursePage> {
         onError: _onError,
         onSuccess: (CourseData data) {
           courseData = data;
+          courseData.save(courseNotifyCacheKey);
           if (mounted && courseData != null)
             setState(() {
               if (courseData?.courseTables == null)
