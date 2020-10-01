@@ -7,6 +7,7 @@ import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/login/search_student_id_page.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
@@ -318,6 +319,7 @@ class LoginPageState extends State<LoginPage> {
             }
             Preferences.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
             Navigator.of(context).pop(true);
+            TextInput.finishAutofillContext();
           },
         ),
       );
