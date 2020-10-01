@@ -19,11 +19,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.3.0"
-      resolved-ref: "78277db7eac15f15abfb5e1845e57c338fd013dc"
+      ref: "v0.3.1"
+      resolved-ref: "002e3669ed6e440c6cb544720fa97727ed07765d"
       url: "https://github.com/abc873693/ap_common_firebase"
     source: git
-    version: "0.3.0"
+    version: "0.3.1"
   archive:
     dependency: transitive
     description:
@@ -275,7 +275,7 @@ packages:
       name: firebase_crashlytics
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.0-dev.5"
+    version: "0.2.0"
   firebase_crashlytics_platform_interface:
     dependency: transitive
     description:
