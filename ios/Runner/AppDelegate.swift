@@ -29,7 +29,6 @@ import WidgetKit
                 groupUserDefaults?.set(text, forKey: "course_notify")
             }
         }
-        WidgetCenter.shared.reloadAllTimelines()
     }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
