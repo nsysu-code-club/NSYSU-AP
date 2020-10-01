@@ -6,7 +6,6 @@ import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/course_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/utils/notification_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/dialog_option.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
@@ -45,6 +44,8 @@ class CoursePageState extends State<CoursePage> {
   String get courseNotifyCacheKey =>
       semesterData?.defaultSemester?.code ?? '1091';
 
+  Future<void> future;
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +55,7 @@ class CoursePageState extends State<CoursePage> {
       tag: '${SelcrsHelper.instance.username}_latest',
       newTag: courseNotifyCacheKey,
     );
-    _getSemester();
+    future = _getSemester();
     isShowSearchButton = Preferences.getBool(
       Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
       true,
@@ -69,62 +70,65 @@ class CoursePageState extends State<CoursePage> {
   @override
   Widget build(BuildContext context) {
     ap = ApLocalizations.of(context);
-    return CourseScaffold(
-      state: state,
-      courseData: courseData,
-      notifyData: notifyData,
-      semesterData: semesterData,
-      onSelect: (index) {
-        this.semesterData.currentIndex = index;
-        _getCourseTables();
-      },
-      onRefresh: _getCourseTables,
-      customHint: isOffline ? ap.offlineCourse : null,
-      isShowSearchButton: isShowSearchButton,
-      enableNotifyControl: semesterData != null &&
-          semesterData?.currentSemester?.code == defaultSemesterCode,
-      courseNotifySaveKey: courseNotifyCacheKey,
-      actions: <Widget>[
-        PopupMenuButton<int>(
-          onSelected: (int value) {
-            switch (value) {
-              case 1:
-                setState(() {
-                  isShowSearchButton = !isShowSearchButton;
-                });
-                Preferences.setBool(
-                  Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
-                  isShowSearchButton,
-                );
-                break;
-            }
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              child: Center(
-                child: Text(
-                  ap.settings,
-                  style: TextStyle(color: ApTheme.of(context).greyText),
+    return FutureBuilder(
+      future: future,
+      builder: (_, __) => CourseScaffold(
+        state: state,
+        courseData: courseData,
+        notifyData: notifyData,
+        semesterData: semesterData,
+        onSelect: (index) {
+          this.semesterData.currentIndex = index;
+          _getCourseTables();
+        },
+        onRefresh: _getCourseTables,
+        customHint: isOffline ? ap.offlineCourse : null,
+        isShowSearchButton: isShowSearchButton,
+        enableNotifyControl: semesterData != null &&
+            semesterData?.currentSemester?.code == defaultSemesterCode,
+        courseNotifySaveKey: courseNotifyCacheKey,
+        actions: <Widget>[
+          PopupMenuButton<int>(
+            onSelected: (int value) {
+              switch (value) {
+                case 1:
+                  setState(() {
+                    isShowSearchButton = !isShowSearchButton;
+                  });
+                  Preferences.setBool(
+                    Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
+                    isShowSearchButton,
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                child: Center(
+                  child: Text(
+                    ap.settings,
+                    style: TextStyle(color: ApTheme.of(context).greyText),
+                  ),
                 ),
+                value: -1,
+                enabled: false,
               ),
-              value: -1,
-              enabled: false,
-            ),
-            PopupMenuDivider(
-              height: 10,
-            ),
-            PopupMenuItem(
-              child: DialogOption(
-                text: ApLocalizations.of(context).showSearchButton,
-                check: isShowSearchButton,
-                onPressed: null,
+              PopupMenuDivider(
+                height: 10,
               ),
-              value: 1,
-              enabled: true,
-            )
-          ],
-        ),
-      ],
+              PopupMenuItem(
+                child: DialogOption(
+                  text: ApLocalizations.of(context).showSearchButton,
+                  check: isShowSearchButton,
+                  onPressed: null,
+                ),
+                value: 1,
+                enabled: true,
+              )
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -142,7 +146,7 @@ class CoursePageState extends State<CoursePage> {
 
   Function get _onError => (_) => setState(() => state = CourseState.error);
 
-  void _getSemester() async {
+  Future<void> _getSemester() async {
     SelcrsHelper.instance.getCourseSemesterData(
       callback: GeneralCallback(
         onFailure: _onFailure,
