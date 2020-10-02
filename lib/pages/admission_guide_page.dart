@@ -27,6 +27,7 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
   void initState() {
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen("AdmissionGuidePage", "admission_guide_page.dart");
+    if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     super.initState();
   }
 
