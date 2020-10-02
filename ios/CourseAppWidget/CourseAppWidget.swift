@@ -24,7 +24,7 @@ struct Provider: IntentTimelineProvider {
         var entries: [SimpleEntry] = []
         
         var myUserDefaults :UserDefaults!
-        myUserDefaults = UserDefaults(suiteName: "group.ap_common.course_app_widget")
+        myUserDefaults = UserDefaults(suiteName: "group.com.nsysu.ap")
         var text = "尚無課程資料"
         if let json = myUserDefaults.string(forKey: "course_notify"){
             let courseData = try? JSONDecoder().decode(CourseData.self, from: Data(json.utf8))

@@ -6,7 +6,7 @@
 	<string>development</string>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.ap_common.course_app_widget</string>
+		<string>group.com.nsysu.ap</string>
 	</array>
 </dict>
 </plist>
