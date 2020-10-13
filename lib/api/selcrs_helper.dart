@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/course_data.dart';
@@ -7,6 +8,7 @@ import 'package:ap_common/models/score_data.dart';
 import 'package:ap_common/models/semester_data.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
+import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:big5/big5.dart';
@@ -14,9 +16,11 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
+import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/pre_score.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
+import 'package:nsysu_ap/utils/captcha_utils.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -24,8 +28,22 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 import '../utils/app_localizations.dart';
 
+enum CourseLoginMethod { sso, normal }
+
+extension CourseLoginMethodExtension on String {
+  CourseLoginMethod get courseLoginMethod {
+    switch (this) {
+      case 'normal':
+        return CourseLoginMethod.normal;
+      case 'sso':
+      default:
+        return CourseLoginMethod.sso;
+    }
+  }
+}
+
 class SelcrsHelper {
-  static const selcrsUrlFormat = 'http://selcrs%i.nsysu.edu.tw';
+  static const selcrsUrlFormat = 'https://selcrs.nsysu.edu.tw';
 
   static const courseTimeoutText = '請重新登錄';
   static const scoreTimeoutText = '請重新登錄';
@@ -40,11 +58,13 @@ class SelcrsHelper {
 
   int reLoginCount = 0;
 
+  CourseLoginMethod method;
+
   bool get canReLogin => reLoginCount < 5;
 
-  static String get selcrsUrl => sprintf(selcrsUrlFormat, [index]);
+  static String get selcrsUrl => sprintf(selcrsUrlFormat, []);
 
-  static int index = 1;
+  static int index = 2;
   static int error = 0;
 
   static SelcrsHelper get instance {
@@ -58,6 +78,9 @@ class SelcrsHelper {
         ),
       );
       initCookiesJar();
+      String methodText =
+          Preferences.getString(Constants.COURSE_LOGIN_METHOD, 'normal');
+      _instance.method = methodText.courseLoginMethod;
     }
     return _instance;
   }
@@ -153,15 +176,43 @@ class SelcrsHelper {
       }
     }
     try {
-      var courseResponse = await dio.post(
-        '$selcrsUrl/menu4/Studcheck_sso2.asp',
-        data: {
-          'stuid': username,
-          'SPassword': base64md5Password,
-        },
-      );
-      String text = big5.decode(courseResponse.data);
+      String text;
+      if (method == CourseLoginMethod.sso) {
+        var courseResponse = await dio.post(
+          '$selcrsUrl/menu4/Studcheck_sso2.asp',
+          data: {
+            'stuid': username,
+            'SPassword': base64md5Password,
+          },
+        );
+        text = big5.decode(courseResponse.data);
 //      debugPrint('course =  $text');
+      } else {
+        int validationCodeErrorCount = 0;
+        do {
+          var validationCodeResponse = await dio.get(
+            '$selcrsUrl/validcode.asp?epoch=${DateTime.now().millisecondsSinceEpoch}',
+          );
+          var validationCode = await CaptchaUtils.extractByTfLite(
+            bodyBytes: validationCodeResponse.data,
+            type: SystemType.course,
+          );
+          var courseResponse = await dio.post(
+            '$selcrsUrl/menu4/Studcheck.asp',
+            data: {
+              'stuid': username,
+              'SPassword': password,
+              'ValidCode': validationCode,
+            },
+          );
+          text = big5.decode(courseResponse.data);
+          // debugPrint('course =  $text');
+          if (text.contains("驗證碼錯誤")) {
+            validationCodeErrorCount++;
+          } else
+            break;
+        } while (validationCodeErrorCount < 5);
+      }
       if (text.contains("學號碼密碼不符")) {
         return callback?.onError(
           GeneralResponse(statusCode: 400, message: 'course error'),
@@ -176,7 +227,10 @@ class SelcrsHelper {
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
         String text = big5.decode(e.response.data);
-//        debugPrint('text =  $text');
+        // debugPrint('text =  $text');
+        if (method == CourseLoginMethod.normal)
+          await dio.get('https://selcrs.nsysu.edu.tw/menu4/main_frame.asp');
+        this.method = method;
         this.username = username;
         this.password = password;
         if (callback == null)
@@ -719,6 +773,20 @@ class SelcrsHelper {
       throw e;
     }
     return null;
+  }
+
+  Future<Uint8List> getValidationCode() async {
+    print(
+        '$selcrsUrl/validcode.asp?epoch=${DateTime.now().millisecondsSinceEpoch}');
+    var validationCodeResponse = await dio.get(
+      '$selcrsUrl/validcode.asp?epoch=${DateTime.now().millisecondsSinceEpoch}',
+    );
+    var validationCode = await CaptchaUtils.extractByTfLite(
+      bodyBytes: validationCodeResponse.data,
+      type: SystemType.course,
+    );
+    print(validationCode);
+    return validationCodeResponse.data;
   }
 
   Future<dynamic> dumpError(
