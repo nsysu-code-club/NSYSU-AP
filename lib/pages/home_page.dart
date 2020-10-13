@@ -85,6 +85,7 @@ class HomePageState extends State<HomePage> {
     super.initState();
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen("HomePage", "home_page.dart");
+    _getConfig();
     _getAllAnnouncement();
     if (Preferences.getBool(Constants.PREF_AUTO_LOGIN, false))
       _login();
@@ -549,5 +550,19 @@ class HomePageState extends State<HomePage> {
       } else
         setState(() => content = page);
     }
+  }
+
+  void _getConfig() async {
+    RemoteConfig remoteConfig;
+    try {
+      remoteConfig = await RemoteConfig.instance;
+      await remoteConfig.fetch(expiration: const Duration(seconds: 10));
+      await remoteConfig.activateFetched();
+      String methodText =
+          remoteConfig?.getString(Constants.COURSE_LOGIN_METHOD);
+      Preferences.setString(Constants.COURSE_LOGIN_METHOD, methodText);
+      SelcrsHelper.instance.method = methodText.courseLoginMethod;
+      debugPrint(methodText);
+    } catch (exception) {}
   }
 }
