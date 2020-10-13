@@ -4,16 +4,19 @@
 <a href='https://apps.apple.com/tw/app/id1467522198'><img alt='Get it on the App Store' src='screenshots/app_store.png' height='48px'/></a>
 
 ## 開發環境
-- Flutter stable version v1.12.13+hotfix9
+- Flutter stable version v1.22.1
 
 ## 支援系統
 - [x] Android
 - [x] iOS
 - [x] MacOS
-- [ ] Windows
+- [X] Windows
 - [ ] Linux
 
 ## 功能列表
+
+ [中山大學軟體工程組執掌查詢](https://lis.nsysu.edu.tw/p/405-1001-180580,c1173.php)
+
 - 登入(列出對應系統所擁有的功能及串接狀態)
     - [x] 選課系統
         - [ ] 選課登記(無期限不實作)
