@@ -1,6 +1,7 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/scaffold/login_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
@@ -106,8 +107,7 @@ class LoginPageState extends State<LoginPage> {
             SizedBox(height: orientation == Orientation.portrait ? 30.0 : 0.0),
           ];
     List<Widget> listB = <Widget>[
-      TextField(
-        maxLines: 1,
+      ApTextField(
         controller: _username,
         textInputAction: TextInputAction.next,
         focusNode: usernameFocusNode,
@@ -115,14 +115,10 @@ class LoginPageState extends State<LoginPage> {
           usernameFocusNode.unfocus();
           FocusScope.of(context).requestFocus(passwordFocusNode);
         },
-        decoration: InputDecoration(
-          labelText: ap.username,
-        ),
-        style: _editTextStyle(),
+        labelText: ap.username,
       ),
-      TextField(
+      ApTextField(
         obscureText: true,
-        maxLines: 1,
         textInputAction: TextInputAction.send,
         controller: _password,
         focusNode: passwordFocusNode,
@@ -130,10 +126,7 @@ class LoginPageState extends State<LoginPage> {
           passwordFocusNode.unfocus();
           _login();
         },
-        decoration: InputDecoration(
-          labelText: ap.password,
-        ),
-        style: _editTextStyle(),
+        labelText: ap.password,
       ),
       SizedBox(height: 8.0),
       Row(
