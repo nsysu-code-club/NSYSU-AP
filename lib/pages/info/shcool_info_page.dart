@@ -42,7 +42,7 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
 
   PdfState pdfState = PdfState.loading;
 
-  Uint8List byteList;
+  PdfController pdfController;
 
   ApLocalizations ap;
 
@@ -83,11 +83,11 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
           ),
           PdfScaffold(
             state: pdfState,
-            byteList: byteList,
             onRefresh: () {
               setState(() => pdfState = PdfState.loading);
               _getSchedules();
             },
+            pdfController: pdfController,
           ),
         ],
         controller: controller,
@@ -146,7 +146,9 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
       );
       setState(() {
         pdfState = PdfState.finish;
-        byteList = response.data;
+        pdfController = PdfController(
+          document: PdfDocument.openData(response.data),
+        );
       });
     } catch (e) {
       setState(() {
