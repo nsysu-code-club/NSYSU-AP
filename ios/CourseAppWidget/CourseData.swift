@@ -87,19 +87,19 @@ class Coursetable: Codable {
     
     func getCourses(weekdayIndex:Int) -> [Course?]?{
         switch weekdayIndex {
-        case 1:
-            return monday
         case 2:
-            return tuesday
+            return monday
         case 3:
-            return wednesday
+            return tuesday
         case 4:
-            return thursday
+            return wednesday
         case 5:
-            return friday
+            return thursday
         case 6:
+            return friday
+        case 7:
             return saturday
-        case 0:
+        case 1:
             return sunday
         default:
             return sunday
