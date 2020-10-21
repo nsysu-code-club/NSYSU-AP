@@ -14,16 +14,16 @@ packages:
       name: ap_common
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.0-beta.1"
+    version: "0.8.2"
   ap_common_firebase:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.3.1"
-      resolved-ref: "002e3669ed6e440c6cb544720fa97727ed07765d"
+      ref: "v0.3.2"
+      resolved-ref: "2e292c2efe92e557a174d57f3e366744f0b71c64"
       url: "https://github.com/abc873693/ap_common_firebase"
     source: git
-    version: "0.3.1"
+    version: "0.3.2"
   ap_common_plugin:
     dependency: "direct main"
     description:
@@ -53,7 +53,7 @@ packages:
       name: asn1lib
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.4"
+    version: "0.8.1"
   async:
     dependency: transitive
     description:
@@ -186,7 +186,7 @@ packages:
       name: encrypt
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.3"
+    version: "4.1.0"
   extended_image:
     dependency: transitive
     description:
@@ -242,7 +242,7 @@ packages:
       name: firebase_analytics
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.0"
+    version: "6.0.2"
   firebase_analytics_platform_interface:
     dependency: transitive
     description:
@@ -263,7 +263,7 @@ packages:
       name: firebase_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.0"
+    version: "0.5.0+1"
   firebase_core_platform_interface:
     dependency: transitive
     description:
@@ -284,28 +284,28 @@ packages:
       name: firebase_crashlytics
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.0"
+    version: "0.2.1+1"
   firebase_crashlytics_platform_interface:
     dependency: transitive
     description:
       name: firebase_crashlytics_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.1.1"
   firebase_messaging:
     dependency: transitive
     description:
       name: firebase_messaging
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "7.0.0"
+    version: "7.0.3"
   firebase_remote_config:
     dependency: transitive
     description:
       name: firebase_remote_config
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0"
+    version: "0.4.0+2"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -339,20 +339,27 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.2.2"
+  flutter_linkify:
+    dependency: transitive
+    description:
+      name: flutter_linkify
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.1.3"
   flutter_local_notifications:
     dependency: transitive
     description:
       name: flutter_local_notifications
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.0-beta.10"
+    version: "2.0.2"
   flutter_local_notifications_platform_interface:
     dependency: transitive
     description:
       name: flutter_local_notifications_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0-beta.1"
+    version: "2.0.0"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
@@ -374,7 +381,7 @@ packages:
       name: html
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.14.0+3"
+    version: "0.14.0+4"
   http:
     dependency: "direct main"
     description:
@@ -409,7 +416,7 @@ packages:
       name: in_app_review
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.0+4"
+    version: "0.2.1+1"
   intl:
     dependency: transitive
     description:
@@ -424,6 +431,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.1+1"
+  linkify:
+    dependency: transitive
+    description:
+      name: linkify
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.0"
   matcher:
     dependency: transitive
     description:
@@ -437,7 +451,7 @@ packages:
       name: material_design_icons_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.5555"
+    version: "4.0.5755"
   meta:
     dependency: transitive
     description:
@@ -473,13 +487,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.0"
-  outline_material_icons:
-    dependency: transitive
-    description:
-      name: outline_material_icons
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.1"
   package_info:
     dependency: transitive
     description:
@@ -507,7 +514,7 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.18"
+    version: "1.6.21"
   path_provider_linux:
     dependency: transitive
     description:
@@ -591,14 +598,14 @@ packages:
       name: pointycastle
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.2"
+    version: "2.0.0"
   printing:
     dependency: "direct main"
     description:
       name: printing
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.6.1"
+    version: "3.6.4"
   process:
     dependency: transitive
     description:
@@ -640,14 +647,14 @@ packages:
       name: share
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.5"
+    version: "0.6.5+3"
   shared_preferences:
     dependency: transitive
     description:
       name: shared_preferences
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.12"
+    version: "0.5.12+2"
   shared_preferences_linux:
     dependency: transitive
     description:
@@ -701,7 +708,7 @@ packages:
       name: sprintf
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.0"
+    version: "5.0.0"
   sqflite:
     dependency: transitive
     description:
@@ -785,7 +792,7 @@ packages:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.7.2"
+    version: "5.7.5"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -848,7 +855,7 @@ packages:
       name: webview_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.4"
   win32:
     dependency: transitive
     description:

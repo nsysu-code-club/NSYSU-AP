@@ -12,12 +12,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  ap_common: 0.8.0-beta.1
+  ap_common: 0.8.2
   #   path: ../../GitHub-NKUST-ITC/ap_common
   ap_common_firebase:
     git:
       url: https://github.com/abc873693/ap_common_firebase
-      ref: v0.3.1
+      ref: v0.3.2
   #     path: ../ap_common_firebase
   ap_common_plugin:
     git:
@@ -27,16 +27,16 @@ dependencies:
 
   #official plugin
   http: 0.12.2
-  html: ^0.14.0+3
-  path_provider: 1.6.18
-  webview_flutter: 1.0.0
+  html: ^0.14.0+4
+  path_provider: 1.6.21
+  webview_flutter: 1.0.4
 
   #third party plugin
-  encrypt: 4.0.3
-  sprintf: ^4.0.2
+  encrypt: 4.1.0
+  sprintf: ^5.0.0
   crypto: ^2.1.5
   big5: 0.0.4
-  printing: 3.6.1
+  printing: 3.6.4
   dio: 3.0.10
   dio_cookie_manager: 1.0.0
 
