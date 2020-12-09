@@ -25,7 +25,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../utils/app_localizations.dart';
 
 class SelcrsHelper {
-  static const selcrsUrlFormat = 'http://selcrs%i.nsysu.edu.tw';
+  static const selcrsUrlFormat = 'https://selcrs.nsysu.edu.tw';
 
   static const courseTimeoutText = '請重新登錄';
   static const scoreTimeoutText = '請重新登錄';
