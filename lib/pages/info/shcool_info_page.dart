@@ -81,6 +81,7 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
           ),
           PdfScaffold(
             state: pdfState,
+            data: data,
             onRefresh: () {
               setState(() => pdfState = PdfState.loading);
               _getSchedules();
