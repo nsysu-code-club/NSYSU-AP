@@ -434,7 +434,7 @@ class SelcrsHelper {
             scoreSemesterData.selectSemesterIndex = i;
         }
       } else {
-        print('document.text = ${document.text}');
+        // print('document.text = ${document.text}');
       }
       return callback.onSuccess(scoreSemesterData);
     } on DioError catch (e) {
