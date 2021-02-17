@@ -25,12 +25,10 @@ packages:
   ap_common_plugin:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "v0.0.5"
-      resolved-ref: "096c571f554b311ca6caabfd3c83df9faf98fab4"
-      url: "https://github.com/abc873693/ap_common_plugin"
-    source: git
-    version: "0.0.5"
+      name: ap_common_plugin
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.5"
   archive:
     dependency: transitive
     description:
