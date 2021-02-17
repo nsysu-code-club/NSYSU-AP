@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:ap_common/config/analytics_constants.dart';
 import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
@@ -33,12 +30,14 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   ThemeMode themeMode = ThemeMode.system;
 
+  Locale locale;
+
   @override
   void initState() {
     _analytics = FirebaseUtils.init();
     themeMode = ThemeMode
         .values[Preferences.getInt(Constants.PREF_THEME_MODE_INDEX, 0)];
-    logThemeEvent();
+    FirebaseAnalyticsUtils.instance.logThemeEvent(themeMode);
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
@@ -52,7 +51,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void didChangePlatformBrightness() {
     setState(() {});
-    logThemeEvent();
+    FirebaseAnalyticsUtils.instance.logThemeEvent(themeMode);
     super.didChangePlatformBrightness();
   }
 
@@ -77,11 +76,11 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           theme: ApTheme.light,
           darkTheme: ApTheme.dark,
           themeMode: themeMode,
-          navigatorObservers: FirebaseUtils.isSupportAnalytics
-              ? [
-                  FirebaseAnalyticsObserver(analytics: _analytics),
-                ]
-              : [],
+          locale: locale,
+          navigatorObservers: [
+            if (FirebaseUtils.isSupportAnalytics)
+              FirebaseAnalyticsObserver(analytics: _analytics),
+          ],
           localeResolutionCallback:
               (Locale locale, Iterable<Locale> supportedLocales) {
 //            print('Load ${locale.languageCode}');
@@ -90,9 +89,11 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
               ApSupportLanguageConstants.SYSTEM,
             );
             if (languageCode == ApSupportLanguageConstants.SYSTEM)
-              return locale;
+              return this.locale = ApLocalizations.delegate.isSupported(locale)
+                  ? locale
+                  : Locale('en');
             else
-              return Locale(
+              return this.locale = Locale(
                 languageCode,
                 languageCode == ApSupportLanguageConstants.ZH ? 'TW' : null,
               );
@@ -117,26 +118,6 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     setState(() {
       themeMode = mode;
     });
-    logThemeEvent();
-  }
-
-  void logThemeEvent() async {
-    Brightness brightness;
-    switch (themeMode) {
-      case ThemeMode.system:
-        brightness = WidgetsBinding.instance.window.platformBrightness;
-        break;
-      case ThemeMode.light:
-        brightness = Brightness.light;
-        break;
-      case ThemeMode.dark:
-      default:
-        brightness = Brightness.dark;
-        break;
-    }
-    FirebaseAnalyticsUtils.instance.setUserProperty(
-      AnalyticsConstants.THEME,
-      brightness == Brightness.light ? ApTheme.LIGHT : ApTheme.DARK,
-    );
+    FirebaseAnalyticsUtils.instance.logThemeEvent(themeMode);
   }
 }
