@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:big5/big5.dart';
 import 'package:dio/dio.dart';
@@ -133,7 +135,8 @@ class TuitionHelper {
           ),
         );
       }
-      return callback?.onSuccess(list);
+      list = list.reversed.toList();
+      return callback?.onSuccess(list) ?? list;
     } on DioError catch (e) {
       if (callback != null) {
         callback.onFailure(e);
@@ -146,9 +149,9 @@ class TuitionHelper {
     }
   }
 
-  Future<List<int>> downloadFdf({
+  Future<Uint8List> downloadFdf({
     String serialNumber,
-    GeneralCallback callback,
+    GeneralCallback<Uint8List> callback,
   }) async {
     try {
       var response = await dio.get(
@@ -163,7 +166,7 @@ class TuitionHelper {
       //    String dir = (await getApplicationDocumentsDirectory()).path;
       //    File file = new File('$dir/$filename');
       //    await file.writeAsBytes(bytes);
-      return response.data;
+      return callback?.onSuccess(response.data) ?? response.data;
     } on DioError catch (e) {
       if (callback != null) {
         callback.onFailure(e);
