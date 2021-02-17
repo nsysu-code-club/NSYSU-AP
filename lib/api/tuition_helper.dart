@@ -59,8 +59,8 @@ class TuitionHelper {
         },
       );
       String text = big5.decode(response.data);
-      debugPrint('Request =  ${response.request.data}');
-      debugPrint('Response =  $text');
+      // debugPrint('Request =  ${response.request.data}');
+      // debugPrint('Response =  $text');
       //    debugPrint('response.statusCode = ${response.statusCode}');
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
@@ -69,7 +69,7 @@ class TuitionHelper {
       } else {
         if (callback != null) {
           callback.onFailure(e);
-          debugPrint(big5.decode(e.response.data));
+          // debugPrint(big5.decode(e.response.data));
           return null;
         } else
           throw e;
@@ -91,7 +91,7 @@ class TuitionHelper {
         options: _tfOption,
       );
       String text = big5.decode(response.data);
-      debugPrint('text =  ${text}');
+      // debugPrint('text =  ${text}');
       if (text.contains('沒有合乎查詢條件的資料')) {
         return [];
       }
