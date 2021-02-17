@@ -21,6 +21,9 @@ void main() async {
     key: Constants.key,
     iv: Constants.iv,
   );
+  final currentVersion =
+      Preferences.getString(Constants.PREF_CURRENT_VERSION, '0');
+  if (int.parse(currentVersion) < 700) CourseData.migrateFrom0_10();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   if (FirebaseUtils.isSupportCore) await Firebase.initializeApp();
   if (!kDebugMode && FirebaseUtils.isSupportCrashlytics) {
