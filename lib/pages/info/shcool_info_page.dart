@@ -41,7 +41,7 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
   PhoneState phoneState = PhoneState.finish;
 
   PdfState pdfState = PdfState.loading;
-  
+
   ApLocalizations ap;
 
   TabController controller;
@@ -78,8 +78,6 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
           PhoneScaffold(
             state: phoneState,
             phoneModelList: phoneModelList,
-            logEvent: (key, value) =>
-                FirebaseAnalyticsUtils.instance.logAction(key, value),
           ),
           PdfScaffold(
             state: pdfState,

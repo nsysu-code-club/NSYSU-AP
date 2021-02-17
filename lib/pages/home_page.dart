@@ -233,21 +233,13 @@ class HomePageState extends State<HomePage> {
               fbFanPageId: '735951703168873',
               fbFanPageUrl: 'https://www.facebook.com/NKUST.ITC/',
               githubUrl: 'https://github.com/NKUST-ITC',
-              logEvent: (name, value) =>
-                  FirebaseAnalyticsUtils.instance.logAction(name, value),
-              setCurrentScreen: () => FirebaseAnalyticsUtils.instance
-                  .setCurrentScreen("AboutUsPage", "about_us_page.dart"),
               actions: <Widget>[
                 IconButton(
                   icon: Icon(ApIcon.codeIcon),
                   onPressed: () {
                     Navigator.of(context).push(
                       CupertinoPageRoute(
-                        builder: (_) => OpenSourcePage(
-                          setCurrentScreen: () =>
-                              FirebaseAnalyticsUtils.instance.setCurrentScreen(
-                                  "OpenSourcePage", "open_source_page.dart"),
-                        ),
+                        builder: (_) => OpenSourcePage(),
                       ),
                     );
                     FirebaseAnalyticsUtils.instance
