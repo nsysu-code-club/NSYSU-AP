@@ -1,5 +1,6 @@
 import 'package:ap_common/api/github_helper.dart';
 import 'package:ap_common/callback/general_callback.dart';
+import 'package:ap_common/config/analytics_constants.dart';
 import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/pages/about_us_page.dart';
 import 'package:ap_common/pages/announcement_content_page.dart';
@@ -12,7 +13,6 @@ import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/dialog_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/ap_drawer.dart';
-import 'package:ap_common_firebase/constants/fiirebase_constants.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
@@ -94,7 +94,7 @@ class HomePageState extends State<HomePage> {
       _checkUpdate();
     }
     FirebaseAnalyticsUtils.instance.setUserProperty(
-      FirebaseConstants.LANGUAGE,
+      AnalyticsConstants.LANGUAGE,
       AppLocalizations.locale.languageCode,
     );
   }

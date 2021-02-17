@@ -1,3 +1,4 @@
+import 'package:ap_common/config/analytics_constants.dart';
 import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
@@ -5,7 +6,6 @@ import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:ap_common/widgets/setting_page_widgets.dart';
-import 'package:ap_common_firebase/constants/fiirebase_constants.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
@@ -115,7 +115,7 @@ class SettingPageState extends State<SettingPage> {
                         code,
                       );
                       FirebaseAnalyticsUtils.instance.setUserProperty(
-                        FirebaseConstants.LANGUAGE,
+                        AnalyticsConstants.LANGUAGE,
                         AppLocalizations.locale.languageCode,
                       );
                     },

@@ -1,10 +1,10 @@
 import 'dart:io';
 
+import 'package:ap_common/config/analytics_constants.dart';
 import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/preferences.dart';
-import 'package:ap_common_firebase/constants/fiirebase_constants.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -135,7 +135,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         break;
     }
     FirebaseAnalyticsUtils.instance.setUserProperty(
-      FirebaseConstants.THEME,
+      AnalyticsConstants.THEME,
       brightness == Brightness.light ? ApTheme.LIGHT : ApTheme.DARK,
     );
   }
