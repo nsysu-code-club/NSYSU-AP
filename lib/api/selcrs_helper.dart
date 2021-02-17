@@ -325,10 +325,9 @@ class SelcrsHelper {
       var startTime = DateTime.now().millisecondsSinceEpoch;
       var document = parse(text, encoding: 'BIG-5');
       var trDoc = document.getElementsByTagName('tr');
-      var courseData =
-          CourseData(courseTables: (trDoc.length == 0) ? null : CourseTables());
-      if (courseData.courseTables != null)
-        courseData.courseTables.timeCode = timeCodeConfig.textList;
+      var courseData = CourseData(courses: (trDoc.length == 0) ? null : []);
+      if (courseData.courses != null)
+        courseData.timeCodes = timeCodeConfig.timeCodes;
       //print(DateTime.now());
       for (var i = 1; i < trDoc.length; i++) {
         var tdDoc = trDoc[i].getElementsByTagName('td');
@@ -351,67 +350,32 @@ class SelcrsHelper {
           building: '',
           room: tdDoc[9].text,
         );
-        String time = '';
+        final course = Course(
+          code: tdDoc[2].text,
+          className: '${tdDoc[1].text} ${tdDoc[3].text}',
+          title: title,
+          units: tdDoc[5].text,
+          required:
+              tdDoc[7].text.length == 1 ? '${tdDoc[7].text}修' : tdDoc[7].text,
+          location: location,
+          instructors: [instructors],
+          times: [],
+        );
         for (var j = 10; j < tdDoc.length; j++) {
           if (tdDoc[j].text.length > 0) {
             List<String> sections = tdDoc[j].text.split('');
             if (sections.length > 0 && sections[0] != ' ') {
-              String tmp = '';
               for (var section in sections) {
                 int index = timeCodeConfig.indexOf(section);
                 if (index == -1) continue;
-                TimeCode timeCode = timeCodeConfig.timeCodes[index];
-                tmp += '$section';
-                var course = Course(
-                  title: title,
-                  instructors: [instructors],
-                  location: location,
-                  date: Date(
-                    section: section,
-                    startTime: timeCode?.startTime ?? '',
-                    endTime: timeCode?.endTime ?? '',
-                  ),
-                  detailIndex: i - 1,
-                );
-                if (j == 10)
-                  courseData.courseTables.monday.add(course);
-                else if (j == 11)
-                  courseData.courseTables.tuesday.add(course);
-                else if (j == 12)
-                  courseData.courseTables.wednesday.add(course);
-                else if (j == 13)
-                  courseData.courseTables.thursday.add(course);
-                else if (j == 14)
-                  courseData.courseTables.friday.add(course);
-                else if (j == 15)
-                  courseData.courseTables.saturday.add(course);
-                else if (j == 16) courseData.courseTables.sunday.add(course);
-              }
-              if (tmp.isNotEmpty) {
-                time += '${trDoc[0].getElementsByTagName('td')[j].text}$tmp';
+                course.times.add(SectionTime(weekday: j - 9, index: index));
               }
             }
           }
         }
-        courseData.courses.add(
-          CourseDetail(
-            code: tdDoc[2].text,
-            className: '${tdDoc[1].text} ${tdDoc[3].text}',
-            title: title,
-            units: tdDoc[5].text,
-            required:
-                tdDoc[7].text.length == 1 ? '${tdDoc[7].text}修' : tdDoc[7].text,
-            location: location,
-            instructors: [instructors],
-            times: time,
-          ),
-        );
+        courseData.courses.add(course);
       }
       if (trDoc.length != 0) {
-        if (courseData.courseTables.saturday.length == 0)
-          courseData.courseTables.saturday = null;
-        if (courseData.courseTables.sunday.length == 0)
-          courseData.courseTables.sunday = null;
         var endTime = DateTime.now().millisecondsSinceEpoch;
         FirebaseAnalyticsUtils.instance
             .logTimeEvent('course_html_parser', (endTime - startTime) / 1000.0);

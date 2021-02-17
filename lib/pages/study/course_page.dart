@@ -254,7 +254,8 @@ class CoursePageState extends State<CoursePage> {
           courseData.save(courseNotifyCacheKey);
           if (mounted && courseData != null)
             setState(() {
-              if (courseData?.courseTables == null)
+              if (courseData?.courses == null ||
+                  courseData?.courses?.length == 0)
                 state = CourseState.empty;
               else
                 state = CourseState.finish;
