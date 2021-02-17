@@ -1,7 +1,7 @@
-import 'dart:io';
 
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/scaffold/pdf_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
@@ -13,7 +13,6 @@ import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
-import 'package:printing/printing.dart';
 import 'package:sprintf/sprintf.dart';
 
 enum _State { loading, finish, error, empty }
@@ -35,7 +34,8 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   @override
   void initState() {
-    FirebaseAnalyticsUtils.instance.setCurrentScreen("TuitionAndFeesPage", "tuition_and_fees_page.dart");
+    FirebaseAnalyticsUtils.instance
+        .setCurrentScreen("TuitionAndFeesPage", "tuition_and_fees_page.dart");
     if (TuitionHelper.isLogin)
       _getData();
     else
@@ -123,87 +123,44 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             ),
           ),
           onTap: () async {
-            //if (!item.serialNumber.contains('act=51'))
             showDialog(
               context: context,
-              builder: (_) => SimpleDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(16),
-                  ),
-                ),
-                title: Text(app.tuitionAndFeesPageDialogTitle),
-                children: <Widget>[
-                  ListTile(
-                    leading: Icon(Icons.print),
-                    title: Text(ap.printing),
-                    onTap: () {
-                      Navigator.of(context).pop(0);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.share),
-                    title: Text(ap.share),
-                    onTap: () {
-                      Navigator.of(context).pop(1);
-                    },
-                  ),
-                ],
-              ),
-            ).then((index) async {
-              if (index != null) {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) => WillPopScope(
-                      child: ProgressDialog(ap.loading),
-                      onWillPop: () async {
-                        return false;
-                      }),
-                  barrierDismissible: false,
-                );
-                List<int> bytes = await TuitionHelper.instance.downloadFdf(
-                  serialNumber: item.serialNumber,
-                  callback: GeneralCallback(
-                    onError: (GeneralResponse e) {
-                      Navigator.of(context, rootNavigator: true).pop();
-                      ApUtils.showToast(
-                        context,
-                        ApLocalizations.of(context).somethingError,
-                      );
-                    },
-                    onFailure: (DioError e) {
-                      Navigator.of(context, rootNavigator: true).pop();
-                      ApUtils.showToast(
-                        context,
-                        e.i18nMessage,
-                      );
-                    },
-                  ),
-                );
-                Navigator.of(context, rootNavigator: true).pop();
-                if (!kIsWeb && (Platform.isAndroid || Platform.isIOS|| Platform.isMacOS|| Platform.isWindows)) {
-                  switch (index) {
-                    case 0:
-                      await Printing.layoutPdf(
-                        onLayout: (format) async => bytes,
-                        name: item.title,
-                      );
-                      FirebaseAnalyticsUtils.instance.logAction('export_by_printing', '');
-                      break;
-                    case 1:
-                      await Printing.sharePdf(
-                          bytes: bytes, filename: '${item.title}.pdf');
-                      FirebaseAnalyticsUtils.instance.logAction('export_by_share', '');
-                      break;
-                  }
-                } else {
+              builder: (BuildContext context) => WillPopScope(
+                  child: ProgressDialog(ap.loading),
+                  onWillPop: () async {
+                    return false;
+                  }),
+              barrierDismissible: false,
+            );
+            TuitionHelper.instance.downloadFdf(
+              serialNumber: item.serialNumber,
+              callback: GeneralCallback(
+                onError: (GeneralResponse e) {
+                  Navigator.of(context, rootNavigator: true).pop();
                   ApUtils.showToast(
                     context,
-                    ApLocalizations.of(context).platformError,
+                    ApLocalizations.of(context).somethingError,
                   );
-                }
-              }
-            });
+                },
+                onFailure: (DioError e) {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  ApUtils.showToast(
+                    context,
+                    e.i18nMessage,
+                  );
+                },
+                onSuccess: (data) {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  ApUtils.pushCupertinoStyle(
+                    context,
+                    PdfScaffold(
+                      state: PdfState.finish,
+                      data: data,
+                    ),
+                  );
+                },
+              ),
+            );
           },
           subtitle: Padding(
             padding: const EdgeInsets.all(4.0),
