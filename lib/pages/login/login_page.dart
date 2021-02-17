@@ -58,7 +58,7 @@ class LoginPageState extends State<LoginPage> {
       builder: (_, orientation) {
         return Scaffold(
           backgroundColor: ApTheme.of(context).blue,
-          resizeToAvoidBottomPadding: orientation == Orientation.portrait,
+          resizeToAvoidBottomInset: orientation == Orientation.portrait,
           body: Container(
             alignment: Alignment(0, 0),
             padding: EdgeInsets.symmetric(horizontal: 30.0),

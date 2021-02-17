@@ -49,7 +49,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
       builder: (_, orientation) {
         return Scaffold(
           backgroundColor: ApTheme.of(context).blue,
-          resizeToAvoidBottomPadding: orientation == Orientation.portrait,
+          resizeToAvoidBottomInset: orientation == Orientation.portrait,
           appBar: AppBar(
             backgroundColor: ApTheme.of(context).blue,
             elevation: 0.0,
