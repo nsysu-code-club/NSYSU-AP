@@ -175,7 +175,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                       Navigator.of(context, rootNavigator: true).pop();
                       ApUtils.showToast(
                         context,
-                        ApLocalizations.dioError(context, e),
+                        e.i18nMessage,
                       );
                     },
                   ),

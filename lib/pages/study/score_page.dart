@@ -68,7 +68,7 @@ class ScorePageState extends State<ScorePage> {
         children: <Widget>[
           Expanded(
             child: ItemPicker(
-              dialogTitle: ap.picksSemester,
+              dialogTitle: ap.pickSemester,
               items: years,
               currentIndex: currentYearsIndex,
               onSelected: (int index) {
@@ -81,7 +81,7 @@ class ScorePageState extends State<ScorePage> {
           ),
           Expanded(
             child: ItemPicker(
-              dialogTitle: ap.picksSemester,
+              dialogTitle: ap.pickSemester,
               items: semesters,
               currentIndex: currentSemesterIndex,
               onSelected: (int index) {

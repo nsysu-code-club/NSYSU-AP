@@ -138,7 +138,7 @@ class CoursePageState extends State<CoursePage> {
             customHint = '${ap.offlineCourse}';
             state = CourseState.finish;
           } else {
-            customStateHint = ApLocalizations.dioError(context, e);
+            customStateHint = e.i18nMessage;
             state = CourseState.error;
           }
         });

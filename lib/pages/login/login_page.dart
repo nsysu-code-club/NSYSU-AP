@@ -115,7 +115,7 @@ class LoginPageState extends State<LoginPage> {
           usernameFocusNode.unfocus();
           FocusScope.of(context).requestFocus(passwordFocusNode);
         },
-        labelText: ap.username,
+        labelText: ap.studentId,
       ),
       ApTextField(
         obscureText: true,
@@ -167,7 +167,7 @@ class LoginPageState extends State<LoginPage> {
                     onChanged: _onRememberPasswordChanged,
                   ),
                 ),
-                Text(ap.remember, style: TextStyle(color: Colors.white))
+                Text(ap.rememberPassword, style: TextStyle(color: Colors.white))
               ],
             ),
             onTap: () => _onRememberPasswordChanged(!isRememberPassword),
@@ -299,7 +299,7 @@ class LoginPageState extends State<LoginPage> {
           },
           onFailure: (DioError e) {
             Navigator.pop(context);
-            ApUtils.showToast(context, ApLocalizations.dioError(context, e));
+            ApUtils.showToast(context, e.i18nMessage);
           },
           onSuccess: (GeneralResponse data) async {
             Navigator.pop(context);
