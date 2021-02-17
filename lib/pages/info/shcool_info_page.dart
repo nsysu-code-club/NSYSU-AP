@@ -41,14 +41,14 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
   PhoneState phoneState = PhoneState.finish;
 
   PdfState pdfState = PdfState.loading;
-
-  PdfController pdfController;
-
+  
   ApLocalizations ap;
 
   TabController controller;
 
   int _currentIndex = 0;
+
+  Uint8List data;
 
   @override
   void initState() {
@@ -87,7 +87,6 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
               setState(() => pdfState = PdfState.loading);
               _getSchedules();
             },
-            pdfController: pdfController,
           ),
         ],
         controller: controller,
@@ -146,9 +145,7 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
       );
       setState(() {
         pdfState = PdfState.finish;
-        pdfController = PdfController(
-          document: PdfDocument.openData(response.data),
-        );
+        data = response.data;
       });
     } catch (e) {
       setState(() {
