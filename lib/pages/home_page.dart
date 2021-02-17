@@ -470,10 +470,7 @@ class HomePageState extends State<HomePage> {
         },
         onFailure: (DioError e) {
           _homeKey.currentState.showBasicHint(
-            text: ApLocalizations.dioError(
-              context,
-              e,
-            ),
+            text: e.i18nMessage,
           );
         },
         onSuccess: (GeneralResponse data) {
