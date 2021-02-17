@@ -96,7 +96,7 @@ class SettingPageState extends State<SettingPage> {
                       String code = ApSupportLanguage.values[index].code;
                       switch (index) {
                         case 0:
-                          locale = Localizations.localeOf(context);
+                          locale = WidgetsBinding.instance.window.locales.first;
                           break;
                         default:
                           locale = Locale(
