@@ -33,5 +33,5 @@ jobs:
       - name: Run Fastlane
         uses: maierj/fastlane-action@v2.0.1
         with:
-          lane: beta
-          subdirectory: android
+          lane: 'beta'
+          subdirectory: 'android'
