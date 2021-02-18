@@ -47,5 +47,7 @@ app.*.map.json
 GoogleService-Info.plist
 
 google-services.json
+key.jks
+service_account_key.json
 
 .vscode/
