@@ -29,8 +29,12 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
       - run: flutter build appbundle --release
-      - name: Run Fastlane
-        uses: maierj/fastlane-action@v1.4.0
+      - name: Setup ruby
+        uses: actions/setup-ruby@v1
         with:
-          lane: closed_beta
+          ruby-version: '2.7.2'
+      - name: Run Fastlane
+        uses: maierj/fastlane-action@v2.0.1
+        with:
+          lane: beta
           subdirectory: android
