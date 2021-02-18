@@ -1,0 +1,121 @@
+name: Build Test
+on: [push, pull_request]
+jobs:
+
+  build_android:
+    name: Build Android App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '1.8'
+      - name: Decrypt Android keys
+        run: sh ./.github/scripts/decrypt_android_keys.sh
+        env:
+          ANDROID_KEYS_SECRET_PASSPHRASE: ${{ secrets.ANDROID_KEYS_SECRET_PASSPHRASE }}
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.26.x' # you can use 1.12
+          channel: 'dev'
+      - name: Upgrades flutter
+        run: flutter upgrade
+      - run: flutter pub get
+      - name: Build Android app bundle
+        run: flutter build appbundle --release
+
+  build_ios:
+    name: Build iOS App
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run Flutter tasks
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.26.x'
+          channel: 'dev'
+      - run: flutter pub get
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign
+
+  build_web:
+    name: Build Web App
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.26.x'
+          channel: 'dev'
+      - name: Upgrades flutter
+        run: flutter upgrade
+      - name: Enable Web
+        run: flutter config --enable-web
+      - run: flutter pub get
+      - name: Build Web
+        run: flutter build web
+
+  build_macos:
+    name: Build macOS App
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run Flutter tasks
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.26.x'
+          channel: 'dev'
+      - name: Upgrades flutter
+        run: flutter upgrade
+      - name: Enable macOS
+        run: flutter config --enable-macos-desktop
+      - run: flutter pub get
+      - name: Build macOS
+        run: flutter build macos --release
+
+  build_linux:
+    name: Build Linux App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run Flutter tasks
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.26.x'
+          channel: 'dev'
+      - name: Intall requird Dependencies
+        run: sudo apt -y install ninja-build libgtk-3-dev libblkid-dev
+      - name: Upgrades flutter
+        run: flutter upgrade
+      - name: Enable linux
+        run: flutter config --enable-linux-desktop
+      - run: flutter doctor -v
+      - run: flutter pub get
+      - name: Build linux
+        run: flutter build linux --release
+
+  build_windows:
+    name: Build Windows App
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run Flutter tasks
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.26.x'
+          channel: 'dev'
+      - name: Upgrades flutter
+        run: flutter upgrade
+      - name: Enable windows
+        run: flutter config --enable-windows-desktop
+      - run: flutter doctor -v
+      - run: flutter pub get
+      - name: Build windows
+        run: flutter build windows --release
