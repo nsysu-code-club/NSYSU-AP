@@ -30,7 +30,9 @@ jobs:
         uses: actions/setup-ruby@v1
         with:
           ruby-version: '2.7.2'
-      - run: bundle update --bundler
+      - name: Bundle update
+        run: bundle update --bundler
+        working-directory: ./android
       - name: Run Fastlane
         uses: maierj/fastlane-action@v2.0.1
         with:
