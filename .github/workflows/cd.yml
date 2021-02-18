@@ -1,7 +1,10 @@
 # cd.yml
 name: Store CD
 
-on: [push, pull_request]
+on:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   # CD
