@@ -63,8 +63,8 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             child: CircularProgressIndicator(), alignment: Alignment.center);
       case _State.error:
       case _State.empty:
-        return FlatButton(
-          onPressed: _getData,
+        return InkWell(
+          onTap: _getData,
           child: HintContent(
             icon: Icons.assignment,
             content: state == _State.error

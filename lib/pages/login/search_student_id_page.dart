@@ -1,5 +1,6 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/scaffold/login_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
@@ -78,26 +79,26 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     List<Widget> list = orientation == Orientation.portrait
         ? <Widget>[
             Center(
-              child: Text(
-                'N',
-                style: TextStyle(
-                  fontSize: 120,
-                  color: Colors.white,
+                child: Text(
+                  'N',
+                  style: TextStyle(
+                    fontSize: 120,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            ),
             SizedBox(height: orientation == Orientation.portrait ? 30.0 : 0.0),
           ]
         : <Widget>[
             Expanded(
-              child: Text(
-                'N',
-                style: TextStyle(
-                  fontSize: 120,
-                  color: Colors.white,
+                child: Text(
+                  'N',
+                  style: TextStyle(
+                    fontSize: 120,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            ),
             SizedBox(height: orientation == Orientation.portrait ? 30.0 : 0.0),
           ];
     List<Widget> listB = <Widget>[
@@ -159,26 +160,13 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
         ],
       ),
       SizedBox(height: 8.0),
-      Container(
-        width: double.infinity,
-        child: RaisedButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(30.0),
-            ),
-          ),
-          padding: EdgeInsets.all(14.0),
-          onPressed: () {
-            FirebaseAnalyticsUtils.instance
-                .logAction('search_student_id', 'click');
-            _search();
-          },
-          color: Colors.white,
-          child: Text(
-            ap.search,
-            style: TextStyle(color: ApTheme.of(context).blue, fontSize: 18.0),
-          ),
-        ),
+      ApButton(
+        text: ap.search,
+        onPressed: () {
+          FirebaseAnalyticsUtils.instance
+              .logAction('search_student_id', 'click');
+          _search();
+        },
       ),
     ];
     if (orientation == Orientation.portrait) {

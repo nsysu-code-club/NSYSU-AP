@@ -95,8 +95,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
             child: CircularProgressIndicator(), alignment: Alignment.center);
       case _State.error:
       case _State.empty:
-        return FlatButton(
-          onPressed: () {
+        return InkWell(
+          onTap: () {
             _getGraduationReport();
             FirebaseAnalyticsUtils.instance.logAction('retry', 'click');
           },

@@ -62,8 +62,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     controller: newEmail,
                   ),
                   actions: <Widget>[
-                    FlatButton(
-                      onPressed: () async {
+                    InkWell(
+                      onTap: () async {
                         Navigator.pop(context);
                         showDialog(
                           context: context,
