@@ -14,12 +14,8 @@ class AdmissionGuidePage extends StatefulWidget {
   _AdmissionGuidePageState createState() => _AdmissionGuidePageState();
 }
 
-enum _State { loading, finish, error, empty, offlineEmpty }
-
 class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
   ApLocalizations ap;
-
-  _State state = _State.loading;
 
   WebViewController webViewController;
 
@@ -55,7 +51,7 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
           ),
         ],
       ),
-      body: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+      body: !kIsWeb && (Platform.isAndroid || Platform.isIOS)
           ? WebView(
               initialUrl: 'https://leslietsai1.wixsite.com/nsysufreshman',
               javascriptMode: JavascriptMode.unrestricted,
@@ -68,17 +64,6 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
               icon: ApIcon.apps,
               content: ap.platformError,
             ),
-    );
-  }
-
-  JavascriptChannel _toasterJavascriptChannel(BuildContext context) {
-    return JavascriptChannel(
-      name: 'Toaster',
-      onMessageReceived: (JavascriptMessage message) {
-        Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(message.message)),
-        );
-      },
     );
   }
 }
