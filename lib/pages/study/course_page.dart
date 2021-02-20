@@ -79,6 +79,7 @@ class CoursePageState extends State<CoursePage> {
         enableNotifyControl: semesterData != null &&
             semesterData?.currentSemester?.code == defaultSemesterCode,
         courseNotifySaveKey: courseNotifyCacheKey,
+        enableCaptureCourseTable: true,
         actions: <Widget>[],
       ),
     );
