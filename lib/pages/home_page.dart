@@ -1,4 +1,4 @@
-import 'package:ap_common/api/github_helper.dart';
+import 'package:ap_common/api/announcement_helper.dart';
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/config/analytics_constants.dart';
 import 'package:ap_common/models/general_response.dart';
@@ -67,10 +67,7 @@ class HomePageState extends State<HomePage> {
 
   Widget content;
 
-  Map<String, List<Announcement>> newsMap;
-
-  List<Announcement> get newsList =>
-      (newsMap == null) ? null : newsMap[AppLocalizations.locale.languageCode];
+  List<Announcement> announcements;
 
   bool isStudyExpanded = false;
   bool isSchoolNavigationExpanded = false;
@@ -294,7 +291,7 @@ class HomePageState extends State<HomePage> {
           }
         },
       ),
-      announcements: newsList,
+      announcements: announcements,
       onTabTapped: onTabTapped,
       bottomNavigationBarItems: [
         BottomNavigationBarItem(
@@ -336,36 +333,20 @@ class HomePageState extends State<HomePage> {
   }
 
   _getAllAnnouncement() async {
-    GitHubHelper.instance.getAnnouncement(
-      gitHubUsername: 'abc873693',
-      hashCode: '6da4a9ac08361f3a70b302ca4ce11039',
-      tag: 'nsysu',
+    AnnouncementHelper.instance.getAnnouncements(
+      tags: ['nsysu'],
       callback: GeneralCallback(
-        onError: (GeneralResponse e) {
-          setState(() {
-            state = HomeState.error;
-          });
-        },
-        onFailure: (DioError e) {
-          setState(() {
-            state = HomeState.error;
-          });
-          ApUtils.handleDioError(context, e);
-        },
-        onSuccess: (Map<String, List<Announcement>> data) {
-          newsMap = data;
-          setState(() {
-            if (newsList == null || newsList.length == 0)
-              state = HomeState.empty;
-            else {
-              newsMap.forEach((_, data) {
-                data.sort((a, b) {
-                  return b.weight.compareTo(a.weight);
-                });
-              });
-              state = HomeState.finish;
-            }
-          });
+        onFailure: (_) => setState(() => state = HomeState.error),
+        onError: (_) => setState(() => state = HomeState.error),
+        onSuccess: (List<Announcement> data) {
+          announcements = data;
+          if (mounted)
+            setState(() {
+              if (announcements == null || announcements.length == 0)
+                state = HomeState.empty;
+              else
+                state = HomeState.finish;
+            });
         },
       ),
     );
