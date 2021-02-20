@@ -299,15 +299,15 @@ class HomePageState extends State<HomePage> {
       bottomNavigationBarItems: [
         BottomNavigationBarItem(
           icon: Icon(ApIcon.accessibilityNew),
-          title: Text(ap.admissionGuide),
+          label: ap.admissionGuide,
         ),
         BottomNavigationBarItem(
           icon: Icon(ApIcon.classIcon),
-          title: Text(ap.course),
+          label: ap.course,
         ),
         BottomNavigationBarItem(
           icon: Icon(ApIcon.assignment),
-          title: Text(ap.score),
+          label: ap.score,
         ),
       ],
     );
