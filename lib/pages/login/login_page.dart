@@ -1,6 +1,5 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/general_response.dart';
-import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/login_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
@@ -48,156 +47,62 @@ class LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  _editTextStyle() => TextStyle(
-      color: Colors.white, fontSize: 18.0, decorationColor: Colors.white);
-
   @override
   Widget build(BuildContext context) {
     ap = ApLocalizations.of(context);
-    return OrientationBuilder(
-      builder: (_, orientation) {
-        return Scaffold(
-          backgroundColor: ApTheme.of(context).blue,
-          resizeToAvoidBottomInset: orientation == Orientation.portrait,
-          body: Container(
-            alignment: Alignment(0, 0),
-            padding: EdgeInsets.symmetric(horizontal: 30.0),
-            child: orientation == Orientation.portrait
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    mainAxisSize: MainAxisSize.min,
-                    children: _renderContent(orientation),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: _renderContent(orientation),
-                  ),
-          ),
-        );
-      },
-    );
-  }
-
-  _renderContent(Orientation orientation) {
-    List<Widget> list = orientation == Orientation.portrait
-        ? <Widget>[
-            Center(
-              child: Text(
-                'N',
-                style: TextStyle(
-                  fontSize: 120,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            SizedBox(height: orientation == Orientation.portrait ? 30.0 : 0.0),
-          ]
-        : <Widget>[
-            Expanded(
-              child: Text(
-                'N',
-                style: TextStyle(
-                  fontSize: 120,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            SizedBox(height: orientation == Orientation.portrait ? 30.0 : 0.0),
-          ];
-    List<Widget> listB = <Widget>[
-      ApTextField(
-        controller: _username,
-        textInputAction: TextInputAction.next,
-        focusNode: usernameFocusNode,
-        onSubmitted: (text) {
-          usernameFocusNode.unfocus();
-          FocusScope.of(context).requestFocus(passwordFocusNode);
-        },
-        labelText: ap.studentId,
-      ),
-      ApTextField(
-        obscureText: true,
-        textInputAction: TextInputAction.send,
-        controller: _password,
-        focusNode: passwordFocusNode,
-        onSubmitted: (text) {
-          passwordFocusNode.unfocus();
-          _login();
-        },
-        labelText: ap.password,
-      ),
-      SizedBox(height: 8.0),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          GestureDetector(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Theme(
-                  data: ThemeData(
-                    unselectedWidgetColor: Colors.white,
-                  ),
-                  child: Checkbox(
-                    activeColor: Colors.white,
-                    checkColor: ApTheme.of(context).blue,
-                    value: isAutoLogin,
-                    onChanged: _onAutoLoginChanged,
-                  ),
-                ),
-                Text(ap.autoLogin, style: TextStyle(color: Colors.white))
-              ],
-            ),
-            onTap: () => _onAutoLoginChanged(!isAutoLogin),
-          ),
-          GestureDetector(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Theme(
-                  data: ThemeData(
-                    unselectedWidgetColor: Colors.white,
-                  ),
-                  child: Checkbox(
-                    activeColor: Colors.white,
-                    checkColor: ApTheme.of(context).blue,
-                    value: isRememberPassword,
-                    onChanged: _onRememberPasswordChanged,
-                  ),
-                ),
-                Text(ap.rememberPassword, style: TextStyle(color: Colors.white))
-              ],
-            ),
-            onTap: () => _onRememberPasswordChanged(!isRememberPassword),
-          ),
-        ],
-      ),
-      SizedBox(height: 8.0),
-      Container(
-        width: double.infinity,
-        child: RaisedButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(30.0),
-            ),
-          ),
-          padding: EdgeInsets.all(14.0),
-          onPressed: () {
-            FirebaseAnalyticsUtils.instance.logAction('login', 'click');
-            SelcrsHelper.error = 0;
+    return LoginScaffold(
+      logoMode: LogoMode.text,
+      logoSource: 'N',
+      forms: [
+        ApTextField(
+          controller: _username,
+          textInputAction: TextInputAction.next,
+          focusNode: usernameFocusNode,
+          onSubmitted: (text) {
+            usernameFocusNode.unfocus();
+            FocusScope.of(context).requestFocus(passwordFocusNode);
+          },
+          labelText: ap.studentId,
+          autofillHints: [AutofillHints.username],
+        ),
+        ApTextField(
+          obscureText: true,
+          textInputAction: TextInputAction.send,
+          controller: _password,
+          focusNode: passwordFocusNode,
+          onSubmitted: (text) {
+            passwordFocusNode.unfocus();
             _login();
           },
-          color: Colors.white,
-          child: Text(
-            ap.login,
-            style: TextStyle(color: ApTheme.of(context).blue, fontSize: 18.0),
-          ),
+          labelText: ap.password,
+          autofillHints: [AutofillHints.password],
         ),
-      ),
-      Center(
-        child: FlatButton(
+        SizedBox(height: 8.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextCheckBox(
+              text: ap.autoLogin,
+              value: isAutoLogin,
+              onChanged: _onAutoLoginChanged,
+            ),
+            TextCheckBox(
+              text: ap.rememberPassword,
+              value: isRememberPassword,
+              onChanged: _onRememberPasswordChanged,
+            ),
+          ],
+        ),
+        SizedBox(height: 8.0),
+        ApButton(
+          text: ap.login,
+          onPressed: () {
+            SelcrsHelper.error = 0;
+            _login();
+            FirebaseAnalyticsUtils.instance.logAction('login', 'click');
+          },
+        ),
+        ApFlatButton(
           onPressed: () async {
             var username = await Navigator.push(
               context,
@@ -215,21 +120,10 @@ class LoginPageState extends State<LoginPage> {
               );
             }
           },
-          child: Text(
-            ap.searchUsername,
-            style: TextStyle(color: Colors.white, fontSize: 16.0),
-          ),
+          text: ap.searchUsername,
         ),
-      ),
-    ];
-    if (orientation == Orientation.portrait) {
-      list.addAll(listB);
-    } else {
-      list.add(Expanded(
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, children: listB)));
-    }
-    return list;
+      ],
+    );
   }
 
   _onRememberPasswordChanged(bool value) async {
