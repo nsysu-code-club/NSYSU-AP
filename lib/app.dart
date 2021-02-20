@@ -113,11 +113,21 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ),
     );
   }
+  void update() {
+    setState(() {});
+  }
 
-  void update(ThemeMode mode) {
+  void loadTheme(ThemeMode mode) {
     setState(() {
       themeMode = mode;
     });
-    FirebaseAnalyticsUtils.instance.logThemeEvent(themeMode);
+  }
+
+  void loadLocale(Locale locale) {
+    this.locale = locale;
+    setState(() {
+      AppLocalizationsDelegate().load(locale);
+      ApLocalizations.load(locale);
+    });
   }
 }
