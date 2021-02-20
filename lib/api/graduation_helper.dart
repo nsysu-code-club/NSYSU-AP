@@ -220,6 +220,5 @@ class GraduationHelper {
       callback?.onError(GeneralResponse.unknownError());
       throw e;
     }
-    return null;
   }
 }

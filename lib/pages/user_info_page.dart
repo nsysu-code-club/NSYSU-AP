@@ -7,7 +7,6 @@ import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:nsysu_ap/utils/app_localizations.dart';
 
 class UserInfoPage extends StatefulWidget {
   final UserInfo userInfo;
@@ -25,7 +24,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
   @override
   void initState() {
-    FirebaseAnalyticsUtils.instance.setCurrentScreen("UserInfoPage", "user_info_page.dart");
+    FirebaseAnalyticsUtils.instance
+        .setCurrentScreen("UserInfoPage", "user_info_page.dart");
     userInfo = widget.userInfo;
     super.initState();
   }

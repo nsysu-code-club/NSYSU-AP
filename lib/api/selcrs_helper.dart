@@ -175,7 +175,7 @@ class SelcrsHelper {
       }
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
-        String text = big5.decode(e.response.data);
+        String _ = big5.decode(e.response.data);
 //        debugPrint('text =  $text');
         this.username = username;
         this.password = password;

@@ -30,19 +30,19 @@ class GraduationReportData {
     otherEducationsCourseCredit = json['otherEducationsCourseCredit'];
     totalDescription = json['totalDescription'];
     if (json['missingRequiredCourse'] != null) {
-      missingRequiredCourse = new List<MissingRequiredCourse>();
+      missingRequiredCourse = [];
       json['missingRequiredCourse'].forEach((v) {
         missingRequiredCourse.add(new MissingRequiredCourse.fromJson(v));
       });
     }
     if (json['generalEducationCourse'] != null) {
-      generalEducationCourse = new List<GeneralEducationCourse>();
+      generalEducationCourse = [];
       json['generalEducationCourse'].forEach((v) {
         generalEducationCourse.add(new GeneralEducationCourse.fromJson(v));
       });
     }
     if (json['otherEducationsCourse'] != null) {
-      otherEducationsCourse = new List<OtherEducationsCourse>();
+      otherEducationsCourse = [];
       json['otherEducationsCourse'].forEach((v) {
         otherEducationsCourse.add(new OtherEducationsCourse.fromJson(v));
       });
@@ -106,7 +106,7 @@ class GeneralEducationCourse {
   GeneralEducationCourse.fromJson(Map<String, dynamic> json) {
     type = json['type'];
     if (json['generalEducationItem'] != null) {
-      generalEducationItem = new List<GeneralEducationItem>();
+      generalEducationItem = [];
       json['generalEducationItem'].forEach((v) {
         generalEducationItem.add(new GeneralEducationItem.fromJson(v));
       });

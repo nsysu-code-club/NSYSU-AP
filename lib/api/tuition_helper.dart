@@ -60,7 +60,7 @@ class TuitionHelper {
           'passwd': password,
         },
       );
-      String text = big5.decode(response.data);
+      String _ = big5.decode(response.data);
       // debugPrint('Request =  ${response.request.data}');
       // debugPrint('Response =  $text');
       //    debugPrint('response.statusCode = ${response.statusCode}');
