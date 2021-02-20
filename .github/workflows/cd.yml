@@ -1,4 +1,3 @@
-# cd.yml
 name: Store CD
 
 on:
@@ -9,6 +8,7 @@ on:
 jobs:
   # CD
   deploy_android:
+    name: Android PlayStore
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,3 +41,29 @@ jobs:
         with:
           lane: 'beta'
           subdirectory: 'android'
+
+  deploy_windows:
+    name: Windows App
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run Flutter tasks
+        uses: subosito/flutter-action@v1
+        with:
+          channel: 'dev'
+      - name: Upgrades flutter
+        run: flutter upgrade
+      - name: Enable windows
+        run: flutter config --enable-windows-desktop
+      - run: flutter doctor -v
+      - run: flutter pub get
+      - name: Build windows
+        run: flutter build windows --release
+      - name: 'Zip files'
+        run: powershell Compress-Archive build\windows\runner\Release\ windows.zip
+      - name: upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-artifact
+          path: windows.zip
