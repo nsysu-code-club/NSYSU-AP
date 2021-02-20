@@ -79,6 +79,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     List<Widget> list = orientation == Orientation.portrait
         ? <Widget>[
             Center(
+              child: Center(
                 child: Text(
                   'N',
                   style: TextStyle(
@@ -87,10 +88,12 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                   ),
                 ),
               ),
+            ),
             SizedBox(height: orientation == Orientation.portrait ? 30.0 : 0.0),
           ]
         : <Widget>[
             Expanded(
+              child: Center(
                 child: Text(
                   'N',
                   style: TextStyle(
@@ -99,6 +102,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                   ),
                 ),
               ),
+            ),
             SizedBox(height: orientation == Orientation.portrait ? 30.0 : 0.0),
           ];
     List<Widget> listB = <Widget>[
