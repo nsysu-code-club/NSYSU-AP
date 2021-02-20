@@ -66,5 +66,7 @@
 	<false/>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Feature calendar would be add course to calendar app</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Feature course table export</string>
 </dict>
 </plist>
