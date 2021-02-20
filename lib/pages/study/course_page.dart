@@ -3,11 +3,9 @@ import 'package:ap_common/config/ap_constants.dart';
 import 'package:ap_common/models/course_notify_data.dart';
 import 'package:ap_common/models/semester_data.dart';
 import 'package:ap_common/models/time_code.dart';
-import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/course_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/preferences.dart';
-import 'package:ap_common/widgets/dialog_option.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +35,6 @@ class CoursePageState extends State<CoursePage> {
   String customHint;
 
   bool isOffline = false;
-  bool isShowSearchButton = false;
 
   String defaultSemesterCode = '';
 
@@ -56,10 +53,6 @@ class CoursePageState extends State<CoursePage> {
       newTag: courseNotifyCacheKey,
     );
     future = _getSemester();
-    isShowSearchButton = Preferences.getBool(
-      Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
-      true,
-    );
   }
 
   @override
@@ -83,51 +76,10 @@ class CoursePageState extends State<CoursePage> {
         },
         onRefresh: _getCourseTables,
         customHint: isOffline ? ap.offlineCourse : null,
-        isShowSearchButton: isShowSearchButton,
         enableNotifyControl: semesterData != null &&
             semesterData?.currentSemester?.code == defaultSemesterCode,
         courseNotifySaveKey: courseNotifyCacheKey,
-        actions: <Widget>[
-          PopupMenuButton<int>(
-            onSelected: (int value) {
-              switch (value) {
-                case 1:
-                  setState(() {
-                    isShowSearchButton = !isShowSearchButton;
-                  });
-                  Preferences.setBool(
-                    Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
-                    isShowSearchButton,
-                  );
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                child: Center(
-                  child: Text(
-                    ap.settings,
-                    style: TextStyle(color: ApTheme.of(context).greyText),
-                  ),
-                ),
-                value: -1,
-                enabled: false,
-              ),
-              PopupMenuDivider(
-                height: 10,
-              ),
-              PopupMenuItem(
-                child: DialogOption(
-                  text: ApLocalizations.of(context).showSearchButton,
-                  check: isShowSearchButton,
-                  onPressed: null,
-                ),
-                value: 1,
-                enabled: true,
-              )
-            ],
-          ),
-        ],
+        actions: <Widget>[],
       ),
     );
   }

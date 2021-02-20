@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ap_common/config/ap_constants.dart';
 import 'package:ap_common/models/course_data.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
@@ -23,7 +24,7 @@ void main() async {
   );
   final currentVersion =
       Preferences.getString(Constants.PREF_CURRENT_VERSION, '0');
-  if (int.parse(currentVersion) < 700) CourseData.migrateFrom0_10();
+  if (int.parse(currentVersion) < 700) _migrate700();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   if (FirebaseUtils.isSupportCore) await Firebase.initializeApp();
   if (!kDebugMode && FirebaseUtils.isSupportCrashlytics) {
@@ -35,4 +36,15 @@ void main() async {
     });
   } else
     runApp(MyApp());
+}
+
+void _migrate700() {
+  CourseData.migrateFrom0_10();
+  Preferences.setBool(
+    ApConstants.SHOW_COURSE_SEARCH_BUTTON,
+    Preferences.getBool(
+      Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
+      true,
+    ),
+  );
 }
