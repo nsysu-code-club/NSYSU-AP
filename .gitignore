@@ -49,5 +49,6 @@ GoogleService-Info.plist
 google-services.json
 key.jks
 service_account_key.json
+android/android_keys.zip
 
 .vscode/
