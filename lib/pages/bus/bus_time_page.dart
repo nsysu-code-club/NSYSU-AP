@@ -5,6 +5,7 @@ import 'package:ap_common/l10n/l10n.dart';
 import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/widgets/hint_content.dart';
+import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/bus_helper.dart';
 import 'package:nsysu_ap/models/bus_info.dart';
@@ -45,6 +46,10 @@ class _BusTimePageState extends State<BusTimePage>
       (timer) {
         _getData();
       },
+    );
+    FirebaseAnalyticsUtils.instance?.setCurrentScreen(
+      "BusTimePage",
+      "bus_time_page.dart",
     );
     super.initState();
   }
