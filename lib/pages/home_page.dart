@@ -324,7 +324,11 @@ class HomePageState extends State<HomePage> {
     setState(() {
       switch (index) {
         case 0:
-          ApUtils.pushCupertinoStyle(context, BusListPage());
+          ApUtils.pushCupertinoStyle(
+              context,
+              BusListPage(
+                locale: AppLocalizations.locale,
+              ));
           break;
         case 1:
           if (isLogin)
