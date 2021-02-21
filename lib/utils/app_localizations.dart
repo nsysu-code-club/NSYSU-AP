@@ -84,6 +84,8 @@ class AppLocalizations {
 
   String get pleaseConfirmForm => _vocabularies['pleaseConfirmForm'];
 
+  String get bus => _vocabularies['bus'];
+
   static Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'app_name': 'NSYSU AP',
@@ -119,6 +121,7 @@ class AppLocalizations {
       'tuitionAndFeesEmpty': 'Oops！No tuition and fees data～\uD83D\uDE0B',
       'hasPreScoreHint': 'Yellow Text not final score, proved by instructor.',
       'pleaseConfirmForm': 'Please fill out confirm form before login.',
+      'bus': 'Bus System',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -152,6 +155,7 @@ class AppLocalizations {
       'tuitionAndFeesEmpty': 'Oops！查無任何學雜費資料哦～\uD83D\uDE0B',
       'hasPreScoreHint': '黃字為授課老師開放成績查詢 並非最終成績',
       'pleaseConfirmForm': '請先填寫確認表單再進行登入',
+      'bus': '校園公車',
     },
   };
 }

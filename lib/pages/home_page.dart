@@ -25,6 +25,7 @@ import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:ap_common/models/announcement_data.dart';
 import 'package:ap_common/models/user_info.dart';
+import 'package:nsysu_ap/pages/bus/bus_list_page.dart';
 import 'package:nsysu_ap/pages/school_map_page.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
@@ -170,6 +171,15 @@ class HomePageState extends State<HomePage> {
               ),
             ],
           ),
+          DrawerItem(
+            icon: ApIcon.directionsBus,
+            title: app.bus,
+            onTap: () => _openPage(
+              BusListPage(
+                locale: AppLocalizations.locale,
+              ),
+            ),
+          ),
           ExpansionTile(
             initiallyExpanded: isSchoolNavigationExpanded,
             onExpansionChanged: (bool) {
@@ -295,8 +305,8 @@ class HomePageState extends State<HomePage> {
       onTabTapped: onTabTapped,
       bottomNavigationBarItems: [
         BottomNavigationBarItem(
-          icon: Icon(ApIcon.accessibilityNew),
-          label: ap.admissionGuide,
+          icon: Icon(ApIcon.directionsBus),
+          label: app.bus,
         ),
         BottomNavigationBarItem(
           icon: Icon(ApIcon.classIcon),
@@ -314,7 +324,7 @@ class HomePageState extends State<HomePage> {
     setState(() {
       switch (index) {
         case 0:
-          ApUtils.pushCupertinoStyle(context, AdmissionGuidePage());
+          ApUtils.pushCupertinoStyle(context, BusListPage());
           break;
         case 1:
           if (isLogin)
