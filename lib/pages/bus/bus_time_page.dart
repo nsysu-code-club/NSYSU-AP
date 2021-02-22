@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/bus_helper.dart';
 import 'package:nsysu_ap/models/bus_info.dart';
 import 'package:nsysu_ap/models/bus_time.dart';
+import 'package:nsysu_ap/utils/app_localizations.dart';
 
 enum _State { loading, finish, error }
 
@@ -160,8 +161,14 @@ class BusTimeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final postfix = int.tryParse(busTime.arrivedTime ?? '') == null
+        ? ''
+        : ' ${AppLocalizations.of(context).minute}';
     return ListTile(
       leading: Container(
+        constraints: BoxConstraints(
+          minWidth: 65.0,
+        ),
         decoration: BoxDecoration(
           border: Border.all(
             width: 1.0,
@@ -175,12 +182,13 @@ class BusTimeItem extends StatelessWidget {
         ),
         padding: EdgeInsets.all(8.0),
         child: Text(
-          busTime.arrivedTime,
+          '${busTime.arrivedTime ?? ''}$postfix',
           style: TextStyle(
             color: busTime.arrivedTime == '進站中'
                 ? Colors.red
                 : ApTheme.of(context).greyText,
           ),
+          textAlign: TextAlign.center,
         ),
       ),
       title: Text(busTime.name ?? ''),

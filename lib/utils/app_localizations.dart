@@ -10,6 +10,8 @@ class AppLocalizations {
 
   static Locale locale;
 
+  String get minute => _vocabularies['minute'];
+
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
@@ -122,6 +124,7 @@ class AppLocalizations {
       'hasPreScoreHint': 'Yellow Text not final score, proved by instructor.',
       'pleaseConfirmForm': 'Please fill out confirm form before login.',
       'bus': 'Bus System',
+      'minute': 'Min',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -156,6 +159,7 @@ class AppLocalizations {
       'hasPreScoreHint': '黃字為授課老師開放成績查詢 並非最終成績',
       'pleaseConfirmForm': '請先填寫確認表單再進行登入',
       'bus': '校園公車',
+      'minute': '分',
     },
   };
 }
