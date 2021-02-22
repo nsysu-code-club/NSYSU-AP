@@ -16,7 +16,7 @@ dependencies:
   #   path: ../../GitHub-NKUST-ITC/ap_common
   ap_common_firebase: 0.6.0-dev.2
   #   path: ../ap_common_firebase
-  ap_common_plugin: 0.1.5
+  ap_common_plugin: 0.2.0
 #     path: ../ap_common_plugin
 
   #official plugin
