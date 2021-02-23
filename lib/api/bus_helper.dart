@@ -50,7 +50,8 @@ class BusHelper {
         languageCode = locale.languageCode;
       else
         languageCode = 'en';
-      final path = 'https://abc873693.github.io/nsysu-bus/bus_info_data_$languageCode.json';
+      final path =
+          'https://abc873693.github.io/nsysu-bus/bus_info_data_$languageCode.json';
       var response = await dio.get(
         path,
         options: Options(
@@ -93,6 +94,7 @@ class BusHelper {
           {
             "RID": busInfo.routeId,
             "C": languageCode,
+            "CID": busInfo.carId,
           },
         ),
       );
