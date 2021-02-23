@@ -172,6 +172,7 @@ class BusTimeItem extends StatelessWidget {
     final postfix = int.tryParse(busTime.arrivedTime ?? '') == null
         ? ''
         : ' ${AppLocalizations.of(context).minute}';
+    final isComing = busTime.arrivedTime == '進站中' || busTime.arrivedTime == '將到站';
     return ListTile(
       leading: Container(
         constraints: BoxConstraints(
@@ -180,9 +181,7 @@ class BusTimeItem extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(
             width: 1.0,
-            color: busTime.arrivedTime == '進站中'
-                ? Colors.red
-                : ApTheme.of(context).greyText,
+            color: isComing ? Colors.red : ApTheme.of(context).greyText,
           ),
           borderRadius: BorderRadius.all(
             Radius.circular(16.0),
@@ -192,9 +191,7 @@ class BusTimeItem extends StatelessWidget {
         child: Text(
           '${busTime.arrivedTime ?? ''}$postfix',
           style: TextStyle(
-            color: busTime.arrivedTime == '進站中'
-                ? Colors.red
-                : ApTheme.of(context).greyText,
+            color: isComing ? Colors.red : ApTheme.of(context).greyText,
           ),
           textAlign: TextAlign.center,
         ),
