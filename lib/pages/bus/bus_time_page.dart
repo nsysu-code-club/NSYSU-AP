@@ -138,10 +138,10 @@ class _BusTimePageState extends State<BusTimePage>
       busInfo: widget.busInfo,
       callback: GeneralCallback(
         onFailure: (_) {
-          setState(() => state = _State.error);
+          if (mounted) setState(() => state = _State.error);
         },
         onError: (_) {
-          setState(() => state = _State.error);
+          if (mounted) setState(() => state = _State.error);
         },
         onSuccess: (data) {
           startList.clear();
@@ -152,7 +152,7 @@ class _BusTimePageState extends State<BusTimePage>
             else
               startList.add(element);
           });
-          setState(() => state = _State.finish);
+          if (mounted) setState(() => state = _State.finish);
         },
       ),
     );
@@ -172,7 +172,8 @@ class BusTimeItem extends StatelessWidget {
     final postfix = int.tryParse(busTime.arrivedTime ?? '') == null
         ? ''
         : ' ${AppLocalizations.of(context).minute}';
-    final isComing = busTime.arrivedTime == '進站中' || busTime.arrivedTime == '將到站';
+    final isComing =
+        busTime.arrivedTime == '進站中' || busTime.arrivedTime == '將到站';
     return ListTile(
       leading: Container(
         constraints: BoxConstraints(
