@@ -12,6 +12,8 @@ class AppLocalizations {
 
   String get minute => _vocabularies['minute'];
 
+  String get busEmpty => _vocabularies['busEmpty'];
+
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
@@ -125,6 +127,7 @@ class AppLocalizations {
       'pleaseConfirmForm': 'Please fill out confirm form before login.',
       'bus': 'Bus System',
       'minute': 'Min',
+      "busEmpty": "Oops! No bus currently~\n Please choose another bus 😋",
     },
     'zh': {
       'app_name': '中山校務通',
@@ -160,6 +163,7 @@ class AppLocalizations {
       'pleaseConfirmForm': '請先填寫確認表單再進行登入',
       'bus': '校園公車',
       'minute': '分',
+      'busEmpty': 'Oops！目前校車沒上班喔～\n請選擇其他班次 😋',
     },
   };
 }

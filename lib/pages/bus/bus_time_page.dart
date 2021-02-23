@@ -102,25 +102,33 @@ class _BusTimePageState extends State<BusTimePage>
           ),
         );
       default:
-        return TabBarView(
-          controller: _tabController,
-          children: <Widget>[
-            ListView.separated(
-              itemCount: startList.length,
-              separatorBuilder: (_, __) => Divider(height: 1.0),
-              itemBuilder: (_, index) => BusTimeItem(
-                busTime: startList[index],
-              ),
-            ),
-            ListView.separated(
-              itemCount: endList.length,
-              separatorBuilder: (_, __) => Divider(height: 1.0),
-              itemBuilder: (_, index) => BusTimeItem(
-                busTime: endList[index],
-              ),
-            )
-          ],
-        );
+        return startList.length == 0 && startList.length == 0
+            ? InkWell(
+                onTap: () => _getData(),
+                child: HintContent(
+                  icon: ApIcon.info,
+                  content: AppLocalizations.of(context).busEmpty,
+                ),
+              )
+            : TabBarView(
+                controller: _tabController,
+                children: <Widget>[
+                  ListView.separated(
+                    itemCount: startList.length,
+                    separatorBuilder: (_, __) => Divider(height: 1.0),
+                    itemBuilder: (_, index) => BusTimeItem(
+                      busTime: startList[index],
+                    ),
+                  ),
+                  ListView.separated(
+                    itemCount: endList.length,
+                    separatorBuilder: (_, __) => Divider(height: 1.0),
+                    itemBuilder: (_, index) => BusTimeItem(
+                      busTime: endList[index],
+                    ),
+                  )
+                ],
+              );
     }
   }
 
