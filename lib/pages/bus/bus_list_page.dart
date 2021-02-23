@@ -81,19 +81,17 @@ class _BusListPageState extends State<BusListPage> {
                   color: bus.carId == null ? Colors.red : Colors.green,
                 ),
               ),
-              onTap: bus.carId == null
-                  ? null
-                  : () {
-                      Navigator.push(
-                        context,
-                        CupertinoPageRoute(
-                          builder: (_) => BusTimePage(
-                            busInfo: bus,
-                            locale: widget.locale,
-                          ),
-                        ),
-                      );
-                    },
+              onTap: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (_) => BusTimePage(
+                      busInfo: bus,
+                      locale: widget.locale,
+                    ),
+                  ),
+                );
+              },
             );
           },
         );
