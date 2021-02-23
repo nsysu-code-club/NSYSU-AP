@@ -76,7 +76,7 @@ class _BusListPageState extends State<BusListPage> {
             return ListTile(
               title: Text(bus.name),
               trailing: Text(
-                bus.carId?.replaceAll(',', '') ?? bus.stopName,
+                bus.carId?.split(',')?.first ?? bus.carId ?? bus.stopName,
                 style: TextStyle(
                   color: bus.carId == null ? Colors.red : Colors.green,
                 ),
