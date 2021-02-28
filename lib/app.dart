@@ -100,7 +100,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           },
           localizationsDelegates: [
             const AppLocalizationsDelegate(),
-            const ApLocalizationsDelegate(),
+            ApLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
