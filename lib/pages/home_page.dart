@@ -36,7 +36,6 @@ import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/yes_no_dialog.dart';
 import 'package:nsysu_ap/utils/utils.dart';
-import 'package:package_info/package_info.dart';
 
 import 'admission_guide_page.dart';
 import 'info/shcool_info_page.dart';

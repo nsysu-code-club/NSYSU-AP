@@ -8,7 +8,6 @@ import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
-import 'package:package_info/package_info.dart';
 
 class SettingPage extends StatefulWidget {
   static const String routerName = "/setting";
