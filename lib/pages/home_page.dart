@@ -36,7 +36,6 @@ import 'package:nsysu_ap/pages/user_info_page.dart';
 import 'package:nsysu_ap/resources/image_assets.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:ap_common/widgets/yes_no_dialog.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
 import 'guide/admission_guide_page.dart';
@@ -400,40 +399,6 @@ class HomePageState extends State<HomePage> {
           if (userInfo != null) {
             FirebaseAnalyticsUtils.instance.logUserInfo(userInfo);
           }
-        },
-      ),
-    );
-  }
-
-  void _showInformationDialog() {
-    FirebaseAnalyticsUtils.instance.logAction('news_rule', 'click');
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => YesNoDialog(
-        title: ap.newsRuleTitle,
-        contentWidget: RichText(
-          text: TextSpan(
-            style: TextStyle(color: ApTheme.of(context).grey, fontSize: 16.0),
-            children: [
-              TextSpan(
-                  text: '${ap.newsRuleDescription1}',
-                  style: TextStyle(fontWeight: FontWeight.normal)),
-              TextSpan(
-                  text: '${ap.newsRuleDescription2}',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(
-                  text: '${ap.newsRuleDescription3}',
-                  style: TextStyle(fontWeight: FontWeight.normal)),
-            ],
-          ),
-        ),
-        leftActionText: ap.cancel,
-        rightActionText: ap.contactFansPage,
-        leftActionFunction: () {},
-        rightActionFunction: () {
-          ApUtils.launchFbFansPage(context, Constants.FANS_PAGE_ID);
-          FirebaseAnalyticsUtils.instance
-              .logAction('contact_fans_page', 'click');
         },
       ),
     );
