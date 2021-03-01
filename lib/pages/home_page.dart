@@ -1,8 +1,10 @@
 import 'package:ap_common/api/announcement_helper.dart';
+import 'package:ap_common/api/imgur_helper.dart';
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/config/analytics_constants.dart';
 import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/pages/about_us_page.dart';
+import 'package:ap_common/pages/announcement/home_page.dart';
 import 'package:ap_common/pages/announcement_content_page.dart';
 import 'package:ap_common/pages/open_source_page.dart';
 import 'package:ap_common/resources/ap_icon.dart';
@@ -113,8 +115,33 @@ class HomePageState extends State<HomePage> {
       content: content,
       actions: <Widget>[
         IconButton(
-          icon: Icon(ApIcon.info),
-          onPressed: _showInformationDialog,
+          icon: Icon(Icons.fiber_new_rounded),
+          tooltip: ap.announcementReviewSystem,
+          onPressed: () async {
+            ImgurHelper.clientId = 'bf8e32144d00b04';
+            AnnouncementHelper.tag = 'ap';
+            AnnouncementHelper.organization = 'nsysu';
+            ApUtils.pushCupertinoStyle(
+              context,
+              AnnouncementHomePage(
+                organizationDomain: '@g-mail.nsysu.edu.tw',
+              ),
+            );
+            if (FirebaseUtils.isSupportCloudMessage) {
+              try {
+                final messaging = FirebaseMessaging.instance;
+                NotificationSettings settings =
+                    await messaging.getNotificationSettings();
+                if (settings.authorizationStatus ==
+                        AuthorizationStatus.authorized ||
+                    settings.authorizationStatus ==
+                        AuthorizationStatus.provisional) {
+                  String token = await messaging.getToken();
+                  AnnouncementHelper.fcmToken = token;
+                }
+              } catch (_) {}
+            }
+          },
         ),
       ],
       onImageTapped: (Announcement announcement) {
