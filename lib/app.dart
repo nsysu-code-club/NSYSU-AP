@@ -1,3 +1,4 @@
+import 'package:ap_common/api/announcement_helper.dart';
 import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
@@ -83,20 +84,21 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ],
           localeResolutionCallback:
               (Locale locale, Iterable<Locale> supportedLocales) {
-//            print('Load ${locale.languageCode}');
             String languageCode = Preferences.getString(
               Constants.PREF_LANGUAGE_CODE,
               ApSupportLanguageConstants.SYSTEM,
             );
             if (languageCode == ApSupportLanguageConstants.SYSTEM)
-              return this.locale = ApLocalizations.delegate.isSupported(locale)
+              this.locale = ApLocalizations.delegate.isSupported(locale)
                   ? locale
                   : Locale('en');
             else
-              return this.locale = Locale(
+              this.locale = Locale(
                 languageCode,
                 languageCode == ApSupportLanguageConstants.ZH ? 'TW' : null,
               );
+            AnnouncementHelper.instance.setLocale(this.locale);
+            return this.locale;
           },
           localizationsDelegates: [
             const AppLocalizationsDelegate(),
@@ -113,6 +115,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ),
     );
   }
+
   void update() {
     setState(() {});
   }
@@ -125,6 +128,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   void loadLocale(Locale locale) {
     this.locale = locale;
+    AnnouncementHelper.instance.setLocale(this.locale);
     setState(() {
       AppLocalizationsDelegate().load(locale);
       ApLocalizations.load(locale);
