@@ -68,5 +68,16 @@
 	<string>Feature calendar would be add course to calendar app</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Feature course table export</string>
+	<key>CFBundleURLTypes</key>
+    <array>
+    	<dict>
+    		<key>CFBundleTypeRole</key>
+    		<string>Editor</string>
+    		<key>CFBundleURLSchemes</key>
+    		<array>
+    			<string>com.googleusercontent.apps.183269888565-70pb0kkietf205lp5h45eicn50u0u641</string>
+    		</array>
+    	</dict>
+    </array>
 </dict>
 </plist>
