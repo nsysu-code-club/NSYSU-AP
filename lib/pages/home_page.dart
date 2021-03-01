@@ -194,7 +194,7 @@ class HomePageState extends State<HomePage> {
           ),
           DrawerItem(
             icon: ApIcon.directionsBus,
-            title: app.bus,
+            title: ap.bus,
             onTap: () => _openPage(
               BusListPage(
                 locale: AppLocalizations.locale,
@@ -327,7 +327,7 @@ class HomePageState extends State<HomePage> {
       bottomNavigationBarItems: [
         BottomNavigationBarItem(
           icon: Icon(ApIcon.directionsBus),
-          label: app.bus,
+          label: ap.bus,
         ),
         BottomNavigationBarItem(
           icon: Icon(ApIcon.classIcon),

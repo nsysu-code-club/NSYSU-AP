@@ -107,7 +107,7 @@ class _BusTimePageState extends State<BusTimePage>
                 onTap: () => _getData(),
                 child: HintContent(
                   icon: ApIcon.info,
-                  content: AppLocalizations.of(context).busEmpty,
+                  content: ApLocalizations.of(context).busEmpty,
                 ),
               )
             : TabBarView(

@@ -42,7 +42,7 @@ class _BusListPageState extends State<BusListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ap = AppLocalizations.of(context);
+    final ap = ApLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(ap.bus),
