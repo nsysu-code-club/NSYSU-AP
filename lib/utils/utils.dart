@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
 import 'package:big5/big5.dart';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/pages/comfirm_form_page.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -24,7 +29,7 @@ class Utils {
     return result;
   }
 
-  static void openConfirmForm(String username) async {
+  static void openConfirmForm(BuildContext context, String username) async {
     String confirmFormUrl = '';
     try {
       RemoteConfig remoteConfig = await RemoteConfig.instance;
@@ -42,6 +47,17 @@ class Utils {
       );
     }
     await Future.delayed(Duration(seconds: 1));
-    await launch(sprintf(confirmFormUrl, [username]));
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ConfirmFormPage(
+            confirmFormUrl: confirmFormUrl,
+            username: username,
+          ),
+        ),
+      );
+    else
+      await launch(sprintf(confirmFormUrl, [username]));
   }
 }

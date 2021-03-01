@@ -25,7 +25,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../utils/app_localizations.dart';
 
 class SelcrsHelper {
-  static const selcrsUrlFormat = 'https://selcrs.nsysu.edu.tw';
+  static const BASE_URL = 'https://selcrs.nsysu.edu.tw';
 
   static const courseTimeoutText = '請重新登錄';
   static const scoreTimeoutText = '請重新登錄';
@@ -42,7 +42,7 @@ class SelcrsHelper {
 
   bool get canReLogin => reLoginCount < 5;
 
-  static String get selcrsUrl => sprintf(selcrsUrlFormat, [index]);
+  static String get selcrsUrl => sprintf(BASE_URL, [index]);
 
   static int index = 1;
   static int error = 0;

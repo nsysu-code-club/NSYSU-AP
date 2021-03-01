@@ -472,7 +472,7 @@ class HomePageState extends State<HomePage> {
           else if (e.statusCode == 401) {
             ApUtils.showToast(
                 context, AppLocalizations.of(context).pleaseConfirmForm);
-            Utils.openConfirmForm(username);
+            Utils.openConfirmForm(context, username);
           } else
             _homeKey.currentState.showBasicHint(text: ap.unknownError);
         },
@@ -541,7 +541,7 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  _openPage(Widget page, {needLogin = false}) {
+  _openPage(Widget page, {needLogin = false, bool useCupertinoRoute = true}) {
     if (isMobile) Navigator.of(context).pop();
     if (needLogin && !isLogin)
       ApUtils.showToast(
@@ -550,7 +550,13 @@ class HomePageState extends State<HomePage> {
       );
     else {
       if (isMobile) {
-        ApUtils.pushCupertinoStyle(context, page);
+        if (useCupertinoRoute)
+          ApUtils.pushCupertinoStyle(context, page);
+        else
+          Navigator.push(
+            context,
+            CupertinoPageRoute(builder: (_) => page),
+          );
       } else
         setState(() => content = page);
     }
