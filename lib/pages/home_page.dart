@@ -120,6 +120,7 @@ class HomePageState extends State<HomePage> {
             ImgurHelper.clientId = 'bf8e32144d00b04';
             AnnouncementHelper.tag = 'ap';
             AnnouncementHelper.organization = 'nsysu';
+            AnnouncementHelper.appleBundleId = 'com.nsysu.ap';
             ApUtils.pushCupertinoStyle(
               context,
               AnnouncementHomePage(
