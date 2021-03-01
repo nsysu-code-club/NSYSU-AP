@@ -28,7 +28,7 @@ import 'package:nsysu_ap/config/constants.dart';
 import 'package:ap_common/models/announcement_data.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:nsysu_ap/pages/bus/bus_list_page.dart';
-import 'package:nsysu_ap/pages/school_map_page.dart';
+import 'package:nsysu_ap/pages/guide/school_map_page.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
@@ -39,7 +39,7 @@ import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:ap_common/widgets/yes_no_dialog.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
-import 'admission_guide_page.dart';
+import 'guide/admission_guide_page.dart';
 import 'info/shcool_info_page.dart';
 import 'study/course_page.dart';
 import 'graduation_report_page.dart';
