@@ -7,7 +7,7 @@ import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class AdmissionGuidePage extends StatefulWidget {
   @override
@@ -17,13 +17,12 @@ class AdmissionGuidePage extends StatefulWidget {
 class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
   ApLocalizations ap;
 
-  WebViewController webViewController;
+  InAppWebViewController webViewController;
 
   @override
   void initState() {
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen("AdmissionGuidePage", "admission_guide_page.dart");
-    if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     super.initState();
   }
 
@@ -52,10 +51,9 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
         ],
       ),
       body: !kIsWeb && (Platform.isAndroid || Platform.isIOS)
-          ? WebView(
+          ? InAppWebView(
               initialUrl: 'https://leslietsai1.wixsite.com/nsysufreshman',
-              javascriptMode: JavascriptMode.unrestricted,
-              onWebViewCreated: (WebViewController webViewController) {
+              onWebViewCreated: (InAppWebViewController webViewController) {
                 this.webViewController = webViewController;
                 //_controller.complete(webViewController);
               },
