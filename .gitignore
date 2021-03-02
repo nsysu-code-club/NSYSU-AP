@@ -45,6 +45,7 @@ app.*.map.json
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 
 GoogleService-Info.plist
+ios_keys.zip
 
 google-services.json
 key.jks
