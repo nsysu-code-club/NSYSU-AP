@@ -269,8 +269,9 @@
 				TargetAttributes = {
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
-						DevelopmentTeam = R7BC26UNC9;
+						DevelopmentTeam = 5SP52F6F2C;
 						LastSwiftMigration = 0910;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.Push = {
 								enabled = 1;
@@ -279,7 +280,7 @@
 					};
 					A4E3F60B2525B59600343570 = {
 						CreatedOnToolsVersion = 12.0;
-						DevelopmentTeam = R7BC26UNC9;
+						DevelopmentTeam = 5SP52F6F2C;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -631,9 +632,11 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = R7BC26UNC9;
+				DEVELOPMENT_TEAM = 5SP52F6F2C;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -648,6 +651,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.nsysu.ap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.nsysu.ap";
 				SWIFT_VERSION = 4.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -764,9 +768,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = R7BC26UNC9;
+				DEVELOPMENT_TEAM = 5SP52F6F2C;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -781,6 +787,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.nsysu.ap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.nsysu.ap";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
@@ -797,9 +804,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = R7BC26UNC9;
+				DEVELOPMENT_TEAM = 5SP52F6F2C;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -814,6 +823,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.nsysu.ap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.nsysu.ap";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
@@ -837,7 +847,7 @@
 				CODE_SIGN_ENTITLEMENTS = CourseAppWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 600;
-				DEVELOPMENT_TEAM = R7BC26UNC9;
+				DEVELOPMENT_TEAM = 5SP52F6F2C;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = CourseAppWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -871,7 +881,7 @@
 				CODE_SIGN_ENTITLEMENTS = CourseAppWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 600;
-				DEVELOPMENT_TEAM = R7BC26UNC9;
+				DEVELOPMENT_TEAM = 5SP52F6F2C;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = CourseAppWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -902,7 +912,7 @@
 				CODE_SIGN_ENTITLEMENTS = CourseAppWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 600;
-				DEVELOPMENT_TEAM = R7BC26UNC9;
+				DEVELOPMENT_TEAM = 5SP52F6F2C;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = CourseAppWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
