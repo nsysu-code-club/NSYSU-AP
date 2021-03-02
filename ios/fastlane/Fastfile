@@ -55,7 +55,7 @@ platform :ios do
 
     pilot(
       apple_id: "#{DEVELOPER_APP_ID}",
-      app_identifier: ["#{DEVELOPER_APP_IDENTIFIER}", "#{DEVELOPER_APP_IDENTIFIER}.CourseAppWidget"],
+      app_identifier: "#{DEVELOPER_APP_IDENTIFIER}",
       skip_waiting_for_build_processing: true,
       skip_submission: true,
       distribute_external: false,
