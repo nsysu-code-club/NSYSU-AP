@@ -1,4 +1,4 @@
-default_platform(:macos)
+default_platform(:mac)
 
 DEVELOPER_APP_ID = ENV["DEVELOPER_APP_ID"]
 DEVELOPER_APP_IDENTIFIER = ENV["DEVELOPER_APP_IDENTIFIER"]
@@ -26,7 +26,7 @@ def ensure_temp_keychain(name, password)
   create_temp_keychain(name, password)
 end
 
-platform :macos do
+platform :mac do
   lane :release do
     keychain_name = TEMP_KEYCHAIN_USER
     keychain_password = TEMP_KEYCHAIN_PASSWORD
