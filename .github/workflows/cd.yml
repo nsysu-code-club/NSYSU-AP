@@ -8,7 +8,7 @@ on:
 jobs:
   # CD
   deploy_android:
-    name: Android PlayStore
+    name: Android Play Store
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
