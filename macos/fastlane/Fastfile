@@ -27,7 +27,7 @@ def ensure_temp_keychain(name, password)
 end
 
 platform :macos do
-  lane :closed_beta do
+  lane :release do
     keychain_name = TEMP_KEYCHAIN_USER
     keychain_password = TEMP_KEYCHAIN_PASSWORD
     ensure_temp_keychain(keychain_name, keychain_password)
@@ -41,7 +41,7 @@ platform :macos do
       keychain_password: keychain_password 
     )
 
-    gym(
+    build_mac_app(
       configuration: "Release",
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
