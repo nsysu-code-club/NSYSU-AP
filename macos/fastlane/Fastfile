@@ -34,7 +34,7 @@ platform :macos do
 
     match(
       type: 'appstore',
-      app_identifier: ["#{DEVELOPER_APP_IDENTIFIER}", "#{DEVELOPER_APP_IDENTIFIER}.CourseAppWidget"],
+      app_identifier: ["#{DEVELOPER_APP_IDENTIFIER}"],
       git_basic_authorization: Base64.strict_encode64(ENV["GIT_AUTHORIZATION"]),
       readonly: true,
       keychain_name: keychain_name,
