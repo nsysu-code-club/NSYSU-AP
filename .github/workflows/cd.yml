@@ -1,88 +1,85 @@
 name: Store CD
 
-on:
-  push:
-    tags:
-      - "v*"
+on: push
 
 jobs:
   # CD
-  deploy_android:
-    name: Android Play Store
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Setup Java
-        uses: actions/setup-java@v1
-        with:
-          java-version: '1.8'
-      - name: Decrypt Android keys
-        run: sh ./.github/scripts/decrypt_android_keys.sh
-        env:
-          KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v1
-        with:
-          flutter-version: '1.26.x' # you can use 1.12
-          channel: 'beta'
-      - name: Install Flutter dependencies
-        run: flutter pub get
-      - run: flutter build appbundle --release
-      - name: Setup ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: '2.7.2'
-      - name: Bundle update
-        run: bundle update --bundler
-        working-directory: ./android
-      - name: Run Fastlane
-        uses: maierj/fastlane-action@v2.0.1
-        with:
-          lane: 'beta'
-          subdirectory: 'android'
-  deploy_ios:
-    name: iOS Deploy TestFlight
-    runs-on: macOS-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.ref }}
-      - name: Decrypt iOS keys
-        run: sh ./.github/scripts/decrypt_ios_keys.sh
-        env:
-          KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
-      - name: Run Flutter tasks
-        uses: subosito/flutter-action@v1
-        with:
-          flutter-version: '1.26.x' # you can use 1.12
-          channel: 'beta'
-      - run: flutter pub get
-      - run: flutter build ios --release --no-codesign
-      - uses: actions/setup-ruby@v1
-        with:
-          ruby-version: '2.7.2'
-      - name: Bundle update
-        run: bundle update --bundler
-        working-directory: ./ios
-      - name: Deploy iOS Beta to TestFlight via Fastlane
-        uses: maierj/fastlane-action@v2.0.1
-        with:
-          lane: 'closed_beta'
-          subdirectory: 'ios'
-        env:
-          APP_STORE_CONNECT_TEAM_ID: '${{ secrets.APP_STORE_CONNECT_TEAM_ID }}'
-          DEVELOPER_APP_ID: '${{ secrets.DEVELOPER_APP_ID }}'
-          DEVELOPER_APP_IDENTIFIER: '${{ secrets.DEVELOPER_APP_IDENTIFIER }}'
-          DEVELOPER_PORTAL_TEAM_ID: '${{ secrets.DEVELOPER_PORTAL_TEAM_ID }}'
-          FASTLANE_APPLE_ID: '${{ secrets.FASTLANE_APPLE_ID }}'
-          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: '${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}'
-          MATCH_PASSWORD: '${{ secrets.MATCH_PASSWORD }}'
-          GIT_AUTHORIZATION: '${{ secrets.GIT_AUTHORIZATION }}'
-          PROVISIONING_PROFILE_SPECIFIER: '${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}'
-          TEMP_KEYCHAIN_PASSWORD: '${{ secrets.TEMP_KEYCHAIN_PASSWORD }}'
-          TEMP_KEYCHAIN_USER: '${{ secrets.TEMP_KEYCHAIN_USER }}'
+#  deploy_android:
+#    name: Android Play Store
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#      - name: Setup Java
+#        uses: actions/setup-java@v1
+#        with:
+#          java-version: '1.8'
+#      - name: Decrypt Android keys
+#        run: sh ./.github/scripts/decrypt_android_keys.sh
+#        env:
+#          KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
+#      - name: Setup Flutter
+#        uses: subosito/flutter-action@v1
+#        with:
+#          flutter-version: '1.26.x' # you can use 1.12
+#          channel: 'beta'
+#      - name: Install Flutter dependencies
+#        run: flutter pub get
+#      - run: flutter build appbundle --release
+#      - name: Setup ruby
+#        uses: actions/setup-ruby@v1
+#        with:
+#          ruby-version: '2.7.2'
+#      - name: Bundle update
+#        run: bundle update --bundler
+#        working-directory: ./android
+#      - name: Run Fastlane
+#        uses: maierj/fastlane-action@v2.0.1
+#        with:
+#          lane: 'beta'
+#          subdirectory: 'android'
+#  deploy_ios:
+#    name: iOS Deploy TestFlight
+#    runs-on: macOS-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#        with:
+#          ref: ${{ github.ref }}
+#      - name: Decrypt iOS keys
+#        run: sh ./.github/scripts/decrypt_ios_keys.sh
+#        env:
+#          KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
+#      - name: Run Flutter tasks
+#        uses: subosito/flutter-action@v1
+#        with:
+#          flutter-version: '1.26.x' # you can use 1.12
+#          channel: 'beta'
+#      - run: flutter pub get
+#      - run: flutter build ios --release --no-codesign
+#      - uses: actions/setup-ruby@v1
+#        with:
+#          ruby-version: '2.7.2'
+#      - name: Bundle update
+#        run: bundle update --bundler
+#        working-directory: ./ios
+#      - name: Deploy iOS Beta to TestFlight via Fastlane
+#        uses: maierj/fastlane-action@v2.0.1
+#        with:
+#          lane: 'closed_beta'
+#          subdirectory: 'ios'
+#        env:
+#          APP_STORE_CONNECT_TEAM_ID: '${{ secrets.APP_STORE_CONNECT_TEAM_ID }}'
+#          DEVELOPER_APP_ID: '${{ secrets.DEVELOPER_APP_ID }}'
+#          DEVELOPER_APP_IDENTIFIER: '${{ secrets.DEVELOPER_APP_IDENTIFIER }}'
+#          DEVELOPER_PORTAL_TEAM_ID: '${{ secrets.DEVELOPER_PORTAL_TEAM_ID }}'
+#          FASTLANE_APPLE_ID: '${{ secrets.FASTLANE_APPLE_ID }}'
+#          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: '${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}'
+#          MATCH_PASSWORD: '${{ secrets.MATCH_PASSWORD }}'
+#          GIT_AUTHORIZATION: '${{ secrets.GIT_AUTHORIZATION }}'
+#          PROVISIONING_PROFILE_SPECIFIER: '${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}'
+#          TEMP_KEYCHAIN_PASSWORD: '${{ secrets.TEMP_KEYCHAIN_PASSWORD }}'
+#          TEMP_KEYCHAIN_USER: '${{ secrets.TEMP_KEYCHAIN_USER }}'
 
   deploy_macos:
     name: macOS Deploy TestFlight
@@ -130,61 +127,61 @@ jobs:
           TEMP_KEYCHAIN_PASSWORD: '${{ secrets.TEMP_KEYCHAIN_PASSWORD }}'
           TEMP_KEYCHAIN_USER: '${{ secrets.TEMP_KEYCHAIN_USER }}'
 
-  deploy_windows:
-    name: Windows App
-    runs-on: windows-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Run Flutter tasks
-        uses: subosito/flutter-action@v1
-        with:
-          channel: 'dev'
-      - name: Upgrades flutter
-        run: flutter upgrade
-      - name: Enable windows
-        run: flutter config --enable-windows-desktop
-      - run: flutter doctor -v
-      - run: flutter pub get
-      - name: Build windows
-        run: flutter build windows --release
-      - name: 'Zip files'
-        run: powershell Compress-Archive build\windows\runner\Release\ windows.zip
-      - name: upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: windows-artifact
-          path: windows.zip
-
-  github_release:
-    name: Create GitHub Release
-    needs: [deploy_android, deploy_ios, deploy_windows]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          body_path: RELEASE_NOTE.md
-          draft: false
-          prerelease: false
-      - name: Use Download Artifact v2
-        uses: actions/download-artifact@v2
-        with:
-          name: windows-artifact
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./windows.zip
-          asset_name: windows.zip
-          asset_content_type: application/zip
+#  deploy_windows:
+#    name: Windows App
+#    runs-on: windows-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#      - name: Run Flutter tasks
+#        uses: subosito/flutter-action@v1
+#        with:
+#          channel: 'dev'
+#      - name: Upgrades flutter
+#        run: flutter upgrade
+#      - name: Enable windows
+#        run: flutter config --enable-windows-desktop
+#      - run: flutter doctor -v
+#      - run: flutter pub get
+#      - name: Build windows
+#        run: flutter build windows --release
+#      - name: 'Zip files'
+#        run: powershell Compress-Archive build\windows\runner\Release\ windows.zip
+#      - name: upload artifacts
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: windows-artifact
+#          path: windows.zip
+#
+#  github_release:
+#    name: Create GitHub Release
+#    needs: [deploy_android, deploy_ios, deploy_windows]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#      - name: Create Release
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+#        with:
+#          tag_name: ${{ github.ref }}
+#          release_name: ${{ github.ref }}
+#          body_path: RELEASE_NOTE.md
+#          draft: false
+#          prerelease: false
+#      - name: Use Download Artifact v2
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: windows-artifact
+#      - name: Upload Release Asset
+#        id: upload-release-asset
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+#          asset_path: ./windows.zip
+#          asset_name: windows.zip
+#          asset_content_type: application/zip
