@@ -118,10 +118,8 @@ class HomePageState extends State<HomePage> {
           icon: Icon(Icons.fiber_new_rounded),
           tooltip: ap.announcementReviewSystem,
           onPressed: () async {
-            ImgurHelper.clientId = 'bf8e32144d00b04';
-            AnnouncementHelper.tag = 'ap';
-            AnnouncementHelper.organization = 'nsysu';
-            AnnouncementHelper.appleBundleId = 'com.nsysu.ap';
+            AnnouncementHelper.instance.organization = 'nsysu';
+            AnnouncementHelper.instance.appleBundleId = 'com.nsysu.ap';
             ApUtils.pushCupertinoStyle(
               context,
               AnnouncementHomePage(
@@ -138,7 +136,7 @@ class HomePageState extends State<HomePage> {
                     settings.authorizationStatus ==
                         AuthorizationStatus.provisional) {
                   String token = await messaging.getToken();
-                  AnnouncementHelper.fcmToken = token;
+                  AnnouncementHelper.instance.fcmToken = token;
                 }
               } catch (_) {}
             }
