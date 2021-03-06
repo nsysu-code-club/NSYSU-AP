@@ -8,6 +8,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 import 'app.dart';
 
@@ -21,6 +22,9 @@ void main() async {
     key: Constants.key,
     iv: Constants.iv,
   );
+
+  timeago.setLocaleMessages('zh-TW', timeago.ZhMessages());
+  timeago.setLocaleMessages('en-US', timeago.EnMessages());
   final currentVersion =
       Preferences.getString(Constants.PREF_CURRENT_VERSION, '0');
   if (int.parse(currentVersion) < 700) _migrate700();

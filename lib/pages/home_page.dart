@@ -43,6 +43,7 @@ import 'info/shcool_info_page.dart';
 import 'study/course_page.dart';
 import 'graduation_report_page.dart';
 import 'login/login_page.dart';
+import 'tow/tow_car_home_page.dart';
 
 class HomePage extends StatefulWidget {
   static const String routerName = "/home";
@@ -243,6 +244,15 @@ class HomePageState extends State<HomePage> {
             onTap: () => _openPage(
               TuitionAndFeesPage(),
               needLogin: true,
+            ),
+          ),
+          DrawerItem(
+            icon: Icons.car_repair,
+            title: '拖車小幫手',
+            onTap: () => _openPage(
+              TowCarHomePage(),
+              needLogin: true,
+              useCupertinoRoute: false,
             ),
           ),
           DrawerItem(
