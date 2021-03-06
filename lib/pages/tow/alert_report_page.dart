@@ -1,7 +1,8 @@
+import 'package:ap_common/api/imgur_helper.dart';
 import 'package:ap_common/l10n/l10n.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/widgets/ap_network_image.dart';
-import 'package:ap_common/widgets/hint_content.dart';
 import 'package:flutter/material.dart';
 
 enum _ImgurUploadState { no_file, uploading, done }
@@ -72,7 +73,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
               suffixIcon: Icon(Icons.keyboard_arrow_down_sharp),
               border: OutlineInputBorder(),
               fillColor: ApTheme.of(context).blueAccent,
-              disabledBorder: OutlineInputBorder(),
+              disabledBorder: UnderlineInputBorder(),
               labelStyle: TextStyle(
                 color: ApTheme.of(context).grey,
               ),
@@ -82,7 +83,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
         ),
         SizedBox(height: dividerHeight),
         TextFormField(
-          maxLines: 1,
+          maxLines: 5,
           controller: _description,
           validator: (value) {
             if (value.isEmpty) {
@@ -109,7 +110,33 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
         ),
         SizedBox(height: 12.0),
         InkWell(
-          onTap: () {},
+          onTap: () async {
+            PickedFile image = await ApUtils.pickImage();
+            if (image != null) {
+              setState(() => imgurUploadState = _ImgurUploadState.uploading);
+              ImgurHelper.instance.uploadImageToImgur(
+                file: image,
+                callback: GeneralCallback(
+                  onFailure: (dioError) {
+                    ApUtils.showToast(context, dioError.message);
+                    setState(() => imgurUploadState = _imgUrl.isEmpty
+                        ? _ImgurUploadState.no_file
+                        : _ImgurUploadState.done);
+                  },
+                  onError: (generalResponse) {
+                    ApUtils.showToast(context, generalResponse.message);
+                    setState(() => imgurUploadState = _imgUrl.isEmpty
+                        ? _ImgurUploadState.no_file
+                        : _ImgurUploadState.done);
+                  },
+                  onSuccess: (data) {
+                    _imgUrl = data.link;
+                    setState(() => imgurUploadState = _ImgurUploadState.done);
+                  },
+                ),
+              );
+            }
+          },
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(color: ApTheme.of(context).grey),
