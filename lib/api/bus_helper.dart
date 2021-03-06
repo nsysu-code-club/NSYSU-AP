@@ -1,40 +1,34 @@
-import 'dart:typed_data';
-
 import 'package:ap_common/callback/general_callback.dart';
-import 'package:big5/big5.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/widgets.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:html/parser.dart';
 import 'package:nsysu_ap/models/bus_info.dart';
 import 'package:nsysu_ap/models/bus_time.dart';
-import 'package:nsysu_ap/models/tuition_and_fees.dart';
 
 class BusHelper {
   static const BASE_PATH = 'https://ibus.nsysu.edu.tw';
 
-  static Dio dio;
-  static CookieJar cookieJar;
-
   static BusHelper _instance;
-
-  static bool isLogin = false;
 
   static BusHelper get instance {
     if (_instance == null) {
       _instance = BusHelper();
-      dio = Dio();
-      initCookiesJar();
     }
     return _instance;
   }
 
-  Options get _tfOption => Options(
-        responseType: ResponseType.bytes,
-      );
+  BusHelper() {
+    dio = Dio();
+    initCookiesJar();
+  }
 
-  static initCookiesJar() {
+  Dio dio;
+  CookieJar cookieJar;
+
+  bool isLogin = false;
+
+  void initCookiesJar() {
     cookieJar = CookieJar();
     dio.interceptors.add(CookieManager(cookieJar));
     cookieJar.loadForRequest(Uri.parse(BASE_PATH));

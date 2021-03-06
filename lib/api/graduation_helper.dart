@@ -10,26 +10,29 @@ import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
 class GraduationHelper {
-  static Dio dio;
-  static CookieJar cookieJar;
-
   static GraduationHelper _instance;
-
-  static bool isLogin = false;
 
   static GraduationHelper get instance {
     if (_instance == null) {
       _instance = GraduationHelper();
-      dio = Dio();
-      initCookiesJar();
     }
     return _instance;
   }
 
-  static initCookiesJar() {
+  GraduationHelper() {
+    dio = Dio();
+    initCookiesJar();
+  }
+
+  Dio dio;
+  CookieJar cookieJar;
+
+  bool isLogin = false;
+
+  void initCookiesJar() {
     cookieJar = CookieJar();
     dio.interceptors.add(CookieManager(cookieJar));
-    cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.selcrsUrl}'));
+    cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.instance.selcrsUrl}'));
   }
 
   void logout() {
@@ -50,7 +53,7 @@ class GraduationHelper {
     try {
       var base64md5Password = Utils.base64md5(password);
       var response = await dio.post(
-        '${SelcrsHelper.selcrsUrl}/gadchk/gad_chk_login_prs_sso2.asp',
+        '${SelcrsHelper.instance.selcrsUrl}/gadchk/gad_chk_login_prs_sso2.asp',
         options: Options(
           responseType: ResponseType.bytes,
           contentType: Headers.formUrlEncodedContentType,
@@ -92,7 +95,7 @@ class GraduationHelper {
     @required String username,
     @required GeneralCallback<GraduationReportData> callback,
   }) async {
-    var url = '${SelcrsHelper.selcrsUrl}/gadchk/gad_chk_stu_list.asp?'
+    var url = '${SelcrsHelper.instance.selcrsUrl}/gadchk/gad_chk_stu_list.asp?'
         'stno=$username&KIND=5&frm=1';
     try {
       var response = await dio.get(

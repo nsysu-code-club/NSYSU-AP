@@ -36,7 +36,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   void initState() {
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen("TuitionAndFeesPage", "tuition_and_fees_page.dart");
-    if (TuitionHelper.isLogin)
+    if (TuitionHelper.instance.isLogin)
       _getData();
     else
       _login();

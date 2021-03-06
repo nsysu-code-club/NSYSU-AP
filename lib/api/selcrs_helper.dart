@@ -32,8 +32,26 @@ class SelcrsHelper {
 
   static SelcrsHelper _instance;
 
-  static Dio dio;
-  static CookieJar cookieJar;
+  static SelcrsHelper get instance {
+    if (_instance == null) {
+      _instance = SelcrsHelper();
+    }
+    return _instance;
+  }
+
+  SelcrsHelper() {
+    dio = Dio(
+      BaseOptions(
+        responseType: ResponseType.bytes,
+        sendTimeout: 10000,
+        receiveTimeout: 10000,
+      ),
+    );
+    initCookiesJar();
+  }
+
+  Dio dio;
+  CookieJar cookieJar;
 
   String username = '';
   String password = '';
@@ -42,25 +60,10 @@ class SelcrsHelper {
 
   bool get canReLogin => reLoginCount < 5;
 
-  static String get selcrsUrl => sprintf(BASE_URL, [index]);
+  String get selcrsUrl => sprintf(BASE_URL, [index]);
 
-  static int index = 1;
-  static int error = 0;
-
-  static SelcrsHelper get instance {
-    if (_instance == null) {
-      _instance = SelcrsHelper();
-      dio = Dio(
-        BaseOptions(
-          responseType: ResponseType.bytes,
-          sendTimeout: 10000,
-          receiveTimeout: 10000,
-        ),
-      );
-      initCookiesJar();
-    }
-    return _instance;
-  }
+  int index = 1;
+  int error = 0;
 
   String get language {
     switch (AppLocalizations.locale.languageCode) {
@@ -82,17 +85,17 @@ class SelcrsHelper {
         contentType: Headers.formUrlEncodedContentType,
       );
 
-  static changeSelcrsUrl() {
+  void changeSelcrsUrl() {
     index++;
     if (index == 5) index = 1;
     print(selcrsUrl);
-    cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.selcrsUrl}'));
+    cookieJar.loadForRequest(Uri.parse('$selcrsUrl'));
   }
 
-  static initCookiesJar() {
+  void initCookiesJar() {
     cookieJar = CookieJar();
     dio.interceptors.add(CookieManager(cookieJar));
-    cookieJar.loadForRequest(Uri.parse('${SelcrsHelper.selcrsUrl}'));
+    cookieJar.loadForRequest(Uri.parse('$selcrsUrl'));
   }
 
   void logout() {

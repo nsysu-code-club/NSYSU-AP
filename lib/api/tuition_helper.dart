@@ -12,31 +12,33 @@ import 'package:nsysu_ap/models/tuition_and_fees.dart';
 class TuitionHelper {
   static const BASE_PATH = 'https://tfstu.nsysu.edu.tw';
 
-  static Dio dio;
-  static CookieJar cookieJar;
-
   static TuitionHelper _instance;
-
-  static bool isLogin = false;
 
   static TuitionHelper get instance {
     if (_instance == null) {
       _instance = TuitionHelper();
-      dio = Dio();
-      initCookiesJar();
     }
     return _instance;
+  }
+
+  TuitionHelper() {
+    dio = Dio();
+    initCookiesJar();
+  }
+
+  Dio dio;
+  CookieJar cookieJar;
+
+  bool isLogin = false;
+  void initCookiesJar() {
+    cookieJar = CookieJar();
+    dio.interceptors.add(CookieManager(cookieJar));
+    cookieJar.loadForRequest(Uri.parse(BASE_PATH));
   }
 
   Options get _tfOption => Options(
         responseType: ResponseType.bytes,
       );
-
-  static initCookiesJar() {
-    cookieJar = CookieJar();
-    dio.interceptors.add(CookieManager(cookieJar));
-    cookieJar.loadForRequest(Uri.parse(BASE_PATH));
-  }
 
   void logout() {
     isLogin = false;

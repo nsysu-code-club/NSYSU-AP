@@ -67,7 +67,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
 
   Future<void> _loadData() async {
     final cookiesManager = CookieManager.instance();
-    for (var cookie in SelcrsHelper.cookieJar
+    for (var cookie in SelcrsHelper.instance.cookieJar
         .loadForRequest(Uri.parse(SelcrsHelper.BASE_URL))) {
       cookiesManager.setCookie(
         url: SelcrsHelper.BASE_URL,
