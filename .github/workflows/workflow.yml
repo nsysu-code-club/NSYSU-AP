@@ -25,7 +25,7 @@ jobs:
           KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
       - uses: subosito/flutter-action@v1
         with:
-          flutter-version: '2.0.x' # you can use 1.12
+          flutter-version: '2.0.x'
           channel: 'stable'
       - name: Upgrades flutter
         run: flutter upgrade

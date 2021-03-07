@@ -21,11 +21,17 @@ jobs:
         run: sh ./.github/scripts/decrypt_android_keys.sh
         env:
           KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
+      - name: Use JD
+        uses: r26d/jq-action@master
+        with:
+          cmd: jq -n env
+      - name: Generate changelog
+        run: bash ./.github/scripts/generate_android_changelog.sh
       - name: Setup Flutter
         uses: subosito/flutter-action@v1
         with:
-          flutter-version: '1.26.x' # you can use 1.12
-          channel: 'beta'
+          flutter-version: '2.0.x'
+          channel: 'stable'
       - name: Install Flutter dependencies
         run: flutter pub get
       - run: flutter build appbundle --release
@@ -39,8 +45,9 @@ jobs:
       - name: Run Fastlane
         uses: maierj/fastlane-action@v2.0.1
         with:
-          lane: 'beta'
+          lane: 'playstore'
           subdirectory: 'android'
+
   deploy_ios:
     name: iOS Deploy TestFlight
     runs-on: macOS-latest
@@ -53,11 +60,13 @@ jobs:
         run: sh ./.github/scripts/decrypt_ios_keys.sh
         env:
           KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
+      - name: Generate changelog
+        run: bash ./.github/scripts/generate_ios_changelog.sh
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v1
         with:
-          flutter-version: '1.26.x' # you can use 1.12
-          channel: 'beta'
+          flutter-version: '2.0.x'
+          channel: 'stable'
       - run: flutter pub get
       - run: flutter build ios --release --no-codesign
       - uses: actions/setup-ruby@v1
@@ -69,7 +78,7 @@ jobs:
       - name: Deploy iOS Beta to TestFlight via Fastlane
         uses: maierj/fastlane-action@v2.0.1
         with:
-          lane: 'closed_beta'
+          lane: 'release'
           subdirectory: 'ios'
         env:
           APP_STORE_CONNECT_TEAM_ID: '${{ secrets.APP_STORE_CONNECT_TEAM_ID }}'
@@ -140,7 +149,8 @@ jobs:
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v1
         with:
-          channel: 'dev'
+          flutter-version: '2.0.x'
+          channel: 'stable'
       - name: Upgrades flutter
         run: flutter upgrade
       - name: Enable windows
@@ -187,5 +197,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           asset_path: ./windows.zip
-          asset_name: windows.zip
+          asset_name: nsysu_ap_windows.zip
           asset_content_type: application/zip

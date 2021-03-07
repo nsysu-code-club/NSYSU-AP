@@ -26,8 +26,13 @@ def ensure_temp_keychain(name, password)
   create_temp_keychain(name, password)
 end
 
+
+sh("chmod", "a+x", "../../.github/scripts/generate_ios_changelog.sh")
+
+sh("../../.github/scripts/generate_ios_changelog.sh", flutter_version()["version_code"])
+
 platform :ios do
-  lane :closed_beta do
+  lane :release do
     keychain_name = TEMP_KEYCHAIN_USER
     keychain_password = TEMP_KEYCHAIN_PASSWORD
     ensure_temp_keychain(keychain_name, keychain_password)
@@ -59,8 +64,16 @@ platform :ios do
       skip_waiting_for_build_processing: true,
       skip_submission: true,
       distribute_external: false,
-      notify_external_testers: false,
-      ipa: "./Runner.ipa"
+      notify_external_testers: true,
+      ipa: "./Runner.ipa",
+      localized_build_info: {
+          "default": {
+            whats_new: File.read("./zh-TW.txt"),
+          },
+          "en-US": {
+            whats_new: File.read("./en-US.txt"),
+          }
+        }
     )
 
     delete_temp_keychain(keychain_name)
