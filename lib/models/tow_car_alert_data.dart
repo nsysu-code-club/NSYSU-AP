@@ -43,6 +43,7 @@ class TowCarAlert {
     this.title,
     this.message,
     this.imageUrl,
+    this.viewCounts,
     this.time,
   });
 
@@ -50,6 +51,7 @@ class TowCarAlert {
   String title;
   String message;
   String imageUrl;
+  int viewCounts;
   DateTime time;
 
   String get ago => timeago.format(
