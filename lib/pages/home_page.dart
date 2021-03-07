@@ -246,7 +246,7 @@ class HomePageState extends State<HomePage> {
           ),
           DrawerItem(
             icon: Icons.car_repair,
-            title: '拖車小幫手',
+            title: app.towCarHelper,
             onTap: () => _openPage(
               TowCarHomePage(),
               needLogin: true,

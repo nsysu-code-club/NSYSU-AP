@@ -12,6 +12,30 @@ class AppLocalizations {
 
   String get minute => _vocabularies['minute'];
 
+  String get towCarHelper => _vocabularies['towCarHelper'];
+
+  String get subscriptionArea => _vocabularies['subscriptionArea'];
+
+  String get towCarNews => _vocabularies['towCarNews'];
+
+  String get towCarSubscriptionArea => _vocabularies['towCarSubscriptionArea'];
+
+  String get towCarAlertReport => _vocabularies['towCarAlertReport'];
+
+  String get credibility => _vocabularies['credibility'];
+
+  String get viewCounts => _vocabularies['viewCounts'];
+
+  String get publishTime => _vocabularies['publishTime'];
+
+  String get alertContent => _vocabularies['alertContent'];
+
+  String get notificationArea => _vocabularies['notificationArea'];
+
+  String get uploadImage => _vocabularies['uploadImage'];
+
+  String get allArea => _vocabularies['allArea'];
+
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
@@ -122,6 +146,18 @@ class AppLocalizations {
       'hasPreScoreHint': 'Yellow Text not final score, proved by instructor.',
       'pleaseConfirmForm': 'Please fill out confirm form before login.',
       'minute': 'Min',
+      'towCarHelper': 'Tow Car Helper',
+      'subscriptionArea': 'Subscription Area',
+      'towCarNews': 'News',
+      'towCarSubscriptionArea': 'Subscription',
+      'towCarAlertReport': 'Report',
+      'credibility': 'Credibility',
+      'viewCounts': 'views',
+      'publishTime': 'Publish Time',
+      'alertContent': 'Content',
+      'notificationArea': 'Notification Area',
+      'uploadImage': 'Upload Image',
+      'allArea': 'All Area',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -156,6 +192,18 @@ class AppLocalizations {
       'hasPreScoreHint': '黃字為授課老師開放成績查詢 並非最終成績',
       'pleaseConfirmForm': '請先填寫確認表單再進行登入',
       'minute': '分',
+      'towCarHelper': '拖車小幫手',
+      'subscriptionArea': '訂閱區域',
+      'towCarNews': '最新消息',
+      'towCarSubscriptionArea': '訂閱區域',
+      'towCarAlertReport': '狀況回報',
+      'credibility': '可信度',
+      'viewCounts': '多少人看過',
+      'publishTime': '發布時間',
+      'alertContent': '警報內容',
+      'notificationArea': '推播區域',
+      'uploadImage': '上傳圖片',
+      'allArea': '全部區域',
     },
   };
 }

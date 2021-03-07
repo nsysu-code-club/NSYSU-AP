@@ -5,6 +5,8 @@ import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/widgets/ap_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../utils/app_localizations.dart';
+
 enum _ImgurUploadState { no_file, uploading, done }
 
 class TowCarAlertReportPage extends StatefulWidget {
@@ -15,6 +17,7 @@ class TowCarAlertReportPage extends StatefulWidget {
 class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
   final dividerHeight = 16.0;
 
+  AppLocalizations app;
   ApLocalizations ap;
 
   var _title = TextEditingController();
@@ -33,6 +36,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
 
   @override
   Widget build(BuildContext context) {
+    app = AppLocalizations.of(context);
     ap = ApLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.all(16.0),
@@ -77,7 +81,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
               labelStyle: TextStyle(
                 color: ApTheme.of(context).grey,
               ),
-              labelText: '推播區域',
+              labelText: app.subscriptionArea,
             ),
           ),
         ),
@@ -103,9 +107,17 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
         SizedBox(height: dividerHeight),
         Row(
           children: [
-            Text('上傳圖片'),
+            Text(
+              app.uploadImage,
+              style: TextStyle(
+                color: ApTheme.of(context).greyText,
+              ),
+            ),
             SizedBox(width: 4.0),
-            Icon(Icons.upload_file),
+            Icon(
+              Icons.upload_file,
+              color: ApTheme.of(context).greyText,
+            ),
           ],
         ),
         SizedBox(height: 12.0),
@@ -200,7 +212,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
           ),
           SizedBox(height: 16.0),
           Text(
-            'Click to Upload',
+            ap.pickAndUploadToImgur,
             textAlign: TextAlign.center,
             style: TextStyle(color: ApTheme.of(context).grey),
           ),

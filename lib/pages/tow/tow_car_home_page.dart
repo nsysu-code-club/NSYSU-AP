@@ -6,6 +6,8 @@ import 'package:nsysu_ap/pages/tow/alert_report_page.dart';
 import 'package:nsysu_ap/pages/tow/tow_car_subscription_page.dart';
 import 'package:nsysu_ap/pages/tow/tow_car_news_page.dart';
 
+import '../../utils/app_localizations.dart';
+
 class TowCarHomePage extends StatefulWidget {
   @override
   _TowCarHomePageState createState() => _TowCarHomePageState();
@@ -13,6 +15,7 @@ class TowCarHomePage extends StatefulWidget {
 
 class _TowCarHomePageState extends State<TowCarHomePage>
     with SingleTickerProviderStateMixin {
+  AppLocalizations app;
   ApLocalizations ap;
 
   TabController controller;
@@ -35,10 +38,11 @@ class _TowCarHomePageState extends State<TowCarHomePage>
 
   @override
   Widget build(BuildContext context) {
+    app = AppLocalizations.of(context);
     ap = ApLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(''),
+        title: Text(app.towCarHelper),
         backgroundColor: ApTheme.of(context).blue,
       ),
       body: TabBarView(
@@ -62,15 +66,15 @@ class _TowCarHomePageState extends State<TowCarHomePage>
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
-            label: ap.announcements,
+            label: app.towCarNews,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.tag_faces_outlined),
-            label: '訂閱區域',
+            label: app.towCarNews,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.notification_important_outlined),
-            label: '警報推播',
+            label: app.towCarAlertReport,
           ),
         ],
       ),

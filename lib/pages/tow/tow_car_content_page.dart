@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../models/tow_car_alert_data.dart';
+import '../../utils/app_localizations.dart';
 
 class TowCarContentPage extends StatefulWidget {
   final TowCarAlert towCarAlert;
@@ -18,6 +19,8 @@ class TowCarContentPage extends StatefulWidget {
 }
 
 class _TowCarContentPageState extends State<TowCarContentPage> {
+  AppLocalizations app;
+
   TextStyle get _subTitleStyle => TextStyle(
         color: ApTheme.of(context).greyText,
         fontSize: 16.0,
@@ -32,9 +35,10 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
 
   @override
   Widget build(BuildContext context) {
+    app = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('拖車警報'),
+        title: Text(app.towCarAlertReport),
         backgroundColor: ApTheme.of(context).blue,
       ),
       body: ListView(
@@ -94,7 +98,7 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
                           ),
                           SizedBox(height: 8.0),
                           Text(
-                            "多少人看過",
+                            app.viewCounts,
                             style: _subTitleStyle,
                           ),
                         ],
@@ -115,7 +119,7 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
                           ),
                           SizedBox(height: 8.0),
                           Text(
-                            "發布時間",
+                            app.publishTime,
                             style: _subTitleStyle,
                           ),
                         ],
@@ -125,7 +129,7 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
                 ),
                 Divider(),
                 Text(
-                  "警報內容",
+                  app.alertContent,
                   style: TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.w800,

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/car_park_area.dart';
 
+import '../../utils/app_localizations.dart';
+
 class TowCarSubscriptionPage extends StatefulWidget {
   @override
   _TowCarSubscriptionPageState createState() => _TowCarSubscriptionPageState();
 }
 
 class _TowCarSubscriptionPageState extends State<TowCarSubscriptionPage> {
+  AppLocalizations app;
+
   bool enableAll = false;
 
   List<CarParkArea> carParkAreas = [
@@ -18,10 +22,11 @@ class _TowCarSubscriptionPageState extends State<TowCarSubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
+    app = AppLocalizations.of(context);
     return ListView(
       children: [
         SwitchListTile.adaptive(
-          title: Text('全部區域'),
+          title: Text(app.allArea),
           value: enableAll,
           onChanged: (value) {
             setState(() {
