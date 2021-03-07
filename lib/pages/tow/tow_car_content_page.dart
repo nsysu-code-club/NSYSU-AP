@@ -39,14 +39,17 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
       ),
       body: ListView(
         children: [
-          CachedNetworkImage(
-            height: 250.0,
-            fit: BoxFit.cover,
-            imageUrl: widget.towCarAlert.imageUrl,
-            placeholder: (context, url) => Center(
-              child: CircularProgressIndicator(),
+          Hero(
+            tag: widget.towCarAlert.imageUrl,
+            child: CachedNetworkImage(
+              height: 250.0,
+              fit: BoxFit.cover,
+              imageUrl: widget.towCarAlert.imageUrl,
+              placeholder: (context, url) => Center(
+                child: CircularProgressIndicator(),
+              ),
+              errorWidget: (context, url, error) => Icon(ApIcon.error),
             ),
-            errorWidget: (context, url, error) => Icon(ApIcon.error),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),

@@ -65,13 +65,16 @@ class _TowCarNewsPageState extends State<TowCarNewsPage> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: CachedNetworkImage(
-                    width: 68.0,
-                    imageUrl: alert.imageUrl,
-                    placeholder: (context, url) => Center(
-                      child: CircularProgressIndicator(),
+                  child: Hero(
+                    tag: alert.imageUrl,
+                    child: CachedNetworkImage(
+                      width: 68.0,
+                      imageUrl: alert.imageUrl,
+                      placeholder: (context, url) => Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      errorWidget: (context, url, error) => Icon(ApIcon.error),
                     ),
-                    errorWidget: (context, url, error) => Icon(ApIcon.error),
                   ),
                 ),
                 SizedBox(width: 16.0),
