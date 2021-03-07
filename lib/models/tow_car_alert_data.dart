@@ -94,4 +94,12 @@ class TowCarAlert {
         "imageUrl": imageUrl == null ? null : imageUrl,
         "time": time == null ? null : time.toIso8601String(),
       };
+
+  Map<String, dynamic> toUpdateJson() => {
+        "title": title,
+        "topic": topic,
+        "imageUrl": imageUrl,
+        "message": message,
+        "time": time,
+      };
 }
