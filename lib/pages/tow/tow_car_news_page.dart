@@ -18,7 +18,11 @@ class TowCarNewsPage extends StatefulWidget {
   _TowCarNewsPageState createState() => _TowCarNewsPageState();
 }
 
-class _TowCarNewsPageState extends State<TowCarNewsPage> {
+class _TowCarNewsPageState extends State<TowCarNewsPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   List<TowCarAlert> towCarAlerts = [
     TowCarAlert(
       time: DateTime.now().subtract(

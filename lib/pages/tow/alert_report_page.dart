@@ -19,7 +19,11 @@ class TowCarAlertReportPage extends StatefulWidget {
   _TowCarAlertReportPageState createState() => _TowCarAlertReportPageState();
 }
 
-class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
+class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final dividerHeight = 16.0;
 
   AppLocalizations app;

@@ -21,7 +21,11 @@ class TowCarSubscriptionPage extends StatefulWidget {
   _TowCarSubscriptionPageState createState() => _TowCarSubscriptionPageState();
 }
 
-class _TowCarSubscriptionPageState extends State<TowCarSubscriptionPage> {
+class _TowCarSubscriptionPageState extends State<TowCarSubscriptionPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   AppLocalizations app;
 
   _State state = _State.loading;
