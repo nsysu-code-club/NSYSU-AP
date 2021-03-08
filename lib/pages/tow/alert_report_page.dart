@@ -79,7 +79,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
             showDialog(
               context: context,
               builder: (_) => SimpleOptionDialog(
-                title: app.subscriptionArea ?? '',
+                title: app.notificationArea,
                 items: carParkAreas.map((e) => e.name).toList(),
                 index: index,
                 onSelected: (index) {
@@ -109,7 +109,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
               labelStyle: TextStyle(
                 color: ApTheme.of(context).grey,
               ),
-              labelText: app.subscriptionArea,
+              labelText: app.notificationArea,
             ),
           ),
         ),

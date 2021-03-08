@@ -70,7 +70,7 @@ class _TowCarHomePageState extends State<TowCarHomePage>
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.tag_faces_outlined),
-            label: app.towCarNews,
+            label: app.subscriptionArea,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.notification_important_outlined),
