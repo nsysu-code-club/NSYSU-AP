@@ -11,6 +11,10 @@ import 'package:nsysu_ap/api/tow_car_helper.dart';
 import 'package:nsysu_ap/models/tow_car_alert_data.dart';
 import 'package:nsysu_ap/pages/tow/tow_car_content_page.dart';
 
+import '../../models/car_park_area.dart';
+import '../../utils/app_localizations.dart';
+import 'tow_car_home_page.dart';
+
 enum _State { loading, error, empty, finish }
 
 class TowCarNewsPage extends StatefulWidget {
@@ -23,12 +27,14 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
   @override
   bool get wantKeepAlive => true;
 
+  AppLocalizations app;
+
   List<TowCarAlert> towCarAlerts = [
     TowCarAlert(
       time: DateTime.now().subtract(
         Duration(hours: 1),
       ),
-      topic: '管院',
+      topic: 'P09',
       viewCounts: 30,
       title: '管院拖車快來救',
       message: '管院拖車拉，發新年紅包了，快來救...',
@@ -38,7 +44,7 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
       time: DateTime.now().subtract(
         Duration(hours: 2),
       ),
-      topic: '武二',
+      topic: 'P03',
       viewCounts: 23,
       title: '武二發紅包快來',
       message: '管院拖車拉，發新年紅包了，快來救...',
@@ -48,7 +54,7 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
       time: DateTime.now().subtract(
         Duration(days: 1),
       ),
-      topic: 'L停',
+      topic: 'P05',
       viewCounts: 22,
       title: 'L停大量猴子',
       message: 'L停大量猴子，拿食物請注意',
@@ -60,6 +66,8 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
 
   String hint;
 
+  int areaIndex = 0;
+
   @override
   void initState() {
     Future.microtask(_getData);
@@ -68,6 +76,18 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
 
   @override
   Widget build(BuildContext context) {
+    app = AppLocalizations.of(context);
+    final carParkAreas = TowCarConfig.of(context).carParkAreas;
+    final subscriptions = TowCarConfig.of(context).subscriptions;
+    List<TowCarAlert> selectTowCarAlerts = [];
+    this.towCarAlerts.forEach((element) {
+      if (areaIndex == 0 && subscriptions?.indexOf(element.topic) != -1) {
+        selectTowCarAlerts.add(element);
+      } else if (areaIndex != 0 &&
+          carParkAreas[areaIndex - 1].fcmTopic == element.topic) {
+        selectTowCarAlerts.add(element);
+      }
+    });
     super.build(context);
     switch (state) {
       case _State.loading:
@@ -89,79 +109,127 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
         break;
       case _State.finish:
       default:
-        return RefreshIndicator(
-          onRefresh: _getData,
-          child: ListView.separated(
-            itemCount: towCarAlerts?.length ?? 0,
-            separatorBuilder: (_, __) => Divider(),
-            itemBuilder: (_, index) {
-              final alert = towCarAlerts[index];
-              return InkWell(
-                onTap: () {
-                  ApUtils.pushCupertinoStyle(
-                    context,
-                    TowCarContentPage(towCarAlert: alert),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: Hero(
-                          tag: alert.imageUrl,
+        return Column(
+          children: [
+            SizedBox(
+              height: 108.0,
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                scrollDirection: Axis.horizontal,
+                separatorBuilder: (_, __) => SizedBox(width: 4.0),
+                shrinkWrap: true,
+                itemCount: (carParkAreas?.length ?? 0) + 1,
+                itemBuilder: (_, index) {
+                  final carParkArea = index == 0
+                      ? CarParkArea(
+                          name: app.subscriptionArea,
+                          imageUrl: 'https://i.imgur.com/pS8opJN.png',
+                        )
+                      : carParkAreas[index - 1];
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() => areaIndex = index);
+                    },
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16.0),
                           child: CachedNetworkImage(
-                            width: 68.0,
-                            imageUrl: alert.imageUrl,
+                            width: 150.0,
+                            imageUrl: carParkArea.imageUrl,
                             errorWidget: (context, url, error) =>
                                 Icon(ApIcon.error),
+                            fit: BoxFit.cover,
                           ),
                         ),
-                      ),
-                      SizedBox(width: 16.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Text(
+                          carParkArea.name,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _getData,
+                child: ListView.separated(
+                  itemCount: selectTowCarAlerts?.length ?? 0,
+                  separatorBuilder: (_, __) => Divider(),
+                  itemBuilder: (_, index) {
+                    final alert = selectTowCarAlerts[index];
+                    return InkWell(
+                      onTap: () {
+                        ApUtils.pushCupertinoStyle(
+                          context,
+                          TowCarContentPage(towCarAlert: alert),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
                           children: [
-                            SizedBox(height: 8.0),
-                            Text(
-                              alert.title,
-                              style: TextStyle(
-                                color: ApTheme.of(context).blueText,
-                                fontSize: 17.0,
-                                fontWeight: FontWeight.w500,
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Hero(
+                                tag: alert.imageUrl,
+                                child: CachedNetworkImage(
+                                  width: 68.0,
+                                  imageUrl: alert.imageUrl,
+                                  errorWidget: (context, url, error) =>
+                                      Icon(ApIcon.error),
+                                ),
                               ),
                             ),
-                            SizedBox(height: 4.0),
-                            Text(
-                              alert.message,
-                              style: TextStyle(
-                                color: ApTheme.of(context).greyText,
-                                fontSize: 15.0,
+                            SizedBox(width: 16.0),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 8.0),
+                                  Text(
+                                    alert.title,
+                                    style: TextStyle(
+                                      color: ApTheme.of(context).blueText,
+                                      fontSize: 17.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4.0),
+                                  Text(
+                                    alert.message,
+                                    style: TextStyle(
+                                      color: ApTheme.of(context).greyText,
+                                      fontSize: 15.0,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
+                            Column(
+                              children: [
+                                Text(
+                                  alert.ago,
+                                  style: TextStyle(
+                                    color: ApTheme.of(context).blueText,
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: 8.0),
                           ],
                         ),
                       ),
-                      Column(
-                        children: [
-                          Text(
-                            alert.ago,
-                            style: TextStyle(
-                              color: ApTheme.of(context).blueText,
-                              fontSize: 14.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(width: 8.0),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
+              ),
+            ),
+          ],
         );
     }
   }

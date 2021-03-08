@@ -10,10 +10,9 @@ import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/tow_car_helper.dart';
 
-import '../../models/car_park_area.dart';
 import '../../models/tow_car_alert_data.dart';
-import '../../resources/image_assets.dart';
 import '../../utils/app_localizations.dart';
+import 'tow_car_home_page.dart';
 
 enum _ImgurUploadState { no_file, uploading, done }
 
@@ -42,8 +41,6 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
 
   String _imgUrl;
 
-  List<CarParkArea> carParkAreas;
-
   int index = 0;
 
   @override
@@ -55,6 +52,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final carParkAreas = TowCarConfig.of(context).carParkAreas;
     app = AppLocalizations.of(context);
     ap = ApLocalizations.of(context);
     return Form(
@@ -259,20 +257,12 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
     }
   }
 
-  Future<FutureOr> _getData() async {
-    final json = await FileAssets.carParkAreaData;
-    carParkAreas = CarParkAreaData.fromJson(json).data;
-    setState(() {
-      _area.text = carParkAreas[index].name;
-    });
-  }
-
   void _submit() async {
     if (_formKey.currentState.validate() &&
         imgurUploadState == _ImgurUploadState.done) {
       final data = TowCarAlert(
         title: _title.text,
-        topic: carParkAreas[index].fcmTopic,
+        topic: TowCarConfig.of(context).carParkAreas[index].fcmTopic,
         message: _description.text,
         imageUrl: _imgUrl,
       );
@@ -306,5 +296,11 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
     }
     if (imgurUploadState != _ImgurUploadState.done)
       ApUtils.showToast(context, app.pleaseProvideImage);
+  }
+
+  FutureOr _getData() {
+    setState(() {
+      _area.text = TowCarConfig.of(context).carParkAreas[index].name;
+    });
   }
 }
