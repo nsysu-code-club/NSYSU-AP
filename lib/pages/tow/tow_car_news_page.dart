@@ -37,7 +37,7 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
       topic: 'P09',
       viewCounts: 30,
       title: '管院拖車快來救',
-      message: '管院拖車拉，發新年紅包了，快來救...',
+      message: '管院拖車拉，發新年紅包了，快來救車，立刻馬上現在',
       imageUrl: 'https://i.imgur.com/iHKvJUIb.jpg',
     ),
     TowCarAlert(
@@ -47,7 +47,7 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
       topic: 'P03',
       viewCounts: 23,
       title: '武二發紅包快來',
-      message: '管院拖車拉，發新年紅包了，快來救...',
+      message: '管院拖車拉，發新年紅包了，快來救車，立刻馬上現在',
       imageUrl: 'https://i.imgur.com/Iethorib.jpg',
     ),
     TowCarAlert(
@@ -165,7 +165,10 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
                       onTap: () {
                         ApUtils.pushCupertinoStyle(
                           context,
-                          TowCarContentPage(towCarAlert: alert),
+                          TowCarContentPage(
+                            towCarAlert: alert,
+                            carParkAreas: carParkAreas,
+                          ),
                         );
                       },
                       child: Padding(
@@ -200,7 +203,9 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
                                   ),
                                   SizedBox(height: 4.0),
                                   Text(
-                                    alert.message,
+                                    alert.message.length > 18
+                                        ? "${alert.message.substring(0, 18)}..."
+                                        : alert.message,
                                     style: TextStyle(
                                       color: ApTheme.of(context).greyText,
                                       fontSize: 15.0,

@@ -1,16 +1,20 @@
 import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../models/car_park_area.dart';
 import '../../models/tow_car_alert_data.dart';
 import '../../utils/app_localizations.dart';
 
 class TowCarContentPage extends StatefulWidget {
+  final List<CarParkArea> carParkAreas;
   final TowCarAlert towCarAlert;
 
   const TowCarContentPage({
     Key key,
+    @required this.carParkAreas,
     @required this.towCarAlert,
   }) : super(key: key);
 
@@ -19,6 +23,8 @@ class TowCarContentPage extends StatefulWidget {
 }
 
 class _TowCarContentPageState extends State<TowCarContentPage> {
+  final dateFormat = DateFormat('yyyy/MM/dd\na hh:mm');
+
   AppLocalizations app;
 
   TextStyle get _subTitleStyle => TextStyle(
@@ -36,6 +42,10 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
   @override
   Widget build(BuildContext context) {
     app = AppLocalizations.of(context);
+    int index = widget.carParkAreas.indexWhere(
+      (element) => element.fcmTopic == widget.towCarAlert.topic,
+    );
+    String location = widget.carParkAreas[index].name;
     return Scaffold(
       appBar: AppBar(
         title: Text(app.towCarAlertReport),
@@ -76,7 +86,7 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
                     ),
                     SizedBox(width: 4.0),
                     Text(
-                      widget.towCarAlert.topic,
+                      location,
                       style: TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.w400,
@@ -113,7 +123,7 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            "${widget.towCarAlert.time}",
+                            dateFormat.format(widget.towCarAlert.time),
                             style: _subContentStyle,
                             textAlign: TextAlign.center,
                           ),
