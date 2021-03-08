@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:ap_common/api/imgur_helper.dart';
 import 'package:ap_common/l10n/l10n.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/widgets/ap_network_image.dart';
+import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:flutter/material.dart';
 
+import '../../models/car_park_area.dart';
+import '../../resources/image_assets.dart';
 import '../../utils/app_localizations.dart';
 
 enum _ImgurUploadState { no_file, uploading, done }
@@ -28,9 +33,13 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
 
   String _imgUrl;
 
+  List<CarParkArea> carParkAreas;
+
+  int index = 0;
+
   @override
   void initState() {
-    _area.text = '武嶺';
+    Future.microtask(_getData);
     super.initState();
   }
 
@@ -62,7 +71,22 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
         ),
         SizedBox(height: dividerHeight),
         InkWell(
-          onTap: () {},
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (_) => SimpleOptionDialog(
+                title: app.subscriptionArea ?? '',
+                items: carParkAreas.map((e) => e.name).toList(),
+                index: index,
+                onSelected: (index) {
+                  setState(() {
+                    this.index = index;
+                    _area.text = carParkAreas[index].name;
+                  });
+                },
+              ),
+            );
+          },
           child: TextFormField(
             enabled: false,
             maxLines: 1,
@@ -218,5 +242,13 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage> {
           ),
         ];
     }
+  }
+
+  Future<FutureOr> _getData() async {
+    final json = await FileAssets.carParkAreaData;
+    carParkAreas = CarParkAreaData.fromJson(json).data;
+    setState(() {
+      _area.text = carParkAreas[index].name;
+    });
   }
 }
