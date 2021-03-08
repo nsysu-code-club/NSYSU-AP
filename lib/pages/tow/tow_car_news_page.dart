@@ -68,6 +68,7 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     switch (state) {
       case _State.loading:
         return Center(

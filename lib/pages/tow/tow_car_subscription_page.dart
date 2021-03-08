@@ -44,6 +44,7 @@ class _TowCarSubscriptionPageState extends State<TowCarSubscriptionPage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     app = AppLocalizations.of(context);
     switch (state) {
       case _State.loading:
@@ -141,15 +142,15 @@ class _TowCarSubscriptionPageState extends State<TowCarSubscriptionPage>
   Future<FutureOr> _getData() async {
     subscriptions =
         Preferences.getStringList(Constants.CAR_PARK_AREA_SUBSCRIPTION, []);
-    print(subscriptions);
     final json = await FileAssets.carParkAreaData;
     carParkAreas = CarParkAreaData.fromJson(json).data;
     carParkAreas.forEach((element) {
       if (subscriptions.indexOf(element.fcmTopic) != -1) element.enable = true;
     });
     enableAll = subscriptions.length == carParkAreas.length;
-    setState(() {
-      state = _State.finish;
-    });
+    if (mounted)
+      setState(() {
+        state = _State.finish;
+      });
   }
 }

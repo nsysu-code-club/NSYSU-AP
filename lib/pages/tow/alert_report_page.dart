@@ -1,14 +1,17 @@
 import 'dart:async';
 
 import 'package:ap_common/api/imgur_helper.dart';
-import 'package:ap_common/l10n/l10n.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/widgets/ap_network_image.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
+import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/tow_car_helper.dart';
 
 import '../../models/car_park_area.dart';
+import '../../models/tow_car_alert_data.dart';
 import '../../resources/image_assets.dart';
 import '../../utils/app_localizations.dart';
 
@@ -28,6 +31,8 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
 
   AppLocalizations app;
   ApLocalizations ap;
+
+  final _formKey = GlobalKey<FormState>();
 
   var _title = TextEditingController();
   var _area = TextEditingController();
@@ -49,52 +54,19 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     app = AppLocalizations.of(context);
     ap = ApLocalizations.of(context);
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        SizedBox(height: dividerHeight),
-        TextFormField(
-          maxLines: 1,
-          controller: _title,
-          validator: (value) {
-            if (value.isEmpty) {
-              return ap.doNotEmpty;
-            }
-            return null;
-          },
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            fillColor: ApTheme.of(context).blueAccent,
-            labelStyle: TextStyle(
-              color: ApTheme.of(context).grey,
-            ),
-            labelText: ap.title,
-          ),
-        ),
-        SizedBox(height: dividerHeight),
-        InkWell(
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (_) => SimpleOptionDialog(
-                title: app.notificationArea,
-                items: carParkAreas.map((e) => e.name).toList(),
-                index: index,
-                onSelected: (index) {
-                  setState(() {
-                    this.index = index;
-                    _area.text = carParkAreas[index].name;
-                  });
-                },
-              ),
-            );
-          },
-          child: TextFormField(
-            enabled: false,
+    return Form(
+      key: _formKey,
+      child: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          SizedBox(height: dividerHeight),
+          TextFormField(
             maxLines: 1,
-            controller: _area,
+            maxLength: 20,
+            controller: _title,
             validator: (value) {
               if (value.isEmpty) {
                 return ap.doNotEmpty;
@@ -102,112 +74,151 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
               return null;
             },
             decoration: InputDecoration(
-              suffixIcon: Icon(Icons.keyboard_arrow_down_sharp),
               border: OutlineInputBorder(),
               fillColor: ApTheme.of(context).blueAccent,
-              disabledBorder: UnderlineInputBorder(),
               labelStyle: TextStyle(
                 color: ApTheme.of(context).grey,
               ),
-              labelText: app.notificationArea,
+              labelText: ap.title,
             ),
           ),
-        ),
-        SizedBox(height: dividerHeight),
-        TextFormField(
-          maxLines: 5,
-          controller: _description,
-          validator: (value) {
-            if (value.isEmpty) {
-              return ap.doNotEmpty;
-            }
-            return null;
-          },
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            fillColor: ApTheme.of(context).blueAccent,
-            labelStyle: TextStyle(
-              color: ApTheme.of(context).grey,
-            ),
-            labelText: ap.description,
-          ),
-        ),
-        SizedBox(height: dividerHeight),
-        Row(
-          children: [
-            Text(
-              app.uploadImage,
-              style: TextStyle(
-                color: ApTheme.of(context).greyText,
-              ),
-            ),
-            SizedBox(width: 4.0),
-            Icon(
-              Icons.upload_file,
-              color: ApTheme.of(context).greyText,
-            ),
-          ],
-        ),
-        SizedBox(height: 12.0),
-        InkWell(
-          onTap: () async {
-            PickedFile image = await ApUtils.pickImage();
-            if (image != null) {
-              setState(() => imgurUploadState = _ImgurUploadState.uploading);
-              ImgurHelper.instance.uploadImageToImgur(
-                file: image,
-                callback: GeneralCallback(
-                  onFailure: (dioError) {
-                    ApUtils.showToast(context, dioError.message);
-                    setState(() => imgurUploadState = _imgUrl.isEmpty
-                        ? _ImgurUploadState.no_file
-                        : _ImgurUploadState.done);
-                  },
-                  onError: (generalResponse) {
-                    ApUtils.showToast(context, generalResponse.message);
-                    setState(() => imgurUploadState = _imgUrl.isEmpty
-                        ? _ImgurUploadState.no_file
-                        : _ImgurUploadState.done);
-                  },
-                  onSuccess: (data) {
-                    _imgUrl = data.link;
-                    setState(() => imgurUploadState = _ImgurUploadState.done);
+          SizedBox(height: dividerHeight),
+          InkWell(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (_) => SimpleOptionDialog(
+                  title: app.notificationArea,
+                  items: carParkAreas.map((e) => e.name).toList(),
+                  index: index,
+                  onSelected: (index) {
+                    setState(() {
+                      this.index = index;
+                      _area.text = carParkAreas[index].name;
+                    });
                   },
                 ),
               );
-            }
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: ApTheme.of(context).grey),
-            ),
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: _imgurUploadWidget,
+            },
+            child: TextFormField(
+              enabled: false,
+              maxLines: 1,
+              controller: _area,
+              validator: (value) {
+                if (value.isEmpty) {
+                  return ap.doNotEmpty;
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                suffixIcon: Icon(Icons.keyboard_arrow_down_sharp),
+                border: OutlineInputBorder(),
+                fillColor: ApTheme.of(context).blueAccent,
+                disabledBorder: UnderlineInputBorder(),
+                labelStyle: TextStyle(
+                  color: ApTheme.of(context).grey,
+                ),
+                labelText: app.notificationArea,
+              ),
             ),
           ),
-        ),
-        SizedBox(height: dividerHeight),
-        FractionallySizedBox(
-          widthFactor: 0.7,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(30.0),
+          SizedBox(height: dividerHeight),
+          TextFormField(
+            maxLines: 5,
+            maxLength: 100,
+            controller: _description,
+            validator: (value) {
+              if (value.isEmpty) {
+                return ap.doNotEmpty;
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              fillColor: ApTheme.of(context).blueAccent,
+              labelStyle: TextStyle(
+                color: ApTheme.of(context).grey,
+              ),
+              labelText: ap.description,
+            ),
+          ),
+          SizedBox(height: dividerHeight),
+          Row(
+            children: [
+              Text(
+                app.uploadImage,
+                style: TextStyle(
+                  color: ApTheme.of(context).greyText,
                 ),
               ),
-              padding: EdgeInsets.symmetric(
-                horizontal: 8.0,
-                vertical: 16.0,
+              SizedBox(width: 4.0),
+              Icon(
+                Icons.upload_file,
+                color: ApTheme.of(context).greyText,
               ),
-              primary: ApTheme.of(context).blueAccent,
-            ),
-            child: Text(ap.submit),
-            onPressed: () async {},
+            ],
           ),
-        ),
-      ],
+          SizedBox(height: 12.0),
+          InkWell(
+            onTap: () async {
+              PickedFile image = await ApUtils.pickImage();
+              if (image != null) {
+                setState(() => imgurUploadState = _ImgurUploadState.uploading);
+                ImgurHelper.instance.uploadImageToImgur(
+                  file: image,
+                  callback: GeneralCallback(
+                    onFailure: (dioError) {
+                      ApUtils.showToast(context, dioError.message);
+                      setState(() => imgurUploadState = _imgUrl.isEmpty
+                          ? _ImgurUploadState.no_file
+                          : _ImgurUploadState.done);
+                    },
+                    onError: (generalResponse) {
+                      ApUtils.showToast(context, generalResponse.message);
+                      setState(() => imgurUploadState = _imgUrl.isEmpty
+                          ? _ImgurUploadState.no_file
+                          : _ImgurUploadState.done);
+                    },
+                    onSuccess: (data) {
+                      _imgUrl = data.link;
+                      setState(() => imgurUploadState = _ImgurUploadState.done);
+                    },
+                  ),
+                );
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: ApTheme.of(context).grey),
+              ),
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: _imgurUploadWidget,
+              ),
+            ),
+          ),
+          SizedBox(height: dividerHeight),
+          FractionallySizedBox(
+            widthFactor: 0.7,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(30.0),
+                  ),
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 16.0,
+                ),
+                primary: ApTheme.of(context).blueAccent,
+              ),
+              child: Text(ap.submit),
+              onPressed: _submit,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -254,5 +265,46 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
     setState(() {
       _area.text = carParkAreas[index].name;
     });
+  }
+
+  void _submit() async {
+    if (_formKey.currentState.validate() &&
+        imgurUploadState == _ImgurUploadState.done) {
+      final data = TowCarAlert(
+        title: _title.text,
+        topic: carParkAreas[index].fcmTopic,
+        message: _description.text,
+        imageUrl: _imgUrl,
+      );
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => WillPopScope(
+          child: ProgressDialog(app.processing),
+          onWillPop: () async {
+            return false;
+          },
+        ),
+        barrierDismissible: false,
+      );
+      TowCarHelper.instance.addApplication(
+        data: data,
+        callback: GeneralCallback(
+          onSuccess: (Response<dynamic> data) {
+            Navigator.pop(context);
+            ApUtils.showToast(context, app.success);
+          },
+          onFailure: (DioError e) {
+            Navigator.pop(context);
+            ApUtils.showToast(context, e.i18nMessage);
+          },
+          onError: (GeneralResponse response) {
+            Navigator.pop(context);
+            ApUtils.showToast(context, ap.somethingError);
+          },
+        ),
+      );
+    }
+    if (imgurUploadState != _ImgurUploadState.done)
+      ApUtils.showToast(context, app.pleaseProvideImage);
   }
 }

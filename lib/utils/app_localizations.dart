@@ -38,6 +38,10 @@ class AppLocalizations {
 
   String get processing => _vocabularies['processing'];
 
+  String get pleaseProvideImage => _vocabularies['pleaseProvideImage'];
+
+  String get success => _vocabularies['success'];
+
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
@@ -161,6 +165,7 @@ class AppLocalizations {
       'uploadImage': 'Upload Image',
       'allArea': 'All Area',
       'processing': 'Processing...',
+      'pleaseProvideImage': 'Please Provide Image',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -208,6 +213,7 @@ class AppLocalizations {
       'uploadImage': '上傳圖片',
       'allArea': '全部區域',
       'processing': '處理中...',
+      'pleaseProvideImage': '請提供照片',
     },
   };
 }
