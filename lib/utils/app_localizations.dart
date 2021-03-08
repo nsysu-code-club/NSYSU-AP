@@ -36,6 +36,8 @@ class AppLocalizations {
 
   String get allArea => _vocabularies['allArea'];
 
+  String get processing => _vocabularies['processing'];
+
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
@@ -158,6 +160,7 @@ class AppLocalizations {
       'notificationArea': 'Notification Area',
       'uploadImage': 'Upload Image',
       'allArea': 'All Area',
+      'processing': 'Processing...',
     },
     'zh': {
       'app_name': '中山校務通',
@@ -204,6 +207,7 @@ class AppLocalizations {
       'notificationArea': '推播區域',
       'uploadImage': '上傳圖片',
       'allArea': '全部區域',
+      'processing': '處理中...',
     },
   };
 }

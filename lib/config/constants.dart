@@ -65,6 +65,8 @@ class Constants {
   static const TAG_NEWS_ICON = "tag_news_icon";
   static const TAG_NEWS_TITLE = "tag_news_title";
 
+  static const CAR_PARK_AREA_SUBSCRIPTION = "car_park_area_subscription";
+
   static const BUS_INFO_DATA = 'bus_info_data';
 
   static const CONFIRM_FORM_URL = "confirm_form_url";
