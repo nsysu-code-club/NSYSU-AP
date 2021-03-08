@@ -154,9 +154,8 @@ class TowCarHelper {
       if (callback == null)
         throw dioError;
       else
-        callback.onFailure(dioError);
+        return callback.onFailure(dioError);
     }
-    return null;
   }
 
   Future<TowCarAlert> getTowCarAlert({

@@ -1,10 +1,17 @@
+import 'dart:async';
+
 import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common/widgets/hint_content.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/tow_car_helper.dart';
 import 'package:nsysu_ap/models/tow_car_alert_data.dart';
 import 'package:nsysu_ap/pages/tow/tow_car_content_page.dart';
+
+enum _State { loading, error, empty, finish }
 
 class TowCarNewsPage extends StatefulWidget {
   @override
@@ -45,80 +52,137 @@ class _TowCarNewsPageState extends State<TowCarNewsPage> {
     ),
   ];
 
+  _State state = _State.finish;
+
+  String hint;
+
+  @override
+  void initState() {
+    Future.microtask(_getData);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      itemCount: towCarAlerts?.length ?? 0,
-      separatorBuilder: (_, __) => Divider(),
-      itemBuilder: (_, index) {
-        final alert = towCarAlerts[index];
+    switch (state) {
+      case _State.loading:
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+        break;
+      case _State.error:
+      case _State.empty:
         return InkWell(
           onTap: () {
-            ApUtils.pushCupertinoStyle(
-              context,
-              TowCarContentPage(towCarAlert: alert),
-            );
+            Future.microtask(_getData);
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Hero(
-                    tag: alert.imageUrl,
-                    child: CachedNetworkImage(
-                      width: 68.0,
-                      imageUrl: alert.imageUrl,
-                      placeholder: (context, url) => Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      errorWidget: (context, url, error) => Icon(ApIcon.error),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16.0),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          child: HintContent(
+            icon: ApIcon.error,
+            content: hint,
+          ),
+        );
+        break;
+      case _State.finish:
+      default:
+        return RefreshIndicator(
+          onRefresh: _getData,
+          child: ListView.separated(
+            itemCount: towCarAlerts?.length ?? 0,
+            separatorBuilder: (_, __) => Divider(),
+            itemBuilder: (_, index) {
+              final alert = towCarAlerts[index];
+              return InkWell(
+                onTap: () {
+                  ApUtils.pushCupertinoStyle(
+                    context,
+                    TowCarContentPage(towCarAlert: alert),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
                     children: [
-                      SizedBox(height: 8.0),
-                      Text(
-                        alert.title,
-                        style: TextStyle(
-                          color: ApTheme.of(context).blueText,
-                          fontSize: 17.0,
-                          fontWeight: FontWeight.w500,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Hero(
+                          tag: alert.imageUrl,
+                          child: CachedNetworkImage(
+                            width: 68.0,
+                            imageUrl: alert.imageUrl,
+                            errorWidget: (context, url, error) =>
+                                Icon(ApIcon.error),
+                          ),
                         ),
                       ),
-                      SizedBox(height: 4.0),
-                      Text(
-                        alert.message,
-                        style: TextStyle(
-                          color: ApTheme.of(context).greyText,
-                          fontSize: 15.0,
+                      SizedBox(width: 16.0),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 8.0),
+                            Text(
+                              alert.title,
+                              style: TextStyle(
+                                color: ApTheme.of(context).blueText,
+                                fontSize: 17.0,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 4.0),
+                            Text(
+                              alert.message,
+                              style: TextStyle(
+                                color: ApTheme.of(context).greyText,
+                                fontSize: 15.0,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                      Column(
+                        children: [
+                          Text(
+                            alert.ago,
+                            style: TextStyle(
+                              color: ApTheme.of(context).blueText,
+                              fontSize: 14.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 8.0),
                     ],
                   ),
                 ),
-                Column(
-                  children: [
-                    Text(
-                      alert.ago,
-                      style: TextStyle(
-                        color: ApTheme.of(context).blueText,
-                        fontSize: 14.0,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(width: 8.0),
-              ],
-            ),
+              );
+            },
           ),
         );
-      },
+    }
+  }
+
+  Future<void> _getData() async {
+    await TowCarHelper.instance.getAllTowCarAlert(
+      callback: GeneralCallback(
+        onSuccess: (List<TowCarAlert> data) {
+          setState(() {
+            towCarAlerts = data;
+            state = _State.finish;
+          });
+        },
+        onFailure: (DioError e) {
+          setState(() {
+            state = _State.finish;
+            hint = e.i18nMessage;
+          });
+        },
+        onError: (GeneralResponse response) {
+          setState(() {
+            state = _State.error;
+            hint = response.message;
+          });
+        },
+      ),
     );
   }
 }
