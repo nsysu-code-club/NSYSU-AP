@@ -8,6 +8,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:location_platform_interface/location_platform_interface.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/comfirm_form_page.dart';
 import 'package:sprintf/sprintf.dart';
@@ -59,5 +60,17 @@ class Utils {
       );
     else
       await launch(sprintf(confirmFormUrl, [username]));
+  }
+
+  static bool checkIsInSchool(LocationData currentPosition) {
+    //TODO more accuracy position check
+    final latBottom = 22.622056,
+        latTop = 22.636574,
+        longLeft = 120.258485,
+        lonRight = 120.271779;
+    return currentPosition.latitude >= latBottom &&
+        currentPosition.latitude <= latTop &&
+        currentPosition.longitude >= longLeft &&
+        currentPosition.longitude <= lonRight;
   }
 }

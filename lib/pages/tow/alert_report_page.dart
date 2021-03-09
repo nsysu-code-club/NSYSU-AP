@@ -7,8 +7,11 @@ import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/widgets/ap_network_image.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/tow_car_helper.dart';
+import 'package:location/location.dart';
+import 'package:nsysu_ap/utils/utils.dart';
 
 import '../../models/tow_car_alert_data.dart';
 import '../../utils/app_localizations.dart';
@@ -260,6 +263,12 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
   void _submit() async {
     if (_formKey.currentState.validate() &&
         imgurUploadState == _ImgurUploadState.done) {
+      final _currentPosition = await _getCurrentLocation();
+      if (_currentPosition == null) return;
+      if (!Utils.checkIsInSchool(_currentPosition)) {
+        ApUtils.showToast(context, app.locationNotNearSchool);
+        return null;
+      }
       final data = TowCarAlert(
         title: _title.text,
         topic: TowCarConfig.of(context).carParkAreas[index].fcmTopic,
@@ -302,5 +311,32 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
     setState(() {
       _area.text = TowCarConfig.of(context).carParkAreas[index].name;
     });
+  }
+
+  Future<LocationData> _getCurrentLocation() async {
+    Location location = Location();
+
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+    if (!kIsWeb) {
+      _serviceEnabled = await location.serviceEnabled();
+      if (!_serviceEnabled) {
+        _serviceEnabled = await location.requestService();
+        if (!_serviceEnabled) {
+          ApUtils.showToast(context, app.notLocationPermissionHint);
+          return null;
+        }
+      }
+
+      _permissionGranted = await location.hasPermission();
+      if (_permissionGranted == PermissionStatus.denied) {
+        _permissionGranted = await location.requestPermission();
+        if (_permissionGranted != PermissionStatus.granted) {
+          ApUtils.showToast(context, app.notLocationPermissionHint);
+          return null;
+        }
+      }
+    }
+    return await location.getLocation();
   }
 }
