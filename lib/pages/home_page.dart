@@ -84,6 +84,7 @@ class HomePageState extends State<HomePage> {
     super.initState();
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen("HomePage", "home_page.dart");
+    Future.microtask(() {
     _getAllAnnouncement();
     if (Preferences.getBool(Constants.PREF_AUTO_LOGIN, false))
       _login();
@@ -92,6 +93,7 @@ class HomePageState extends State<HomePage> {
     if (FirebaseUtils.isSupportRemoteConfig) {
       _checkUpdate();
     }
+    });
     FirebaseAnalyticsUtils.instance.setUserProperty(
       AnalyticsConstants.LANGUAGE,
       AppLocalizations.locale.languageCode,
