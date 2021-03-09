@@ -249,7 +249,6 @@ class HomePageState extends State<HomePage> {
             title: app.towCarHelper,
             onTap: () => _openPage(
               TowCarHomePage(),
-              needLogin: true,
               useCupertinoRoute: false,
             ),
           ),

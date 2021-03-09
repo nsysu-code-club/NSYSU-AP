@@ -56,6 +56,8 @@ class SelcrsHelper {
   String username = '';
   String password = '';
 
+  bool isLogin = false;
+
   int reLoginCount = 0;
 
   bool get canReLogin => reLoginCount < 5;
@@ -103,6 +105,7 @@ class SelcrsHelper {
     password = '';
     index = 1;
     error = 0;
+    isLogin = false;
     initCookiesJar();
   }
 
@@ -182,6 +185,7 @@ class SelcrsHelper {
 //        debugPrint('text =  $text');
         this.username = username;
         this.password = password;
+        this.isLogin = true;
         if (callback == null)
           return GeneralResponse.success();
         else

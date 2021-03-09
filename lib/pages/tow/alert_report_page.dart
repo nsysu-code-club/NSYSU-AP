@@ -4,13 +4,17 @@ import 'package:ap_common/api/imgur_helper.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/ap_network_image.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tow_car_helper.dart';
 import 'package:location/location.dart';
+import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/pages/login/login_page.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
 import '../../models/tow_car_alert_data.dart';
@@ -18,6 +22,7 @@ import '../../utils/app_localizations.dart';
 import 'tow_car_home_page.dart';
 
 enum _ImgurUploadState { no_file, uploading, done }
+enum _State { first, not_login, prepare }
 
 class TowCarAlertReportPage extends StatefulWidget {
   @override
@@ -30,6 +35,10 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
   bool get wantKeepAlive => true;
 
   final dividerHeight = 16.0;
+
+  _State state = Preferences.getBool(Constants.AGREE_TOW_CAR_POLICY, false)
+      ? (SelcrsHelper.instance.isLogin ? _State.prepare : _State.not_login)
+      : _State.first;
 
   AppLocalizations app;
   ApLocalizations ap;
@@ -58,169 +67,250 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
     final carParkAreas = TowCarConfig.of(context).carParkAreas;
     app = AppLocalizations.of(context);
     ap = ApLocalizations.of(context);
-    return Form(
-      key: _formKey,
-      child: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          SizedBox(height: dividerHeight),
-          TextFormField(
-            maxLines: 1,
-            maxLength: 20,
-            controller: _title,
-            validator: (value) {
-              if (value.isEmpty) {
-                return ap.doNotEmpty;
-              }
-              return null;
-            },
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              fillColor: ApTheme.of(context).blueAccent,
-              labelStyle: TextStyle(
-                color: ApTheme.of(context).grey,
-              ),
-              labelText: ap.title,
-            ),
-          ),
-          SizedBox(height: dividerHeight),
-          InkWell(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (_) => SimpleOptionDialog(
-                  title: app.notificationArea,
-                  items: carParkAreas.map((e) => e.name).toList(),
-                  index: index,
-                  onSelected: (index) {
-                    setState(() {
-                      this.index = index;
-                      _area.text = carParkAreas[index].name;
-                    });
-                  },
+    switch (state) {
+      case _State.first:
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(app.towCarUploadPolicy),
+            SizedBox(height: 16.0),
+            FractionallySizedBox(
+              widthFactor: 0.7,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(30.0),
+                    ),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 16.0,
+                  ),
+                  primary: ApTheme.of(context).blueAccent,
                 ),
-              );
-            },
-            child: TextFormField(
-              enabled: false,
-              maxLines: 1,
-              controller: _area,
-              validator: (value) {
-                if (value.isEmpty) {
-                  return ap.doNotEmpty;
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                suffixIcon: Icon(Icons.keyboard_arrow_down_sharp),
-                border: OutlineInputBorder(),
-                fillColor: ApTheme.of(context).blueAccent,
-                disabledBorder: UnderlineInputBorder(),
-                labelStyle: TextStyle(
-                  color: ApTheme.of(context).grey,
+                child: Text(app.agreeAndUpload),
+                onPressed: () {
+                  Preferences.setBool(Constants.AGREE_TOW_CAR_POLICY, true);
+                  setState(() {
+                    state = SelcrsHelper.instance.isLogin
+                        ? _State.prepare
+                        : _State.not_login;
+                  });
+                },
+              ),
+            ),
+          ],
+        );
+        break;
+      case _State.not_login:
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(ap.notLogin),
+            SizedBox(height: 16.0),
+            FractionallySizedBox(
+              widthFactor: 0.7,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(30.0),
+                    ),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 16.0,
+                  ),
+                  primary: ApTheme.of(context).blueAccent,
                 ),
-                labelText: app.notificationArea,
+                child: Text(ap.login),
+                onPressed: () async {
+                  var result = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => LoginPage(),
+                    ),
+                  );
+                  if (result ?? false) {
+                    state = SelcrsHelper.instance.isLogin
+                        ? _State.prepare
+                        : _State.not_login;
+                  }
+                },
               ),
             ),
-          ),
-          SizedBox(height: dividerHeight),
-          TextFormField(
-            maxLines: 5,
-            maxLength: 100,
-            controller: _description,
-            validator: (value) {
-              if (value.isEmpty) {
-                return ap.doNotEmpty;
-              }
-              return null;
-            },
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              fillColor: ApTheme.of(context).blueAccent,
-              labelStyle: TextStyle(
-                color: ApTheme.of(context).grey,
-              ),
-              labelText: ap.description,
-            ),
-          ),
-          SizedBox(height: dividerHeight),
-          Row(
+          ],
+        );
+        break;
+      case _State.prepare:
+      default:
+        return Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(16.0),
             children: [
-              Text(
-                app.uploadImage,
-                style: TextStyle(
-                  color: ApTheme.of(context).greyText,
+              SizedBox(height: dividerHeight),
+              TextFormField(
+                maxLines: 1,
+                maxLength: 20,
+                controller: _title,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return ap.doNotEmpty;
+                  }
+                  return null;
+                },
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  fillColor: ApTheme.of(context).blueAccent,
+                  labelStyle: TextStyle(
+                    color: ApTheme.of(context).grey,
+                  ),
+                  labelText: ap.title,
                 ),
               ),
-              SizedBox(width: 4.0),
-              Icon(
-                Icons.upload_file,
-                color: ApTheme.of(context).greyText,
+              SizedBox(height: dividerHeight),
+              InkWell(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => SimpleOptionDialog(
+                      title: app.notificationArea,
+                      items: carParkAreas.map((e) => e.name).toList(),
+                      index: index,
+                      onSelected: (index) {
+                        setState(() {
+                          this.index = index;
+                          _area.text = carParkAreas[index].name;
+                        });
+                      },
+                    ),
+                  );
+                },
+                child: TextFormField(
+                  enabled: false,
+                  maxLines: 1,
+                  controller: _area,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return ap.doNotEmpty;
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    suffixIcon: Icon(Icons.keyboard_arrow_down_sharp),
+                    border: OutlineInputBorder(),
+                    fillColor: ApTheme.of(context).blueAccent,
+                    disabledBorder: UnderlineInputBorder(),
+                    labelStyle: TextStyle(
+                      color: ApTheme.of(context).grey,
+                    ),
+                    labelText: app.notificationArea,
+                  ),
+                ),
+              ),
+              SizedBox(height: dividerHeight),
+              TextFormField(
+                maxLines: 5,
+                maxLength: 100,
+                controller: _description,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return ap.doNotEmpty;
+                  }
+                  return null;
+                },
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  fillColor: ApTheme.of(context).blueAccent,
+                  labelStyle: TextStyle(
+                    color: ApTheme.of(context).grey,
+                  ),
+                  labelText: ap.description,
+                ),
+              ),
+              SizedBox(height: dividerHeight),
+              Row(
+                children: [
+                  Text(
+                    app.uploadImage,
+                    style: TextStyle(
+                      color: ApTheme.of(context).greyText,
+                    ),
+                  ),
+                  SizedBox(width: 4.0),
+                  Icon(
+                    Icons.upload_file,
+                    color: ApTheme.of(context).greyText,
+                  ),
+                ],
+              ),
+              SizedBox(height: 12.0),
+              InkWell(
+                onTap: () async {
+                  PickedFile image = await ApUtils.pickImage();
+                  if (image != null) {
+                    setState(
+                        () => imgurUploadState = _ImgurUploadState.uploading);
+                    ImgurHelper.instance.uploadImageToImgur(
+                      file: image,
+                      callback: GeneralCallback(
+                        onFailure: (dioError) {
+                          ApUtils.showToast(context, dioError.message);
+                          setState(() => imgurUploadState = _imgUrl.isEmpty
+                              ? _ImgurUploadState.no_file
+                              : _ImgurUploadState.done);
+                        },
+                        onError: (generalResponse) {
+                          ApUtils.showToast(context, generalResponse.message);
+                          setState(() => imgurUploadState = _imgUrl.isEmpty
+                              ? _ImgurUploadState.no_file
+                              : _ImgurUploadState.done);
+                        },
+                        onSuccess: (data) {
+                          _imgUrl = data.link;
+                          setState(
+                              () => imgurUploadState = _ImgurUploadState.done);
+                        },
+                      ),
+                    );
+                  }
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: ApTheme.of(context).grey),
+                  ),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: _imgurUploadWidget,
+                  ),
+                ),
+              ),
+              SizedBox(height: dividerHeight),
+              FractionallySizedBox(
+                widthFactor: 0.7,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(30.0),
+                      ),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 16.0,
+                    ),
+                    primary: ApTheme.of(context).blueAccent,
+                  ),
+                  child: Text(ap.submit),
+                  onPressed: _submit,
+                ),
               ),
             ],
           ),
-          SizedBox(height: 12.0),
-          InkWell(
-            onTap: () async {
-              PickedFile image = await ApUtils.pickImage();
-              if (image != null) {
-                setState(() => imgurUploadState = _ImgurUploadState.uploading);
-                ImgurHelper.instance.uploadImageToImgur(
-                  file: image,
-                  callback: GeneralCallback(
-                    onFailure: (dioError) {
-                      ApUtils.showToast(context, dioError.message);
-                      setState(() => imgurUploadState = _imgUrl.isEmpty
-                          ? _ImgurUploadState.no_file
-                          : _ImgurUploadState.done);
-                    },
-                    onError: (generalResponse) {
-                      ApUtils.showToast(context, generalResponse.message);
-                      setState(() => imgurUploadState = _imgUrl.isEmpty
-                          ? _ImgurUploadState.no_file
-                          : _ImgurUploadState.done);
-                    },
-                    onSuccess: (data) {
-                      _imgUrl = data.link;
-                      setState(() => imgurUploadState = _ImgurUploadState.done);
-                    },
-                  ),
-                );
-              }
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: ApTheme.of(context).grey),
-              ),
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: _imgurUploadWidget,
-              ),
-            ),
-          ),
-          SizedBox(height: dividerHeight),
-          FractionallySizedBox(
-            widthFactor: 0.7,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(30.0),
-                  ),
-                ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 16.0,
-                ),
-                primary: ApTheme.of(context).blueAccent,
-              ),
-              child: Text(ap.submit),
-              onPressed: _submit,
-            ),
-          ),
-        ],
-      ),
-    );
+        );
+        break;
+    }
   }
 
   List<Widget> get _imgurUploadWidget {
