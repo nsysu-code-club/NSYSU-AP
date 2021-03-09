@@ -37,6 +37,7 @@ import 'package:nsysu_ap/resources/image_assets.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
+import 'package:nsysu_ap/widgets/share_data_widget.dart';
 
 import 'guide/admission_guide_page.dart';
 import 'info/shcool_info_page.dart';
@@ -63,9 +64,9 @@ class HomePageState extends State<HomePage> {
 
   HomeState state = HomeState.loading;
 
-  bool isLogin = false;
+  bool get isLogin => ShareDataWidget.of(context).data.isLogin;
 
-  UserInfo userInfo;
+  UserInfo get userInfo => ShareDataWidget.of(context).data.userInfo;
 
   Widget content;
 
@@ -85,14 +86,14 @@ class HomePageState extends State<HomePage> {
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen("HomePage", "home_page.dart");
     Future.microtask(() {
-    _getAllAnnouncement();
-    if (Preferences.getBool(Constants.PREF_AUTO_LOGIN, false))
-      _login();
-    else
-      _checkLoginState();
-    if (FirebaseUtils.isSupportRemoteConfig) {
-      _checkUpdate();
-    }
+      _getAllAnnouncement();
+      if (Preferences.getBool(Constants.PREF_AUTO_LOGIN, false))
+        _login();
+      else
+        _checkLoginState();
+      if (FirebaseUtils.isSupportRemoteConfig) {
+        _checkUpdate();
+      }
     });
     FirebaseAnalyticsUtils.instance.setUserProperty(
       AnalyticsConstants.LANGUAGE,
@@ -306,8 +307,8 @@ class HomePageState extends State<HomePage> {
                 GraduationHelper.instance.logout();
                 TuitionHelper.instance.logout();
                 setState(() {
-                  isLogin = false;
-                  userInfo = null;
+                  ShareDataWidget.of(context).data.isLogin = false;
+                  ShareDataWidget.of(context).data.userInfo = null;
                 });
                 if (isMobile) Navigator.of(context).pop();
                 _checkLoginState();
@@ -396,26 +397,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  _getUserInfo() {
-    SelcrsHelper.instance.getUserInfo(
-      callback: GeneralCallback<UserInfo>(
-        onFailure: (DioError e) => ApUtils.handleDioError(context, e),
-        onError: (GeneralResponse e) =>
-            ApUtils.showToast(context, ap.somethingError),
-        onSuccess: (UserInfo data) {
-          setState(() {
-            userInfo = data;
-          });
-          if (userInfo != null) {
-            FirebaseAnalyticsUtils.instance.logUserInfo(userInfo);
-          }
-        },
-      ),
-    );
-  }
-
   void _checkLoginState() async {
-    await Future.delayed(Duration(microseconds: 50));
     if (isLogin) {
       _homeKey.currentState.hideSnackBar();
     } else {
@@ -459,9 +441,9 @@ class HomePageState extends State<HomePage> {
         onSuccess: (GeneralResponse data) {
           _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
           setState(() {
-            isLogin = true;
+            ShareDataWidget.of(context).data.isLogin = true;
           });
-          _getUserInfo();
+          ShareDataWidget.of(context).data.getUserInfo();
         },
       ),
     );
@@ -470,7 +452,6 @@ class HomePageState extends State<HomePage> {
   _checkUpdate() async {
     if (kIsWeb) return;
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    await Future.delayed(Duration(milliseconds: 50));
     var currentVersion =
         Preferences.getString(Constants.PREF_CURRENT_VERSION, '');
     if (currentVersion != packageInfo.buildNumber) {
@@ -508,15 +489,16 @@ class HomePageState extends State<HomePage> {
       if (state != HomeState.finish) {
         _getAllAnnouncement();
       }
-      isLogin = true;
-      _getUserInfo();
+      ShareDataWidget.of(context).data.isLogin = true;
+      ShareDataWidget.of(context).data.getUserInfo();
       _homeKey.currentState.hideSnackBar();
     } else {
       _checkLoginState();
     }
   }
 
-  _openPage(Widget page, {needLogin = false, bool useCupertinoRoute = true}) {
+  _openPage(Widget page,
+      {needLogin = false, bool useCupertinoRoute = true}) async {
     if (isMobile) Navigator.of(context).pop();
     if (needLogin && !isLogin)
       ApUtils.showToast(
@@ -528,10 +510,11 @@ class HomePageState extends State<HomePage> {
         if (useCupertinoRoute)
           ApUtils.pushCupertinoStyle(context, page);
         else
-          Navigator.push(
+          await Navigator.push(
             context,
             CupertinoPageRoute(builder: (_) => page),
           );
+        _checkLoginState();
       } else
         setState(() => content = page);
     }

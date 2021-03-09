@@ -1,7 +1,9 @@
 import 'package:ap_common/api/announcement_helper.dart';
 import 'package:ap_common/models/ap_support_language.dart';
+import 'package:ap_common/models/user_info.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
+import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
@@ -15,6 +17,7 @@ import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 
+import 'api/selcrs_helper.dart';
 import 'pages/study/course_page.dart';
 import 'pages/home_page.dart';
 import 'pages/setting_page.dart';
@@ -32,6 +35,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   ThemeMode themeMode = ThemeMode.system;
 
   Locale locale;
+
+  bool isLogin = false;
+
+  UserInfo userInfo;
 
   @override
   void initState() {
@@ -133,5 +140,23 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       AppLocalizationsDelegate().load(locale);
       ApLocalizations.load(locale);
     });
+  }
+
+  void getUserInfo() {
+    SelcrsHelper.instance.getUserInfo(
+      callback: GeneralCallback<UserInfo>(
+        onFailure: (DioError e) => ApUtils.handleDioError(context, e),
+        onError: (GeneralResponse e) =>
+            ApUtils.showToast(context, ApLocalizations.current.somethingError),
+        onSuccess: (UserInfo data) {
+          setState(() {
+            userInfo = data;
+          });
+          if (userInfo != null) {
+            FirebaseAnalyticsUtils.instance.logUserInfo(userInfo);
+          }
+        },
+      ),
+    );
   }
 }

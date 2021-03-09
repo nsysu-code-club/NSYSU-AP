@@ -16,6 +16,7 @@ import 'package:location/location.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/login/login_page.dart';
 import 'package:nsysu_ap/utils/utils.dart';
+import 'package:nsysu_ap/widgets/share_data_widget.dart';
 
 import '../../models/tow_car_alert_data.dart';
 import '../../utils/app_localizations.dart';
@@ -136,6 +137,10 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
                         ? _State.prepare
                         : _State.not_login;
                   }
+                  setState(() {
+                    ShareDataWidget.of(context).data.isLogin = true;
+                  });
+                  ShareDataWidget.of(context).data.getUserInfo();
                 },
               ),
             ),
