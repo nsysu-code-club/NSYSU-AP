@@ -149,6 +149,8 @@ PODS:
     - Flutter
   - in_app_review (0.2.0):
     - Flutter
+  - location (0.0.1):
+    - Flutter
   - nanopb (2.30906.0):
     - nanopb/decode (= 2.30906.0)
     - nanopb/encode (= 2.30906.0)
@@ -191,6 +193,7 @@ DEPENDENCIES:
   - image_gallery_saver (from `.symlinks/plugins/image_gallery_saver/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - in_app_review (from `.symlinks/plugins/in_app_review/ios`)
+  - location (from `.symlinks/plugins/location/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
@@ -255,6 +258,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker/ios"
   in_app_review:
     :path: ".symlinks/plugins/in_app_review/ios"
+  location:
+    :path: ".symlinks/plugins/location/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider:
@@ -308,6 +313,7 @@ SPEC CHECKSUMS:
   image_gallery_saver: 259eab68fb271cfd57d599904f7acdc7832e7ef2
   image_picker: 9c3312491f862b28d21ecd8fdf0ee14e601b3f09
   in_app_review: 4a97249f7a2f539a0f294c2d9196b7fe35e49541
+  location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
   nanopb: 1bf24dd71191072e120b83dd02d08f3da0d65e53
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c

@@ -68,6 +68,12 @@
 	<string>Feature calendar would be add course to calendar app</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Feature course table export</string>
+	<key>NSInternalInconsistencyException</key>
+	<string>Feature sure user in school.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Feature sure user in school.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Feature sure user in school.</string>
 	<key>CFBundleURLTypes</key>
     <array>
     	<dict>
