@@ -45,7 +45,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _analytics = FirebaseUtils.init();
     themeMode = ThemeMode
         .values[Preferences.getInt(Constants.PREF_THEME_MODE_INDEX, 0)];
-    FirebaseAnalyticsUtils.instance.logThemeEvent(themeMode);
+    FirebaseAnalyticsUtils.instance?.logThemeEvent(themeMode);
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
