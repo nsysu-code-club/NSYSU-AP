@@ -1,4 +1,10 @@
 {
+  "804": {
+    "visible": false,
+    "date": "2021/03/24",
+    "zh-TW": "* 測試拖車小幫手 UI",
+    "en-US": "* Test tow car helper UI."
+  },
   "803": {
     "visible": true,
     "date": "2021/03/04",
