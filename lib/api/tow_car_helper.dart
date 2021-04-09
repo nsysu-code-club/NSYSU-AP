@@ -19,13 +19,13 @@ enum AnnouncementLoginType {
 
 extension DioErrorExtension on DioError {
   bool get isUnauthorized =>
-      type == DioErrorType.RESPONSE && response.statusCode == 401;
+      type == DioErrorType.response && response.statusCode == 401;
 
   bool get isNotPermission =>
-      type == DioErrorType.RESPONSE && response.statusCode == 403;
+      type == DioErrorType.response && response.statusCode == 403;
 
   bool get isNotFoundAnnouncement =>
-      type == DioErrorType.RESPONSE && response.statusCode == 404;
+      type == DioErrorType.response && response.statusCode == 404;
 }
 
 class TowCarHelper {

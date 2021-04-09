@@ -143,7 +143,7 @@ class SelcrsHelper {
         dumpError('score', text, null);
       }
     } on DioError catch (e) {
-      if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+      if (e.type == DioErrorType.response && e.response.statusCode == 302) {
       } else {
         error++;
         if (error > 5)
@@ -180,7 +180,7 @@ class SelcrsHelper {
         return dumpError('course', text, callback);
       }
     } on DioError catch (e) {
-      if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+      if (e.type == DioErrorType.response && e.response.statusCode == 302) {
         String _ = big5.decode(e.response.data);
 //        debugPrint('text =  $text');
         this.username = username;
@@ -445,7 +445,7 @@ class SelcrsHelper {
       }
       return callback.onSuccess(scoreSemesterData);
     } on DioError catch (e) {
-      if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+      if (e.type == DioErrorType.response && e.response.statusCode == 302) {
         String text = big5.decode(e.response.data);
         if (text.contains(scoreTimeoutText) && canReLogin) {
           await reLogin();
@@ -561,7 +561,7 @@ class SelcrsHelper {
       );
       return callback?.onSuccess(scoreData);
     } on DioError catch (e) {
-      if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+      if (e.type == DioErrorType.response && e.response.statusCode == 302) {
         String text = big5.decode(e.response.data);
         if (text.contains(scoreTimeoutText) && canReLogin) {
           await reLogin();

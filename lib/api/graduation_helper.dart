@@ -78,7 +78,7 @@ class GraduationHelper {
         );
       }
     } on DioError catch (e) {
-      if (e.type == DioErrorType.RESPONSE && e.response.statusCode == 302) {
+      if (e.type == DioErrorType.response && e.response.statusCode == 302) {
         isLogin = true;
         return callback.onSuccess(GeneralResponse.success());
       } else {

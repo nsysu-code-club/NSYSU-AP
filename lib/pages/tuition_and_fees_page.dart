@@ -1,4 +1,3 @@
-
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/pdf_scaffold.dart';
@@ -182,13 +181,13 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   Function get _onFailure => (DioError e) => setState(() {
         state = _State.error;
         switch (e.type) {
-          case DioErrorType.CONNECT_TIMEOUT:
-          case DioErrorType.SEND_TIMEOUT:
-          case DioErrorType.RECEIVE_TIMEOUT:
-          case DioErrorType.RESPONSE:
-          case DioErrorType.CANCEL:
+          case DioErrorType.connectTimeout:
+          case DioErrorType.sendTimeout:
+          case DioErrorType.receiveTimeout:
+          case DioErrorType.response:
+          case DioErrorType.cancel:
             break;
-          case DioErrorType.DEFAULT:
+          case DioErrorType.other:
             throw e;
             break;
         }

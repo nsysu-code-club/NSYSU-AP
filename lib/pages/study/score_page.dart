@@ -125,13 +125,13 @@ class ScorePageState extends State<ScorePage> {
   Function get _onFailure => (DioError e) => setState(() {
         state = ScoreState.error;
         switch (e.type) {
-          case DioErrorType.CONNECT_TIMEOUT:
-          case DioErrorType.SEND_TIMEOUT:
-          case DioErrorType.RECEIVE_TIMEOUT:
-          case DioErrorType.RESPONSE:
-          case DioErrorType.CANCEL:
+          case DioErrorType.connectTimeout:
+          case DioErrorType.sendTimeout:
+          case DioErrorType.receiveTimeout:
+          case DioErrorType.response:
+          case DioErrorType.cancel:
             break;
-          case DioErrorType.DEFAULT:
+          case DioErrorType.other:
             throw e;
             break;
         }
