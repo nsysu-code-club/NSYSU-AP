@@ -52,7 +52,11 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
       ),
       body: !kIsWeb && (Platform.isAndroid || Platform.isIOS)
           ? InAppWebView(
-              initialUrl: 'https://leslietsai1.wixsite.com/nsysufreshman',
+              initialUrlRequest: URLRequest(
+                url: Uri.parse(
+                  'https://leslietsai1.wixsite.com/nsysufreshman',
+                ),
+              ),
               onWebViewCreated: (InAppWebViewController webViewController) {
                 this.webViewController = webViewController;
                 //_controller.complete(webViewController);

@@ -49,9 +49,13 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
       ),
       body: !kIsWeb && (Platform.isAndroid || Platform.isIOS)
           ? InAppWebView(
-              initialUrl: sprintf(
-                widget.confirmFormUrl,
-                [widget.username],
+              initialUrlRequest: URLRequest(
+                url: Uri.parse(
+                  sprintf(
+                    widget.confirmFormUrl,
+                    [widget.username],
+                  ),
+                ),
               ),
               onWebViewCreated: (InAppWebViewController webViewController) {
                 this.webViewController = webViewController;
@@ -67,10 +71,10 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
 
   Future<void> _loadData() async {
     final cookiesManager = CookieManager.instance();
-    for (var cookie in SelcrsHelper.instance.cookieJar
+    for (var cookie in await SelcrsHelper.instance.cookieJar
         .loadForRequest(Uri.parse(SelcrsHelper.BASE_URL))) {
       cookiesManager.setCookie(
-        url: SelcrsHelper.BASE_URL,
+        url: Uri.parse(SelcrsHelper.BASE_URL),
         name: cookie.name,
         value: cookie.value,
       );
