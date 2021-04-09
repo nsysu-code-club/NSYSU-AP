@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
-import 'package:big5/big5.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -13,6 +12,8 @@ import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/comfirm_form_page.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'big5/big5.dart';
 
 class Utils {
   static String base64md5(String text) {

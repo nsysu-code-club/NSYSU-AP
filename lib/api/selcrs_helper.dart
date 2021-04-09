@@ -9,7 +9,7 @@ import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
-import 'package:big5/big5.dart';
+import 'package:nsysu_ap/utils/big5/big5.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';

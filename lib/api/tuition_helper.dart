@@ -1,13 +1,13 @@
 import 'dart:typed_data';
 
 import 'package:ap_common/callback/general_callback.dart';
-import 'package:big5/big5.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/widgets.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:html/parser.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
+import 'package:nsysu_ap/utils/big5/big5.dart';
 
 class TuitionHelper {
   static const BASE_PATH = 'https://tfstu.nsysu.edu.tw';

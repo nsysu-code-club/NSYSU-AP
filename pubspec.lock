@@ -78,13 +78,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.5.0"
-  big5:
-    dependency: "direct main"
-    description:
-      name: big5
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.4"
   boolean_selector:
     dependency: transitive
     description:
