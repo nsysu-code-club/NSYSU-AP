@@ -124,8 +124,8 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
     if (FirebaseUtils.isSupportRemoteConfig) {
       try {
         final RemoteConfig remoteConfig = await RemoteConfig.instance;
-        await remoteConfig.fetch(expiration: const Duration(hours: 1));
-        await remoteConfig.activateFetched();
+        await remoteConfig.fetch();
+        await remoteConfig.activate();
         pdfUrl = remoteConfig.getString(Constants.SCHEDULE_PDF_URL);
         downloadFdf(pdfUrl);
       } catch (exception) {

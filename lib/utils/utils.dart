@@ -35,8 +35,8 @@ class Utils {
     String confirmFormUrl = '';
     try {
       RemoteConfig remoteConfig = await RemoteConfig.instance;
-      await remoteConfig.fetch(expiration: const Duration(seconds: 10));
-      await remoteConfig.activateFetched();
+      await remoteConfig.fetch();
+      await remoteConfig.activate();
       confirmFormUrl = remoteConfig.getString(Constants.CONFIRM_FORM_URL);
       Preferences.getString(
         Constants.CONFIRM_FORM_URL,

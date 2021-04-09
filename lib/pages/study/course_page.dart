@@ -109,8 +109,8 @@ class CoursePageState extends State<CoursePage> {
           RemoteConfig remoteConfig;
           try {
             remoteConfig = await RemoteConfig.instance;
-            await remoteConfig.fetch(expiration: const Duration(seconds: 10));
-            await remoteConfig.activateFetched();
+            await remoteConfig.fetch();
+            await remoteConfig.activate();
             defaultSemesterCode =
                 remoteConfig?.getString(Constants.DEFAULT_COURSE_SEMESTER_CODE);
             String rawTimeCodeConfig =

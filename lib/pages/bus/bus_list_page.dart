@@ -102,8 +102,8 @@ class _BusListPageState extends State<BusListPage> {
     await Future.delayed(Duration(milliseconds: 100));
     final RemoteConfig remoteConfig = await RemoteConfig.instance;
     try {
-      await remoteConfig.fetch(expiration: const Duration(seconds: 10));
-      await remoteConfig.activateFetched();
+      await remoteConfig.fetch();
+      await remoteConfig.activate();
     } catch (e) {}
     busList = BusInfo.fromRawList(
       remoteConfig.getString(Constants.BUS_INFO_DATA),
