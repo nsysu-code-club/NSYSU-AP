@@ -23,6 +23,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
+import 'package:nsysu_ap/api/tow_car_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:ap_common/models/announcement_data.dart';
@@ -98,6 +99,21 @@ class HomePageState extends State<HomePage> {
     FirebaseAnalyticsUtils.instance.setUserProperty(
       AnalyticsConstants.LANGUAGE,
       AppLocalizations.locale.languageCode,
+    );
+    FirebaseUtils.initFcm(
+      onClick: (message) {
+        print(message.data);
+        if (message.data != null) {
+          if (message.data['type'] == 'tow_car') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TowCarHomePage(),
+              ),
+            );
+          }
+        }
+      },
     );
   }
 
