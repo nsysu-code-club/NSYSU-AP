@@ -1,4 +1,10 @@
 {
+  "805": {
+    "visible": false,
+    "date": "2021/04/11",
+    "zh-TW": "* 使用已遷移 Null-Safety 套件",
+    "en-US": "* Use migrated null-safety packages."
+  },
   "804": {
     "visible": false,
     "date": "2021/03/24",
