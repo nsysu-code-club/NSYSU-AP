@@ -14,7 +14,7 @@ dependencies:
 
   ap_common: ^0.16.0-nullsafety.1
   #   path: ../../GitHub-NKUST-ITC/ap_common
-  ap_common_firebase: 0.7.0-dev.1
+  ap_common_firebase: 0.7.0-dev.4
   #   path: ../ap_common_firebase
   ap_common_plugin: 0.3.0
   #     path: ../ap_common_plugin
