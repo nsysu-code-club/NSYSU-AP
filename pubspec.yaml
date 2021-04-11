@@ -12,7 +12,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  ap_common: ^0.16.0-nullsafety.0
+  ap_common: ^0.16.0-nullsafety.1
   #   path: ../../GitHub-NKUST-ITC/ap_common
   ap_common_firebase: 0.7.0-dev.1
   #   path: ../ap_common_firebase
@@ -41,6 +41,8 @@ dev_dependencies:
 #dependency_overrides:
 #  ap_common:
 #    path: ../../GitHub-NKUST-ITC/ap_common
+#  ap_common_firebase:
+#    path: ../ap_common_firebase
 
 flutter:
 
