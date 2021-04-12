@@ -54,7 +54,7 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
       body: ListView(
         children: [
           Hero(
-            tag: widget.towCarAlert.imageUrl,
+            tag: widget.towCarAlert.hashCode,
             child: CachedNetworkImage(
               height: 250.0,
               fit: BoxFit.cover,

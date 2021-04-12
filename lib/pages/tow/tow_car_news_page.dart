@@ -178,7 +178,7 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
                               child: Hero(
-                                tag: alert.imageUrl,
+                                tag: alert.hashCode,
                                 child: CachedNetworkImage(
                                   width: 68.0,
                                   imageUrl: alert.imageUrl,
