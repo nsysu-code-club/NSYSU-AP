@@ -29,38 +29,7 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
 
   AppLocalizations app;
 
-  List<TowCarAlert> towCarAlerts = [
-    TowCarAlert(
-      time: DateTime.now().subtract(
-        Duration(hours: 1),
-      ),
-      topic: 'P09',
-      viewCounts: 30,
-      title: '管院拖車快來救',
-      message: '管院拖車拉，發新年紅包了，快來救車，立刻馬上現在',
-      imageUrl: 'https://i.imgur.com/iHKvJUIb.jpg',
-    ),
-    TowCarAlert(
-      time: DateTime.now().subtract(
-        Duration(hours: 2),
-      ),
-      topic: 'P03',
-      viewCounts: 23,
-      title: '武二發紅包快來',
-      message: '管院拖車拉，發新年紅包了，快來救車，立刻馬上現在',
-      imageUrl: 'https://i.imgur.com/Iethorib.jpg',
-    ),
-    TowCarAlert(
-      time: DateTime.now().subtract(
-        Duration(days: 1),
-      ),
-      topic: 'P05',
-      viewCounts: 22,
-      title: 'L停大量猴子',
-      message: 'L停大量猴子，拿食物請注意',
-      imageUrl: 'https://i.imgur.com/2SCaPvbb.jpg',
-    ),
-  ];
+  List<TowCarAlert> towCarAlerts = [];
 
   _State state = _State.finish;
 
