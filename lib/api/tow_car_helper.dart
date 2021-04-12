@@ -160,7 +160,7 @@ class TowCarHelper {
 
   Future<TowCarAlert> getTowCarAlert({
     @required String alertId,
-    @required GeneralCallback<TowCarAlert> callback,
+    GeneralCallback<TowCarAlert> callback,
   }) async {
     try {
       var response = await dio.get(
