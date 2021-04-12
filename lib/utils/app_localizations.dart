@@ -51,6 +51,8 @@ class AppLocalizations {
 
   String get locationNotNearSchool => _vocabularies['locationNotNearSchool'];
 
+  String get unknownTime => _vocabularies['unknownTime'];
+
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
@@ -130,7 +132,7 @@ class AppLocalizations {
       'app_name': 'NSYSU AP',
       'update_note_content': '* Fix part of device home widget error.',
       'about_open_source_content':
-      'https://github.com/abc873693/NSYSU-AP\n\nThis project is licensed under the terms of the MIT license:\nThe MIT License (MIT)\n\nCopyright &#169; 2019 Rainvisitor\n\nThis project is Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.',
+          'https://github.com/abc873693/NSYSU-AP\n\nThis project is licensed under the terms of the MIT license:\nThe MIT License (MIT)\n\nCopyright &#169; 2019 Rainvisitor\n\nThis project is Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.',
       'graduationCheckChecklist': 'Graduation check checklist',
       'missingRequiredCourses': 'Missing Required Courses',
       'generalEducationCourse': 'General Education Courses',
@@ -142,11 +144,11 @@ class AppLocalizations {
       'practiceSituation': 'Practice Situation',
       'courseClickHint': 'Click subject show more.',
       'graduationCheckChecklistHint':
-      'The selected credits for this semester are considered as passing prequalification.\nThe information is for reference only. Please refer to the school service system.',
+          'The selected credits for this semester are considered as passing prequalification.\nThe information is for reference only. Please refer to the school service system.',
       'graduationCheckChecklistEmpty': 'No graduation check information yet',
       'graduationCheckChecklistSummary': 'Summary',
       'firstLoginHint':
-      'For first-time login, please fill in the last six number of your ID as your password',
+          'For first-time login, please fill in the last six number of your ID as your password',
       'tuitionAndFees': 'Tuition Payment Status',
       'tuitionAndFeesItemTitleFormat': 'Amount：%s\nDate of Payment：%s',
       'admissionGuide': 'Admission Guide',
@@ -179,12 +181,13 @@ class AppLocalizations {
       'agreeAndUpload': 'Agree and Upload',
       'notLocationPermissionHint': 'Not Location Permission',
       'locationNotNearSchool': 'Your location not in school, can\'t publish.',
+      'unknownTime': 'Unknown Time'
     },
     'zh': {
       'app_name': '中山校務通',
       'update_note_content': '* 修正部分裝置桌面小工具無法顯示',
       'about_open_source_content':
-      'https://github.com/abc873693/NSYSU-AP\n\nThis project is licensed under the terms of the MIT license:\nThe MIT License (MIT)\n\nCopyright &#169; 2019 Rainvisitor\n\nThis project is Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.',
+          'https://github.com/abc873693/NSYSU-AP\n\nThis project is licensed under the terms of the MIT license:\nThe MIT License (MIT)\n\nCopyright &#169; 2019 Rainvisitor\n\nThis project is Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.',
       'graduationCheckChecklist': '應屆畢業生成績檢核表',
       'missingRequiredCourses': '學系必修課程缺修',
       'generalEducationCourse': '通識課程',
@@ -231,6 +234,7 @@ class AppLocalizations {
       'agreeAndUpload': '同意並開始上傳',
       'notLocationPermissionHint': '尚未取得定位權限',
       'locationNotNearSchool': '您的位置尚未在學校附近，無法發布',
+      'unknownTime': '未知時間'
     },
   };
 }

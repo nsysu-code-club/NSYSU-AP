@@ -217,7 +217,9 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
                             Column(
                               children: [
                                 Text(
-                                  alert.ago,
+                                  alert.time == null
+                                      ? app.unknownTime
+                                      : alert.ago,
                                   style: TextStyle(
                                     color: ApTheme.of(context).blueText,
                                     fontSize: 14.0,

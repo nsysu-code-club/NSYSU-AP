@@ -123,7 +123,9 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            dateFormat.format(widget.towCarAlert.time),
+                            widget.towCarAlert.time == null
+                                ? app.unknownTime
+                                : dateFormat.format(widget.towCarAlert.time),
                             style: _subContentStyle,
                             textAlign: TextAlign.center,
                           ),
