@@ -9,7 +9,6 @@ import 'package:nsysu_ap/models/tow_car_login_data.dart';
 import '../models/tow_car_alert_data.dart';
 
 export 'package:ap_common/callback/general_callback.dart';
-export 'package:ap_common/models/announcement_login_data.dart';
 
 enum AnnouncementLoginType {
   normal,
@@ -38,8 +37,6 @@ class TowCarHelper {
   static String host = 'nsysu.taki.dog';
 
   Dio dio;
-
-  AnnouncementLoginType loginType = AnnouncementLoginType.normal;
 
   String username;
   String password;
@@ -119,7 +116,6 @@ class TowCarHelper {
       setAuthorization(loginData.key);
       this.username = username;
       this.password = password;
-      this.loginType = AnnouncementLoginType.normal;
       return callback == null ? loginData : callback.onSuccess(loginData);
     } on DioError catch (dioError) {
       if (callback == null)

@@ -194,7 +194,7 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
                                 children: [
                                   SizedBox(height: 8.0),
                                   Text(
-                                    alert.title,
+                                    alert.title ?? '',
                                     style: TextStyle(
                                       color: ApTheme.of(context).blueText,
                                       fontSize: 17.0,

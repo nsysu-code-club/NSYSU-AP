@@ -103,7 +103,7 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            "${widget.towCarAlert.viewCounts}",
+                            "${widget.towCarAlert.viewCounts ?? 0}",
                             style: _subContentStyle,
                           ),
                           SizedBox(height: 8.0),
