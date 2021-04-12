@@ -35,7 +35,7 @@ class TowCarHelper {
 
   static TowCarHelper _instance;
 
-  static String host = '';
+  static String host = 'nsysu.taki.dog';
 
   Dio dio;
 
@@ -108,7 +108,7 @@ class TowCarHelper {
   }) async {
     try {
       var response = await dio.post(
-        '/login',
+        '/auth/login',
         data: {
           'username': username,
           'password': password,
@@ -184,7 +184,7 @@ class TowCarHelper {
   }) async {
     try {
       var response = await dio.post(
-        "/application",
+        "/alert/report",
         data: data.toUpdateJson(),
       );
       return callback == null ? response : callback.onSuccess(response);
