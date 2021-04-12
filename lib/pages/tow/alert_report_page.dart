@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:ap_common/api/imgur_helper.dart';
+import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/ap_network_image.dart';
+import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:flutter/foundation.dart';
@@ -23,7 +25,7 @@ import '../../utils/app_localizations.dart';
 import 'tow_car_home_page.dart';
 
 enum _ImgurUploadState { no_file, uploading, done }
-enum _State { first, not_login, prepare }
+enum _State { first, not_login, login_ing, login_error, prepare }
 
 class TowCarAlertReportPage extends StatefulWidget {
   @override
@@ -133,9 +135,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
                     ),
                   );
                   if (result ?? false) {
-                    state = SelcrsHelper.instance.isLogin
-                        ? _State.prepare
-                        : _State.not_login;
+                    checkLogin();
                   }
                   setState(() {
                     ShareDataWidget.of(context).data.isLogin = true;
@@ -148,7 +148,6 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
         );
         break;
       case _State.prepare:
-      default:
         return Form(
           key: _formKey,
           child: ListView(
@@ -177,6 +176,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
               SizedBox(height: dividerHeight),
               InkWell(
                 onTap: () {
+                  FocusScope.of(context).unfocus();
                   showDialog(
                     context: context,
                     builder: (_) => SimpleOptionDialog(
@@ -253,6 +253,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
               SizedBox(height: 12.0),
               InkWell(
                 onTap: () async {
+                  FocusScope.of(context).unfocus();
                   PickedFile image = await ApUtils.pickImage();
                   if (image != null) {
                     setState(
@@ -315,6 +316,20 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
           ),
         );
         break;
+      case _State.login_error:
+        return InkWell(
+          onTap: checkLogin,
+          child: HintContent(
+            icon: ApIcon.error,
+            content: ap.somethingError,
+          ),
+        );
+        break;
+      case _State.login_ing:
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+        break;
     }
   }
 
@@ -358,18 +373,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
   void _submit() async {
     if (_formKey.currentState.validate() &&
         imgurUploadState == _ImgurUploadState.done) {
-      final _currentPosition = await _getCurrentLocation();
-      if (_currentPosition == null) return;
-      if (!Utils.checkIsInSchool(_currentPosition)) {
-        ApUtils.showToast(context, app.locationNotNearSchool);
-        return null;
-      }
-      final data = TowCarAlert(
-        title: _title.text,
-        topic: TowCarConfig.of(context).carParkAreas[index].fcmTopic,
-        message: _description.text,
-        imageUrl: _imgUrl,
-      );
+      FocusScope.of(context).unfocus();
       showDialog(
         context: context,
         builder: (BuildContext context) => WillPopScope(
@@ -379,6 +383,19 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
           },
         ),
         barrierDismissible: false,
+      );
+      final _currentPosition = await _getCurrentLocation();
+      if (_currentPosition == null) return;
+      if (!Utils.checkIsInSchool(_currentPosition)) {
+        ApUtils.showToast(context, app.locationNotNearSchool);
+        Navigator.pop(context);
+        return null;
+      }
+      final data = TowCarAlert(
+        title: _title.text,
+        topic: TowCarConfig.of(context).carParkAreas[index].fcmTopic,
+        message: _description.text,
+        imageUrl: _imgUrl,
       );
       TowCarHelper.instance.addApplication(
         data: data,
@@ -403,6 +420,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
   }
 
   FutureOr _getData() {
+    checkLogin();
     setState(() {
       _area.text = TowCarConfig.of(context).carParkAreas[index].name;
     });
@@ -433,5 +451,24 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
       }
     }
     return await location.getLocation();
+  }
+
+  void checkLogin() {
+    if (SelcrsHelper.instance.isLogin) {
+      setState(() => state = _State.login_ing);
+      TowCarHelper.instance.login(
+        username: SelcrsHelper.instance.username,
+        password: SelcrsHelper.instance.password,
+        callback: GeneralCallback(
+          onFailure: (_) => setState(() => state = _State.login_error),
+          onError: (_) => setState(() => state = _State.login_error),
+          onSuccess: (data) {
+            print(data.key);
+            setState(() => state = _State.prepare);
+          },
+        ),
+      );
+    } else
+      setState(() => state = _State.not_login);
   }
 }

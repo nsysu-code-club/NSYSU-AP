@@ -181,7 +181,8 @@ class AppLocalizations {
       'agreeAndUpload': 'Agree and Upload',
       'notLocationPermissionHint': 'Not Location Permission',
       'locationNotNearSchool': 'Your location not in school, can\'t publish.',
-      'unknownTime': 'Unknown Time'
+      'unknownTime': 'Unknown Time',
+      'success': 'Success'
     },
     'zh': {
       'app_name': '中山校務通',
@@ -234,7 +235,8 @@ class AppLocalizations {
       'agreeAndUpload': '同意並開始上傳',
       'notLocationPermissionHint': '尚未取得定位權限',
       'locationNotNearSchool': '您的位置尚未在學校附近，無法發布',
-      'unknownTime': '未知時間'
+      'unknownTime': '未知時間',
+      'success': '成功'
     },
   };
 }
