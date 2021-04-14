@@ -125,7 +125,7 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
                           Text(
                             widget.towCarAlert.time == null
                                 ? app.unknownTime
-                                : dateFormat.format(widget.towCarAlert.time),
+                                : dateFormat.format(widget.towCarAlert.time.toLocal()),
                             style: _subContentStyle,
                             textAlign: TextAlign.center,
                           ),
