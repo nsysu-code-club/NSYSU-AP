@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:ap_common/callback/general_callback.dart';
-import 'package:ap_common/l10n/l10n.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show required;
 import 'package:nsysu_ap/models/tow_car_login_data.dart';
@@ -22,9 +22,6 @@ extension DioErrorExtension on DioError {
 
   bool get isNotPermission =>
       type == DioErrorType.response && response.statusCode == 403;
-
-  bool get isNotFoundAnnouncement =>
-      type == DioErrorType.response && response.statusCode == 404;
 }
 
 class TowCarHelper {
@@ -80,6 +77,7 @@ class TowCarHelper {
   }
 
   void handleCrudError(DioError dioError, GeneralCallback<Response> callback) {
+    print(dioError.falconMessage);
     if (dioError.isNotPermission)
       callback.onError(
         GeneralResponse(
@@ -87,11 +85,11 @@ class TowCarHelper {
           message: ApLocalizations.current.noPermissionHint,
         ),
       );
-    else if (dioError.isNotFoundAnnouncement)
+    else if (dioError.isJsonResponse)
       callback.onError(
         GeneralResponse(
           statusCode: NOT_PERMISSION,
-          message: ApLocalizations.current.notFoundData,
+          message: dioError.falconMessage,
         ),
       );
     else

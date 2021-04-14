@@ -410,7 +410,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
           },
           onError: (GeneralResponse response) {
             Navigator.pop(context);
-            ApUtils.showToast(context, ap.somethingError);
+            ApUtils.showToast(context, response.message);
           },
         ),
       );
