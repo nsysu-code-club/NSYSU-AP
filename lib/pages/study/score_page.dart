@@ -26,8 +26,8 @@ class ScorePageState extends State<ScorePage> {
   ScoreSemesterData scoreSemesterData;
   ScoreData scoreData;
 
-  List<String> years;
-  List<String> semesters;
+  List<String> years = [];
+  List<String> semesters = [];
 
   var currentYearsIndex = 0;
   var currentSemesterIndex = 0;
