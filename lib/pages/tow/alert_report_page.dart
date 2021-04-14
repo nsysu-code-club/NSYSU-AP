@@ -95,11 +95,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
                 child: Text(app.agreeAndUpload),
                 onPressed: () {
                   Preferences.setBool(Constants.AGREE_TOW_CAR_POLICY, true);
-                  setState(() {
-                    state = SelcrsHelper.instance.isLogin
-                        ? _State.prepare
-                        : _State.not_login;
-                  });
+                  checkLogin();
                 },
               ),
             ),
@@ -420,7 +416,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
   }
 
   FutureOr _getData() {
-    checkLogin();
+    if (state != _State.first) checkLogin();
     setState(() {
       _area.text = TowCarConfig.of(context).carParkAreas[index].name;
     });
