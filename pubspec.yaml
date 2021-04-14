@@ -27,7 +27,6 @@ dependencies:
   crypto: ^3.0.1
   dio: ^4.0.0
   dio_cookie_manager: ^2.0.0
-  extended_image: ^4.0.1
   flutter_inappwebview: ^5.3.2
   timeago: ^3.0.2
   location: ^4.1.1
