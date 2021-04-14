@@ -45,6 +45,7 @@ class TowCarAlert {
     this.imageUrl,
     this.viewCounts,
     this.time,
+    this.reviewStatus,
   });
 
   String topic;
@@ -53,6 +54,7 @@ class TowCarAlert {
   String imageUrl;
   int viewCounts;
   DateTime time;
+  bool reviewStatus;
 
   String get ago => timeago.format(
         time,
@@ -65,6 +67,7 @@ class TowCarAlert {
     String message,
     String imageUrl,
     DateTime time,
+    bool reviewStatus,
   }) =>
       TowCarAlert(
         topic: topic ?? this.topic,
@@ -72,6 +75,7 @@ class TowCarAlert {
         message: message ?? this.message,
         imageUrl: imageUrl ?? this.imageUrl,
         time: time ?? this.time,
+        reviewStatus: reviewStatus ?? this.reviewStatus,
       );
 
   factory TowCarAlert.fromRawJson(String str) =>
@@ -85,6 +89,7 @@ class TowCarAlert {
         message: json["message"] == null ? null : json["message"],
         imageUrl: json["imageUrl"] == null ? null : json["imageUrl"],
         time: json["time"] == null ? null : DateTime.parse(json["time"]),
+        reviewStatus: json['review_status'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -93,6 +98,7 @@ class TowCarAlert {
         "message": message == null ? null : message,
         "imageUrl": imageUrl == null ? null : imageUrl,
         "time": time == null ? null : time.toIso8601String(),
+        "review_status": reviewStatus,
       };
 
   Map<String, dynamic> toUpdateJson() => {

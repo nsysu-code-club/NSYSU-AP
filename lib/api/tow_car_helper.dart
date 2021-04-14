@@ -141,11 +141,13 @@ class TowCarHelper {
       var response = await dio.get(
         "/alert",
       );
-      var data = TowCarAlertData(data: []);
+      final List<TowCarAlert> filterList = [];
       if (response.statusCode != 204) {
-        data = TowCarAlertData.fromJson(response.data);
+        final towCarData = TowCarAlertData.fromJson(response.data);
+        for (var item in towCarData.data)
+          if (item.reviewStatus ?? false) filterList.add(item);
       }
-      return (callback == null) ? data.data : callback.onSuccess(data.data);
+      return (callback == null) ? filterList : callback.onSuccess(filterList);
     } on DioError catch (dioError) {
       if (callback == null)
         throw dioError;
