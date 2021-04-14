@@ -1,4 +1,10 @@
 {
+  "900": {
+    "visible": true,
+    "date": "2021/04/14",
+    "zh-TW": "* 加入拖車小幫手.",
+    "en-US": "* Add tow car helper."
+  },
   "806": {
     "visible": false,
     "date": "2021/04/11",
