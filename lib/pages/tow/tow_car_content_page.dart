@@ -1,8 +1,11 @@
 import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
+import 'package:ap_common/utils/ap_utils.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:photo_view/photo_view.dart';
 
 import '../../models/car_park_area.dart';
 import '../../models/tow_car_alert_data.dart';
@@ -55,14 +58,34 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
         children: [
           Hero(
             tag: widget.towCarAlert.hashCode,
-            child: CachedNetworkImage(
-              height: 250.0,
-              fit: BoxFit.cover,
-              imageUrl: widget.towCarAlert.imageUrl,
-              placeholder: (context, url) => Center(
-                child: CircularProgressIndicator(),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(
+                        title: Text(widget.towCarAlert.title),
+                      ),
+                      body: PhotoView(
+                        imageProvider: (ApUtils.isSupportCacheNetworkImage
+                            ? CachedNetworkImageProvider(
+                                widget.towCarAlert.imageUrl)
+                            : NetworkImage(widget.towCarAlert.imageUrl)),
+                      ),
+                    ),
+                  ),
+                );
+              },
+              child: CachedNetworkImage(
+                height: 250.0,
+                fit: BoxFit.cover,
+                imageUrl: widget.towCarAlert.imageUrl,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(),
+                ),
+                errorWidget: (context, url, error) => Icon(ApIcon.error),
               ),
-              errorWidget: (context, url, error) => Icon(ApIcon.error),
             ),
           ),
           Padding(
@@ -125,7 +148,8 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
                           Text(
                             widget.towCarAlert.time == null
                                 ? app.unknownTime
-                                : dateFormat.format(widget.towCarAlert.time.toLocal()),
+                                : dateFormat
+                                    .format(widget.towCarAlert.time.toLocal()),
                             style: _subContentStyle,
                             textAlign: TextAlign.center,
                           ),
