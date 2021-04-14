@@ -75,7 +75,10 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(app.towCarUploadPolicy),
+            Text(
+              app.towCarUploadPolicy,
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: 16.0),
             FractionallySizedBox(
               widthFactor: 0.7,
