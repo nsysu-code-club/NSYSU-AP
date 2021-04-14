@@ -35,6 +35,118 @@
       "imageUrl": "https://i.imgur.com/pS8opJN.png",
       "latitude": 22.6266366,
       "longitude": 120.2659347
+    },
+    {
+      "fcmTopic": "P06",
+      "name": "生態步道區（來賓）",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.627401,
+      "longitude": 120.268770
+    },
+    {
+      "fcmTopic": "P07",
+      "name": "活動中心前路橋下",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.628102,
+      "longitude": 120.264429
+    },
+    {
+      "fcmTopic": "P08",
+      "name": "蔣公行館後方路橋下",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.627284,
+      "longitude": 120.264324
+    },
+    {
+      "fcmTopic": "P09",
+      "name": "海工機車停車場",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.628298,
+      "longitude": 120.263212
+    },
+    {
+      "fcmTopic": "P10",
+      "name": "海科院機車停車場",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.630165,
+      "longitude": 120.262161
+    },
+    {
+      "fcmTopic": "P11",
+      "name": "海科院機車停車場（來賓）",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.630383,
+      "longitude": 120.261715
+    },
+    {
+      "fcmTopic": "P12",
+      "name": "海科院造波池旁",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.632056,
+      "longitude": 120.261005
+    },
+    {
+      "fcmTopic": "P13",
+      "name": "文學院機車停車場（大）",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.634351,
+      "longitude": 120.260545
+    },
+    {
+      "fcmTopic": "P14",
+      "name": "文學院機車停車場（小）",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.634229,
+      "longitude": 120.260713
+    },
+    {
+      "fcmTopic": "P15",
+      "name": "文藝大樓東側彎道",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.633883,
+      "longitude": 120.262310
+    },
+    {
+      "fcmTopic": "P16",
+      "name": "國研機車停車場（來賓）",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.624181,
+      "longitude": 120.265946
+    },
+    {
+      "fcmTopic": "P17",
+      "name": "海堤機車停車場（來賓）",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.624105,
+      "longitude": 120.263710
+    },
+    {
+      "fcmTopic": "P18",
+      "name": "室外籃球場旁",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.623920,
+      "longitude": 120.264359
+    },
+    {
+      "fcmTopic": "P19",
+      "name": "單槓場旁",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.623755,
+      "longitude": 120.264362
+    },
+    {
+      "fcmTopic": "P20",
+      "name": "網球場旁",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.623767,
+      "longitude": 120.264079
+    },
+    {
+      "fcmTopic": "P21",
+      "name": "司令臺後方游泳池前",
+      "imageUrl": "https://i.imgur.com/pS8opJN.png",
+      "latitude": 22.623084,
+      "longitude": 120.264093
     }
   ]
 }
