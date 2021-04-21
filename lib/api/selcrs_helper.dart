@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/course_data.dart';
 import 'package:ap_common/models/general_response.dart';
@@ -133,7 +131,7 @@ class SelcrsHelper {
           'INTYPE': '1',
         },
       );
-      String text = utf8.decode(scoreResponse.data);
+      String text = big5.decode(scoreResponse.data);
 //      debugPrint(text);
       if (text.contains("資料錯誤請重新輸入")) {
         return callback?.onError(
