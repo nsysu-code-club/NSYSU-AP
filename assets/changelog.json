@@ -1,4 +1,10 @@
 {
+  "902": {
+    "visible": true,
+    "date": "2021/04/21",
+    "zh-TW": "* 修正無法正確顯示密碼錯誤",
+    "en-US": "* Fix can't show password error hint."
+  },
   "901": {
     "visible": true,
     "date": "2021/04/14",
