@@ -12,7 +12,6 @@ import 'package:nsysu_ap/api/bus_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/bus_info.dart';
 import 'package:nsysu_ap/pages/bus/bus_time_page.dart';
-import 'package:nsysu_ap/utils/app_localizations.dart';
 
 enum _State { loading, finish, error }
 
@@ -100,7 +99,7 @@ class _BusListPageState extends State<BusListPage> {
 
   Future<void> _getDataByConfig() async {
     await Future.delayed(Duration(milliseconds: 100));
-    final RemoteConfig remoteConfig = await RemoteConfig.instance;
+    final RemoteConfig remoteConfig = RemoteConfig.instance;
     try {
       await remoteConfig.fetch();
       await remoteConfig.activate();

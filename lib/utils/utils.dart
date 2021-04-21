@@ -34,7 +34,7 @@ class Utils {
   static void openConfirmForm(BuildContext context, String username) async {
     String confirmFormUrl = '';
     try {
-      RemoteConfig remoteConfig = await RemoteConfig.instance;
+      RemoteConfig remoteConfig = RemoteConfig.instance;
       await remoteConfig.fetch();
       await remoteConfig.activate();
       confirmFormUrl = remoteConfig.getString(Constants.CONFIRM_FORM_URL);

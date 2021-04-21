@@ -483,7 +483,7 @@ class HomePageState extends State<HomePage> {
     if (currentVersion != packageInfo.buildNumber) {
       final rawData = await FileAssets.changelogData;
       final updateNoteContent =
-      rawData["${packageInfo.buildNumber}"][ApLocalizations.current.locale];
+          rawData["${packageInfo.buildNumber}"][ApLocalizations.current.locale];
       DialogUtils.showUpdateContent(
         context,
         "v${packageInfo.version}\n"
@@ -495,8 +495,10 @@ class HomePageState extends State<HomePage> {
       );
     }
     if (!Constants.isInDebugMode) {
-      VersionInfo versionInfo =
-          await FirebaseRemoteConfigUtils.getVersionInfo();
+      RemoteConfig remoteConfig = RemoteConfig.instance;
+      await remoteConfig.fetch();
+      await remoteConfig.activate();
+      VersionInfo versionInfo = remoteConfig.versionInfo;
       if (versionInfo != null)
         DialogUtils.showNewVersionContent(
           context: context,

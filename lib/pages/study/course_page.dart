@@ -103,7 +103,7 @@ class CoursePageState extends State<CoursePage> {
           semesterData = data;
           RemoteConfig remoteConfig;
           try {
-            remoteConfig = await RemoteConfig.instance;
+            remoteConfig = RemoteConfig.instance;
             await remoteConfig.fetch();
             await remoteConfig.activate();
             defaultSemesterCode =
