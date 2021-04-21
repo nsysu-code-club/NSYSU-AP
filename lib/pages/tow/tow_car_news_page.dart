@@ -5,6 +5,7 @@ import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/widgets/hint_content.dart';
+import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/tow_car_helper.dart';
@@ -39,6 +40,10 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
 
   @override
   void initState() {
+    FirebaseAnalyticsUtils.instance?.setCurrentScreen(
+      "TowCarNewsPage",
+      "tow_car_news_page.dart",
+    );
     Future.microtask(_getData);
     super.initState();
   }
@@ -139,6 +144,8 @@ class _TowCarNewsPageState extends State<TowCarNewsPage>
                             carParkAreas: carParkAreas,
                           ),
                         );
+                        FirebaseAnalyticsUtils.instance
+                            ?.logEvent('show_tow_car_alert_content');
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),

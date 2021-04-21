@@ -10,6 +10,7 @@ import 'package:ap_common/widgets/ap_network_image.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common/widgets/option_dialog.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
+import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
@@ -61,6 +62,10 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
   @override
   void initState() {
     Future.microtask(_getData);
+    FirebaseAnalyticsUtils.instance?.setCurrentScreen(
+      "TowCarAlertReportPage",
+      "tow_car_alert_report_page.dart",
+    );
     super.initState();
   }
 
@@ -388,6 +393,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
       if (!Utils.checkIsInSchool(_currentPosition)) {
         ApUtils.showToast(context, app.locationNotNearSchool);
         Navigator.pop(context);
+        FirebaseAnalyticsUtils.instance?.logEvent('tow_car_not_in_school');
         return null;
       }
       final data = TowCarAlert(
@@ -396,12 +402,14 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
         message: _description.text,
         imageUrl: _imgUrl,
       );
+      FirebaseAnalyticsUtils.instance?.logEvent('tow_car_alert_report');
       TowCarHelper.instance.addApplication(
         data: data,
         callback: GeneralCallback(
           onSuccess: (Response<dynamic> data) {
             Navigator.pop(context);
             ApUtils.showToast(context, app.success);
+            FirebaseAnalyticsUtils.instance?.logEvent('tow_car_alert_report_success');
           },
           onFailure: (DioError e) {
             Navigator.pop(context);

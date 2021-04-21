@@ -4,12 +4,10 @@ import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
-import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:nsysu_ap/api/bus_helper.dart';
-import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/bus_info.dart';
 import 'package:nsysu_ap/pages/bus/bus_time_page.dart';
 
@@ -95,19 +93,6 @@ class _BusListPageState extends State<BusListPage> {
           },
         );
     }
-  }
-
-  Future<void> _getDataByConfig() async {
-    await Future.delayed(Duration(milliseconds: 100));
-    final RemoteConfig remoteConfig = RemoteConfig.instance;
-    try {
-      await remoteConfig.fetch();
-      await remoteConfig.activate();
-    } catch (e) {}
-    busList = BusInfo.fromRawList(
-      remoteConfig.getString(Constants.BUS_INFO_DATA),
-    );
-    setState(() {});
   }
 
   Future<void> _getData() async {

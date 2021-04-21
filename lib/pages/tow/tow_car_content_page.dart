@@ -2,6 +2,7 @@ import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -41,6 +42,15 @@ class _TowCarContentPageState extends State<TowCarContentPage> {
         fontSize: 20.0,
         fontWeight: FontWeight.w900,
       );
+
+  @override
+  void initState() {
+    FirebaseAnalyticsUtils.instance?.setCurrentScreen(
+      "TowCarContentPage",
+      "tow_car_content_page.dart",
+    );
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

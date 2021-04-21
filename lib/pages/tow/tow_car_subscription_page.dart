@@ -1,5 +1,6 @@
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
+import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/car_park_area.dart';
@@ -25,6 +26,10 @@ class _TowCarSubscriptionPageState extends State<TowCarSubscriptionPage>
 
   @override
   void initState() {
+    FirebaseAnalyticsUtils.instance?.setCurrentScreen(
+      "TowCarSubscriptionPage",
+      "tow_car_subscription_page.dart",
+    );
     super.initState();
   }
 
