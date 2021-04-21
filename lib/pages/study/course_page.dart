@@ -41,8 +41,6 @@ class CoursePageState extends State<CoursePage> {
   String get courseNotifyCacheKey =>
       semesterData?.defaultSemester?.code ?? '1091';
 
-  Future<void> future;
-
   @override
   void initState() {
     super.initState();
@@ -52,7 +50,7 @@ class CoursePageState extends State<CoursePage> {
       tag: '${SelcrsHelper.instance.username}_latest',
       newTag: courseNotifyCacheKey,
     );
-    future = _getSemester();
+    Future.microtask(() => _getSemester());
   }
 
   @override
@@ -63,25 +61,22 @@ class CoursePageState extends State<CoursePage> {
   @override
   Widget build(BuildContext context) {
     ap = ApLocalizations.of(context);
-    return FutureBuilder(
-      future: future,
-      builder: (_, __) => CourseScaffold(
-        state: state,
-        courseData: courseData,
-        notifyData: notifyData,
-        semesterData: semesterData,
-        onSelect: (index) {
-          this.semesterData.currentIndex = index;
-          _getCourseTables();
-        },
-        onRefresh: _getCourseTables,
-        customHint: isOffline ? ap.offlineCourse : null,
-        enableNotifyControl: semesterData != null &&
-            semesterData?.currentSemester?.code == defaultSemesterCode,
-        courseNotifySaveKey: courseNotifyCacheKey,
-        enableCaptureCourseTable: true,
-        actions: <Widget>[],
-      ),
+    return CourseScaffold(
+      state: state,
+      courseData: courseData,
+      notifyData: notifyData,
+      semesterData: semesterData,
+      onSelect: (index) {
+        this.semesterData.currentIndex = index;
+        _getCourseTables();
+      },
+      onRefresh: _getCourseTables,
+      customHint: isOffline ? ap.offlineCourse : null,
+      enableNotifyControl: semesterData != null &&
+          semesterData?.currentSemester?.code == defaultSemesterCode,
+      courseNotifySaveKey: courseNotifyCacheKey,
+      enableCaptureCourseTable: true,
+      actions: <Widget>[],
     );
   }
 
