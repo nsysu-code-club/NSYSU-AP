@@ -145,7 +145,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void getUserInfo() {
     SelcrsHelper.instance.getUserInfo(
       callback: GeneralCallback<UserInfo>(
-        onFailure: (DioError e) => ApUtils.handleDioError(context, e),
+        onFailure: (DioError e) => ApUtils.showToast(context, e.i18nMessage),
         onError: (GeneralResponse e) =>
             ApUtils.showToast(context, ApLocalizations.current.somethingError),
         onSuccess: (UserInfo data) {
