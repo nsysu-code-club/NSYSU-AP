@@ -504,6 +504,9 @@ class HomePageState extends State<HomePage> {
           context: context,
           iOSAppId: '146752219',
           defaultUrl: 'https://www.facebook.com/NKUST.ITC/',
+          githubRepositoryName: 'nsysu-code-club/NSYSU-AP',
+          windowsPath:
+              'https://github.com/NKUST-ITC/nsysu-code-club/NSYSU-AP/releases/download/%s/nsysu_ap_windows.zip',
           appName: app.appName,
           versionInfo: versionInfo,
         );

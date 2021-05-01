@@ -1,0 +1,50 @@
+{
+  "903": {
+    "visible": true,
+    "date": "2021/05/01",
+    "zh-TW": "* 修正無法正確顯示密碼錯誤",
+    "en-US": "* Fix can't show password error hint."
+  },
+  "902": {
+    "visible": false,
+    "date": "2021/04/21",
+    "zh-TW": "* 修正無法正確顯示密碼錯誤",
+    "en-US": "* Fix can't show password error hint."
+  },
+  "901": {
+    "visible": true,
+    "date": "2021/04/14",
+    "zh-TW": "* 加入拖車小幫手.",
+    "en-US": "* Add tow car helper."
+  },
+  "900": {
+    "visible": false,
+    "date": "2021/04/14",
+    "zh-TW": "* 加入拖車小幫手.",
+    "en-US": "* Add tow car helper."
+  },
+  "806": {
+    "visible": false,
+    "date": "2021/04/11",
+    "zh-TW": "* 修正拖車小幫手API串接",
+    "en-US": "* 修正拖車小幫手API串接"
+  },
+  "805": {
+    "visible": false,
+    "date": "2021/04/11",
+    "zh-TW": "* 使用已遷移 Null-Safety 套件",
+    "en-US": "* Use migrated null-safety packages."
+  },
+  "804": {
+    "visible": false,
+    "date": "2021/03/24",
+    "zh-TW": "* 測試拖車小幫手 UI",
+    "en-US": "* Test tow car helper UI."
+  },
+  "803": {
+    "visible": true,
+    "date": "2021/03/04",
+    "zh-TW": "* 修正部分裝置桌面小工具無法顯示",
+    "en-US": "* Fix part of device home widget error."
+  }
+}
