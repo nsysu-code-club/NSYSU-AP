@@ -1,3 +1,4 @@
+[![Build Test](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/workflow.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/workflow.yml)
 # 中山校務通
 
  提供中山大學學生查詢基本校務系統功能，由 Google 開源跨平台框架 [Flutter](https://flutter.dev/) 開發
