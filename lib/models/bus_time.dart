@@ -74,7 +74,7 @@ class BusTime {
     else
       return List<BusTime>.from(
         rawStringList.map(
-          (Map<String, dynamic> x) => BusTime.fromJson(x),
+          (dynamic x) => BusTime.fromJson(x),
         ),
       );
   }
