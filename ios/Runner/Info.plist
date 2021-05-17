@@ -72,6 +72,8 @@
 	<string>Feature sure user in school.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Feature sure user in school.</string>
+    <key>NSUserTrackingUsageDescription</key>
+    <string>Feature for improve app.</string>
 	<key>CFBundleURLTypes</key>
     <array>
     	<dict>
