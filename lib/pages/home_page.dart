@@ -99,7 +99,7 @@ class HomePageState extends State<HomePage> {
       }
     });
     FirebaseAnalyticsUtils.instance.setUserProperty(
-      AnalyticsConstants.LANGUAGE,
+      AnalyticsConstants.language,
       AppLocalizations.locale.languageCode,
     );
     FirebaseUtils.initFcm(

@@ -44,7 +44,7 @@ void main() async {
 void _migrate700() {
   CourseData.migrateFrom0_10();
   Preferences.setBool(
-    ApConstants.SHOW_COURSE_SEARCH_BUTTON,
+    ApConstants.showCourseSearchButton,
     Preferences.getBool(
       Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
       true,

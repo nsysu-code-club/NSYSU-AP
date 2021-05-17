@@ -93,16 +93,16 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
               (Locale locale, Iterable<Locale> supportedLocales) {
             String languageCode = Preferences.getString(
               Constants.PREF_LANGUAGE_CODE,
-              ApSupportLanguageConstants.SYSTEM,
+              ApSupportLanguageConstants.system,
             );
-            if (languageCode == ApSupportLanguageConstants.SYSTEM)
+            if (languageCode == ApSupportLanguageConstants.system)
               this.locale = ApLocalizations.delegate.isSupported(locale)
                   ? locale
                   : Locale('en');
             else
               this.locale = Locale(
                 languageCode,
-                languageCode == ApSupportLanguageConstants.ZH ? 'TW' : null,
+                languageCode == ApSupportLanguageConstants.zh ? 'TW' : null,
               );
             AnnouncementHelper.instance.setLocale(this.locale);
             return this.locale;

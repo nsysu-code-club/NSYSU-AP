@@ -128,14 +128,14 @@ class CoursePageState extends State<CoursePage> {
             );
           }
           var semester = Preferences.getString(
-            ApConstants.CURRENT_SEMESTER_CODE,
-            ApConstants.SEMESTER_LATEST,
+            ApConstants.currentSemesterCode,
+            ApConstants.semesterLatest,
           );
           if (semester != defaultSemesterCode) {
             CourseNotifyData.clearOldVersionNotification(
                 tag: semester, newTag: defaultSemesterCode);
             Preferences.setString(
-              ApConstants.CURRENT_SEMESTER_CODE,
+              ApConstants.currentSemesterCode,
               defaultSemesterCode,
             );
           }
