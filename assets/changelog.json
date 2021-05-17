@@ -1,6 +1,12 @@
 {
-  "904": {
+  "905": {
     "visible": true,
+    "date": "2021/05/18",
+    "zh-TW": "* 修正無法正確顯示密碼錯誤\n* 改善英文文法\n* 修正公車解析錯誤",
+    "en-US": "* Fix can't show password error hint.\n* Improve grammar english\n* Fix bus display error."
+  },
+  "904": {
+    "visible": false,
     "date": "2021/05/18",
     "zh-TW": "* 修正無法正確顯示密碼錯誤",
     "en-US": "* Fix can't show password error hint."
