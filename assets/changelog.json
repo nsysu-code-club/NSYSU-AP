@@ -1,6 +1,12 @@
 {
-  "903": {
+  "904": {
     "visible": true,
+    "date": "2021/05/18",
+    "zh-TW": "* 修正無法正確顯示密碼錯誤",
+    "en-US": "* Fix can't show password error hint."
+  },
+  "903": {
+    "visible": false,
     "date": "2021/05/01",
     "zh-TW": "* 修正無法正確顯示密碼錯誤",
     "en-US": "* Fix can't show password error hint."
