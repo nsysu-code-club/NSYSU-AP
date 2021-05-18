@@ -34,5 +34,7 @@
 	<string>Feature sure user in school.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Feature sure user in school.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Feature course table export</string>
 </dict>
 </plist>
