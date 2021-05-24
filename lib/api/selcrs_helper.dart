@@ -6,6 +6,7 @@ import 'package:ap_common/models/semester_data.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common_firebase/utils/firebase_crashlytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:nsysu_ap/utils/big5/big5.dart';
 import 'package:dio/dio.dart';
@@ -18,7 +19,6 @@ import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 import '../utils/app_localizations.dart';
 
@@ -696,7 +696,7 @@ class SelcrsHelper {
     GeneralCallback<dynamic> callback,
   ) {
     reLoginCount = 0;
-    if (FirebaseUtils.isSupportCrashlytics)
+    if (FirebaseCrashlyticsUtils.isSupported)
       FirebaseCrashlytics.instance.setCustomKey('crawler_error_$feature', text);
     return callback?.onError(GeneralResponse.unknownError());
   }

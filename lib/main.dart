@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ap_common/config/ap_constants.dart';
 import 'package:ap_common/models/course_data.dart';
 import 'package:ap_common/utils/preferences.dart';
+import 'package:ap_common_firebase/utils/firebase_crashlytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -30,13 +31,14 @@ void main() async {
   if (int.parse(currentVersion) < 700) _migrate700();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   if (FirebaseUtils.isSupportCore) await Firebase.initializeApp();
-  if (!kDebugMode && FirebaseUtils.isSupportCrashlytics) {
-    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
-    runZonedGuarded(() {
-      runApp(MyApp());
-    }, (error, stackTrace) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace);
-    });
+  if (!kDebugMode && FirebaseCrashlyticsUtils.isSupported) {
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+    runZonedGuarded(
+      () {
+        runApp(MyApp());
+      },
+      FirebaseCrashlytics.instance.recordError,
+    );
   } else
     runApp(MyApp());
 }

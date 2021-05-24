@@ -121,7 +121,7 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
   _getSchedules() async {
     String pdfUrl =
         'https://raw.githubusercontent.com/abc873693/NSYSU-AP/master/school_schedule.pdf';
-    if (FirebaseUtils.isSupportRemoteConfig) {
+    if (FirebaseRemoteConfigUtils.isSupported) {
       try {
         final RemoteConfig remoteConfig = RemoteConfig.instance;
         await remoteConfig.fetch();

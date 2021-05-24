@@ -95,7 +95,7 @@ class HomePageState extends State<HomePage> {
         _login();
       else
         _checkLoginState();
-      if (FirebaseUtils.isSupportRemoteConfig) {
+      if (FirebaseRemoteConfigUtils.isSupported) {
         _checkUpdate();
       }
       if (await AppTrackingUtils.trackingAuthorizationStatus ==
@@ -160,7 +160,7 @@ class HomePageState extends State<HomePage> {
                 organizationDomain: '@g-mail.nsysu.edu.tw',
               ),
             );
-            if (FirebaseUtils.isSupportCloudMessage) {
+            if (FirebaseMessagingUtils.isSupported) {
               try {
                 final messaging = FirebaseMessaging.instance;
                 NotificationSettings settings =
