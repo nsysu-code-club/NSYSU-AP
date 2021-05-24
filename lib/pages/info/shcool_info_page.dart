@@ -11,7 +11,6 @@ import 'package:ap_common/views/pdf_view.dart';
 import 'package:ap_common/views/phone_list_view.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
-import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 

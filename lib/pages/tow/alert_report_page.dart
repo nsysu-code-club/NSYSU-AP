@@ -70,6 +70,7 @@ class _TowCarAlertReportPageState extends State<TowCarAlertReportPage>
   }
 
   @override
+  // ignore: missing_return
   Widget build(BuildContext context) {
     super.build(context);
     final carParkAreas = TowCarConfig.of(context).carParkAreas;

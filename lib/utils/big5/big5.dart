@@ -27,8 +27,6 @@ String big5TransformDecode(List<int> src) {
   var size = 0;
   var nDst = '';
 
-  var nSrc = 0;
-
   void write(input) => nDst += (new String.fromCharCode(input));
 
   for (var nSrc = 0; nSrc < src.length; nSrc += size) {
