@@ -6,7 +6,6 @@ import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/pages/about_us_page.dart';
 import 'package:ap_common/pages/announcement/home_page.dart';
 import 'package:ap_common/pages/announcement_content_page.dart';
-import 'package:ap_common/pages/open_source_page.dart';
 import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/home_page_scaffold.dart';
@@ -17,6 +16,7 @@ import 'package:ap_common/utils/dialog_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/ap_drawer.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common_firebase/utils/firebase_message_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:dio/dio.dart';
@@ -294,29 +294,17 @@ class HomePageState extends State<HomePage> {
           DrawerItem(
             icon: ApIcon.face,
             title: ap.about,
-            onTap: () => _openPage(AboutUsPage(
-              assetImage: ImageAssets.nsysu,
-              githubName: 'NKUST-ITC',
-              email: 'abc873693@gmail.com',
-              appLicense: app.aboutOpenSourceContent,
-              fbFanPageId: '735951703168873',
-              fbFanPageUrl: 'https://www.facebook.com/NKUST.ITC/',
-              githubUrl: 'https://github.com/NKUST-ITC',
-              actions: <Widget>[
-                IconButton(
-                  icon: Icon(ApIcon.codeIcon),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => OpenSourcePage(),
-                      ),
-                    );
-                    FirebaseAnalyticsUtils.instance
-                        .logAction('open_source', 'click');
-                  },
-                )
-              ],
-            )),
+            onTap: () => _openPage(
+              AboutUsPage(
+                assetImage: ImageAssets.nsysu,
+                githubName: 'NKUST-ITC',
+                email: 'abc873693@gmail.com',
+                appLicense: app.aboutOpenSourceContent,
+                fbFanPageId: '735951703168873',
+                fbFanPageUrl: 'https://www.facebook.com/NKUST.ITC/',
+                githubUrl: 'https://github.com/NKUST-ITC',
+              ),
+            ),
           ),
           DrawerItem(
             icon: ApIcon.settings,

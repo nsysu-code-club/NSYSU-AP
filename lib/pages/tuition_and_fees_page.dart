@@ -1,8 +1,8 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/scaffold/pdf_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common/views/pdf_view.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -152,7 +152,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                   Navigator.of(context, rootNavigator: true).pop();
                   ApUtils.pushCupertinoStyle(
                     context,
-                    PdfScaffold(
+                    PdfView(
                       state: PdfState.finish,
                       data: data,
                     ),
