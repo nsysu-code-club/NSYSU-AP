@@ -13,7 +13,7 @@ dependencies:
     sdk: flutter
 
   ap_common: ^0.17.0-dev.4
-  ap_common_firebase: 0.9.0-dev.3
+  ap_common_firebase: 0.9.0-dev.4
   ap_common_plugin: 0.3.0
   #     path: ../ap_common_plugin
 
