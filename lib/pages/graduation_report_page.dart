@@ -76,7 +76,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
               child: RefreshIndicator(
                 onRefresh: () async {
                   _getGraduationReport();
-                  FirebaseAnalyticsUtils.instance.logAction('refresh', 'swipe');
+                  FirebaseAnalyticsUtils.instance.logEvent('graduation_report_refresh');
                   return null;
                 },
                 child: _body(),
@@ -98,7 +98,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
         return InkWell(
           onTap: () {
             _getGraduationReport();
-            FirebaseAnalyticsUtils.instance.logAction('retry', 'click');
+            FirebaseAnalyticsUtils.instance.logEvent('click_retry');
           },
           child: HintContent(
             icon: Icons.assignment,

@@ -107,7 +107,7 @@ class HomePageState extends State<HomePage> {
       AnalyticsConstants.language,
       AppLocalizations.locale.languageCode,
     );
-    FirebaseUtils.initFcm(
+    FirebaseMessagingUtils.instance.init(
       onClick: (message) async {
         print(message.data);
         if (message.data != null) {

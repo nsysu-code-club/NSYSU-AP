@@ -78,7 +78,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
               state = _State.loading;
             });
             await _getData();
-            FirebaseAnalyticsUtils.instance.logAction('refresh', 'swipe');
+            FirebaseAnalyticsUtils.instance.logEvent('t_and_f_refresh');
             return null;
           },
           child: ListView.builder(
