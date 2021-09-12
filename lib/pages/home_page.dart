@@ -2,7 +2,9 @@ import 'package:ap_common/api/announcement_helper.dart';
 import 'package:ap_common/api/imgur_helper.dart';
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/config/analytics_constants.dart';
+import 'package:ap_common/models/announcement_data.dart';
 import 'package:ap_common/models/general_response.dart';
+import 'package:ap_common/models/user_info.dart';
 import 'package:ap_common/pages/about_us_page.dart';
 import 'package:ap_common/pages/announcement/home_page.dart';
 import 'package:ap_common/pages/announcement_content_page.dart';
@@ -24,30 +26,28 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tow_car_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
-import 'package:ap_common/models/announcement_data.dart';
-import 'package:ap_common/models/user_info.dart';
 import 'package:nsysu_ap/models/car_park_area.dart';
 import 'package:nsysu_ap/pages/bus/bus_list_page.dart';
 import 'package:nsysu_ap/pages/guide/school_map_page.dart';
-import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
+import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/pages/tow/tow_car_content_page.dart';
 import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/pages/user_info_page.dart';
 import 'package:nsysu_ap/resources/image_assets.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 
+import 'graduation_report_page.dart';
 import 'guide/admission_guide_page.dart';
 import 'info/shcool_info_page.dart';
-import 'study/course_page.dart';
-import 'graduation_report_page.dart';
 import 'login/login_page.dart';
+import 'study/course_page.dart';
 import 'tow/tow_car_home_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -248,11 +248,12 @@ class HomePageState extends State<HomePage> {
             title: Text(ap.schoolNavigation, style: _defaultStyle),
             children: <Widget>[
               DrawerSubItem(
-                  icon: ApIcon.map,
-                  title: ap.schoolMap,
-                  onTap: () => _openPage(
-                        SchoolMapPage(),
-                      )),
+                icon: ApIcon.map,
+                title: ap.schoolMap,
+                onTap: () => _openPage(
+                  SchoolMapPage(),
+                ),
+              ),
               DrawerSubItem(
                 icon: ApIcon.accessibilityNew,
                 title: ap.admissionGuide,
@@ -524,8 +525,11 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  _openPage(Widget page,
-      {needLogin = false, bool useCupertinoRoute = true}) async {
+  _openPage(
+    Widget page, {
+    needLogin = false,
+    bool useCupertinoRoute = true,
+  }) async {
     if (isMobile) Navigator.of(context).pop();
     if (needLogin && !isLogin)
       ApUtils.showToast(
