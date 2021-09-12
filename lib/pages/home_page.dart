@@ -252,6 +252,7 @@ class HomePageState extends State<HomePage> {
                 title: ap.schoolMap,
                 onTap: () => _openPage(
                   SchoolMapPage(),
+                  useCupertinoRoute: false,
                 ),
               ),
               DrawerSubItem(
