@@ -53,3 +53,5 @@ service_account_key.json
 android/android_keys.zip
 
 .vscode/
+
+.fvm/flutter_sdk
