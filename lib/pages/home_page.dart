@@ -48,7 +48,6 @@ import 'guide/admission_guide_page.dart';
 import 'info/shcool_info_page.dart';
 import 'login/login_page.dart';
 import 'study/course_page.dart';
-import 'tow/tow_car_home_page.dart';
 
 class HomePage extends StatefulWidget {
   static const String routerName = "/home";
@@ -280,14 +279,14 @@ class HomePageState extends State<HomePage> {
               needLogin: true,
             ),
           ),
-          DrawerItem(
-            icon: Icons.car_repair,
-            title: app.towCarHelper,
-            onTap: () => _openPage(
-              TowCarHomePage(),
-              useCupertinoRoute: false,
-            ),
-          ),
+          // DrawerItem(
+          //   icon: Icons.car_repair,
+          //   title: app.towCarHelper,
+          //   onTap: () => _openPage(
+          //     TowCarHomePage(),
+          //     useCupertinoRoute: false,
+          //   ),
+          // ),
           DrawerItem(
             icon: ApIcon.info,
             title: ap.schoolInfo,
