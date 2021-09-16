@@ -46,5 +46,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/changelog.json
+    - changelog.json
     - assets/car_park_area.json

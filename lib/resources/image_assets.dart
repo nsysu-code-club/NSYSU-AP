@@ -10,17 +10,16 @@ class ImageAssets {
   static const schoolMap = '$basePath/map.webp';
 }
 
-
-
 class FileAssets {
   static const String basePath = 'assets';
 
-  static const String changelog = '$basePath/changelog.json';
+  static const String changelog = 'changelog.json';
   static const String carParkArea = '$basePath/car_park_area.json';
 
   static Future<Map<String, dynamic>> get changelogData async {
     return jsonDecode(await rootBundle.loadString(changelog));
   }
+
   static Future<Map<String, dynamic>> get carParkAreaData async {
     return jsonDecode(await rootBundle.loadString(carParkArea));
   }
