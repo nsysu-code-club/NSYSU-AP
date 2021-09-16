@@ -1,8 +1,8 @@
 import 'package:ap_common/callback/general_callback.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/widgets.dart';
-import 'package:cookie_jar/cookie_jar.dart';
 import 'package:nsysu_ap/models/bus_info.dart';
 import 'package:nsysu_ap/models/bus_time.dart';
 
@@ -45,7 +45,7 @@ class BusHelper {
       else
         languageCode = 'en';
       final path =
-          'https://abc873693.github.io/nsysu-bus/bus_info_data_$languageCode.json';
+          'https://nsysu-code-club.github.io/nsysu-bus/bus_info_data_$languageCode.json';
       var response = await dio.get(
         path,
         options: Options(
