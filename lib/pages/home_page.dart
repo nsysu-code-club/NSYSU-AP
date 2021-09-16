@@ -259,6 +259,7 @@ class HomePageState extends State<HomePage> {
                 title: ap.admissionGuide,
                 onTap: () => _openPage(
                   AdmissionGuidePage(),
+                  useCupertinoRoute: false,
                 ),
               ),
             ],
@@ -290,7 +291,10 @@ class HomePageState extends State<HomePage> {
           DrawerItem(
             icon: ApIcon.info,
             title: ap.schoolInfo,
-            onTap: () => _openPage(SchoolInfoPage()),
+            onTap: () => _openPage(
+              SchoolInfoPage(),
+              useCupertinoRoute: false,
+            ),
           ),
           DrawerItem(
             icon: ApIcon.face,
