@@ -1,3 +1,5 @@
-## 本版本使用 Flutter v2.2.0 開發
+### 基於 Flutter v2.5.0 開發
 
-* 修正 iOS NSUserTrackingUsage 權限敘述
+* 更新 ap_common 至最新版
+* 改善部分頁面體驗
+* 修改校車解析使用社團專案來源

@@ -1,4 +1,10 @@
 {
+  "10000": {
+    "visible": true,
+    "date": "2021/09/16",
+    "zh-TW": "* 修正隱私權政策對話框跑版\n* 改善部分頁面返回行為",
+    "en-US": "* Fix privacy policy overflow .\n* Improve some page UX."
+  },
   "906": {
     "visible": true,
     "date": "2021/05/19",
