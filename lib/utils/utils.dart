@@ -52,7 +52,7 @@ class Utils {
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
       Navigator.push(
         context,
-        MaterialPageRoute(
+        CupertinoPageRoute(
           builder: (_) => ConfirmFormPage(
             confirmFormUrl: confirmFormUrl,
             username: username,
