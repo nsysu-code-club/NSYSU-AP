@@ -8,7 +8,7 @@ import 'package:ap_common/models/user_info.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_crashlytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
-import 'package:nsysu_ap/utils/big5/big5.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,9 +16,9 @@ import 'package:html/parser.dart';
 import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/pre_score.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
+import 'package:nsysu_ap/utils/big5/big5.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:sprintf/sprintf.dart';
-import 'package:cookie_jar/cookie_jar.dart';
 
 import '../utils/app_localizations.dart';
 
@@ -171,6 +171,7 @@ class SelcrsHelper {
           GeneralResponse(statusCode: 400, message: 'course error'),
         );
       } else if (text.contains('請先填寫')) {
+        ///https://regweb.nsysu.edu.tw/webreg/confirm_wuhan_pneumonia.asp?STUID=%s&STAT_COD=1&STATUS_COD=1&LOGINURL=https://selcrs.nsysu.edu.tw/
         return callback?.onError(
           GeneralResponse(statusCode: 401, message: 'need to fill out form'),
         );
