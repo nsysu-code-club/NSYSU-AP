@@ -1,4 +1,10 @@
 {
+  "10001": {
+    "visible": true,
+    "date": "2021/09/28",
+    "zh-TW": "* 改善登入確認表單可透過點擊右上角開啟瀏覽器填寫",
+    "en-US": "* Improved that the login confirmation form can be filled in by clicking on the upper right corner to open the browser."
+  },
   "10000": {
     "visible": true,
     "date": "2021/09/16",
