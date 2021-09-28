@@ -127,6 +127,8 @@ class AppLocalizations {
 
   String get pleaseConfirmForm => _vocabularies['pleaseConfirmForm'];
 
+  String get openBrowserToFill => _vocabularies['openBrowserToFill'];
+
   static Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'app_name': 'NSYSU AP',
@@ -161,7 +163,9 @@ class AppLocalizations {
       'summerSemester': 'Summer Semester',
       'tuitionAndFeesEmpty': 'Oops！No tuition and fees data～\uD83D\uDE0B',
       'hasPreScoreHint': 'Yellow Text not final score, proved by instructor.',
-      'pleaseConfirmForm': 'Please fill out confirm form before login.',
+      'pleaseConfirmForm':
+          'Please fill out confirm form before login.\nIf you still can’t log in after filling in, please click on the upper right corner to fill in through other browsers (ex. Chrome)',
+      'openBrowserToFill': 'Open browser to fill',
       'minute': 'Min',
       'towCarHelper': 'Tow Car Helper',
       'subscriptionArea': 'Subscription Area',
@@ -177,7 +181,8 @@ class AppLocalizations {
       'allArea': 'All Area',
       'processing': 'Processing...',
       'pleaseProvideImage': 'Please Provide Image',
-      'towCarUploadPolicy': '拖車小幫手系統\n\n可透過此功能回報校園狀況\n如果同意使用此系統\n將透過中山大學校務系統的帳號密碼作為驗證機制\n建立基本資料(不包含密碼)在我們的伺服器\n一切將遵守雙平台商店隱私政策運作\n\n回報時會以不具名提供資訊在此系統\n影音則是公開上傳至 Imgur\n任何資訊都會經過審查並非直接發佈\n若同意以上資訊請點擊下方按鈕',
+      'towCarUploadPolicy':
+          '拖車小幫手系統\n\n可透過此功能回報校園狀況\n如果同意使用此系統\n將透過中山大學校務系統的帳號密碼作為驗證機制\n建立基本資料(不包含密碼)在我們的伺服器\n一切將遵守雙平台商店隱私政策運作\n\n回報時會以不具名提供資訊在此系統\n影音則是公開上傳至 Imgur\n任何資訊都會經過審查並非直接發佈\n若同意以上資訊請點擊下方按鈕',
       'agreeAndUpload': 'Agree and Upload',
       'notLocationPermissionHint': 'Not Location Permission',
       'locationNotNearSchool': 'Your location not in school, can\'t publish.',
@@ -215,7 +220,9 @@ class AppLocalizations {
       'summerSemester': '暑假',
       'tuitionAndFeesEmpty': 'Oops！查無任何學雜費資料哦～\uD83D\uDE0B',
       'hasPreScoreHint': '黃字為授課老師開放成績查詢 並非最終成績',
-      'pleaseConfirmForm': '請先填寫確認表單再進行登入',
+      'pleaseConfirmForm':
+          '請先填寫確認表單再進行登入\n若填寫完畢仍無法登入 點擊右上角透過其他瀏覽器填寫(ex. Chrome)',
+      'openBrowserToFill': '開啟瀏覽器填寫',
       'minute': '分',
       'towCarHelper': '拖車小幫手',
       'subscriptionArea': '訂閱區域',
@@ -231,7 +238,8 @@ class AppLocalizations {
       'allArea': '全部區域',
       'processing': '處理中...',
       'pleaseProvideImage': '請提供照片',
-      'towCarUploadPolicy': '拖車小幫手系統\n\n可透過此功能回報校園狀況\n如果同意使用此系統\n將透過中山大學校務系統的帳號密碼作為驗證機制\n建立基本資料(不包含密碼)在我們的伺服器\n一切將遵守雙平台商店隱私政策運作\n\n回報時會以不具名提供資訊在此系統\n影音則是公開上傳至 Imgur\n任何資訊都會經過審查並非直接發佈\n若同意以上資訊請點擊下方按鈕',
+      'towCarUploadPolicy':
+          '拖車小幫手系統\n\n可透過此功能回報校園狀況\n如果同意使用此系統\n將透過中山大學校務系統的帳號密碼作為驗證機制\n建立基本資料(不包含密碼)在我們的伺服器\n一切將遵守雙平台商店隱私政策運作\n\n回報時會以不具名提供資訊在此系統\n影音則是公開上傳至 Imgur\n任何資訊都會經過審查並非直接發佈\n若同意以上資訊請點擊下方按鈕',
       'agreeAndUpload': '同意並開始上傳',
       'notLocationPermissionHint': '尚未取得定位權限',
       'locationNotNearSchool': '您的位置尚未在學校附近，無法發布',
