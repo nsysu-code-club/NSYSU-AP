@@ -21,23 +21,6 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('key.properties')
-if (keystorePropertiesFile.canRead()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-
-    if (keystoreProperties != null) {
-        android.signingConfigs.release.storeFile file(keystoreProperties['storeFile'])
-        android.signingConfigs.release.storePassword keystoreProperties['storePassword']
-        android.signingConfigs.release.keyAlias keystoreProperties['keyAlias']
-        android.signingConfigs.release.keyPassword keystoreProperties['keyPassword']
-    } else {
-        println 'some entries in \'release keystore.properties\' not found!'
-    }
-} else {
-    println '\'release keystore.properties\' not found!'
-}
-
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
@@ -86,3 +69,20 @@ dependencies {
 
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.canRead()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+    if (keystoreProperties != null) {
+        android.signingConfigs.release.storeFile file(keystoreProperties['storeFile'])
+        android.signingConfigs.release.storePassword keystoreProperties['storePassword']
+        android.signingConfigs.release.keyAlias keystoreProperties['keyAlias']
+        android.signingConfigs.release.keyPassword keystoreProperties['keyPassword']
+    } else {
+        println 'some entries in \'release keystore.properties\' not found!'
+    }
+} else {
+    println '\'release keystore.properties\' not found!'
+}
