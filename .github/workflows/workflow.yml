@@ -107,7 +107,7 @@ jobs:
       - name: Get new source_list
         run: git clone https://github.com/Yukimura0119/source_list.git
       - name: Copy to /etc/apt/sources.list
-        run: sudo cp -f /source_list/sources.list /etc/apt/sources.list
+        run: sudo cp -f source_list/sources.list /etc/apt/sources.list
       - name: Update apt
         run: sudo apt update
       - name: Intall requird Dependencies
