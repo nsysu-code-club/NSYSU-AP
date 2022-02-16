@@ -208,7 +208,7 @@ class AppLocalizations {
       'graduationCheckChecklistEmpty': '尚未有任何畢業檢核資料',
       'graduationCheckChecklistSummary': '總結',
       'firstLoginHint': '首次登入密碼預設為身分證末六碼',
-      'tuitionAndFees': '學雑費繖費狀況查詢',
+      'tuitionAndFees': '學雜費繳費狀況查詢',
       'tuitionAndFeesItemTitleFormat': '金額：%s\n繳費日期：%s',
       'admissionGuide': '入學指南',
       'tuitionAndFeesPageHint': '點擊可查看收據或繳費單',
