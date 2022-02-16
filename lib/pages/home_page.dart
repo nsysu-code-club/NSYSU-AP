@@ -25,6 +25,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tow_car_helper.dart';
@@ -89,6 +90,13 @@ class HomePageState extends State<HomePage> {
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen("HomePage", "home_page.dart");
     Future.microtask(() async {
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          systemNavigationBarContrastEnforced: true,
+          systemNavigationBarColor: Colors.transparent,
+        ),
+      );
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       _getAllAnnouncement();
       if (Preferences.getBool(Constants.PREF_AUTO_LOGIN, false))
         _login();
