@@ -1,4 +1,10 @@
 {
+  "10002": {
+    "visible": true,
+    "date": "2022/02/17",
+    "zh-TW": "* 文字修正\n* 穩定性更新",
+    "en-US": "* Word error fix.\nStability update."
+  },
   "10001": {
     "visible": true,
     "date": "2021/09/28",
