@@ -1,3 +1,3 @@
-### 基於 Flutter v2.10.1 開發
+### 基於 Flutter v2.10.2 開發
 
-* 加入 Fastlane Firebase App Distribution 設定
+* 加入 TextField resource key 
