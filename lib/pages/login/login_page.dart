@@ -55,7 +55,6 @@ class LoginPageState extends State<LoginPage> {
       logoSource: 'N',
       forms: [
         ApTextField(
-          key: const Key('username'),
           controller: _username,
           textInputAction: TextInputAction.next,
           focusNode: usernameFocusNode,
@@ -67,7 +66,6 @@ class LoginPageState extends State<LoginPage> {
           autofillHints: [AutofillHints.username],
         ),
         ApTextField(
-          key: const Key('password'),
           obscureText: true,
           textInputAction: TextInputAction.send,
           controller: _password,
