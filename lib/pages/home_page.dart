@@ -28,15 +28,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:nsysu_ap/api/tow_car_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
-import 'package:nsysu_ap/models/car_park_area.dart';
 import 'package:nsysu_ap/pages/bus/bus_list_page.dart';
 import 'package:nsysu_ap/pages/guide/school_map_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
-import 'package:nsysu_ap/pages/tow/tow_car_content_page.dart';
 import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/pages/user_info_page.dart';
 import 'package:nsysu_ap/resources/image_assets.dart';
@@ -117,24 +114,6 @@ class HomePageState extends State<HomePage> {
     FirebaseMessagingUtils.instance.init(
       onClick: (message) async {
         print(message.data);
-        if (message.data != null) {
-          if (message.data['type'] == 'towCar') {
-            final alertId = message.data['alertId'];
-            final json = await FileAssets.carParkAreaData;
-            final carParkAreas = CarParkAreaData.fromJson(json).data;
-            final data =
-                await TowCarHelper.instance.getTowCarAlert(alertId: alertId);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => TowCarContentPage(
-                  towCarAlert: data,
-                  carParkAreas: carParkAreas,
-                ),
-              ),
-            );
-          }
-        }
       },
     );
   }
