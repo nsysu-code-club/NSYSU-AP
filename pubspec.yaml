@@ -14,7 +14,7 @@ dependencies:
 
   ap_common: ^0.21.0-dev.0
   ap_common_firebase: ^0.14.0-dev.0
-  ap_common_plugin: 0.3.1
+  ap_common_plugin: 0.4.0
   #     path: ../ap_common_plugin
 
   #official plugin
