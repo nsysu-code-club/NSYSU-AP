@@ -75,8 +75,8 @@ class BusHelper {
   }) async {
     try {
       String languageCode;
-      if (locale.languageCode == 'zh' || locale.languageCode == 'en')
-        languageCode = locale.languageCode;
+      if (locale.languageCode.contains('zh'))
+        languageCode = 'zh';
       else
         languageCode = 'en';
       var response = await dio.post(
