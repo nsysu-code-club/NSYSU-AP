@@ -42,13 +42,13 @@ jobs:
     runs-on: macOS-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Decrypt iOS keys
         run: sh ./.github/scripts/decrypt_ios_keys.sh
         env:
           KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
       - name: Run Flutter tasks
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.0.x'
           channel: 'stable'
