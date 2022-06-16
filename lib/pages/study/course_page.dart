@@ -9,9 +9,9 @@ import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/api/selcrs_helper.dart';
 
 class CoursePage extends StatefulWidget {
   static const String routerName = "/course";
@@ -173,7 +173,7 @@ class CoursePageState extends State<CoursePage> {
           break;
       }
       String first;
-      if (AppLocalizations.locale.languageCode == 'en') {
+      if (Intl.defaultLocale == 'en') {
         int year = int.parse(text.substring(0, 3));
         year += 1911;
         first = '$year~${year + 1}';

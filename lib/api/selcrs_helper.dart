@@ -5,6 +5,7 @@ import 'package:ap_common/models/score_data.dart';
 import 'package:ap_common/models/semester_data.dart';
 import 'package:ap_common/models/time_code.dart';
 import 'package:ap_common/models/user_info.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_crashlytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
@@ -19,8 +20,6 @@ import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/utils/big5/big5.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:sprintf/sprintf.dart';
-
-import '../utils/app_localizations.dart';
 
 class SelcrsHelper {
   static const BASE_URL = 'https://selcrs.nsysu.edu.tw';
@@ -66,7 +65,7 @@ class SelcrsHelper {
   int error = 0;
 
   String get language {
-    switch (AppLocalizations.locale.languageCode) {
+    switch (Intl.defaultLocale) {
       case 'en':
         return 'eng';
       case 'zh':
@@ -341,7 +340,7 @@ class SelcrsHelper {
         final titles = titleElement.innerHtml.split('<br>');
         var title = titleElement.text;
         if (titles.length >= 2) {
-          switch (AppLocalizations.locale.languageCode) {
+          switch (Intl.defaultLocale) {
             case 'en':
               title = titles[1];
               break;

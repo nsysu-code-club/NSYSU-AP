@@ -109,7 +109,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           },
           localizationsDelegates: [
             const AppLocalizationsDelegate(),
-            ApLocalizations.delegate,
+            AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
@@ -138,7 +138,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     AnnouncementHelper.instance.setLocale(this.locale);
     setState(() {
       AppLocalizationsDelegate().load(locale);
-      ApLocalizations.load(locale);
+      AppLocalizations.delegate.load(locale);
     });
   }
 

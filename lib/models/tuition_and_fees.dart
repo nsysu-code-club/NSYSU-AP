@@ -1,4 +1,4 @@
-import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:ap_common/utils/ap_localizations.dart';
 
 class TuitionAndFees {
   final String titleZH;
@@ -20,7 +20,7 @@ class TuitionAndFees {
   });
 
   String get title {
-    switch (AppLocalizations.locale.languageCode) {
+    switch (Intl.defaultLocale) {
       case 'zh':
         return titleZH;
       default:
@@ -29,7 +29,7 @@ class TuitionAndFees {
   }
 
   String get paymentStatus {
-    switch (AppLocalizations.locale.languageCode) {
+    switch (Intl.defaultLocale) {
       case 'zh':
         return paymentStatusZH;
       default:

@@ -109,7 +109,7 @@ class HomePageState extends State<HomePage> {
     });
     FirebaseAnalyticsUtils.instance.setUserProperty(
       AnalyticsConstants.language,
-      AppLocalizations.locale.languageCode,
+      Intl.defaultLocale,
     );
     FirebaseMessagingUtils.instance.init(
       onClick: (message) async {
@@ -216,7 +216,7 @@ class HomePageState extends State<HomePage> {
             title: ap.bus,
             onTap: () => _openPage(
               BusListPage(
-                locale: AppLocalizations.locale,
+                locale: Locale(Intl.defaultLocale),
               ),
             ),
           ),
@@ -369,7 +369,7 @@ class HomePageState extends State<HomePage> {
           ApUtils.pushCupertinoStyle(
               context,
               BusListPage(
-                locale: AppLocalizations.locale,
+                locale: Locale(Intl.defaultLocale),
               ));
           break;
         case 1:
