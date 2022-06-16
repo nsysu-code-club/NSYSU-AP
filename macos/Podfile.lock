@@ -1,4 +1,6 @@
 PODS:
+  - desktop_webview_window (0.0.1):
+    - FlutterMacOS
   - file_selector_macos (0.0.1):
     - FlutterMacOS
   - Firebase/Analytics (8.15.0):
@@ -17,24 +19,24 @@ PODS:
   - Firebase/RemoteConfig (8.15.0):
     - Firebase/CoreOnly
     - FirebaseRemoteConfig (~> 8.15.0)
-  - firebase_analytics (9.1.8):
+  - firebase_analytics (9.1.9):
     - Firebase/Analytics (= 8.15.0)
     - firebase_core
     - FlutterMacOS
-  - firebase_core (1.17.0):
+  - firebase_core (1.17.1):
     - Firebase/CoreOnly (~> 8.15.0)
     - FlutterMacOS
-  - firebase_crashlytics (2.8.0):
+  - firebase_crashlytics (2.8.1):
     - Firebase/CoreOnly (~> 8.15.0)
     - Firebase/Crashlytics (~> 8.15.0)
     - firebase_core
     - FlutterMacOS
-  - firebase_messaging (11.4.0):
+  - firebase_messaging (11.4.1):
     - Firebase/CoreOnly (~> 8.15.0)
     - Firebase/Messaging (~> 8.15.0)
     - firebase_core
     - FlutterMacOS
-  - firebase_remote_config (2.0.7):
+  - firebase_remote_config (2.0.8):
     - Firebase/CoreOnly (~> 8.15.0)
     - Firebase/RemoteConfig (~> 8.15.0)
     - firebase_core
@@ -176,6 +178,7 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
+  - desktop_webview_window (from `Flutter/ephemeral/.symlinks/plugins/desktop_webview_window/macos`)
   - file_selector_macos (from `Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos`)
   - firebase_analytics (from `Flutter/ephemeral/.symlinks/plugins/firebase_analytics/macos`)
   - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
@@ -215,6 +218,8 @@ SPEC REPOS:
     - PromisesObjC
 
 EXTERNAL SOURCES:
+  desktop_webview_window:
+    :path: Flutter/ephemeral/.symlinks/plugins/desktop_webview_window/macos
   file_selector_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos
   firebase_analytics:
@@ -255,13 +260,14 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
 
 SPEC CHECKSUMS:
+  desktop_webview_window: d4365e71bcd4e1aa0c14cf0377aa24db0c16a7e2
   file_selector_macos: f1b08a781e66103e3ba279fd5d4024a2478b3af6
   Firebase: 5f8193dff4b5b7c5d5ef72ae54bb76c08e2b841d
-  firebase_analytics: a94a22cb81c83623405d10fe933df29307e1fd69
-  firebase_core: 895eaa063bde36f163d959810717e0f7a3bac614
-  firebase_crashlytics: dfa8b309709256872f9595234b8c969cc8fc86f2
-  firebase_messaging: 822d21e8fd9ed8f849a51a4480676a2f934abb98
-  firebase_remote_config: f9b10757e720b488f21744bda6adcf5a4ae2b610
+  firebase_analytics: d448483150504ed84f25c5437a34af2591a7929e
+  firebase_core: 7b87364e2d1eae70018a60698e89e7d6f5320bad
+  firebase_crashlytics: af6055d3ac96d2a30b8dd4d38b6854d14f4fa3b0
+  firebase_messaging: e319ed0a19e37b556c6d9df89e275e36d32a3973
+  firebase_remote_config: 2da55f56ff69a9bbfee7760518d11da950899fe2
   FirebaseABTesting: 10cbce8db9985ae2e3847ea44e9947dd18f94e10
   FirebaseAnalytics: 7761cbadb00a717d8d0939363eb46041526474fa
   FirebaseCore: 5743c5785c074a794d35f2fff7ecc254a91e08b1
@@ -280,15 +286,15 @@ SPEC CHECKSUMS:
   location: 7cdb0665bd6577d382b0a343acdadbcb7f964775
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   package_info_plus_macos: f010621b07802a241d96d01876d6705f15e77c1c
-  path_provider_macos: a0a3fd666cb7cd0448e936fb4abad4052961002b
+  path_provider_macos: 3c0c3b4b0d4a76d2bf989a913c2de869c5641a19
   photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
   printing: e4b7e232ff3d5d50a70b20d959aa71035a5c31f9
   PromisesObjC: 99b6f43f9e1044bd87a95a60beff28c2c44ddb72
   share_plus_macos: 853ee48e7dce06b633998ca0735d482dd671ade4
-  shared_preferences_macos: 480ce071d0666e37cef23fe6c702293a3d21799e
+  shared_preferences_macos: a64dc611287ed6cbe28fd1297898db1336975727
   sign_in_with_apple: a9e97e744e8edc36aefc2723111f652102a7a727
   sqflite: a5789cceda41d54d23f31d6de539d65bb14100ea
-  url_launcher_macos: 45af3d61de06997666568a7149c1be98b41c95d4
+  url_launcher_macos: 597e05b8e514239626bcf4a850fcf9ef5c856ec3
 
 PODFILE CHECKSUM: 0d3963a09fc94f580682bd88480486da345dc3f0
 

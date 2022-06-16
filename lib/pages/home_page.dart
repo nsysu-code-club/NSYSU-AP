@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ap_common/api/announcement_helper.dart';
 import 'package:ap_common/api/imgur_helper.dart';
 import 'package:ap_common/callback/general_callback.dart';
@@ -21,6 +23,7 @@ import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_message_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -244,10 +247,19 @@ class HomePageState extends State<HomePage> {
               DrawerSubItem(
                 icon: ApIcon.accessibilityNew,
                 title: ap.admissionGuide,
-                onTap: () => _openPage(
-                  AdmissionGuidePage(),
-                  useCupertinoRoute: false,
-                ),
+                onTap: () {
+                  if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
+                    _openPage(
+                      AdmissionGuidePage(),
+                      useCupertinoRoute: false,
+                    );
+                  } else {
+                    openDesktopWebViewPage(
+                      Constants.admissionGuideUrl,
+                      title: ap.admissionGuide,
+                    );
+                  }
+                },
               ),
             ],
           ),
@@ -540,5 +552,14 @@ class HomePageState extends State<HomePage> {
       } else
         setState(() => content = page);
     }
+  }
+
+  Future<void> openDesktopWebViewPage(
+    String url, {
+    String title,
+  }) async {
+    final Webview webView = await WebviewWindow.create(
+        configuration: CreateConfiguration(title: title));
+    webView.launch(url);
   }
 }
