@@ -1,6 +1,7 @@
 import 'package:encrypt/encrypt.dart';
 
 class Constants {
+  Constants._();
 
   static bool get isInDebugMode {
     bool inDebugMode = false;
@@ -13,6 +14,9 @@ class Constants {
 
   static const DEFAULT_YEAR = '109';
   static const DEFAULT_SEMESTER = '1';
+
+  static const admissionGuideUrl =
+      'https://leslietsai1.wixsite.com/nsysufreshman';
 
   static const PREF_FIRST_ENTER_APP = "pref_first_enter_app";
   static const PREF_CURRENT_VERSION = "pref_current_version";

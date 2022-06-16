@@ -8,6 +8,7 @@ import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:nsysu_ap/config/constants.dart';
 
 class AdmissionGuidePage extends StatefulWidget {
   @override
@@ -53,9 +54,7 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
       body: !kIsWeb && (Platform.isAndroid || Platform.isIOS)
           ? InAppWebView(
               initialUrlRequest: URLRequest(
-                url: Uri.parse(
-                  'https://leslietsai1.wixsite.com/nsysufreshman',
-                ),
+                url: Uri.parse(Constants.admissionGuideUrl),
               ),
               onWebViewCreated: (InAppWebViewController webViewController) {
                 this.webViewController = webViewController;
