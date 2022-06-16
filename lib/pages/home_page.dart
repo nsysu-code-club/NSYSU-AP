@@ -109,7 +109,7 @@ class HomePageState extends State<HomePage> {
     });
     FirebaseAnalyticsUtils.instance.setUserProperty(
       AnalyticsConstants.language,
-      Intl.defaultLocale,
+      Locale(Intl.defaultLocale).languageCode,
     );
     FirebaseMessagingUtils.instance.init(
       onClick: (message) async {

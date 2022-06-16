@@ -20,20 +20,18 @@ class TuitionAndFees {
   });
 
   String get title {
-    switch (Intl.defaultLocale) {
-      case 'zh':
-        return titleZH;
-      default:
-        return titleEN;
+    if (Intl.defaultLocale.contains('zh')) {
+      return titleZH;
+    } else {
+      return titleEN;
     }
   }
 
   String get paymentStatus {
-    switch (Intl.defaultLocale) {
-      case 'zh':
-        return paymentStatusZH;
-      default:
-        return paymentStatusEN;
+    if (Intl.defaultLocale.contains('zh')) {
+      return paymentStatusZH;
+    } else {
+      return paymentStatusEN;
     }
   }
 

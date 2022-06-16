@@ -65,7 +65,7 @@ class SelcrsHelper {
   int error = 0;
 
   String get language {
-    switch (Intl.defaultLocale) {
+    switch (Locale(Intl.defaultLocale).languageCode) {
       case 'en':
         return 'eng';
       case 'zh':
@@ -340,7 +340,7 @@ class SelcrsHelper {
         final titles = titleElement.innerHtml.split('<br>');
         var title = titleElement.text;
         if (titles.length >= 2) {
-          switch (Intl.defaultLocale) {
+          switch (Locale(Intl.defaultLocale).languageCode) {
             case 'en':
               title = titles[1];
               break;

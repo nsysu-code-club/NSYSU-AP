@@ -173,7 +173,7 @@ class CoursePageState extends State<CoursePage> {
           break;
       }
       String first;
-      if (Intl.defaultLocale == 'en') {
+      if (Intl.defaultLocale.contains('en')) {
         int year = int.parse(text.substring(0, 3));
         year += 1911;
         first = '$year~${year + 1}';
