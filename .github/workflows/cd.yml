@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Java
         uses: actions/setup-java@v1
         with:
@@ -28,7 +28,7 @@ jobs:
       - name: Generate changelog
         run: bash ./.github/scripts/generate_android_changelog.sh
       - name: Setup Flutter
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '2.10.x'
           channel: 'stable'
@@ -53,7 +53,7 @@ jobs:
     runs-on: macOS-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
       - name: Decrypt iOS keys
@@ -63,7 +63,7 @@ jobs:
       - name: Generate changelog
         run: bash ./.github/scripts/generate_ios_changelog.sh
       - name: Run Flutter tasks
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '2.10.x'
           channel: 'stable'
@@ -100,7 +100,7 @@ jobs:
 #    runs-on: macOS-latest
 #    steps:
 #      - name: Checkout code
-#        uses: actions/checkout@v2
+#        uses: actions/checkout@v3
 #        with:
 #          ref: ${{ github.ref }}
 #      - name: Decrypt macOS keys
@@ -108,7 +108,7 @@ jobs:
 #        env:
 #          KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
 #      - name: Run Flutter tasks
-#        uses: subosito/flutter-action@v1
+#        uses: subosito/flutter-action@v2
 #        with:
 #          channel: 'dev'
 #      - name: Upgrades flutter
@@ -147,9 +147,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run Flutter tasks
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '2.10.x'
           channel: 'stable'
@@ -175,7 +175,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
