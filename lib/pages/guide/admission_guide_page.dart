@@ -7,7 +7,9 @@ import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:webview_windows/webview_windows.dart';
 import 'package:nsysu_ap/config/constants.dart';
 
 class AdmissionGuidePage extends StatefulWidget {
@@ -19,11 +21,13 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
   ApLocalizations ap;
 
   InAppWebViewController webViewController;
+  final WebviewController _windowsController = WebviewController();
 
   @override
   void initState() {
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen("AdmissionGuidePage", "admission_guide_page.dart");
+    initWindowsPlatformState();
     super.initState();
   }
 
@@ -38,33 +42,90 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
           IconButton(
             icon: Icon(Icons.arrow_back_ios),
             onPressed: () async {
-              if ((await webViewController?.canGoBack() ?? false))
-                webViewController?.goBack();
+              if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+                if ((await webViewController?.canGoBack() ?? false))
+                  webViewController?.goBack();
+              } else if (Platform.isWindows) {
+                _windowsController.goBack();
+              }
             },
           ),
           IconButton(
             icon: Icon(Icons.arrow_forward_ios),
             onPressed: () async {
-              if ((await webViewController?.canGoForward() ?? false))
-                webViewController?.goForward();
+              if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+                if ((await webViewController?.canGoForward() ?? false))
+                  webViewController?.goForward();
+              } else if (Platform.isWindows) {
+                _windowsController.goForward();
+              }
             },
           ),
         ],
       ),
-      body: !kIsWeb && (Platform.isAndroid || Platform.isIOS)
-          ? InAppWebView(
-              initialUrlRequest: URLRequest(
-                url: Uri.parse(Constants.admissionGuideUrl),
-              ),
-              onWebViewCreated: (InAppWebViewController webViewController) {
-                this.webViewController = webViewController;
-                //_controller.complete(webViewController);
-              },
-            )
-          : HintContent(
-              icon: ApIcon.apps,
-              content: ap.platformError,
+      body: Builder(builder: (context) {
+        if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+          return InAppWebView(
+            initialUrlRequest: URLRequest(
+              url: Uri.parse(Constants.admissionGuideUrl),
             ),
+            onWebViewCreated: (InAppWebViewController webViewController) {
+              this.webViewController = webViewController;
+              //_windowsController.complete(webViewController);
+            },
+          );
+        } else if (Platform.isWindows) {
+          return Webview(
+            _windowsController,
+          );
+        } else {
+          return HintContent(
+            icon: ApIcon.apps,
+            content: ap.platformError,
+          );
+        }
+      }),
     );
+  }
+
+  Future<void> initWindowsPlatformState() async {
+    try {
+      await _windowsController.initialize();
+      _windowsController.url.listen((url) {
+        print(url);
+      });
+
+      await _windowsController.setBackgroundColor(Colors.transparent);
+      await _windowsController
+          .setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
+      await _windowsController.loadUrl(Constants.admissionGuideUrl);
+
+      if (!mounted) return;
+      setState(() {});
+    } on PlatformException catch (e) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                  title: Text('Error'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Code: ${e.code}'),
+                      Text('Message: ${e.message}'),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      child: Text('Continue'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    )
+                  ],
+                ));
+      });
+    }
   }
 }

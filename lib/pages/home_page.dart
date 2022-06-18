@@ -248,7 +248,7 @@ class HomePageState extends State<HomePage> {
                 icon: ApIcon.accessibilityNew,
                 title: ap.admissionGuide,
                 onTap: () {
-                  if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
+                  if (kIsWeb || Platform.isAndroid || Platform.isIOS || Platform.isWindows) {
                     _openPage(
                       AdmissionGuidePage(),
                       useCupertinoRoute: false,
