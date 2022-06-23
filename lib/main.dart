@@ -9,7 +9,9 @@ import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in_dartio/google_sign_in_dartio.dart';
 import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/config/sdk_constants.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import 'app.dart';
@@ -45,6 +47,9 @@ void main() {
               .setPerformanceCollectionEnabled(false);
         }
       }
+      GoogleSignInDart.register(
+        clientId: SdkConstants.googleSignInDesktopClientId,
+      );
       if (!kDebugMode && FirebaseCrashlyticsUtils.isSupported) {
         FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
       }

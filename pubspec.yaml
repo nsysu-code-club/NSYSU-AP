@@ -34,6 +34,7 @@ dependencies:
   webview_windows: ^0.2.0
   timeago: ^3.0.2
   location: ^4.4.0
+  google_sign_in_dartio: ^0.2.1
 
 dev_dependencies:
   flutter_test:

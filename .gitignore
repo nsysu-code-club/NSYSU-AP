@@ -55,3 +55,4 @@ android/android_keys.zip
 .vscode/
 
 .fvm/flutter_sdk
+lib/config/sdk_constants.dart
