@@ -12,12 +12,15 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in_dartio/google_sign_in_dartio.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/config/sdk_constants.dart';
+import 'package:nsysu_ap/firebase_options.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import 'app.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 }
 
 void main() {
@@ -36,7 +39,10 @@ void main() {
       if (int.parse(currentVersion) < 700) _migrate700();
       FirebaseMessaging.onBackgroundMessage(
           _firebaseMessagingBackgroundHandler);
-      if (FirebaseUtils.isSupportCore) await Firebase.initializeApp();
+      if (FirebaseUtils.isSupportCore)
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
       if (kDebugMode) {
         if (FirebaseCrashlyticsUtils.isSupported) {
           await FirebaseCrashlytics.instance

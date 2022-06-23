@@ -47,6 +47,7 @@ app.*.map.json
 GoogleService-Info.plist
 ios_keys.zip
 
+firebase_app_id_file.json
 google-services.json
 key.jks
 service_account_key.json
@@ -56,3 +57,5 @@ android/android_keys.zip
 
 .fvm/flutter_sdk
 lib/config/sdk_constants.dart
+dev_configs.zip
+lib/firebase_options.dart

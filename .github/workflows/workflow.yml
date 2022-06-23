@@ -31,6 +31,10 @@ jobs:
         with:
           flutter-version: '3.0.x'
           channel: 'stable'
+      - name: Decrypt dev configs
+        run: sh ./scripts/decrypt_dev_configs.sh
+        env:
+          KEYS_SECRET_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
       - name: Upgrades flutter
         run: flutter upgrade
       - run: flutter pub get
@@ -52,6 +56,10 @@ jobs:
         with:
           flutter-version: '3.0.x'
           channel: 'stable'
+      - name: Decrypt dev configs
+        run: sh ./scripts/decrypt_dev_configs.sh
+        env:
+          KEYS_SECRET_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
       - run: flutter pub get
       - name: Build iOS
         run: flutter build ios --release --no-codesign
@@ -66,6 +74,10 @@ jobs:
         with:
           flutter-version: '3.0.x'
           channel: 'stable'
+      - name: Decrypt dev configs
+        run: sh ./scripts/decrypt_dev_configs.sh
+        env:
+          KEYS_SECRET_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
       - name: Upgrades flutter
         run: flutter upgrade
       - name: Enable Web
@@ -85,6 +97,10 @@ jobs:
 #        with:
 #          flutter-version: '3.0.x'
 #          channel: 'stable'
+#      - name: Decrypt dev configs
+#        run: sh ./scripts/decrypt_dev_configs.sh
+#        env:
+#          KEYS_SECRET_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
 #      - name: Upgrades flutter
 #        run: flutter upgrade
 #      - name: Enable macOS
@@ -104,6 +120,10 @@ jobs:
         with:
           flutter-version: '3.0.x'
           channel: 'stable'
+      - name: Decrypt dev configs
+        run: sh ./scripts/decrypt_dev_configs.sh
+        env:
+          KEYS_SECRET_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
       - name: Get new source_list
         run: git clone https://github.com/Yukimura0119/source_list.git
       - name: Copy to /etc/apt/sources.list
@@ -132,6 +152,10 @@ jobs:
         with:
           flutter-version: '3.0.x'
           channel: 'stable'
+      - name: Decrypt dev configs
+        run: sh ./scripts/decrypt_dev_configs.sh
+        env:
+          KEYS_SECRET_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
       - name: Upgrades flutter
         run: flutter upgrade
       - name: Enable windows
