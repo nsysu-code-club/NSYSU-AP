@@ -18,38 +18,43 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 }
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Preferences.init(
-    key: Constants.key,
-    iv: Constants.iv,
-  );
+void main() {
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      await Preferences.init(
+        key: Constants.key,
+        iv: Constants.iv,
+      );
 
-  timeago.setLocaleMessages('zh-TW', timeago.ZhMessages());
-  timeago.setLocaleMessages('en-US', timeago.EnMessages());
-  final currentVersion =
-      Preferences.getString(Constants.PREF_CURRENT_VERSION, '0');
-  if (int.parse(currentVersion) < 700) _migrate700();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  if (FirebaseUtils.isSupportCore) await Firebase.initializeApp();
-  if (kDebugMode) {
-    if (FirebaseCrashlyticsUtils.isSupported) {
-      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
-    }
-    if (FirebasePerformancesUtils.isSupported) {
-      await FirebasePerformance.instance.setPerformanceCollectionEnabled(false);
-    }
-  }
-  if (!kDebugMode && FirebaseCrashlyticsUtils.isSupported) {
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
-    runZonedGuarded(
-      () {
-        runApp(MyApp());
-      },
-      FirebaseCrashlytics.instance.recordError,
-    );
-  } else
-    runApp(MyApp());
+      timeago.setLocaleMessages('zh-TW', timeago.ZhMessages());
+      timeago.setLocaleMessages('en-US', timeago.EnMessages());
+      final currentVersion =
+          Preferences.getString(Constants.PREF_CURRENT_VERSION, '0');
+      if (int.parse(currentVersion) < 700) _migrate700();
+      FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler);
+      if (FirebaseUtils.isSupportCore) await Firebase.initializeApp();
+      if (kDebugMode) {
+        if (FirebaseCrashlyticsUtils.isSupported) {
+          await FirebaseCrashlytics.instance
+              .setCrashlyticsCollectionEnabled(false);
+        }
+        if (FirebasePerformancesUtils.isSupported) {
+          await FirebasePerformance.instance
+              .setPerformanceCollectionEnabled(false);
+        }
+      }
+      if (!kDebugMode && FirebaseCrashlyticsUtils.isSupported) {
+        FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+      }
+      runApp(MyApp());
+    },
+    (e, s) {
+      if (!kDebugMode && FirebaseCrashlyticsUtils.isSupported)
+        FirebaseCrashlytics.instance.recordError(e, s);
+    },
+  );
 }
 
 void _migrate700() {
