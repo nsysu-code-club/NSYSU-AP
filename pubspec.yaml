@@ -35,6 +35,7 @@ dependencies:
   timeago: ^3.0.2
   location: ^4.4.0
   google_sign_in_dartio: ^0.2.1
+  firebase_core_desktop: ^1.0.0
 
 dev_dependencies:
   flutter_test:

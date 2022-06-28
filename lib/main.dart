@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:ap_common/config/ap_constants.dart';
 import 'package:ap_common/models/course_data.dart';
@@ -39,7 +40,7 @@ void main() {
       if (int.parse(currentVersion) < 700) _migrate700();
       FirebaseMessaging.onBackgroundMessage(
           _firebaseMessagingBackgroundHandler);
-      if (FirebaseUtils.isSupportCore)
+      if (FirebaseUtils.isSupportCore || Platform.isWindows|| Platform.isLinux)
         await Firebase.initializeApp(
           options: DefaultFirebaseOptions.currentPlatform,
         );

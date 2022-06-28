@@ -316,6 +316,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.18.0"
+  firebase_core_dart:
+    dependency: transitive
+    description:
+      name: firebase_core_dart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
+  firebase_core_desktop:
+    dependency: "direct main"
+    description:
+      name: firebase_core_desktop
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   firebase_core_platform_interface:
     dependency: transitive
     description:
