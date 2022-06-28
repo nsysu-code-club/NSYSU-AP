@@ -60,10 +60,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
-#      - name: Decrypt iOS keys
-#        run: sh ./.github/scripts/decrypt_ios_keys.sh
-#        env:
-#          KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
+      - name: Decrypt iOS keys
+        run: sh ./.github/scripts/decrypt_ios_keys.sh
+        env:
+          KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
       - name: Generate changelog
         run: bash ./.github/scripts/generate_ios_changelog.sh
       - name: Run Flutter tasks
