@@ -15,10 +15,10 @@ import 'package:nsysu_ap/utils/app_localizations.dart';
 enum _State { loading, finish, error }
 
 class BusTimePage extends StatefulWidget {
-  final Locale locale;
-  final BusInfo busInfo;
+  final Locale? locale;
+  final BusInfo? busInfo;
 
-  const BusTimePage({Key key, this.busInfo, this.locale}) : super(key: key);
+  const BusTimePage({Key? key, this.busInfo, this.locale}) : super(key: key);
 
   @override
   _BusTimePageState createState() => _BusTimePageState();
@@ -31,9 +31,9 @@ class _BusTimePageState extends State<BusTimePage>
   List<BusTime> startList = [];
   List<BusTime> endList = [];
 
-  TabController _tabController;
+  TabController? _tabController;
 
-  Timer timer;
+  Timer? timer;
 
   @override
   void initState() {
@@ -48,7 +48,7 @@ class _BusTimePageState extends State<BusTimePage>
         _getData();
       },
     );
-    FirebaseAnalyticsUtils.instance?.setCurrentScreen(
+    FirebaseAnalyticsUtils.instance.setCurrentScreen(
       "BusTimePage",
       "bus_time_page.dart",
     );
@@ -64,10 +64,10 @@ class _BusTimePageState extends State<BusTimePage>
 
   @override
   Widget build(BuildContext context) {
-    final busInfo = widget.busInfo;
+    final busInfo = widget.busInfo!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.busInfo.name),
+        title: Text(widget.busInfo!.name!),
         backgroundColor: ApTheme.of(context).blue,
         bottom: TabBar(
           controller: _tabController,
@@ -134,8 +134,8 @@ class _BusTimePageState extends State<BusTimePage>
 
   void _getData() {
     BusHelper.instance.getBusTime(
-      locale: widget.locale,
-      busInfo: widget.busInfo,
+      locale: widget.locale!,
+      busInfo: widget.busInfo!,
       callback: GeneralCallback(
         onFailure: (_) {
           if (mounted) setState(() => state = _State.error);
@@ -146,7 +146,7 @@ class _BusTimePageState extends State<BusTimePage>
         onSuccess: (data) {
           startList.clear();
           endList.clear();
-          data.forEach((element) {
+          data!.forEach((element) {
             if (element.isGoBack == 'Y')
               endList.add(element);
             else
@@ -160,20 +160,20 @@ class _BusTimePageState extends State<BusTimePage>
 }
 
 class BusTimeItem extends StatelessWidget {
-  final BusTime busTime;
+  final BusTime? busTime;
 
   const BusTimeItem({
-    Key key,
+    Key? key,
     this.busTime,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final postfix = int.tryParse(busTime.arrivedTime ?? '') == null
+    final postfix = int.tryParse(busTime!.arrivedTime ?? '') == null
         ? ''
         : ' ${AppLocalizations.of(context).minute}';
     final isComing =
-        busTime.arrivedTime == '進站中' || busTime.arrivedTime == '將到站';
+        busTime!.arrivedTime == '進站中' || busTime!.arrivedTime == '將到站';
     return ListTile(
       leading: Container(
         constraints: BoxConstraints(
@@ -190,14 +190,14 @@ class BusTimeItem extends StatelessWidget {
         ),
         padding: EdgeInsets.all(8.0),
         child: Text(
-          '${busTime.arrivedTime ?? ''}$postfix',
+          '${busTime!.arrivedTime ?? ''}$postfix',
           style: TextStyle(
             color: isComing ? Colors.red : ApTheme.of(context).greyText,
           ),
           textAlign: TextAlign.center,
         ),
       ),
-      title: Text(busTime.name ?? ''),
+      title: Text(busTime!.name ?? ''),
     );
   }
 }

@@ -19,7 +19,7 @@ class SettingPage extends StatefulWidget {
 class SettingPageState extends State<SettingPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  ApLocalizations ap;
+  late ApLocalizations ap;
 
   bool displayPicture = true;
 
@@ -61,17 +61,17 @@ class SettingPageState extends State<SettingPage> {
             SettingTitle(text: ap.environmentSettings),
             ChangeLanguageItem(
               onChange: (locale) {
-                ShareDataWidget.of(context).data.loadLocale(locale);
+                ShareDataWidget.of(context)!.data.loadLocale(locale);
               },
             ),
             ChangeThemeModeItem(
               onChange: (themeMode) {
-                ShareDataWidget.of(context).data.loadTheme(themeMode);
+                ShareDataWidget.of(context)!.data.loadTheme(themeMode);
               },
             ),
             ChangeIconStyleItem(
               onChange: (String code) {
-                ShareDataWidget.of(context).data.update();
+                ShareDataWidget.of(context)!.data.update();
               },
             ),
             Divider(

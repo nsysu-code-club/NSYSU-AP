@@ -3,10 +3,10 @@ import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/scaffold/login_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
+import 'package:ap_common/widgets/default_dialog.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:ap_common/widgets/default_dialog.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
 class SearchStudentIdPage extends StatefulWidget {
@@ -17,21 +17,19 @@ class SearchStudentIdPage extends StatefulWidget {
 }
 
 class SearchStudentIdPageState extends State<SearchStudentIdPage> {
-  ApLocalizations ap;
+  late ApLocalizations ap;
 
   final TextEditingController _name = TextEditingController();
   final TextEditingController _id = TextEditingController();
-  var isAutoFill = true;
+  bool isAutoFill = true;
 
-  FocusNode nameFocusNode;
-  FocusNode idFocusNode;
+  FocusNode nameFocusNode = FocusNode();
+  FocusNode idFocusNode = FocusNode();
 
   @override
   void initState() {
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen("SearchStudentIdPage", "search_student_id_page.dart");
-    nameFocusNode = FocusNode();
-    idFocusNode = FocusNode();
     super.initState();
   }
 
@@ -167,8 +165,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
       ApButton(
         text: ap.search,
         onPressed: () {
-          FirebaseAnalyticsUtils.instance
-              .logEvent('search_student_id_click');
+          FirebaseAnalyticsUtils.instance.logEvent('search_student_id_click');
           _search();
         },
       ),
@@ -188,10 +185,12 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     return list;
   }
 
-  _onAutoFillChanged(bool value) async {
-    setState(() {
-      isAutoFill = value;
-    });
+  _onAutoFillChanged(bool? value) async {
+    if (value != null) {
+      setState(() {
+        isAutoFill = value;
+      });
+    }
   }
 
   _search() async {
@@ -224,7 +223,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                       ),
                       children: [
                         TextSpan(
-                          text: result ?? '',
+                          text: result,
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         if (list.length == 2)

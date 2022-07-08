@@ -3,6 +3,8 @@ import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/views/pdf_view.dart';
+import 'package:ap_common/widgets/hint_content.dart';
+import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,26 +12,24 @@ import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:ap_common/widgets/hint_content.dart';
-import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:sprintf/sprintf.dart';
 
 enum _State { loading, finish, error, empty }
 
 class TuitionAndFeesPage extends StatefulWidget {
-  const TuitionAndFeesPage({Key key}) : super(key: key);
+  const TuitionAndFeesPage({Key? key}) : super(key: key);
 
   @override
   _TuitionAndFeesPageState createState() => _TuitionAndFeesPageState();
 }
 
 class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
-  ApLocalizations ap;
-  AppLocalizations app;
+  late ApLocalizations ap;
+  AppLocalizations? app;
 
   _State state = _State.loading;
 
-  List<TuitionAndFees> items;
+  List<TuitionAndFees>? items;
 
   @override
   void initState() {
@@ -48,7 +48,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     app = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(app.tuitionAndFees),
+        title: Text(app!.tuitionAndFees),
         backgroundColor: ApTheme.of(context).blue,
       ),
       body: _body(),
@@ -68,7 +68,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             icon: Icons.assignment,
             content: state == _State.error
                 ? ApLocalizations.of(context).clickToRetry
-                : app.tuitionAndFeesEmpty,
+                : app!.tuitionAndFeesEmpty,
           ),
         );
       default:
@@ -87,14 +87,14 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             itemBuilder: (context, index) {
               if (index == 0)
                 return Text(
-                  app.tuitionAndFeesPageHint,
+                  app!.tuitionAndFeesPageHint,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: ApTheme.of(context).grey),
                 );
               else
-                return _notificationItem(items[index - 1]);
+                return _notificationItem(items![index - 1]);
             },
-            itemCount: items.length + 1,
+            itemCount: items!.length + 1,
           ),
         );
     }
@@ -165,7 +165,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             padding: const EdgeInsets.all(4.0),
             child: Text(
               sprintf(
-                app.tuitionAndFeesItemTitleFormat,
+                app!.tuitionAndFeesItemTitleFormat,
                 [
                   item.amount,
                   item.dateOfPayment,
@@ -178,7 +178,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     );
   }
 
-  Function get _onFailure => (DioError e) => setState(() {
+  Function(DioError) get _onFailure => (DioError e) => setState(() {
         state = _State.error;
         switch (e.type) {
           case DioErrorType.connectTimeout:
@@ -193,7 +193,8 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
         }
       });
 
-  Function get _onError => (_) => setState(() => state = _State.error);
+  Function(GeneralResponse) get _onError =>
+      (_) => setState(() => state = _State.error);
 
   _login() {
     TuitionHelper.instance.login(
@@ -218,7 +219,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
           items = data;
           if (mounted && items != null)
             setState(() {
-              if (items.length == 0)
+              if (items!.length == 0)
                 state = _State.empty;
               else
                 state = _State.finish;

@@ -2,5 +2,8 @@ class SemesterOptions {
   String text;
   String value;
 
-  SemesterOptions({this.text, this.value});
+  SemesterOptions({
+    required this.text,
+    required this.value,
+  });
 }

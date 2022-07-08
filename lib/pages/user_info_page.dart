@@ -11,16 +11,19 @@ import 'package:nsysu_ap/api/selcrs_helper.dart';
 class UserInfoPage extends StatefulWidget {
   final UserInfo userInfo;
 
-  const UserInfoPage({Key key, this.userInfo}) : super(key: key);
+  const UserInfoPage({
+    Key? key,
+    required this.userInfo,
+  }) : super(key: key);
 
   @override
   _UserInfoPageState createState() => _UserInfoPageState();
 }
 
 class _UserInfoPageState extends State<UserInfoPage> {
-  UserInfo userInfo;
+  late UserInfo userInfo;
 
-  TextEditingController newEmail;
+  late TextEditingController newEmail;
 
   @override
   void initState() {
@@ -35,19 +38,20 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return UserInfoScaffold(
       userInfo: userInfo,
       onRefresh: () async {
-        return await SelcrsHelper.instance.getUserInfo(
-          callback: GeneralCallback(
-            onSuccess: (UserInfo data) {
-              setState(() {
-                userInfo = data;
-              });
-              FirebaseAnalyticsUtils.instance.logUserInfo(userInfo);
-              return data;
-            },
-            onFailure: (DioError e) {},
-            onError: (GeneralResponse e) {},
-          ),
-        );
+        return (await SelcrsHelper.instance.getUserInfo(
+              callback: GeneralCallback(
+                onSuccess: (UserInfo data) {
+                  setState(() {
+                    userInfo = data;
+                  });
+                  FirebaseAnalyticsUtils.instance.logUserInfo(userInfo);
+                  return data;
+                },
+                onFailure: (DioError e) {},
+                onError: (GeneralResponse e) {},
+              ),
+            )) ??
+            userInfo;
       },
       actions: <Widget>[
         IconButton(

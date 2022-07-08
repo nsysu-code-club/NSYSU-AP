@@ -4,14 +4,14 @@ import 'package:ap_common/scaffold/login_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
+import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/login/search_student_id_page.dart';
-import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
@@ -23,13 +23,13 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  ApLocalizations ap;
+  late ApLocalizations ap;
 
   final TextEditingController _username = TextEditingController();
   final TextEditingController _password = TextEditingController();
 
-  var isRememberPassword = true;
-  var isAutoLogin = false;
+  bool isRememberPassword = true;
+  bool isAutoLogin = false;
 
   FocusNode usernameFocusNode = FocusNode();
   FocusNode passwordFocusNode = FocusNode();
@@ -128,31 +128,38 @@ class LoginPageState extends State<LoginPage> {
     );
   }
 
-  _onRememberPasswordChanged(bool value) async {
-    setState(() {
-      isRememberPassword = value;
-      if (!isRememberPassword) isAutoLogin = false;
-      Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
-      Preferences.setBool(Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
-    });
+  _onRememberPasswordChanged(bool? value) async {
+    if (value != null) {
+      setState(() {
+        isRememberPassword = value;
+        if (!isRememberPassword) isAutoLogin = false;
+        Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
+        Preferences.setBool(
+            Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
+      });
+    }
   }
 
-  _onAutoLoginChanged(bool value) async {
-    setState(() {
-      isAutoLogin = value;
-      isRememberPassword = isAutoLogin;
-      Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
-      Preferences.setBool(Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
-    });
+  _onAutoLoginChanged(bool? value) async {
+    if (value != null) {
+      setState(() {
+        isAutoLogin = value;
+        isRememberPassword = isAutoLogin;
+        Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
+        Preferences.setBool(
+            Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
+      });
+    }
   }
 
   _getPreference() async {
     isRememberPassword =
         Preferences.getBool(Constants.PREF_REMEMBER_PASSWORD, true);
     var username = Preferences.getString(Constants.PREF_USERNAME, '');
-    var password = '';
+    String password = '';
     if (isRememberPassword) {
-      password = Preferences.getStringSecurity(Constants.PREF_PASSWORD, '');
+      password =
+          Preferences.getStringSecurity(Constants.PREF_PASSWORD, '') ?? '';
     }
     setState(() {
       _username.text = username;

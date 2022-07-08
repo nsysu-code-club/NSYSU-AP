@@ -1,17 +1,18 @@
 import 'dart:convert';
 
+@deprecated
 class CarParkAreaData {
   CarParkAreaData({
     this.version,
     this.data,
   });
 
-  int version;
-  List<CarParkArea> data;
+  int? version;
+  List<CarParkArea>? data;
 
   CarParkAreaData copyWith({
-    int version,
-    List<CarParkArea> data,
+    int? version,
+    List<CarParkArea>? data,
   }) =>
       CarParkAreaData(
         version: version ?? this.version,
@@ -36,7 +37,7 @@ class CarParkAreaData {
         "version": version == null ? null : version,
         "data": data == null
             ? null
-            : List<dynamic>.from(data.map((x) => x.toJson())),
+            : List<dynamic>.from(data!.map((x) => x.toJson())),
       };
 }
 
@@ -50,19 +51,19 @@ class CarParkArea {
     this.enable = false,
   });
 
-  String fcmTopic;
-  String name;
-  String imageUrl;
-  double latitude;
-  double longitude;
+  String? fcmTopic;
+  String? name;
+  String? imageUrl;
+  double? latitude;
+  double? longitude;
   bool enable;
 
   CarParkArea copyWith({
-    String fcmTopic,
-    String name,
-    String imageUrl,
-    double latitude,
-    double longitude,
+    String? fcmTopic,
+    String? name,
+    String? imageUrl,
+    double? latitude,
+    double? longitude,
   }) =>
       CarParkArea(
         fcmTopic: fcmTopic ?? this.fcmTopic,

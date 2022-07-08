@@ -1,15 +1,18 @@
 class LoginResponse {
   List<Data> data;
 
-  LoginResponse({this.data});
+  LoginResponse({
+    required this.data,
+  });
 
-  LoginResponse.fromJson(Map<String, dynamic> json) {
+  LoginResponse fromJson(Map<String, dynamic> json) {
     if (json['data'] != null) {
       data = [];
       json['data'].forEach((v) {
         data.add(new Data.fromJson(v));
       });
     }
+    return LoginResponse(data: data);
   }
 
   Map<String, dynamic> toJson() {
@@ -22,8 +25,8 @@ class LoginResponse {
 }
 
 class Data {
-  String name;
-  String value;
+  String? name;
+  String? value;
 
   Data({this.name, this.value});
 

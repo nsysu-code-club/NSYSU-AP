@@ -9,34 +9,29 @@ import 'package:nsysu_ap/models/bus_time.dart';
 class BusHelper {
   static const BASE_PATH = 'https://ibus.nsysu.edu.tw';
 
-  static BusHelper _instance;
+  static BusHelper? _instance;
 
   static BusHelper get instance {
-    if (_instance == null) {
-      _instance = BusHelper();
-    }
-    return _instance;
+    return _instance ??= BusHelper();
   }
 
   BusHelper() {
-    dio = Dio();
     initCookiesJar();
   }
 
-  Dio dio;
-  CookieJar cookieJar;
+  Dio dio = Dio();
+  CookieJar cookieJar = CookieJar();
 
   bool isLogin = false;
 
   void initCookiesJar() {
-    cookieJar = CookieJar();
     dio.interceptors.add(CookieManager(cookieJar));
     cookieJar.loadForRequest(Uri.parse(BASE_PATH));
   }
 
-  Future<List<BusInfo>> getBusInfoList({
-    GeneralCallback<List<BusInfo>> callback,
-    Locale locale,
+  Future<List<BusInfo>?> getBusInfoList({
+    required GeneralCallback<List<BusInfo>?> callback,
+    required Locale locale,
   }) async {
     try {
       String languageCode;
@@ -62,16 +57,16 @@ class BusHelper {
       } else
         throw e;
     } on Exception catch (e) {
-      callback?.onError(GeneralResponse.unknownError());
+      callback.onError(GeneralResponse.unknownError());
       throw e;
     }
     return null;
   }
 
-  Future<List<BusTime>> getBusTime({
-    BusInfo busInfo,
-    GeneralCallback<List<BusTime>> callback,
-    Locale locale,
+  Future<List<BusTime>?> getBusTime({
+    required BusInfo busInfo,
+    required GeneralCallback<List<BusTime>?> callback,
+    required Locale locale,
   }) async {
     try {
       String languageCode;
@@ -102,7 +97,7 @@ class BusHelper {
       } else
         throw e;
     } on Exception catch (e) {
-      callback?.onError(GeneralResponse.unknownError());
+      callback.onError(GeneralResponse.unknownError());
       throw e;
     }
     return null;

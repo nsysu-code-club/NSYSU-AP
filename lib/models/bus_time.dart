@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+//TODO: improve by json serialization
 class BusTime {
   BusTime({
     this.routeId,
@@ -15,22 +16,22 @@ class BusTime {
     this.seqNo,
   });
 
-  int routeId;
-  String stopId;
-  String name;
-  String arrivedTime;
-  String realArrivedTime;
-  String isGoBack;
-  int seqNo;
+  int? routeId;
+  String? stopId;
+  String? name;
+  String? arrivedTime;
+  String? realArrivedTime;
+  String? isGoBack;
+  int? seqNo;
 
   BusTime copyWith({
-    int routeId,
-    String stopId,
-    String name,
-    String arrivedTime,
-    String realArrivedTime,
-    String isGoBack,
-    int seqNo,
+    int? routeId,
+    String? stopId,
+    String? name,
+    String? arrivedTime,
+    String? realArrivedTime,
+    String? isGoBack,
+    int? seqNo,
   }) =>
       BusTime(
         routeId: routeId ?? this.routeId,
@@ -67,7 +68,7 @@ class BusTime {
         "SeqNo": seqNo == null ? null : seqNo,
       };
 
-  static List<BusTime> fromRawList(String rawString) {
+  static List<BusTime>? fromRawList(String rawString) {
     final rawStringList = json.decode(rawString);
     if (rawStringList == null)
       return null;

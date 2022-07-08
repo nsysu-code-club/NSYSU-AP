@@ -1,10 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:ap_common/callback/general_callback.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:flutter/widgets.dart';
-import 'package:cookie_jar/cookie_jar.dart';
 import 'package:html/parser.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/big5/big5.dart';
@@ -12,13 +11,10 @@ import 'package:nsysu_ap/utils/big5/big5.dart';
 class TuitionHelper {
   static const BASE_PATH = 'https://tfstu.nsysu.edu.tw';
 
-  static TuitionHelper _instance;
+  static TuitionHelper? _instance;
 
   static TuitionHelper get instance {
-    if (_instance == null) {
-      _instance = TuitionHelper();
-    }
-    return _instance;
+    return _instance ??= TuitionHelper();
   }
 
   TuitionHelper() {
@@ -26,10 +22,11 @@ class TuitionHelper {
     initCookiesJar();
   }
 
-  Dio dio;
-  CookieJar cookieJar;
+  late Dio dio;
+  late CookieJar cookieJar;
 
   bool isLogin = false;
+
   void initCookiesJar() {
     cookieJar = CookieJar();
     dio.interceptors.add(CookieManager(cookieJar));
@@ -45,10 +42,10 @@ class TuitionHelper {
     initCookiesJar();
   }
 
-  Future<GeneralResponse> login({
-    @required String username,
-    @required String password,
-    GeneralCallback<GeneralResponse> callback,
+  Future<GeneralResponse?> login({
+    required String username,
+    required String password,
+    GeneralCallback<GeneralResponse>? callback,
   }) async {
     try {
       var response = await dio.post(
@@ -67,7 +64,7 @@ class TuitionHelper {
       // debugPrint('Response =  $text');
       //    debugPrint('response.statusCode = ${response.statusCode}');
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response && e.response.statusCode == 302) {
+      if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
         isLogin = true;
         return callback?.onSuccess(GeneralResponse.success());
       } else {
@@ -85,8 +82,8 @@ class TuitionHelper {
     return null;
   }
 
-  Future<List<TuitionAndFees>> getData({
-    GeneralCallback<List<TuitionAndFees>> callback,
+  Future<List<TuitionAndFees>?> getData({
+    GeneralCallback<List<TuitionAndFees>>? callback,
   }) async {
     var url = '$BASE_PATH/tfstu/tfstudata.asp?act=11';
     try {
@@ -106,10 +103,10 @@ class TuitionHelper {
       for (var i = 1; i < trElements.length; i++) {
         var tdDoc = trElements[i].getElementsByTagName('td');
         var aTag = tdDoc[4].getElementsByTagName('a');
-        String serialNumber;
+        String? serialNumber;
         if (aTag.length > 0) {
           serialNumber = aTag[0]
-              .attributes['onclick']
+              .attributes['onclick']!
               .split('javascript:window.location.href=\'')
               .last;
           serialNumber = serialNumber.substring(0, serialNumber.length - 1);
@@ -151,9 +148,9 @@ class TuitionHelper {
     }
   }
 
-  Future<Uint8List> downloadFdf({
-    String serialNumber,
-    GeneralCallback<Uint8List> callback,
+  Future<Uint8List?> downloadFdf({
+    String? serialNumber,
+    GeneralCallback<Uint8List?>? callback,
   }) async {
     try {
       var response = await dio.get(

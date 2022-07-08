@@ -1,22 +1,19 @@
 import 'package:ap_common/callback/general_callback.dart';
-import 'package:nsysu_ap/utils/big5/big5.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/widgets.dart';
-import 'package:cookie_jar/cookie_jar.dart';
 import 'package:html/parser.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
+import 'package:nsysu_ap/utils/big5/big5.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
 class GraduationHelper {
-  static GraduationHelper _instance;
+  static GraduationHelper? _instance;
 
   static GraduationHelper get instance {
-    if (_instance == null) {
-      _instance = GraduationHelper();
-    }
-    return _instance;
+    return _instance ??= GraduationHelper();
   }
 
   GraduationHelper() {
@@ -24,8 +21,8 @@ class GraduationHelper {
     initCookiesJar();
   }
 
-  Dio dio;
-  CookieJar cookieJar;
+  late Dio dio;
+  late CookieJar cookieJar;
 
   bool isLogin = false;
 
@@ -45,10 +42,10 @@ class GraduationHelper {
   * error status code
   * 401: 帳號密碼錯誤
   * */
-  Future<GeneralResponse> login({
-    @required String username,
-    @required String password,
-    GeneralCallback<GeneralResponse> callback,
+  Future<GeneralResponse?> login({
+    required String username,
+    required String password,
+    GeneralCallback<GeneralResponse>? callback,
   }) async {
     try {
       var base64md5Password = Utils.base64md5(password);
@@ -78,9 +75,9 @@ class GraduationHelper {
         );
       }
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response && e.response.statusCode == 302) {
+      if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
         isLogin = true;
-        return callback.onSuccess(GeneralResponse.success());
+        return callback!.onSuccess(GeneralResponse.success());
       } else {
         callback?.onFailure(e);
       }
@@ -91,9 +88,9 @@ class GraduationHelper {
     return null;
   }
 
-  Future<GraduationReportData> getGraduationReport({
-    @required String username,
-    @required GeneralCallback<GraduationReportData> callback,
+  Future<GraduationReportData?> getGraduationReport({
+    required String username,
+    required GeneralCallback<GraduationReportData?> callback,
   }) async {
     var url = '${SelcrsHelper.instance.selcrsUrl}/gadchk/gad_chk_stu_list.asp?'
         'stno=$username&KIND=5&frm=1';
@@ -158,7 +155,7 @@ class GraduationHelper {
               }
               if (tdDoc.length > 5)
                 graduationReportData
-                    .generalEducationCourse.last.generalEducationItem
+                    .generalEducationCourse.last.generalEducationItem!
                     .add(
                   GeneralEducationItem(
                     name: tdDoc[base + 0].text,
@@ -206,21 +203,21 @@ class GraduationHelper {
         }
         print(DateTime.now());
       } else {
-        return callback?.onSuccess(null);
+        return callback.onSuccess(null);
       }
       //    graduationReportData.generalEducationCourse.forEach((i) {
       //      print('type = ${i.type}');
       //    });
       var endTime = DateTime.now().millisecondsSinceEpoch;
       debugPrint(((endTime - startTime) / 1000.0).toString());
-      return callback?.onSuccess(graduationReportData);
+      return callback.onSuccess(graduationReportData);
     } on DioError catch (e) {
       if (callback != null)
         return callback.onFailure(e);
       else
         throw e;
     } catch (e) {
-      callback?.onError(GeneralResponse.unknownError());
+      callback.onError(GeneralResponse.unknownError());
       throw e;
     }
   }

@@ -63,18 +63,18 @@ class HomePageState extends State<HomePage> {
 
   bool get isMobile => MediaQuery.of(context).size.shortestSide < 680;
 
-  AppLocalizations app;
-  ApLocalizations ap;
+  late AppLocalizations app;
+  late ApLocalizations ap;
 
   HomeState state = HomeState.loading;
 
-  bool get isLogin => ShareDataWidget.of(context).data.isLogin;
+  bool get isLogin => ShareDataWidget.of(context)?.data.isLogin ?? false;
 
-  UserInfo get userInfo => ShareDataWidget.of(context).data.userInfo;
+  UserInfo? get userInfo => ShareDataWidget.of(context)?.data.userInfo;
 
-  Widget content;
+  Widget? content;
 
-  List<Announcement> announcements;
+  List<Announcement> announcements = <Announcement>[];
 
   bool isStudyExpanded = false;
   bool isSchoolNavigationExpanded = false;
@@ -112,7 +112,7 @@ class HomePageState extends State<HomePage> {
     });
     FirebaseAnalyticsUtils.instance.setUserProperty(
       AnalyticsConstants.language,
-      Locale(Intl.defaultLocale).languageCode,
+      Locale(Intl.defaultLocale!).languageCode,
     );
     FirebaseMessagingUtils.instance.init(
       onClick: (message) async {
@@ -158,7 +158,7 @@ class HomePageState extends State<HomePage> {
                         AuthorizationStatus.authorized ||
                     settings.authorizationStatus ==
                         AuthorizationStatus.provisional) {
-                  String token = await messaging.getToken();
+                  String? token = await messaging.getToken();
                   AnnouncementHelper.instance.fcmToken = token;
                 }
               } catch (_) {}
@@ -219,7 +219,7 @@ class HomePageState extends State<HomePage> {
             title: ap.bus,
             onTap: () => _openPage(
               BusListPage(
-                locale: Locale(Intl.defaultLocale),
+                locale: Locale(Intl.defaultLocale!),
               ),
             ),
           ),
@@ -248,7 +248,10 @@ class HomePageState extends State<HomePage> {
                 icon: ApIcon.accessibilityNew,
                 title: ap.admissionGuide,
                 onTap: () {
-                  if (kIsWeb || Platform.isAndroid || Platform.isIOS || Platform.isWindows) {
+                  if (kIsWeb ||
+                      Platform.isAndroid ||
+                      Platform.isIOS ||
+                      Platform.isWindows) {
                     _openPage(
                       AdmissionGuidePage(),
                       useCupertinoRoute: false,
@@ -330,8 +333,8 @@ class HomePageState extends State<HomePage> {
                 GraduationHelper.instance.logout();
                 TuitionHelper.instance.logout();
                 setState(() {
-                  ShareDataWidget.of(context).data.isLogin = false;
-                  ShareDataWidget.of(context).data.userInfo = null;
+                  ShareDataWidget.of(context)!.data.isLogin = false;
+                  ShareDataWidget.of(context)!.data.userInfo = null;
                 });
                 if (isMobile) Navigator.of(context).pop();
                 _checkLoginState();
@@ -347,7 +350,7 @@ class HomePageState extends State<HomePage> {
             if (userInfo != null && isLogin)
               ApUtils.pushCupertinoStyle(
                 context,
-                UserInfoPage(userInfo: userInfo),
+                UserInfoPage(userInfo: userInfo!),
               );
           } else {
             if (isMobile) Navigator.of(context).pop();
@@ -381,7 +384,7 @@ class HomePageState extends State<HomePage> {
           ApUtils.pushCupertinoStyle(
               context,
               BusListPage(
-                locale: Locale(Intl.defaultLocale),
+                locale: Locale(Intl.defaultLocale!),
               ));
           break;
         case 1:
@@ -406,11 +409,11 @@ class HomePageState extends State<HomePage> {
       callback: GeneralCallback(
         onFailure: (_) => setState(() => state = HomeState.error),
         onError: (_) => setState(() => state = HomeState.error),
-        onSuccess: (List<Announcement> data) {
-          announcements = data;
+        onSuccess: (List<Announcement>? data) {
+          announcements = data ?? [];
           if (mounted)
             setState(() {
-              if (announcements == null || announcements.length == 0)
+              if (announcements.length == 0)
                 state = HomeState.empty;
               else
                 state = HomeState.finish;
@@ -422,9 +425,9 @@ class HomePageState extends State<HomePage> {
 
   void _checkLoginState() async {
     if (isLogin) {
-      _homeKey.currentState.hideSnackBar();
+      _homeKey.currentState!.hideSnackBar();
     } else {
-      _homeKey.currentState
+      _homeKey.currentState!
           .showSnackBar(
             text: ApLocalizations.of(context).notLogin,
             actionText: ApLocalizations.of(context).login,
@@ -441,32 +444,32 @@ class HomePageState extends State<HomePage> {
 
   _login() async {
     var username = Preferences.getString(Constants.PREF_USERNAME, '');
-    var password = Preferences.getStringSecurity(Constants.PREF_PASSWORD, '');
+    var password = Preferences.getStringSecurity(Constants.PREF_PASSWORD, '')!;
     SelcrsHelper.instance.login(
       username: username,
       password: password,
       callback: GeneralCallback(
         onError: (GeneralResponse e) {
           if (e.statusCode == 400)
-            _homeKey.currentState.showBasicHint(text: ap.loginFail);
+            _homeKey.currentState!.showBasicHint(text: ap.loginFail);
           else if (e.statusCode == 401) {
             ApUtils.showToast(
                 context, AppLocalizations.of(context).pleaseConfirmForm);
             Utils.openConfirmForm(context, username);
           } else
-            _homeKey.currentState.showBasicHint(text: ap.unknownError);
+            _homeKey.currentState!.showBasicHint(text: ap.unknownError);
         },
         onFailure: (DioError e) {
-          _homeKey.currentState.showBasicHint(
-            text: e.i18nMessage,
+          _homeKey.currentState!.showBasicHint(
+            text: e.i18nMessage!,
           );
         },
         onSuccess: (GeneralResponse data) {
-          _homeKey.currentState.showBasicHint(text: ap.loginSuccess);
+          _homeKey.currentState!.showBasicHint(text: ap.loginSuccess);
           setState(() {
-            ShareDataWidget.of(context).data.isLogin = true;
+            ShareDataWidget.of(context)!.data.isLogin = true;
           });
-          ShareDataWidget.of(context).data.getUserInfo();
+          ShareDataWidget.of(context)!.data.getUserInfo();
         },
       ),
     );
@@ -478,7 +481,8 @@ class HomePageState extends State<HomePage> {
     var currentVersion =
         Preferences.getString(Constants.PREF_CURRENT_VERSION, '');
     if (currentVersion != packageInfo.buildNumber) {
-      final rawData = await FileAssets.changelogData;
+      final rawData =
+          await (FileAssets.changelogData as Future<Map<String, dynamic>>);
       final updateNoteContent =
           rawData["${packageInfo.buildNumber}"][ApLocalizations.current.locale];
       DialogUtils.showUpdateContent(
@@ -496,17 +500,16 @@ class HomePageState extends State<HomePage> {
       await remoteConfig.fetch();
       await remoteConfig.activate();
       VersionInfo versionInfo = remoteConfig.versionInfo;
-      if (versionInfo != null)
-        DialogUtils.showNewVersionContent(
-          context: context,
-          iOSAppId: '146752219',
-          defaultUrl: 'https://www.facebook.com/NKUST.ITC/',
-          githubRepositoryName: 'nsysu-code-club/NSYSU-AP',
-          windowsPath:
-              'https://github.com/NKUST-ITC/nsysu-code-club/NSYSU-AP/releases/download/%s/nsysu_ap_windows.zip',
-          appName: app.appName,
-          versionInfo: versionInfo,
-        );
+      DialogUtils.showNewVersionContent(
+        context: context,
+        iOSAppId: '146752219',
+        defaultUrl: 'https://www.facebook.com/NKUST.ITC/',
+        githubRepositoryName: 'nsysu-code-club/NSYSU-AP',
+        windowsPath:
+            'https://github.com/NKUST-ITC/nsysu-code-club/NSYSU-AP/releases/download/%s/nsysu_ap_windows.zip',
+        appName: app.appName,
+        versionInfo: versionInfo,
+      );
     }
   }
 
@@ -520,9 +523,9 @@ class HomePageState extends State<HomePage> {
       if (state != HomeState.finish) {
         _getAllAnnouncement();
       }
-      ShareDataWidget.of(context).data.isLogin = true;
-      ShareDataWidget.of(context).data.getUserInfo();
-      _homeKey.currentState.hideSnackBar();
+      ShareDataWidget.of(context)!.data.isLogin = true;
+      ShareDataWidget.of(context)!.data.getUserInfo();
+      _homeKey.currentState!.hideSnackBar();
     } else {
       _checkLoginState();
     }
@@ -556,7 +559,7 @@ class HomePageState extends State<HomePage> {
 
   Future<void> openDesktopWebViewPage(
     String url, {
-    String title,
+    required String title,
   }) async {
     final Webview webView = await WebviewWindow.create(
         configuration: CreateConfiguration(title: title));

@@ -10,17 +10,17 @@ class TuitionAndFees {
   final String serialNumber;
 
   TuitionAndFees({
-    this.titleZH,
-    this.titleEN,
-    this.amount,
-    this.paymentStatusZH,
-    this.paymentStatusEN,
-    this.dateOfPayment,
-    this.serialNumber,
+    required this.titleZH,
+    required this.titleEN,
+    required this.amount,
+    required this.paymentStatusZH,
+    required this.paymentStatusEN,
+    required this.dateOfPayment,
+    required this.serialNumber,
   });
 
   String get title {
-    if (Intl.defaultLocale.contains('zh')) {
+    if (Intl.defaultLocale!.contains('zh')) {
       return titleZH;
     } else {
       return titleEN;
@@ -28,7 +28,7 @@ class TuitionAndFees {
   }
 
   String get paymentStatus {
-    if (Intl.defaultLocale.contains('zh')) {
+    if (Intl.defaultLocale!.contains('zh')) {
       return paymentStatusZH;
     } else {
       return paymentStatusEN;

@@ -18,9 +18,9 @@ class AdmissionGuidePage extends StatefulWidget {
 }
 
 class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
-  ApLocalizations ap;
+  late ApLocalizations ap;
 
-  InAppWebViewController webViewController;
+  InAppWebViewController? webViewController;
   final WebviewController _windowsController = WebviewController();
 
   @override

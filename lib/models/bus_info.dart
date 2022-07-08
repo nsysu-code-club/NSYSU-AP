@@ -20,24 +20,24 @@ class BusInfo {
     this.updateTime,
   });
 
-  String carId;
-  String stopName;
-  int routeId;
-  String name;
-  String isOpenData;
-  String departure;
-  String destination;
-  String updateTime;
+  String? carId;
+  String? stopName;
+  int? routeId;
+  String? name;
+  String? isOpenData;
+  String? departure;
+  String? destination;
+  String? updateTime;
 
   BusInfo copyWith({
-    String carId,
-    String stopName,
-    int routeId,
-    String name,
-    String isOpenData,
-    String departure,
-    String destination,
-    String updateTime,
+    String? carId,
+    String? stopName,
+    int? routeId,
+    String? name,
+    String? isOpenData,
+    String? departure,
+    String? destination,
+    String? updateTime,
   }) =>
       BusInfo(
         carId: carId ?? this.carId,
@@ -79,7 +79,7 @@ class BusInfo {
         "UpdateTime": updateTime == null ? null : updateTime,
       };
 
-  static List<BusInfo> fromRawList(String rawString) {
+  static List<BusInfo>? fromRawList(String rawString) {
     final rawStringList = json.decode(rawString);
     if (rawStringList == null)
       return null;
@@ -91,12 +91,12 @@ class BusInfo {
       );
   }
 
-  static List<BusInfo> load() {
-    final rawStringList = Preferences.getStringList(
+  static List<BusInfo>? load() {
+    final List<String> rawStringList = Preferences.getStringList(
       Constants.BUS_INFO_DATA,
-      null,
+      <String>[],
     );
-    if (rawStringList == null)
+    if (rawStringList.isEmpty)
       return null;
     else
       return List<BusInfo>.from(

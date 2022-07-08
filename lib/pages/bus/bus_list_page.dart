@@ -16,7 +16,10 @@ enum _State { loading, finish, error }
 class BusListPage extends StatefulWidget {
   final Locale locale;
 
-  const BusListPage({Key key, this.locale}) : super(key: key);
+  const BusListPage({
+    Key? key,
+    required this.locale,
+  }) : super(key: key);
 
   @override
   _BusListPageState createState() => _BusListPageState();
@@ -25,12 +28,12 @@ class BusListPage extends StatefulWidget {
 class _BusListPageState extends State<BusListPage> {
   _State state = _State.loading;
 
-  List<BusInfo> busList;
+  List<BusInfo>? busList;
 
   @override
   void initState() {
     _getData();
-    FirebaseAnalyticsUtils.instance?.setCurrentScreen(
+    FirebaseAnalyticsUtils.instance.setCurrentScreen(
       "BusListPage",
       "bus_list_page.dart",
     );
@@ -67,13 +70,13 @@ class _BusListPageState extends State<BusListPage> {
         );
       default:
         return ListView.builder(
-          itemCount: busList.length,
+          itemCount: busList?.length ?? 0,
           itemBuilder: (_, index) {
-            final bus = busList[index];
+            final bus = busList![index];
             return ListTile(
-              title: Text(bus.name),
+              title: Text(bus.name!),
               trailing: Text(
-                bus.carId?.split(',')?.first ?? bus.carId ?? bus.stopName,
+                bus.carId?.split(',').first ?? bus.carId ?? bus.stopName!,
                 style: TextStyle(
                   color: bus.carId == null ? Colors.red : Colors.green,
                 ),

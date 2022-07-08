@@ -1,21 +1,21 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
+import 'package:ap_common/widgets/default_dialog.dart';
+import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:ap_common/widgets/default_dialog.dart';
-import 'package:ap_common/widgets/hint_content.dart';
 
 enum _State { loading, finish, error, empty, offlineEmpty }
 
 class GraduationReportPage extends StatefulWidget {
   static const String routerName = "/graduationReport";
 
-  const GraduationReportPage({Key key}) : super(key: key);
+  const GraduationReportPage({Key? key}) : super(key: key);
 
   @override
   GraduationReportPageState createState() => GraduationReportPageState();
@@ -23,15 +23,15 @@ class GraduationReportPage extends StatefulWidget {
 
 class GraduationReportPageState extends State<GraduationReportPage>
     with SingleTickerProviderStateMixin {
-  AppLocalizations app;
-  ApLocalizations ap;
+  late AppLocalizations app;
+  late ApLocalizations ap;
 
   _State state = _State.loading;
   bool isOffline = false;
 
   List<TableRow> scoreWeightList = [];
 
-  GraduationReportData graduationReportData;
+  GraduationReportData? graduationReportData;
 
   @override
   void initState() {
@@ -76,7 +76,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
               child: RefreshIndicator(
                 onRefresh: () async {
                   _getGraduationReport();
-                  FirebaseAnalyticsUtils.instance.logEvent('graduation_report_refresh');
+                  FirebaseAnalyticsUtils.instance
+                      .logEvent('graduation_report_refresh');
                   return null;
                 },
                 child: _body(),
@@ -132,7 +133,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   textAlign: TextAlign.start,
                   style: _textBlueStyle(),
                 ),
-                graduationReportData.missingRequiredCourse.length == 0
+                graduationReportData!.missingRequiredCourse.length == 0
                     ? Text(
                         ap.noData,
                         style: TextStyle(
@@ -162,7 +163,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                               ],
                             ),
                             for (var missingRequiredCourse
-                                in graduationReportData.missingRequiredCourse)
+                                in graduationReportData!.missingRequiredCourse)
                               TableRow(children: <Widget>[
                                 _scoreTextBorder(
                                     missingRequiredCourse.name, false),
@@ -175,7 +176,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                         ),
                       ),
                 Text(
-                  graduationReportData.missingRequiredCoursesCredit,
+                  graduationReportData!.missingRequiredCoursesCredit,
                   style: _textBlueStyle(),
                 ),
                 Divider(color: ApTheme.of(context).grey),
@@ -185,14 +186,14 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   style: _textBlueStyle(),
                 ),
                 Text(
-                  graduationReportData.generalEducationCourse.length != 0
+                  graduationReportData!.generalEducationCourse.length != 0
                       ? app.courseClickHint
                       : ap.noData,
                   style: TextStyle(
                       color: ApTheme.of(context).grey, fontSize: 14.0),
                 ),
                 for (var generalEducationCourse
-                    in graduationReportData.generalEducationCourse) ...[
+                    in graduationReportData!.generalEducationCourse) ...[
                   Text(
                     generalEducationCourse.type ?? "",
                     textAlign: TextAlign.start,
@@ -220,7 +221,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                           ],
                         ),
                         for (var item
-                            in generalEducationCourse.generalEducationItem)
+                            in generalEducationCourse.generalEducationItem!)
                           TableRow(children: <Widget>[
                             InkWell(
                               child: _scoreTextBorder(item.name, false),
@@ -234,9 +235,9 @@ class GraduationReportPageState extends State<GraduationReportPage>
                     ),
                   ),
                 ],
-                graduationReportData.generalEducationCourse.length != 0
+                graduationReportData!.generalEducationCourse.length != 0
                     ? Text(
-                        graduationReportData.generalEducationCourseDescription,
+                        graduationReportData!.generalEducationCourseDescription,
                         style: _textBlueStyle(),
                       )
                     : SizedBox(),
@@ -269,7 +270,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                         ],
                       ),
                       for (var course
-                          in graduationReportData.otherEducationsCourse)
+                          in graduationReportData!.otherEducationsCourse)
                         TableRow(children: <Widget>[
                           _scoreTextBorder(course.name, false),
                           _scoreTextBorder(course.semester, false),
@@ -279,7 +280,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   ),
                 ),
                 Text(
-                  graduationReportData.otherEducationsCourseCredit,
+                  graduationReportData!.otherEducationsCourseCredit,
                   style: _textBlueStyle(),
                 ),
                 Divider(color: ApTheme.of(context).grey),
@@ -289,7 +290,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                 ),
                 SizedBox(height: 4),
                 Text(
-                  graduationReportData.totalDescription ?? '',
+                  graduationReportData!.totalDescription,
                   textAlign: TextAlign.start,
                   style: _textBlueStyle(),
                 ),
@@ -309,7 +310,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
     return TextStyle(fontSize: 14.0);
   }
 
-  Widget _scoreTextBorder(String text, bool isTitle) {
+  Widget _scoreTextBorder(String? text, bool isTitle) {
     return Container(
       width: double.maxFinite,
       padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
@@ -322,7 +323,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
     );
   }
 
-  Function get _onFailure => (DioError e) => setState(() {
+  Function(DioError) get _onFailure => (DioError e) => setState(() {
         state = _State.error;
         switch (e.type) {
           case DioErrorType.connectTimeout:
@@ -337,7 +338,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
         }
       });
 
-  Function get _onError => (_) => setState(() => state = _State.error);
+  Function(GeneralResponse) get _onError =>
+      (_) => setState(() => state = _State.error);
 
   void _login() {
     GraduationHelper.instance.login(
@@ -359,7 +361,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
       callback: GeneralCallback(
         onError: _onError,
         onFailure: _onFailure,
-        onSuccess: (GraduationReportData data) {
+        onSuccess: (GraduationReportData? data) {
           graduationReportData = data;
           setState(() {
             if (graduationReportData == null)
@@ -415,7 +417,10 @@ class GraduationReportPageState extends State<GraduationReportPage>
 class BorderContainer extends StatelessWidget {
   final Widget child;
 
-  const BorderContainer({Key key, this.child}) : super(key: key);
+  const BorderContainer({
+    Key? key,
+    required this.child,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
