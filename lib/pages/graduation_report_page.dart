@@ -364,7 +364,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
         onSuccess: (GraduationReportData? data) {
           graduationReportData = data;
           setState(() {
-            if (graduationReportData == null)
+            if (data == null)
               state = _State.empty;
             else
               state = _State.finish;

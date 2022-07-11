@@ -29,7 +29,7 @@ class BusHelper {
     cookieJar.loadForRequest(Uri.parse(BASE_PATH));
   }
 
-  Future<List<BusInfo>?> getBusInfoList({
+  Future<void> getBusInfoList({
     required GeneralCallback<List<BusInfo>?> callback,
     required Locale locale,
   }) async {
@@ -50,23 +50,19 @@ class BusHelper {
       final list = BusInfo.fromRawList(response.data);
       callback.onSuccess(list);
     } on DioError catch (e) {
-      if (callback != null) {
-        callback.onFailure(e);
-        // debugPrint(big5.decode(e.response.data));
-        return null;
-      } else
-        throw e;
-    } on Exception catch (e) {
+      callback.onFailure(e);
+      // debugPrint(big5.decode(e.response.data));
+      rethrow;
+    } on Exception catch (_) {
       callback.onError(GeneralResponse.unknownError());
-      throw e;
+      rethrow;
     }
-    return null;
   }
 
-  Future<List<BusTime>?> getBusTime({
+  Future<void> getBusTime({
+    required Locale locale,
     required BusInfo busInfo,
     required GeneralCallback<List<BusTime>?> callback,
-    required Locale locale,
   }) async {
     try {
       String languageCode;
@@ -90,15 +86,12 @@ class BusHelper {
       final list = BusTime.fromRawList(response.data);
       callback.onSuccess(list);
     } on DioError catch (e) {
-      if (callback != null) {
-        callback.onFailure(e);
-        // debugPrint(big5.decode(e.response.data));
-        return null;
-      } else
-        throw e;
+      callback.onFailure(e);
+      // debugPrint(big5.decode(e.response.data));
+      rethrow;
     } on Exception catch (e) {
       callback.onError(GeneralResponse.unknownError());
-      throw e;
+      rethrow;
     }
     return null;
   }

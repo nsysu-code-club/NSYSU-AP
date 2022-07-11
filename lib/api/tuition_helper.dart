@@ -42,10 +42,10 @@ class TuitionHelper {
     initCookiesJar();
   }
 
-  Future<GeneralResponse?> login({
+  Future<void> login({
     required String username,
     required String password,
-    GeneralCallback<GeneralResponse>? callback,
+    required GeneralCallback<GeneralResponse> callback,
   }) async {
     try {
       var response = await dio.post(
@@ -66,24 +66,19 @@ class TuitionHelper {
     } on DioError catch (e) {
       if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
         isLogin = true;
-        return callback?.onSuccess(GeneralResponse.success());
+        return callback.onSuccess(GeneralResponse.success());
       } else {
-        if (callback != null) {
-          callback.onFailure(e);
-          // debugPrint(big5.decode(e.response.data));
-          return null;
-        } else
-          throw e;
+        callback.onFailure(e);
+        // debugPrint(big5.decode(e.response.data));
       }
-    } on Exception catch (e) {
-      callback?.onError(GeneralResponse.unknownError());
-      throw e;
+    } on Exception catch (_) {
+      callback.onError(GeneralResponse.unknownError());
+      rethrow;
     }
-    return null;
   }
 
-  Future<List<TuitionAndFees>?> getData({
-    GeneralCallback<List<TuitionAndFees>>? callback,
+  Future<void> getData({
+    required GeneralCallback<List<TuitionAndFees>> callback,
   }) async {
     var url = '$BASE_PATH/tfstu/tfstudata.asp?act=11';
     try {
@@ -94,7 +89,7 @@ class TuitionHelper {
       String text = big5.decode(response.data);
       // debugPrint('text =  ${text}');
       if (text.contains('沒有合乎查詢條件的資料')) {
-        return [];
+        callback.onSuccess([]);
       }
       var document = parse(text, encoding: 'BIG-5');
       var tbody = document.getElementsByTagName('tbody');
@@ -135,22 +130,18 @@ class TuitionHelper {
         );
       }
       list = list.reversed.toList();
-      return callback?.onSuccess(list) ?? list;
+      callback.onSuccess(list);
     } on DioError catch (e) {
-      if (callback != null) {
-        callback.onFailure(e);
-        return null;
-      } else
-        throw e;
-    } on Exception catch (e) {
-      callback?.onError(GeneralResponse.unknownError());
-      throw e;
+      callback.onFailure(e);
+    } on Exception catch (_) {
+      callback.onError(GeneralResponse.unknownError());
+      rethrow;
     }
   }
 
-  Future<Uint8List?> downloadFdf({
-    String? serialNumber,
-    GeneralCallback<Uint8List?>? callback,
+  Future<void> downloadFdf({
+    required String serialNumber,
+    required GeneralCallback<Uint8List?> callback,
   }) async {
     try {
       var response = await dio.get(
@@ -165,16 +156,12 @@ class TuitionHelper {
       //    String dir = (await getApplicationDocumentsDirectory()).path;
       //    File file = new File('$dir/$filename');
       //    await file.writeAsBytes(bytes);
-      return callback?.onSuccess(response.data) ?? response.data;
+      return callback.onSuccess(response.data) ?? response.data;
     } on DioError catch (e) {
-      if (callback != null) {
-        callback.onFailure(e);
-        return null;
-      } else
-        throw e;
+      callback.onFailure(e);
     } on Exception catch (e) {
-      callback?.onError(GeneralResponse.unknownError());
-      throw e;
+      callback.onError(GeneralResponse.unknownError());
+      rethrow;
     }
   }
 }
