@@ -67,16 +67,16 @@ class _BusTimePageState extends State<BusTimePage>
     final busInfo = widget.busInfo!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.busInfo!.name!),
+        title: Text(widget.busInfo!.name),
         backgroundColor: ApTheme.of(context).blue,
         bottom: TabBar(
           controller: _tabController,
           tabs: [
             Tab(
-              text: busInfo.departure ?? '',
+              text: busInfo.departure,
             ),
             Tab(
-              text: busInfo.destination ?? '',
+              text: busInfo.destination,
             ),
           ],
         ),
@@ -169,7 +169,7 @@ class BusTimeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final postfix = int.tryParse(busTime!.arrivedTime ?? '') == null
+    final postfix = int.tryParse(busTime!.arrivedTime) == null
         ? ''
         : ' ${AppLocalizations.of(context).minute}';
     final isComing =
@@ -190,14 +190,14 @@ class BusTimeItem extends StatelessWidget {
         ),
         padding: EdgeInsets.all(8.0),
         child: Text(
-          '${busTime!.arrivedTime ?? ''}$postfix',
+          '${busTime!.arrivedTime}$postfix',
           style: TextStyle(
             color: isComing ? Colors.red : ApTheme.of(context).greyText,
           ),
           textAlign: TextAlign.center,
         ),
       ),
-      title: Text(busTime!.name ?? ''),
+      title: Text(busTime!.name),
     );
   }
 }

@@ -4,7 +4,11 @@
 
 import 'dart:convert';
 
-//TODO: improve by json serialization
+import 'package:json_annotation/json_annotation.dart';
+
+part 'bus_time.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class BusTime {
   BusTime({
     required this.routeId,
@@ -16,12 +20,19 @@ class BusTime {
     required this.seqNo,
   });
 
+  @JsonKey(name: 'RouteID')
   int routeId;
+  @JsonKey(name: 'StopID')
   String stopId;
+  @JsonKey(name: 'Name')
   String name;
+  @JsonKey(name: 'ArrivedTime')
   String arrivedTime;
+  @JsonKey(name: 'RealArrivedTime')
   String realArrivedTime;
+  @JsonKey(name: 'isGoBack')
   String isGoBack;
+  @JsonKey(name: 'SeqNo')
   int seqNo;
 
   BusTime copyWith({
@@ -43,30 +54,16 @@ class BusTime {
         seqNo: seqNo ?? this.seqNo,
       );
 
-  factory BusTime.fromRawJson(String str) => BusTime.fromJson(json.decode(str));
+  factory BusTime.fromJson(Map<String, dynamic> json) =>
+      _$BusTimeFromJson(json);
 
-  String toRawJson() => json.encode(toJson());
+  Map<String, dynamic> toJson() => _$BusTimeToJson(this);
 
-  factory BusTime.fromJson(Map<String, dynamic> json) => BusTime(
-        routeId: json["RouteID"] == null ? null : json["RouteID"],
-        stopId: json["StopID"] == null ? null : json["StopID"],
-        name: json["Name"] == null ? json["NameEn"] : json["Name"],
-        arrivedTime: json["ArrivedTime"] == null ? null : json["ArrivedTime"],
-        realArrivedTime:
-            json["RealArrivedTime"] == null ? null : json["RealArrivedTime"],
-        isGoBack: json["isGoBack"] == null ? null : json["isGoBack"],
-        seqNo: json["SeqNo"] == null ? null : json["SeqNo"],
+  factory BusTime.fromRawJson(String str) => BusTime.fromJson(
+        json.decode(str) as Map<String, dynamic>,
       );
 
-  Map<String, dynamic> toJson() => {
-        "RouteID": routeId == null ? null : routeId,
-        "StopID": stopId == null ? null : stopId,
-        "Name": name == null ? null : name,
-        "ArrivedTime": arrivedTime == null ? null : arrivedTime,
-        "RealArrivedTime": realArrivedTime == null ? null : realArrivedTime,
-        "isGoBack": isGoBack == null ? null : isGoBack,
-        "SeqNo": seqNo == null ? null : seqNo,
-      };
+  String toRawJson() => jsonEncode(toJson());
 
   static List<BusTime>? fromRawList(String rawString) {
     final rawStringList = json.decode(rawString);

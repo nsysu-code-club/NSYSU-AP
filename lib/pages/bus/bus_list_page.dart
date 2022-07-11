@@ -74,9 +74,9 @@ class _BusListPageState extends State<BusListPage> {
           itemBuilder: (_, index) {
             final bus = busList![index];
             return ListTile(
-              title: Text(bus.name!),
+              title: Text(bus.name),
               trailing: Text(
-                bus.carId?.split(',').first ?? bus.carId ?? bus.stopName!,
+                bus.carId?.split(',').first ?? bus.carId ?? bus.stopName,
                 style: TextStyle(
                   color: bus.carId == null ? Colors.red : Colors.green,
                 ),

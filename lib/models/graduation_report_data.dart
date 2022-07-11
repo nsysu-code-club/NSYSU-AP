@@ -1,4 +1,10 @@
-//TODO: improve by json serialization
+import 'dart:convert';
+
+import 'package:json_annotation/json_annotation.dart';
+
+part 'graduation_report_data.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class GraduationReportData {
   String title;
   String name;
@@ -24,55 +30,17 @@ class GraduationReportData {
     required this.otherEducationsCourse,
   });
 
-  GraduationReportData fromJson(Map<String, dynamic> json) {
-    return GraduationReportData(
-      title: json['title'],
-      name: json['name'],
-      time: json['time'],
-      missingRequiredCoursesCredit: json['missingRequiredCoursesCredit'],
-      generalEducationCourseDescription:
-          json['generalEducationCourseDescription'],
-      otherEducationsCourseCredit: json['otherEducationsCourseCredit'],
-      totalDescription: json['totalDescription'],
-      missingRequiredCourse: [
-        for (var v in json['missingRequiredCourse'])
-          MissingRequiredCourse.fromJson(v)
-      ],
-      generalEducationCourse: [
-        for (var v in json['generalEducationCourse'])
-          GeneralEducationCourse.fromJson(v)
-      ],
-      otherEducationsCourse: [
-        for (var v in json['otherEducationsCourse'])
-          OtherEducationsCourse.fromJson(v)
-      ],
-    );
-  }
+  factory GraduationReportData.fromJson(Map<String, dynamic> json) =>
+      _$GraduationReportDataFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['title'] = this.title;
-    data['name'] = this.name;
-    data['time'] = this.time;
-    data['missingRequiredCoursesCredit'] = this.missingRequiredCoursesCredit;
-    data['generalEducationCourseDescription'] =
-        this.generalEducationCourseDescription;
-    data['otherEducationsCourseCredit'] = this.otherEducationsCourseCredit;
-    data['totalDescription'] = this.totalDescription;
-    if (this.missingRequiredCourse != null) {
-      data['missingRequiredCourse'] =
-          this.missingRequiredCourse.map((v) => v.toJson()).toList();
-    }
-    if (this.generalEducationCourse != null) {
-      data['generalEducationCourse'] =
-          this.generalEducationCourse.map((v) => v.toJson()).toList();
-    }
-    if (this.otherEducationsCourse != null) {
-      data['otherEducationsCourse'] =
-          this.otherEducationsCourse.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
+  Map<String, dynamic> toJson() => _$GraduationReportDataToJson(this);
+
+  factory GraduationReportData.fromRawJson(String str) =>
+      GraduationReportData.fromJson(
+        json.decode(str) as Map<String, dynamic>,
+      );
+
+  String toRawJson() => jsonEncode(toJson());
 }
 
 class MissingRequiredCourse {
