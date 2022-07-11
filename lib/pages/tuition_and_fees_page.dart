@@ -25,11 +25,11 @@ class TuitionAndFeesPage extends StatefulWidget {
 
 class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   late ApLocalizations ap;
-  AppLocalizations? app;
+  late AppLocalizations app;
 
   _State state = _State.loading;
 
-  List<TuitionAndFees>? items;
+  List<TuitionAndFees> items = [];
 
   @override
   void initState() {
@@ -48,7 +48,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     app = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(app!.tuitionAndFees),
+        title: Text(app.tuitionAndFees),
         backgroundColor: ApTheme.of(context).blue,
       ),
       body: _body(),
@@ -68,7 +68,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             icon: Icons.assignment,
             content: state == _State.error
                 ? ApLocalizations.of(context).clickToRetry
-                : app!.tuitionAndFeesEmpty,
+                : app.tuitionAndFeesEmpty,
           ),
         );
       default:
@@ -87,14 +87,14 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             itemBuilder: (context, index) {
               if (index == 0)
                 return Text(
-                  app!.tuitionAndFeesPageHint,
+                  app.tuitionAndFeesPageHint,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: ApTheme.of(context).grey),
                 );
               else
-                return _notificationItem(items![index - 1]);
+                return _notificationItem(items[index - 1]);
             },
-            itemCount: items!.length + 1,
+            itemCount: items.length + 1,
           ),
         );
     }
@@ -165,7 +165,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             padding: const EdgeInsets.all(4.0),
             child: Text(
               sprintf(
-                app!.tuitionAndFeesItemTitleFormat,
+                app.tuitionAndFeesItemTitleFormat,
                 [
                   item.amount,
                   item.dateOfPayment,
@@ -217,9 +217,9 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
         onError: _onError,
         onSuccess: (List<TuitionAndFees> data) {
           items = data;
-          if (mounted && items != null)
+          if (mounted)
             setState(() {
-              if (items!.length == 0)
+              if (items.length == 0)
                 state = _State.empty;
               else
                 state = _State.finish;

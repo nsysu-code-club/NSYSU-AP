@@ -28,7 +28,7 @@ class BusListPage extends StatefulWidget {
 class _BusListPageState extends State<BusListPage> {
   _State state = _State.loading;
 
-  List<BusInfo>? busList;
+  List<BusInfo> busList = <BusInfo>[];
 
   @override
   void initState() {
@@ -70,9 +70,9 @@ class _BusListPageState extends State<BusListPage> {
         );
       default:
         return ListView.builder(
-          itemCount: busList?.length ?? 0,
+          itemCount: busList.length,
           itemBuilder: (_, index) {
-            final bus = busList![index];
+            final bus = busList[index];
             return ListTile(
               title: Text(bus.name),
               trailing: Text(
@@ -109,7 +109,7 @@ class _BusListPageState extends State<BusListPage> {
           setState(() => state = _State.error);
         },
         onSuccess: (data) {
-          busList = data;
+          busList = data ?? <BusInfo>[];
           setState(() => state = _State.finish);
         },
       ),
