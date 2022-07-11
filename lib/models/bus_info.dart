@@ -10,24 +10,24 @@ import 'package:nsysu_ap/models/bus_time.dart';
 
 class BusInfo {
   BusInfo({
-    this.carId,
-    this.stopName,
-    this.routeId,
-    this.name,
-    this.isOpenData,
-    this.departure,
-    this.destination,
-    this.updateTime,
+    required this.carId,
+    required this.stopName,
+    required this.routeId,
+    required this.name,
+    required this.isOpenData,
+    required this.departure,
+    required this.destination,
+    required this.updateTime,
   });
 
-  String? carId;
-  String? stopName;
-  int? routeId;
-  String? name;
-  String? isOpenData;
-  String? departure;
-  String? destination;
-  String? updateTime;
+  String carId;
+  String stopName;
+  int routeId;
+  String name;
+  String isOpenData;
+  String departure;
+  String destination;
+  String updateTime;
 
   BusInfo copyWith({
     String? carId,
