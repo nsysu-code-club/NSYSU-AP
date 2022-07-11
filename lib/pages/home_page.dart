@@ -481,10 +481,9 @@ class HomePageState extends State<HomePage> {
     var currentVersion =
         Preferences.getString(Constants.PREF_CURRENT_VERSION, '');
     if (currentVersion != packageInfo.buildNumber) {
-      final rawData =
-          await (FileAssets.changelogData as Future<Map<String, dynamic>>);
-      final updateNoteContent =
-          rawData["${packageInfo.buildNumber}"][ApLocalizations.current.locale];
+      final rawData = await (FileAssets.changelogData);
+      final updateNoteContent = rawData!["${packageInfo.buildNumber}"]
+          [ApLocalizations.current.locale];
       DialogUtils.showUpdateContent(
         context,
         "v${packageInfo.version}\n"
