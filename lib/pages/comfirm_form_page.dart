@@ -18,9 +18,9 @@ class ConfirmFormPage extends StatefulWidget {
   final String username;
 
   const ConfirmFormPage({
-    Key key,
-    @required this.confirmFormUrl,
-    @required this.username,
+    Key? key,
+    required this.confirmFormUrl,
+    required this.username,
   }) : super(key: key);
 
   @override
@@ -28,9 +28,9 @@ class ConfirmFormPage extends StatefulWidget {
 }
 
 class _ConfirmFormPageState extends State<ConfirmFormPage> {
-  ApLocalizations ap;
+  late ApLocalizations ap;
 
-  InAppWebViewController webViewController;
+  InAppWebViewController? webViewController;
 
   String get url => sprintf(
         widget.confirmFormUrl,

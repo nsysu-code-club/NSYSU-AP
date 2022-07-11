@@ -1,3 +1,10 @@
+import 'dart:convert';
+
+import 'package:json_annotation/json_annotation.dart';
+
+part 'graduation_report_data.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class GraduationReportData {
   String title;
   String name;
@@ -10,82 +17,49 @@ class GraduationReportData {
   List<GeneralEducationCourse> generalEducationCourse;
   List<OtherEducationsCourse> otherEducationsCourse;
 
-  GraduationReportData(
-      {this.title,
-      this.name,
-      this.time,
-      this.missingRequiredCoursesCredit,
-      this.totalDescription,
-      this.missingRequiredCourse,
-      this.generalEducationCourse,
-      this.otherEducationsCourse});
+  GraduationReportData({
+    this.title = '',
+    this.name = '',
+    this.time = '',
+    this.missingRequiredCoursesCredit = '',
+    this.generalEducationCourseDescription = '',
+    this.otherEducationsCourseCredit = '',
+    this.totalDescription = '',
+    required this.missingRequiredCourse,
+    required this.generalEducationCourse,
+    required this.otherEducationsCourse,
+  });
 
-  GraduationReportData.fromJson(Map<String, dynamic> json) {
-    title = json['title'];
-    name = json['name'];
-    time = json['time'];
-    missingRequiredCoursesCredit = json['missingRequiredCoursesCredit'];
-    generalEducationCourseDescription =
-        json['generalEducationCourseDescription'];
-    otherEducationsCourseCredit = json['otherEducationsCourseCredit'];
-    totalDescription = json['totalDescription'];
-    if (json['missingRequiredCourse'] != null) {
-      missingRequiredCourse = [];
-      json['missingRequiredCourse'].forEach((v) {
-        missingRequiredCourse.add(new MissingRequiredCourse.fromJson(v));
-      });
-    }
-    if (json['generalEducationCourse'] != null) {
-      generalEducationCourse = [];
-      json['generalEducationCourse'].forEach((v) {
-        generalEducationCourse.add(new GeneralEducationCourse.fromJson(v));
-      });
-    }
-    if (json['otherEducationsCourse'] != null) {
-      otherEducationsCourse = [];
-      json['otherEducationsCourse'].forEach((v) {
-        otherEducationsCourse.add(new OtherEducationsCourse.fromJson(v));
-      });
-    }
-  }
+  factory GraduationReportData.fromJson(Map<String, dynamic> json) =>
+      _$GraduationReportDataFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['title'] = this.title;
-    data['name'] = this.name;
-    data['time'] = this.time;
-    data['missingRequiredCoursesCredit'] = this.missingRequiredCoursesCredit;
-    data['generalEducationCourseDescription'] =
-        this.generalEducationCourseDescription;
-    data['otherEducationsCourseCredit'] = this.otherEducationsCourseCredit;
-    data['totalDescription'] = this.totalDescription;
-    if (this.missingRequiredCourse != null) {
-      data['missingRequiredCourse'] =
-          this.missingRequiredCourse.map((v) => v.toJson()).toList();
-    }
-    if (this.generalEducationCourse != null) {
-      data['generalEducationCourse'] =
-          this.generalEducationCourse.map((v) => v.toJson()).toList();
-    }
-    if (this.otherEducationsCourse != null) {
-      data['otherEducationsCourse'] =
-          this.otherEducationsCourse.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
+  Map<String, dynamic> toJson() => _$GraduationReportDataToJson(this);
+
+  factory GraduationReportData.fromRawJson(String str) =>
+      GraduationReportData.fromJson(
+        json.decode(str) as Map<String, dynamic>,
+      );
+
+  String toRawJson() => jsonEncode(toJson());
 }
 
 class MissingRequiredCourse {
-  String name;
-  String credit;
-  String description;
+  String? name;
+  String? credit;
+  String? description;
 
-  MissingRequiredCourse({this.name, this.credit, this.description});
+  MissingRequiredCourse({
+    required this.name,
+    required this.credit,
+    required this.description,
+  });
 
-  MissingRequiredCourse.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    credit = json['credit'];
-    description = json['description'];
+  factory MissingRequiredCourse.fromJson(Map<String, dynamic> json) {
+    return MissingRequiredCourse(
+      name: json['name'],
+      credit: json['credit'],
+      description: json['description'],
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -98,8 +72,8 @@ class MissingRequiredCourse {
 }
 
 class GeneralEducationCourse {
-  String type;
-  List<GeneralEducationItem> generalEducationItem;
+  String? type;
+  List<GeneralEducationItem>? generalEducationItem;
 
   GeneralEducationCourse({this.type, this.generalEducationItem});
 
@@ -108,7 +82,7 @@ class GeneralEducationCourse {
     if (json['generalEducationItem'] != null) {
       generalEducationItem = [];
       json['generalEducationItem'].forEach((v) {
-        generalEducationItem.add(new GeneralEducationItem.fromJson(v));
+        generalEducationItem!.add(new GeneralEducationItem.fromJson(v));
       });
     }
   }
@@ -118,19 +92,19 @@ class GeneralEducationCourse {
     data['type'] = this.type;
     if (this.generalEducationItem != null) {
       data['generalEducationItem'] =
-          this.generalEducationItem.map((v) => v.toJson()).toList();
+          this.generalEducationItem!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class GeneralEducationItem {
-  String name;
-  String credit;
-  String check;
-  String actualCredits;
-  String totalCredits;
-  String practiceSituation;
+  String? name;
+  String? credit;
+  String? check;
+  String? actualCredits;
+  String? totalCredits;
+  String? practiceSituation;
 
   GeneralEducationItem(
       {this.name,
@@ -139,8 +113,8 @@ class GeneralEducationItem {
       this.actualCredits,
       this.totalCredits,
       this.practiceSituation}) {
-    this.credit = this.credit.replaceAll('�', '\\');
-    this.check = this.check.replaceAll('�', '\\');
+    this.credit = this.credit!.replaceAll('�', '\\');
+    this.check = this.check!.replaceAll('�', '\\');
   }
 
   GeneralEducationItem.fromJson(Map<String, dynamic> json) {
@@ -165,9 +139,9 @@ class GeneralEducationItem {
 }
 
 class OtherEducationsCourse {
-  String name;
-  String semester;
-  String credit;
+  String? name;
+  String? semester;
+  String? credit;
 
   OtherEducationsCourse({this.name, this.semester, this.credit});
 

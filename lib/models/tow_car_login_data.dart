@@ -5,15 +5,16 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 enum PermissionLevel { user, editor, admin }
 
+@deprecated
 class TowCarLoginData {
   TowCarLoginData({
     this.key,
   });
 
-  String key;
+  String? key;
 
   TowCarLoginData copyWith({
-    String key,
+    String? key,
   }) =>
       TowCarLoginData(
         key: key ?? this.key,
@@ -33,16 +34,16 @@ class TowCarLoginData {
         "key": key == null ? null : key,
       };
 
-  Map<String, dynamic> get decodedToken => JwtDecoder.decode(key);
+  Map<String, dynamic> get decodedToken => JwtDecoder.decode(key!);
 
-  bool get isExpired => JwtDecoder.isExpired(key);
+  bool get isExpired => JwtDecoder.isExpired(key!);
 
   PermissionLevel get level =>
       PermissionLevel.values[decodedToken['user']['permission_level']];
 
-  String get loginType => decodedToken['user']['login_type'];
+  String? get loginType => decodedToken['user']['login_type'];
 
-  String get username => decodedToken['user']['username'];
+  String? get username => decodedToken['user']['username'];
 
   static const KEY_NAME = 'tow_car_login_data';
 
@@ -53,14 +54,14 @@ class TowCarLoginData {
     );
   }
 
-  factory TowCarLoginData.load() {
-    String rawString = Preferences.getStringSecurity(
+  static TowCarLoginData? load() {
+    String? rawString = Preferences.getStringSecurity(
       KEY_NAME,
       '',
     );
     if (rawString == '')
       return null;
     else
-      return TowCarLoginData.fromRawJson(rawString);
+      return TowCarLoginData.fromRawJson(rawString!);
   }
 }

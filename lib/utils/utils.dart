@@ -69,9 +69,9 @@ class Utils {
         latTop = 22.636574,
         longLeft = 120.258485,
         lonRight = 120.271779;
-    return currentPosition.latitude >= latBottom &&
-        currentPosition.latitude <= latTop &&
-        currentPosition.longitude >= longLeft &&
-        currentPosition.longitude <= lonRight;
+    return currentPosition.latitude! >= latBottom &&
+        currentPosition.latitude! <= latTop &&
+        currentPosition.longitude! >= longLeft &&
+        currentPosition.longitude! <= lonRight;
   }
 }

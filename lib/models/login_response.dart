@@ -1,41 +1,46 @@
+import 'dart:convert';
+
+import 'package:json_annotation/json_annotation.dart';
+
+part 'login_response.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class LoginResponse {
   List<Data> data;
 
-  LoginResponse({this.data});
+  LoginResponse({
+    required this.data,
+  });
 
-  LoginResponse.fromJson(Map<String, dynamic> json) {
-    if (json['data'] != null) {
-      data = [];
-      json['data'].forEach((v) {
-        data.add(new Data.fromJson(v));
-      });
-    }
-  }
+  factory LoginResponse.fromJson(Map<String, dynamic> json) =>
+      _$LoginResponseFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
+  Map<String, dynamic> toJson() => _$LoginResponseToJson(this);
+
+  factory LoginResponse.fromRawJson(String str) => LoginResponse.fromJson(
+        json.decode(str) as Map<String, dynamic>,
+      );
+
+  String toRawJson() => jsonEncode(toJson());
 }
 
+@JsonSerializable()
 class Data {
-  String name;
-  String value;
+  String? name;
+  String? value;
 
-  Data({this.name, this.value});
+  Data({
+    this.name,
+    this.value,
+  });
 
-  Data.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    value = json['value'];
-  }
+  factory Data.fromJson(Map<String, dynamic> json) => _$DataFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['value'] = this.value;
-    return data;
-  }
+  Map<String, dynamic> toJson() => _$DataToJson(this);
+
+  factory Data.fromRawJson(String str) => Data.fromJson(
+        json.decode(str) as Map<String, dynamic>,
+      );
+
+  String toRawJson() => jsonEncode(toJson());
 }

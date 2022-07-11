@@ -5,9 +5,9 @@ import 'package:nsysu_ap/app.dart';
 class ShareDataWidget extends InheritedWidget {
   final MyAppState data;
 
-  ShareDataWidget(this.data, {Widget child}) : super(child: child);
+  ShareDataWidget(this.data, {required Widget child}) : super(child: child);
 
-  static ShareDataWidget of(BuildContext context) {
+  static ShareDataWidget? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType();
   }
 

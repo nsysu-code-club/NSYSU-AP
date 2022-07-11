@@ -3,6 +3,8 @@ import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/views/pdf_view.dart';
+import 'package:ap_common/widgets/hint_content.dart';
+import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,26 +12,24 @@ import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:ap_common/widgets/hint_content.dart';
-import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:sprintf/sprintf.dart';
 
 enum _State { loading, finish, error, empty }
 
 class TuitionAndFeesPage extends StatefulWidget {
-  const TuitionAndFeesPage({Key key}) : super(key: key);
+  const TuitionAndFeesPage({Key? key}) : super(key: key);
 
   @override
   _TuitionAndFeesPageState createState() => _TuitionAndFeesPageState();
 }
 
 class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
-  ApLocalizations ap;
-  AppLocalizations app;
+  late ApLocalizations ap;
+  late AppLocalizations app;
 
   _State state = _State.loading;
 
-  List<TuitionAndFees> items;
+  List<TuitionAndFees> items = [];
 
   @override
   void initState() {
@@ -178,7 +178,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     );
   }
 
-  Function get _onFailure => (DioError e) => setState(() {
+  Function(DioError) get _onFailure => (DioError e) => setState(() {
         state = _State.error;
         switch (e.type) {
           case DioErrorType.connectTimeout:
@@ -193,7 +193,8 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
         }
       });
 
-  Function get _onError => (_) => setState(() => state = _State.error);
+  Function(GeneralResponse) get _onError =>
+      (_) => setState(() => state = _State.error);
 
   _login() {
     TuitionHelper.instance.login(
@@ -216,7 +217,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
         onError: _onError,
         onSuccess: (List<TuitionAndFees> data) {
           items = data;
-          if (mounted && items != null)
+          if (mounted)
             setState(() {
               if (items.length == 0)
                 state = _State.empty;

@@ -21,18 +21,18 @@ class CoursePage extends StatefulWidget {
 }
 
 class CoursePageState extends State<CoursePage> {
-  ApLocalizations ap;
+  late ApLocalizations ap;
 
   CourseState state = CourseState.loading;
 
-  TimeCodeConfig timeCodeConfig;
+  TimeCodeConfig? timeCodeConfig;
 
-  SemesterData semesterData;
-  CourseData courseData;
-  CourseNotifyData notifyData;
+  SemesterData? semesterData;
+  CourseData courseData = CourseData();
+  CourseNotifyData? notifyData;
 
-  String customStateHint;
-  String customHint;
+  String? customStateHint;
+  String? customHint;
 
   bool isOffline = false;
 
@@ -67,13 +67,13 @@ class CoursePageState extends State<CoursePage> {
       notifyData: notifyData,
       semesterData: semesterData,
       onSelect: (index) {
-        this.semesterData.currentIndex = index;
+        this.semesterData!.currentIndex = index;
         _getCourseTables();
       },
       onRefresh: _getCourseTables,
       customHint: isOffline ? ap.offlineCourse : null,
       enableNotifyControl: semesterData != null &&
-          semesterData?.currentSemester?.code == defaultSemesterCode,
+          semesterData?.currentSemester.code == defaultSemesterCode,
       courseNotifySaveKey: courseNotifyCacheKey,
       enableCaptureCourseTable: true,
       actions: <Widget>[],
@@ -92,7 +92,8 @@ class CoursePageState extends State<CoursePage> {
         });
       };
 
-  Function get _onError => (_) => setState(() => state = CourseState.error);
+  Function(GeneralResponse) get _onError =>
+      (_) => setState(() => state = CourseState.error);
 
   Future<void> _getSemester() async {
     SelcrsHelper.instance.getCourseSemesterData(
@@ -107,9 +108,9 @@ class CoursePageState extends State<CoursePage> {
             await remoteConfig.fetch();
             await remoteConfig.activate();
             defaultSemesterCode =
-                remoteConfig?.getString(Constants.DEFAULT_COURSE_SEMESTER_CODE);
+                remoteConfig.getString(Constants.DEFAULT_COURSE_SEMESTER_CODE);
             String rawTimeCodeConfig =
-                remoteConfig?.getString(Constants.TIME_CODE_CONFIG);
+                remoteConfig.getString(Constants.TIME_CODE_CONFIG);
             timeCodeConfig = TimeCodeConfig.fromRawJson(rawTimeCodeConfig);
             Preferences.setString(
                 Constants.DEFAULT_COURSE_SEMESTER_CODE, defaultSemesterCode);
@@ -139,14 +140,14 @@ class CoursePageState extends State<CoursePage> {
               defaultSemesterCode,
             );
           }
-          semesterData.defaultSemester = Semester(
+          semesterData!.defaultSemester = Semester(
             year: defaultSemesterCode.substring(0, 3),
             value: defaultSemesterCode.substring(3),
             text: parser(defaultSemesterCode),
           );
-          semesterData.data
-              .forEach((option) => option.text = parser(option.text));
-          semesterData.currentIndex = semesterData.defaultIndex;
+          semesterData!.data!
+              .forEach((option) => option.text = parser(option.text!));
+          semesterData!.currentIndex = semesterData!.defaultIndex;
           _getCourseTables();
         },
       ),
@@ -173,7 +174,7 @@ class CoursePageState extends State<CoursePage> {
           break;
       }
       String first;
-      if (Intl.defaultLocale.contains('en')) {
+      if (Intl.defaultLocale!.contains('en')) {
         int year = int.parse(text.substring(0, 3));
         year += 1911;
         first = '$year~${year + 1}';
@@ -193,17 +194,16 @@ class CoursePageState extends State<CoursePage> {
     SelcrsHelper.instance.getCourseData(
       username: SelcrsHelper.instance.username,
       timeCodeConfig: timeCodeConfig,
-      semester: semesterData.currentSemester.code,
+      semester: semesterData!.currentSemester.code,
       callback: GeneralCallback(
         onFailure: _onFailure,
         onError: _onError,
         onSuccess: (CourseData data) {
           courseData = data;
           courseData.save(courseNotifyCacheKey);
-          if (mounted && courseData != null)
+          if (mounted)
             setState(() {
-              if (courseData?.courses == null ||
-                  courseData?.courses?.length == 0)
+              if (courseData.courses == null || courseData.courses?.length == 0)
                 state = CourseState.empty;
               else
                 state = CourseState.finish;

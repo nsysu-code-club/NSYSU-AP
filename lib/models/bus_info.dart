@@ -5,39 +5,51 @@
 import 'dart:convert';
 
 import 'package:ap_common/utils/preferences.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/bus_time.dart';
 
+part 'bus_info.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class BusInfo {
   BusInfo({
     this.carId,
-    this.stopName,
-    this.routeId,
-    this.name,
-    this.isOpenData,
-    this.departure,
-    this.destination,
-    this.updateTime,
+    required this.stopName,
+    required this.routeId,
+    required this.name,
+    required this.isOpenData,
+    required this.departure,
+    required this.destination,
+    required this.updateTime,
   });
 
-  String carId;
+  @JsonKey(name: 'CarID')
+  String? carId;
+  @JsonKey(name: 'StopName')
   String stopName;
+  @JsonKey(name: 'RouteID')
   int routeId;
+  @JsonKey(name: 'Name')
   String name;
+  @JsonKey(name: 'isOpenData')
   String isOpenData;
+  @JsonKey(name: 'Departure')
   String departure;
+  @JsonKey(name: 'Destination')
   String destination;
-  String updateTime;
+  @JsonKey(name: 'UpdateTime')
+  String? updateTime;
 
   BusInfo copyWith({
-    String carId,
-    String stopName,
-    int routeId,
-    String name,
-    String isOpenData,
-    String departure,
-    String destination,
-    String updateTime,
+    String? carId,
+    String? stopName,
+    int? routeId,
+    String? name,
+    String? isOpenData,
+    String? departure,
+    String? destination,
+    String? updateTime,
   }) =>
       BusInfo(
         carId: carId ?? this.carId,
@@ -50,36 +62,18 @@ class BusInfo {
         updateTime: updateTime ?? this.updateTime,
       );
 
-  factory BusInfo.fromRawJson(String str) => BusInfo.fromJson(json.decode(str));
+  factory BusInfo.fromJson(Map<String, dynamic> json) =>
+      _$BusInfoFromJson(json);
 
-  String toRawJson() => json.encode(toJson());
+  Map<String, dynamic> toJson() => _$BusInfoToJson(this);
 
-  factory BusInfo.fromJson(Map<String, dynamic> json) => BusInfo(
-        carId: json["CarID"] == null ? null : json["CarID"],
-        stopName: json["StopName"] == null ? null : json["StopName"],
-        routeId: json["RouteID"] == null ? null : json["RouteID"],
-        name: json["Name"] == null ? json["NameEn"] : json["Name"],
-        isOpenData: json["isOpenData"] == null ? null : json["isOpenData"],
-        departure:
-            json["Departure"] == null ? json["DepartureEn"] : json["Departure"],
-        destination: json["Destination"] == null
-            ? json["DestinationEn"]
-            : json["Destination"],
-        updateTime: json["UpdateTime"] == null ? null : json["UpdateTime"],
+  factory BusInfo.fromRawJson(String str) => BusInfo.fromJson(
+        json.decode(str) as Map<String, dynamic>,
       );
 
-  Map<String, dynamic> toJson() => {
-        "CarID": carId == null ? null : carId,
-        "StopName": stopName == null ? null : stopName,
-        "RouteID": routeId == null ? null : routeId,
-        "Name": name == null ? null : name,
-        "isOpenData": isOpenData == null ? null : isOpenData,
-        "Departure": departure == null ? null : departure,
-        "Destination": destination == null ? null : destination,
-        "UpdateTime": updateTime == null ? null : updateTime,
-      };
+  String toRawJson() => jsonEncode(toJson());
 
-  static List<BusInfo> fromRawList(String rawString) {
+  static List<BusInfo>? fromRawList(String rawString) {
     final rawStringList = json.decode(rawString);
     if (rawStringList == null)
       return null;
@@ -91,12 +85,12 @@ class BusInfo {
       );
   }
 
-  static List<BusInfo> load() {
-    final rawStringList = Preferences.getStringList(
+  static List<BusInfo>? load() {
+    final List<String> rawStringList = Preferences.getStringList(
       Constants.BUS_INFO_DATA,
-      null,
+      <String>[],
     );
-    if (rawStringList == null)
+    if (rawStringList.isEmpty)
       return null;
     else
       return List<BusInfo>.from(

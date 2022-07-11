@@ -15,5 +15,8 @@ class ScoreSemesterData {
       ? SemesterOptions(text: '上學期', value: '1')
       : semesters[selectSemesterIndex];
 
-  ScoreSemesterData({this.years, this.semesters});
+  ScoreSemesterData({
+    required this.years,
+    required this.semesters,
+  });
 }

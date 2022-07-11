@@ -1,17 +1,18 @@
+import 'dart:convert';
+
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import 'dart:convert';
-
+@deprecated
 class TowCarAlertData {
   TowCarAlertData({
     this.data,
   });
 
-  List<TowCarAlert> data;
+  List<TowCarAlert>? data;
 
   TowCarAlertData copyWith({
-    List<TowCarAlert> data,
+    List<TowCarAlert>? data,
   }) =>
       TowCarAlertData(
         data: data ?? this.data,
@@ -33,7 +34,7 @@ class TowCarAlertData {
   Map<String, dynamic> toJson() => {
         "data": data == null
             ? null
-            : List<dynamic>.from(data.map((x) => x.toJson())),
+            : List<dynamic>.from(data!.map((x) => x.toJson())),
       };
 }
 
@@ -48,26 +49,26 @@ class TowCarAlert {
     this.reviewStatus,
   });
 
-  String topic;
-  String title;
-  String message;
-  String imageUrl;
-  int viewCounts;
-  DateTime time;
-  bool reviewStatus;
+  String? topic;
+  String? title;
+  String? message;
+  String? imageUrl;
+  int? viewCounts;
+  DateTime? time;
+  bool? reviewStatus;
 
   String get ago => timeago.format(
-        time,
+        time!,
         locale: ApLocalizations.current.dateTimeLocale,
       );
 
   TowCarAlert copyWith({
-    String topic,
-    String title,
-    String message,
-    String imageUrl,
-    DateTime time,
-    bool reviewStatus,
+    String? topic,
+    String? title,
+    String? message,
+    String? imageUrl,
+    DateTime? time,
+    bool? reviewStatus,
   }) =>
       TowCarAlert(
         topic: topic ?? this.topic,
@@ -97,7 +98,7 @@ class TowCarAlert {
         "title": title == null ? null : title,
         "message": message == null ? null : message,
         "imageUrl": imageUrl == null ? null : imageUrl,
-        "time": time == null ? null : time.toIso8601String(),
+        "time": time == null ? null : time!.toIso8601String(),
         "review_status": reviewStatus,
       };
 

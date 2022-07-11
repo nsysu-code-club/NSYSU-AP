@@ -18,7 +18,11 @@ class BusTimePage extends StatefulWidget {
   final Locale locale;
   final BusInfo busInfo;
 
-  const BusTimePage({Key key, this.busInfo, this.locale}) : super(key: key);
+  const BusTimePage({
+    Key? key,
+    required this.busInfo,
+    required this.locale,
+  }) : super(key: key);
 
   @override
   _BusTimePageState createState() => _BusTimePageState();
@@ -31,9 +35,9 @@ class _BusTimePageState extends State<BusTimePage>
   List<BusTime> startList = [];
   List<BusTime> endList = [];
 
-  TabController _tabController;
+  TabController? _tabController;
 
-  Timer timer;
+  Timer? timer;
 
   @override
   void initState() {
@@ -48,7 +52,7 @@ class _BusTimePageState extends State<BusTimePage>
         _getData();
       },
     );
-    FirebaseAnalyticsUtils.instance?.setCurrentScreen(
+    FirebaseAnalyticsUtils.instance.setCurrentScreen(
       "BusTimePage",
       "bus_time_page.dart",
     );
@@ -73,10 +77,10 @@ class _BusTimePageState extends State<BusTimePage>
           controller: _tabController,
           tabs: [
             Tab(
-              text: busInfo.departure ?? '',
+              text: busInfo.departure,
             ),
             Tab(
-              text: busInfo.destination ?? '',
+              text: busInfo.destination,
             ),
           ],
         ),
@@ -146,7 +150,7 @@ class _BusTimePageState extends State<BusTimePage>
         onSuccess: (data) {
           startList.clear();
           endList.clear();
-          data.forEach((element) {
+          data!.forEach((element) {
             if (element.isGoBack == 'Y')
               endList.add(element);
             else
@@ -163,13 +167,13 @@ class BusTimeItem extends StatelessWidget {
   final BusTime busTime;
 
   const BusTimeItem({
-    Key key,
-    this.busTime,
+    Key? key,
+    required this.busTime,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final postfix = int.tryParse(busTime.arrivedTime ?? '') == null
+    final postfix = int.tryParse(busTime.arrivedTime) == null
         ? ''
         : ' ${AppLocalizations.of(context).minute}';
     final isComing =
@@ -190,14 +194,14 @@ class BusTimeItem extends StatelessWidget {
         ),
         padding: EdgeInsets.all(8.0),
         child: Text(
-          '${busTime.arrivedTime ?? ''}$postfix',
+          '${busTime.arrivedTime}$postfix',
           style: TextStyle(
             color: isComing ? Colors.red : ApTheme.of(context).greyText,
           ),
           textAlign: TextAlign.center,
         ),
       ),
-      title: Text(busTime.name ?? ''),
+      title: Text(busTime.name),
     );
   }
 }
