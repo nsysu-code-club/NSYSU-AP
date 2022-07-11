@@ -7,22 +7,22 @@ import 'dart:convert';
 //TODO: improve by json serialization
 class BusTime {
   BusTime({
-    this.routeId,
-    this.stopId,
-    this.name,
-    this.arrivedTime,
-    this.realArrivedTime,
-    this.isGoBack,
-    this.seqNo,
+    required this.routeId,
+    required this.stopId,
+    required this.name,
+    required this.arrivedTime,
+    required this.realArrivedTime,
+    required this.isGoBack,
+    required this.seqNo,
   });
 
-  int? routeId;
-  String? stopId;
-  String? name;
-  String? arrivedTime;
-  String? realArrivedTime;
-  String? isGoBack;
-  int? seqNo;
+  int routeId;
+  String stopId;
+  String name;
+  String arrivedTime;
+  String realArrivedTime;
+  String isGoBack;
+  int seqNo;
 
   BusTime copyWith({
     int? routeId,
