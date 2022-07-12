@@ -74,15 +74,17 @@ class BusInfo {
   String toRawJson() => jsonEncode(toJson());
 
   static List<BusInfo>? fromRawList(String rawString) {
-    final rawStringList = json.decode(rawString);
-    if (rawStringList == null)
+    final List<Map<String, dynamic>>? rawStringList =
+        json.decode(rawString) as List<Map<String, dynamic>>?;
+    if (rawStringList == null) {
       return null;
-    else
+    } else {
       return List<BusInfo>.from(
         rawStringList.map(
-          (x) => BusInfo.fromJson(x),
+          (Map<String, dynamic> x) => BusInfo.fromJson(x),
         ),
       );
+    }
   }
 
   static List<BusInfo>? load() {
@@ -90,14 +92,15 @@ class BusInfo {
       Constants.BUS_INFO_DATA,
       <String>[],
     );
-    if (rawStringList.isEmpty)
+    if (rawStringList.isEmpty) {
       return null;
-    else
+    } else {
       return List<BusInfo>.from(
         rawStringList.map(
-          (x) => BusInfo.fromRawJson(x),
+          (String x) => BusInfo.fromRawJson(x),
         ),
       );
+    }
   }
 }
 
@@ -106,8 +109,8 @@ extension BusInfoExtension on List<BusTime> {
     Preferences.setStringList(
       Constants.BUS_INFO_DATA,
       List<String>.from(
-        this.map(
-          (x) => x.toRawJson(),
+        map(
+          (BusTime x) => x.toRawJson(),
         ),
       ),
     );

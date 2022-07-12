@@ -13,7 +13,7 @@ import 'package:nsysu_ap/utils/app_localizations.dart';
 enum _State { loading, finish, error, empty, offlineEmpty }
 
 class GraduationReportPage extends StatefulWidget {
-  static const String routerName = "/graduationReport";
+  static const String routerName = '/graduationReport';
 
   const GraduationReportPage({Key? key}) : super(key: key);
 
@@ -29,7 +29,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
   _State state = _State.loading;
   bool isOffline = false;
 
-  List<TableRow> scoreWeightList = [];
+  List<TableRow> scoreWeightList = <TableRow>[];
 
   GraduationReportData? graduationReportData;
 
@@ -37,11 +37,14 @@ class GraduationReportPageState extends State<GraduationReportPage>
   void initState() {
     super.initState();
     FirebaseAnalyticsUtils.instance.setCurrentScreen(
-        "GraduationReportPage", "graduation_report_page.dart");
-    if (GraduationHelper.instance.isLogin)
+      'GraduationReportPage',
+      'graduation_report_page.dart',
+    );
+    if (GraduationHelper.instance.isLogin) {
       _getGraduationReport();
-    else
+    } else {
       _login();
+    }
   }
 
   @override
@@ -58,33 +61,31 @@ class GraduationReportPageState extends State<GraduationReportPage>
         title: Text(app.graduationCheckChecklist),
         backgroundColor: ApTheme.of(context).blue,
       ),
-      body: Container(
-        child: Flex(
-          direction: Axis.vertical,
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Container(
-              child: isOffline
-                  ? Text(
-                      ap.offlineScore,
-                      style: TextStyle(color: ApTheme.of(context).grey),
-                    )
-                  : null,
+      body: Flex(
+        direction: Axis.vertical,
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Container(
+            child: isOffline
+                ? Text(
+                    ap.offlineScore,
+                    style: TextStyle(color: ApTheme.of(context).grey),
+                  )
+                : null,
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                _getGraduationReport();
+                FirebaseAnalyticsUtils.instance
+                    .logEvent('graduation_report_refresh');
+                return;
+              },
+              child: _body(),
             ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  _getGraduationReport();
-                  FirebaseAnalyticsUtils.instance
-                      .logEvent('graduation_report_refresh');
-                  return null;
-                },
-                child: _body(),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -93,7 +94,9 @@ class GraduationReportPageState extends State<GraduationReportPage>
     switch (state) {
       case _State.loading:
         return Container(
-            child: CircularProgressIndicator(), alignment: Alignment.center);
+          alignment: Alignment.center,
+          child: const CircularProgressIndicator(),
+        );
       case _State.error:
       case _State.empty:
         return InkWell(
@@ -117,64 +120,76 @@ class GraduationReportPageState extends State<GraduationReportPage>
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
             child: Column(
-              mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 Text(
                   app.graduationCheckChecklistHint,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      color: ApTheme.of(context).greyText, fontSize: 16.0),
+                    color: ApTheme.of(context).greyText,
+                    fontSize: 16.0,
+                  ),
                 ),
-                SizedBox(height: 8.0),
+                const SizedBox(height: 8.0),
                 Text(
                   app.missingRequiredCourses,
                   textAlign: TextAlign.start,
                   style: _textBlueStyle(),
                 ),
-                graduationReportData!.missingRequiredCourse.length == 0
-                    ? Text(
-                        ap.noData,
-                        style: TextStyle(
-                            color: ApTheme.of(context).grey, fontSize: 14.0),
-                      )
-                    : BorderContainer(
-                        child: Table(
-                          columnWidths: const <int, TableColumnWidth>{
-                            0: FlexColumnWidth(2.5),
-                            1: FlexColumnWidth(1.0),
-                            2: FlexColumnWidth(1.0),
-                          },
-                          defaultVerticalAlignment:
-                              TableCellVerticalAlignment.middle,
-                          border: TableBorder.symmetric(
-                            inside: BorderSide(
-                              color: ApTheme.of(context).grey,
-                              width: 0.5,
-                            ),
-                          ),
-                          children: [
-                            TableRow(
-                              children: <Widget>[
-                                _scoreTextBorder(ap.subject, true),
-                                _scoreTextBorder(ap.credits, true),
-                                _scoreTextBorder(ap.description, true),
-                              ],
-                            ),
-                            for (var missingRequiredCourse
-                                in graduationReportData!.missingRequiredCourse)
-                              TableRow(children: <Widget>[
-                                _scoreTextBorder(
-                                    missingRequiredCourse.name, false),
-                                _scoreTextBorder(
-                                    missingRequiredCourse.credit, false),
-                                _scoreTextBorder(
-                                    missingRequiredCourse.description, false),
-                              ]),
-                          ],
+                if (graduationReportData!.missingRequiredCourse.isEmpty)
+                  Text(
+                    ap.noData,
+                    style: TextStyle(
+                      color: ApTheme.of(context).grey,
+                      fontSize: 14.0,
+                    ),
+                  )
+                else
+                  BorderContainer(
+                    child: Table(
+                      columnWidths: const <int, TableColumnWidth>{
+                        0: FlexColumnWidth(2.5),
+                        1: FlexColumnWidth(),
+                        2: FlexColumnWidth(),
+                      },
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.middle,
+                      border: TableBorder.symmetric(
+                        inside: BorderSide(
+                          color: ApTheme.of(context).grey,
+                          width: 0.5,
                         ),
                       ),
+                      children: <TableRow>[
+                        TableRow(
+                          children: <Widget>[
+                            _scoreTextBorder(ap.subject, true),
+                            _scoreTextBorder(ap.credits, true),
+                            _scoreTextBorder(ap.description, true),
+                          ],
+                        ),
+                        for (MissingRequiredCourse missingRequiredCourse
+                            in graduationReportData!.missingRequiredCourse)
+                          TableRow(
+                            children: <Widget>[
+                              _scoreTextBorder(
+                                missingRequiredCourse.name,
+                                false,
+                              ),
+                              _scoreTextBorder(
+                                missingRequiredCourse.credit,
+                                false,
+                              ),
+                              _scoreTextBorder(
+                                missingRequiredCourse.description,
+                                false,
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
                 Text(
                   graduationReportData!.missingRequiredCoursesCredit,
                   style: _textBlueStyle(),
@@ -186,16 +201,19 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   style: _textBlueStyle(),
                 ),
                 Text(
-                  graduationReportData!.generalEducationCourse.length != 0
+                  graduationReportData!.generalEducationCourse.isNotEmpty
                       ? app.courseClickHint
                       : ap.noData,
                   style: TextStyle(
-                      color: ApTheme.of(context).grey, fontSize: 14.0),
+                    color: ApTheme.of(context).grey,
+                    fontSize: 14.0,
+                  ),
                 ),
-                for (var generalEducationCourse
-                    in graduationReportData!.generalEducationCourse) ...[
+                for (GeneralEducationCourse generalEducationCourse
+                    in graduationReportData!
+                        .generalEducationCourse) ...<Widget>[
                   Text(
-                    generalEducationCourse.type ?? "",
+                    generalEducationCourse.type ?? '',
                     textAlign: TextAlign.start,
                     style: _textBlueStyle(),
                   ),
@@ -203,7 +221,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                     child: Table(
                       columnWidths: const <int, TableColumnWidth>{
                         0: FlexColumnWidth(2.5),
-                        1: FlexColumnWidth(1.0),
+                        1: FlexColumnWidth(),
                       },
                       defaultVerticalAlignment:
                           TableCellVerticalAlignment.middle,
@@ -213,34 +231,37 @@ class GraduationReportPageState extends State<GraduationReportPage>
                           width: 0.5,
                         ),
                       ),
-                      children: [
+                      children: <TableRow>[
                         TableRow(
                           children: <Widget>[
                             _scoreTextBorder(ap.subject, true),
                             _scoreTextBorder(app.check, true),
                           ],
                         ),
-                        for (var item
+                        for (GeneralEducationItem item
                             in generalEducationCourse.generalEducationItem!)
-                          TableRow(children: <Widget>[
-                            InkWell(
-                              child: _scoreTextBorder(item.name, false),
-                              onTap: () {
-                                _showGeneralEducationCourseDetail(item);
-                              },
-                            ),
-                            _scoreTextBorder(item.check, false),
-                          ]),
+                          TableRow(
+                            children: <Widget>[
+                              InkWell(
+                                child: _scoreTextBorder(item.name, false),
+                                onTap: () {
+                                  _showGeneralEducationCourseDetail(item);
+                                },
+                              ),
+                              _scoreTextBorder(item.check, false),
+                            ],
+                          ),
                       ],
                     ),
                   ),
                 ],
-                graduationReportData!.generalEducationCourse.length != 0
-                    ? Text(
-                        graduationReportData!.generalEducationCourseDescription,
-                        style: _textBlueStyle(),
-                      )
-                    : SizedBox(),
+                if (graduationReportData!.generalEducationCourse.isNotEmpty)
+                  Text(
+                    graduationReportData!.generalEducationCourseDescription,
+                    style: _textBlueStyle(),
+                  )
+                else
+                  const SizedBox(),
                 Divider(color: ApTheme.of(context).grey),
                 Text(
                   app.otherEducationsCourse,
@@ -251,8 +272,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   child: Table(
                     columnWidths: const <int, TableColumnWidth>{
                       0: FlexColumnWidth(2.5),
-                      1: FlexColumnWidth(1.0),
-                      2: FlexColumnWidth(1.0),
+                      1: FlexColumnWidth(),
+                      2: FlexColumnWidth(),
                     },
                     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                     border: TableBorder.symmetric(
@@ -261,7 +282,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                         width: 0.5,
                       ),
                     ),
-                    children: [
+                    children: <TableRow>[
                       TableRow(
                         children: <Widget>[
                           _scoreTextBorder(ap.subject, true),
@@ -269,13 +290,15 @@ class GraduationReportPageState extends State<GraduationReportPage>
                           _scoreTextBorder(ap.credits, true),
                         ],
                       ),
-                      for (var course
+                      for (OtherEducationsCourse course
                           in graduationReportData!.otherEducationsCourse)
-                        TableRow(children: <Widget>[
-                          _scoreTextBorder(course.name, false),
-                          _scoreTextBorder(course.semester, false),
-                          _scoreTextBorder(course.credit, false),
-                        ]),
+                        TableRow(
+                          children: <Widget>[
+                            _scoreTextBorder(course.name, false),
+                            _scoreTextBorder(course.semester, false),
+                            _scoreTextBorder(course.credit, false),
+                          ],
+                        ),
                     ],
                   ),
                 ),
@@ -286,15 +309,15 @@ class GraduationReportPageState extends State<GraduationReportPage>
                 Divider(color: ApTheme.of(context).grey),
                 Text(
                   app.graduationCheckChecklistSummary,
-                  style: TextStyle(fontSize: 16.0),
+                  style: const TextStyle(fontSize: 16.0),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   graduationReportData!.totalDescription,
                   textAlign: TextAlign.start,
                   style: _textBlueStyle(),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -302,21 +325,21 @@ class GraduationReportPageState extends State<GraduationReportPage>
     }
   }
 
-  _textBlueStyle() {
+  TextStyle _textBlueStyle() {
     return TextStyle(color: ApTheme.of(context).blueText, fontSize: 16.0);
   }
 
-  _textStyle() {
-    return TextStyle(fontSize: 14.0);
+  TextStyle _textStyle() {
+    return const TextStyle(fontSize: 14.0);
   }
 
   Widget _scoreTextBorder(String? text, bool isTitle) {
     return Container(
       width: double.maxFinite,
-      padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
       alignment: Alignment.center,
       child: Text(
-        text ?? "",
+        text ?? '',
         textAlign: TextAlign.center,
         style: isTitle ? _textBlueStyle() : _textStyle(),
       ),
@@ -334,7 +357,6 @@ class GraduationReportPageState extends State<GraduationReportPage>
             break;
           case DioErrorType.other:
             throw e;
-            break;
         }
       });
 
@@ -345,7 +367,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
     GraduationHelper.instance.login(
       username: SelcrsHelper.instance.username,
       password: SelcrsHelper.instance.password,
-      callback: GeneralCallback(
+      callback: GeneralCallback<GeneralResponse>(
         onError: _onError,
         onFailure: _onFailure,
         onSuccess: (GeneralResponse data) {
@@ -358,16 +380,17 @@ class GraduationReportPageState extends State<GraduationReportPage>
   void _getGraduationReport() {
     GraduationHelper.instance.getGraduationReport(
       username: SelcrsHelper.instance.username,
-      callback: GeneralCallback(
+      callback: GeneralCallback<GraduationReportData?>(
         onError: _onError,
         onFailure: _onFailure,
         onSuccess: (GraduationReportData? data) {
           graduationReportData = data;
           setState(() {
-            if (data == null)
+            if (data == null) {
               state = _State.empty;
-            else
+            } else {
               state = _State.finish;
+            }
           });
         },
       ),
@@ -384,30 +407,39 @@ class GraduationReportPageState extends State<GraduationReportPage>
             Navigator.of(context, rootNavigator: true).pop('dialog'),
         contentWidget: RichText(
           text: TextSpan(
-              style: TextStyle(
-                  color: ApTheme.of(context).grey, height: 1.3, fontSize: 16.0),
-              children: [
-                TextSpan(
-                    text: '${ap.subject}：',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                TextSpan(text: '${course.name}\n'),
-                TextSpan(
-                    text: '${app.shouldCredits}：',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                TextSpan(text: '${course.credit}\n'),
-                TextSpan(
-                    text: '${app.actualCredits}：',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                TextSpan(text: '${course.actualCredits}\n'),
-                TextSpan(
-                    text: '${app.totalCredits}：',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                TextSpan(text: '${course.totalCredits}\n'),
-                TextSpan(
-                    text: '${app.practiceSituation}：',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                TextSpan(text: '${course.practiceSituation}'),
-              ]),
+            style: TextStyle(
+              color: ApTheme.of(context).grey,
+              height: 1.3,
+              fontSize: 16.0,
+            ),
+            children: <TextSpan>[
+              TextSpan(
+                text: '${ap.subject}：',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(text: '${course.name}\n'),
+              TextSpan(
+                text: '${app.shouldCredits}：',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(text: '${course.credit}\n'),
+              TextSpan(
+                text: '${app.actualCredits}：',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(text: '${course.actualCredits}\n'),
+              TextSpan(
+                text: '${app.totalCredits}：',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(text: '${course.totalCredits}\n'),
+              TextSpan(
+                text: '${app.practiceSituation}：',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(text: '${course.practiceSituation}'),
+            ],
+          ),
         ),
       ),
     );
@@ -425,9 +457,9 @@ class BorderContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(
+        borderRadius: const BorderRadius.all(
           Radius.circular(
             10.0,
           ),
