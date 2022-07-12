@@ -65,6 +65,8 @@ void main() {
     (e, s) {
       if (!kDebugMode && FirebaseCrashlyticsUtils.isSupported)
         FirebaseCrashlytics.instance.recordError(e, s);
+      else
+        throw e;
     },
   );
 }
