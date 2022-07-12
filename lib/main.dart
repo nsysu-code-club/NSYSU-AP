@@ -40,7 +40,7 @@ void main() {
       if (int.parse(currentVersion) < 700) _migrate700();
       FirebaseMessaging.onBackgroundMessage(
           _firebaseMessagingBackgroundHandler);
-      if (FirebaseUtils.isSupportCore || Platform.isWindows|| Platform.isLinux)
+      if (FirebaseUtils.isSupportCore || Platform.isWindows || Platform.isLinux)
         await Firebase.initializeApp(
           options: DefaultFirebaseOptions.currentPlatform,
         );
@@ -54,9 +54,11 @@ void main() {
               .setPerformanceCollectionEnabled(false);
         }
       }
-      GoogleSignInDart.register(
-        clientId: SdkConstants.googleSignInDesktopClientId,
-      );
+      if (!kIsWeb &&
+          (Platform.isWindows || Platform.isMacOS || Platform.isLinux))
+        GoogleSignInDart.register(
+          clientId: SdkConstants.googleSignInDesktopClientId,
+        );
       if (!kDebugMode && FirebaseCrashlyticsUtils.isSupported) {
         FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
       }
