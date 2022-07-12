@@ -43,6 +43,7 @@ class GraduationReportData {
   String toRawJson() => jsonEncode(toJson());
 }
 
+@JsonSerializable()
 class MissingRequiredCourse {
   String? name;
   String? credit;
@@ -54,50 +55,40 @@ class MissingRequiredCourse {
     required this.description,
   });
 
-  factory MissingRequiredCourse.fromJson(Map<String, dynamic> json) {
-    return MissingRequiredCourse(
-      name: json['name'],
-      credit: json['credit'],
-      description: json['description'],
-    );
-  }
+  factory MissingRequiredCourse.fromJson(Map<String, dynamic> json) =>
+      _$MissingRequiredCourseFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['credit'] = this.credit;
-    data['description'] = this.description;
-    return data;
-  }
+  Map<String, dynamic> toJson() => _$MissingRequiredCourseToJson(this);
+
+  factory MissingRequiredCourse.fromRawJson(String str) =>
+      MissingRequiredCourse.fromJson(
+        json.decode(str) as Map<String, dynamic>,
+      );
+
+  String toRawJson() => jsonEncode(toJson());
 }
 
+@JsonSerializable()
 class GeneralEducationCourse {
   String? type;
   List<GeneralEducationItem>? generalEducationItem;
 
   GeneralEducationCourse({this.type, this.generalEducationItem});
 
-  GeneralEducationCourse.fromJson(Map<String, dynamic> json) {
-    type = json['type'];
-    if (json['generalEducationItem'] != null) {
-      generalEducationItem = [];
-      json['generalEducationItem'].forEach((v) {
-        generalEducationItem!.add(new GeneralEducationItem.fromJson(v));
-      });
-    }
-  }
+  factory GeneralEducationCourse.fromJson(Map<String, dynamic> json) =>
+      _$GeneralEducationCourseFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['type'] = this.type;
-    if (this.generalEducationItem != null) {
-      data['generalEducationItem'] =
-          this.generalEducationItem!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
+  Map<String, dynamic> toJson() => _$GeneralEducationCourseToJson(this);
+
+  factory GeneralEducationCourse.fromRawJson(String str) =>
+      GeneralEducationCourse.fromJson(
+        json.decode(str) as Map<String, dynamic>,
+      );
+
+  String toRawJson() => jsonEncode(toJson());
 }
 
+@JsonSerializable()
 class GeneralEducationItem {
   String? name;
   String? credit;
@@ -106,38 +97,32 @@ class GeneralEducationItem {
   String? totalCredits;
   String? practiceSituation;
 
-  GeneralEducationItem(
-      {this.name,
-      this.credit,
-      this.check,
-      this.actualCredits,
-      this.totalCredits,
-      this.practiceSituation}) {
-    this.credit = this.credit!.replaceAll('�', '\\');
-    this.check = this.check!.replaceAll('�', '\\');
+  GeneralEducationItem({
+    this.name,
+    this.credit,
+    this.check,
+    this.actualCredits,
+    this.totalCredits,
+    this.practiceSituation,
+  }) {
+    credit = credit!.replaceAll('�', '\\');
+    check = check!.replaceAll('�', '\\');
   }
 
-  GeneralEducationItem.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    credit = json['credit'];
-    check = json['check'];
-    actualCredits = json['actualCredits'];
-    totalCredits = json['totalCredits'];
-    practiceSituation = json['practiceSituation'];
-  }
+  factory GeneralEducationItem.fromJson(Map<String, dynamic> json) =>
+      _$GeneralEducationItemFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['credit'] = this.credit;
-    data['check'] = this.check;
-    data['actualCredits'] = this.actualCredits;
-    data['totalCredits'] = this.totalCredits;
-    data['practiceSituation'] = this.practiceSituation;
-    return data;
-  }
+  Map<String, dynamic> toJson() => _$GeneralEducationItemToJson(this);
+
+  factory GeneralEducationItem.fromRawJson(String str) =>
+      GeneralEducationItem.fromJson(
+        json.decode(str) as Map<String, dynamic>,
+      );
+
+  String toRawJson() => jsonEncode(toJson());
 }
 
+@JsonSerializable()
 class OtherEducationsCourse {
   String? name;
   String? semester;
@@ -145,17 +130,15 @@ class OtherEducationsCourse {
 
   OtherEducationsCourse({this.name, this.semester, this.credit});
 
-  OtherEducationsCourse.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    semester = json['semester'];
-    credit = json['credit'];
-  }
+  factory OtherEducationsCourse.fromJson(Map<String, dynamic> json) =>
+      _$OtherEducationsCourseFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['semester'] = this.semester;
-    data['credit'] = this.credit;
-    return data;
-  }
+  Map<String, dynamic> toJson() => _$OtherEducationsCourseToJson(this);
+
+  factory OtherEducationsCourse.fromRawJson(String str) =>
+      OtherEducationsCourse.fromJson(
+        json.decode(str) as Map<String, dynamic>,
+      );
+
+  String toRawJson() => jsonEncode(toJson());
 }
