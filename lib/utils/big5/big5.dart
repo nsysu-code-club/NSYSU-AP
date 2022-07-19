@@ -4,7 +4,7 @@ part 'table.dart';
 
 // only non-sream version
 
-const Big5Codec big5 = const Big5Codec();
+const Big5Codec big5 = Big5Codec();
 
 class Big5Codec {
   const Big5Codec();
@@ -19,40 +19,40 @@ class Big5Codec {
 }
 
 // big5 constants.
-const int RUNE_ERROR = 0xFFFD;
-const int RUNE_SELF = 0x80;
+const int runeError = 0xFFFD;
+const int runeSelf = 0x80;
 
 String big5TransformDecode(List<int> src) {
-  var r = 0;
-  var size = 0;
-  var nDst = '';
+  int r = 0;
+  int size = 0;
+  String nDst = '';
 
-  void write(input) => nDst += (new String.fromCharCode(input));
+  void write(int input) => nDst += String.fromCharCode(input);
 
-  for (var nSrc = 0; nSrc < src.length; nSrc += size) {
-    var c0 = src[nSrc];
+  for (int nSrc = 0; nSrc < src.length; nSrc += size) {
+    final int c0 = src[nSrc];
     if (c0 < 0x80) {
       r = c0;
       size = 1;
     } else if (0x81 <= c0 && c0 < 0xFF) {
       if (nSrc + 1 >= src.length) {
-        r = RUNE_ERROR;
+        r = runeError;
         size = 1;
         write(r);
         continue;
       }
-      var c1 = src[nSrc + 1];
+      final int c1 = src[nSrc + 1];
       r = 0xfffd;
       size = 2;
 
-      var i = c0 * 16 * 16 + c1;
-      var s = decode[i];
+      final int i = c0 * 16 * 16 + c1;
+      final int? s = decode[i];
       if (s != null) {
         write(s);
         continue;
       }
     } else {
-      r = RUNE_ERROR;
+      r = runeError;
       size = 1;
     }
     write(r);
@@ -62,22 +62,22 @@ String big5TransformDecode(List<int> src) {
 }
 
 List<int> big5TransformEncode(String src) {
-  var runes = Runes(src).toList();
+  final List<int> runes = Runes(src).toList();
 
   int r = 0;
-  var size = 0;
-  List<int> dst = [];
+  int size = 0;
+  final List<int> dst = <int>[];
 
   void write2(int r) {
     dst.add(r >> 8);
     dst.add(r % 256);
   }
 
-  for (var nSrc = 0; nSrc < runes.length; nSrc += size) {
+  for (int nSrc = 0; nSrc < runes.length; nSrc += size) {
     r = runes[nSrc];
 
     // Decode a 1-byte rune.
-    if (r < RUNE_SELF) {
+    if (r < runeSelf) {
       size = 1;
       dst.add(r);
       continue;
@@ -87,7 +87,7 @@ List<int> big5TransformEncode(String src) {
       size = 1;
     }
 
-    if (r >= RUNE_SELF) {
+    if (r >= runeSelf) {
       if (encode0Low <= r && r < encode0High) {
         r = encode0[r - encode0Low]!;
         if (r != 0) {

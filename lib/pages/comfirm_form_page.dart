@@ -34,14 +34,14 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
 
   String get url => sprintf(
         widget.confirmFormUrl,
-        [widget.username],
+        <String>[widget.username],
       );
 
   @override
   void initState() {
     FirebaseAnalyticsUtils.instance
-        .setCurrentScreen("ConfirmFormPage", "confirm_form_page.dart");
-    Future.microtask(() => _loadData());
+        .setCurrentScreen('ConfirmFormPage', 'confirm_form_page.dart');
+    Future<void>.microtask(() => _loadData());
     super.initState();
   }
 
@@ -71,7 +71,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
                 url: Uri.parse(
                   sprintf(
                     widget.confirmFormUrl,
-                    [widget.username],
+                    <String>[widget.username],
                   ),
                 ),
               ),
@@ -95,11 +95,11 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
   }
 
   Future<void> _loadData() async {
-    final cookiesManager = CookieManager.instance();
-    for (var cookie in await SelcrsHelper.instance.cookieJar
-        .loadForRequest(Uri.parse(SelcrsHelper.BASE_URL))) {
+    final CookieManager cookiesManager = CookieManager.instance();
+    for (final cookie in await SelcrsHelper.instance.cookieJar
+        .loadForRequest(Uri.parse(SelcrsHelper.baseUrl))) {
       cookiesManager.setCookie(
-        url: Uri.parse(SelcrsHelper.BASE_URL),
+        url: Uri.parse(SelcrsHelper.baseUrl),
         name: cookie.name,
         value: cookie.value,
       );

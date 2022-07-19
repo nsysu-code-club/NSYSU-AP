@@ -10,7 +10,7 @@ import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
 class SearchStudentIdPage extends StatefulWidget {
-  static const String routerName = "/searchUsername";
+  static const String routerName = '/searchUsername';
 
   @override
   SearchStudentIdPageState createState() => SearchStudentIdPageState();
@@ -29,7 +29,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
   @override
   void initState() {
     FirebaseAnalyticsUtils.instance
-        .setCurrentScreen("SearchStudentIdPage", "search_student_id_page.dart");
+        .setCurrentScreen('SearchStudentIdPage', 'search_student_id_page.dart');
     super.initState();
   }
 
@@ -38,14 +38,17 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     super.dispose();
   }
 
-  _editTextStyle() => TextStyle(
-      color: Colors.white, fontSize: 18.0, decorationColor: Colors.white);
+  TextStyle _editTextStyle() => const TextStyle(
+        color: Colors.white,
+        fontSize: 18.0,
+        decorationColor: Colors.white,
+      );
 
   @override
   Widget build(BuildContext context) {
     ap = ApLocalizations.of(context);
     return OrientationBuilder(
-      builder: (_, orientation) {
+      builder: (_, Orientation orientation) {
         return Scaffold(
           backgroundColor: ApTheme.of(context).blue,
           resizeToAvoidBottomInset: orientation == Orientation.portrait,
@@ -54,8 +57,8 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
             elevation: 0.0,
           ),
           body: Container(
-            alignment: Alignment(0, 0),
-            padding: EdgeInsets.symmetric(horizontal: 30.0),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
             child: orientation == Orientation.portrait
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -73,10 +76,10 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     );
   }
 
-  _renderContent(Orientation orientation) {
-    List<Widget> list = orientation == Orientation.portrait
+  List<Widget> _renderContent(Orientation orientation) {
+    final List<Widget> list = orientation == Orientation.portrait
         ? <Widget>[
-            Center(
+            const Center(
               child: Center(
                 child: Text(
                   'N',
@@ -90,7 +93,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
             SizedBox(height: orientation == Orientation.portrait ? 30.0 : 0.0),
           ]
         : <Widget>[
-            Expanded(
+            const Expanded(
               child: Center(
                 child: Text(
                   'N',
@@ -103,13 +106,12 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
             ),
             SizedBox(height: orientation == Orientation.portrait ? 30.0 : 0.0),
           ];
-    List<Widget> listB = <Widget>[
+    final List<Widget> listB = <Widget>[
       TextField(
-        maxLines: 1,
         controller: _name,
         textInputAction: TextInputAction.next,
         focusNode: nameFocusNode,
-        onSubmitted: (text) {
+        onSubmitted: (String text) {
           nameFocusNode.unfocus();
           FocusScope.of(context).requestFocus(idFocusNode);
         },
@@ -119,11 +121,10 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
         style: _editTextStyle(),
       ),
       TextField(
-        maxLines: 1,
         textInputAction: TextInputAction.send,
         controller: _id,
         focusNode: idFocusNode,
-        onSubmitted: (text) {
+        onSubmitted: (String text) {
           idFocusNode.unfocus();
           _search();
         },
@@ -132,7 +133,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
         ),
         style: _editTextStyle(),
       ),
-      SizedBox(height: 8.0),
+      const SizedBox(height: 8.0),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -153,7 +154,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                 ),
                 Text(
                   ap.autoFill,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 )
               ],
             ),
@@ -161,7 +162,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
           ),
         ],
       ),
-      SizedBox(height: 8.0),
+      const SizedBox(height: 8.0),
       ApButton(
         text: ap.search,
         onPressed: () {
@@ -185,7 +186,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     return list;
   }
 
-  _onAutoFillChanged(bool? value) async {
+  Future<void> _onAutoFillChanged(bool? value) async {
     if (value != null) {
       setState(() {
         isAutoFill = value;
@@ -193,17 +194,17 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     }
   }
 
-  _search() async {
+  Future<void> _search() async {
     if (_name.text.isEmpty || _id.text.isEmpty) {
       ApUtils.showToast(context, ap.doNotEmpty);
     } else {
       SelcrsHelper.instance.getUsername(
         name: _name.text,
         id: _id.text,
-        callback: GeneralCallback.simple(
+        callback: GeneralCallback<String>.simple(
           context,
           (String result) {
-            List<String> list = result.split('--');
+            final List<String> list = result.split('--');
             if (list.length == 2 && isAutoFill) {
               Navigator.pop(context, list[1]);
             } else {
@@ -221,10 +222,10 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                         height: 1.3,
                         fontSize: 16.0,
                       ),
-                      children: [
+                      children: <InlineSpan>[
                         TextSpan(
                           text: result,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         if (list.length == 2)
                           TextSpan(

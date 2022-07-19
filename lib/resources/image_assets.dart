@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 class ImageAssets {
   static const String basePath = 'assets/images';
 
-  static const nsysu = '$basePath/nsysu.webp';
+  static const String nsysu = '$basePath/nsysu.webp';
 
-  static const schoolMap = '$basePath/map.webp';
+  static const String schoolMap = '$basePath/map.webp';
 }
 
 class FileAssets {

@@ -23,7 +23,7 @@ class SchoolInfoPage extends StatefulWidget {
 
 class SchoolInfoPageState extends State<SchoolInfoPage>
     with SingleTickerProviderStateMixin {
-  final phoneModelList = [
+  final List<PhoneModel> phoneModelList = <PhoneModel>[
     PhoneModel('總機', '(07)5252-000#2350'),
     PhoneModel('校安專線', ''),
     PhoneModel('生輔組', '0911-705-999'),
@@ -122,7 +122,7 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
         'https://raw.githubusercontent.com/abc873693/NSYSU-AP/master/school_schedule.pdf';
     if (FirebaseRemoteConfigUtils.isSupported) {
       try {
-        final RemoteConfig remoteConfig = RemoteConfig.instance;
+        final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
         await remoteConfig.fetch();
         await remoteConfig.activate();
         pdfUrl = remoteConfig.getString(Constants.SCHEDULE_PDF_URL);
