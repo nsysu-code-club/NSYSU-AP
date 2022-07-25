@@ -39,9 +39,9 @@ class GraduationHelper {
   }
 
   /*
-  * ²¦·~¼f¬d¨t²Îµn¤J
+  * ç•¢æ¥­å¯©æŸ¥ç³»çµ±ç™»å…¥
   * error status code
-  * 401: ±b¸¹±K½X¿ù»~
+  * 401: å¸³è™Ÿå¯†ç¢¼éŒ¯èª¤
   * */
   Future<void> login({
     required String username,
@@ -66,7 +66,7 @@ class GraduationHelper {
       final String text = big5.decode(response.data!);
 //          print('Response =  $text');
       //    print('response.statusCode = ${response.statusCode}');
-      if (text.contains('¸ê®Æ¿ù»~½Ð­«·s¿é¤J')) {
+      if (text.contains('è³‡æ–™éŒ¯èª¤è«‹é‡æ–°è¼¸å…¥')) {
         callback.onError(
           GeneralResponse(statusCode: 401, message: 'graduation login error'),
         );
@@ -119,7 +119,7 @@ class GraduationHelper {
           //print('i => ${tableDoc[i].text}');
           final List<Element> trDoc = tableDoc[i].getElementsByTagName('tr');
           if (i == 4) {
-            //¯Ê­×¾Ç¨t¥²­×½Òµ{
+            //ç¼ºä¿®å­¸ç³»å¿…ä¿®èª²ç¨‹
             if (trDoc.length > 3) {
               for (int j = 2; j < trDoc.length; j++) {
                 final List<Element> tdDoc = trDoc[j].getElementsByTagName('td');
@@ -139,10 +139,10 @@ class GraduationHelper {
             }
             if (trDoc.isNotEmpty) {
               graduationReportData.missingRequiredCoursesCredit =
-                  trDoc.last.text.replaceAll(RegExp(r'[¡°\n]'), '');
+                  trDoc.last.text.replaceAll(RegExp(r'[â€»\n]'), '');
             }
           } else if (i == 5) {
-            //³qÃÑ½Òµ{
+            //é€šè­˜èª²ç¨‹
             for (int j = 2; j < trDoc.length; j++) {
               final List<Element> tdDoc = trDoc[j].getElementsByTagName('td');
               //print('td lengh = ${tdDoc.length}');
@@ -173,10 +173,10 @@ class GraduationHelper {
             }
             if (graduationReportData.generalEducationCourse.isNotEmpty) {
               graduationReportData.generalEducationCourseDescription =
-                  trDoc.last.text.replaceAll(RegExp(r'[¡°\n]'), '');
+                  trDoc.last.text.replaceAll(RegExp(r'[â€»\n]'), '');
             }
           } else if (i == 6) {
-            //¨ä¥L
+            //å…¶ä»–
             if (trDoc.length > 3) {
               for (int j = 2; j < trDoc.length; j++) {
                 final List<Element> tdDoc = trDoc[j].getElementsByTagName('td');
@@ -196,15 +196,15 @@ class GraduationHelper {
             }
             if (trDoc.isNotEmpty) {
               graduationReportData.otherEducationsCourseCredit =
-                  trDoc.last.text.replaceAll(RegExp(r'[¡°\n]'), '');
+                  trDoc.last.text.replaceAll(RegExp(r'[â€»\n]'), '');
             }
           }
         }
         final List<Element> tdDoc = document.getElementsByTagName('td');
         for (int i = 0; i < tdDoc.length; i++) {
-          if (tdDoc[i].text.contains('¥Ø«e²Ö­p¾Ç¤À¼Æ')) {
+          if (tdDoc[i].text.contains('ç›®å‰ç´¯è¨ˆå­¸åˆ†æ•¸')) {
             graduationReportData.totalDescription =
-                tdDoc[i].text.replaceAll(RegExp(r'[¡°\n]'), '');
+                tdDoc[i].text.replaceAll(RegExp(r'[â€»\n]'), '');
           }
         }
         if (kDebugMode) {

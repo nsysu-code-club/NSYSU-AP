@@ -25,8 +25,8 @@ import 'package:sprintf/sprintf.dart';
 class SelcrsHelper {
   static const String baseUrl = 'https://selcrs.nsysu.edu.tw';
 
-  static const String courseTimeoutText = '½Ğ­«·sµn¿ı';
-  static const String scoreTimeoutText = '½Ğ­«·sµn¿ı';
+  static const String courseTimeoutText = 'è«‹é‡æ–°ç™»éŒ„';
+  static const String scoreTimeoutText = 'è«‹é‡æ–°ç™»éŒ„';
 
   static SelcrsHelper? _instance;
 
@@ -107,11 +107,11 @@ class SelcrsHelper {
   }
 
   /*
-  * ¿ï½Ò¨t²Î&¦¨ÁZ¨t²Îµn¤J
+  * é¸èª²ç³»çµ±&æˆç¸¾ç³»çµ±ç™»å…¥
   * error status code
-  * 400: ±b¸¹±K½X¿ù»~
-  * 401: »İ­n¶ñ¼gªí³æ
-  * 1000: ¥¼ª¾¿ù»~
+  * 400: å¸³è™Ÿå¯†ç¢¼éŒ¯èª¤
+  * 401: éœ€è¦å¡«å¯«è¡¨å–®
+  * 1000: æœªçŸ¥éŒ¯èª¤
   * */
   Future<GeneralResponse?>? login({
     required String username,
@@ -132,7 +132,7 @@ class SelcrsHelper {
       );
       final String text = big5.decode(scoreResponse.data!);
 //      debugPrint(text);
-      if (text.contains('¸ê®Æ¿ù»~½Ğ­«·s¿é¤J')) {
+      if (text.contains('è³‡æ–™éŒ¯èª¤è«‹é‡æ–°è¼¸å…¥')) {
         return callback?.onError(
           GeneralResponse(statusCode: 400, message: 'score error'),
         ) as Future<GeneralResponse>;
@@ -165,11 +165,11 @@ class SelcrsHelper {
       );
       final String text = big5.decode(courseResponse.data!);
 //      debugPrint('course =  $text');
-      if (text.contains('¾Ç¸¹½X±K½X¤£²Å')) {
+      if (text.contains('å­¸è™Ÿç¢¼å¯†ç¢¼ä¸ç¬¦')) {
         return callback?.onError(
           GeneralResponse(statusCode: 400, message: 'course error'),
         ) as Future<GeneralResponse>;
-      } else if (text.contains('½Ğ¥ı¶ñ¼g')) {
+      } else if (text.contains('è«‹å…ˆå¡«å¯«')) {
         ///https://regweb.nsysu.edu.tw/webreg/confirm_wuhan_pneumonia.asp?STUID=%s&STAT_COD=1&STATUS_COD=1&LOGINURL=https://selcrs.nsysu.edu.tw/
         return callback?.onError(
           GeneralResponse(statusCode: 401, message: 'need to fill out form'),
@@ -213,9 +213,9 @@ class SelcrsHelper {
   }
 
   /*
-  * ¨ú±o¨Ï¥ÎªÌ¸ê°T
+  * å–å¾—ä½¿ç”¨è€…è³‡è¨Š
   * error status code
-  * 400: ±b¸¹±K½X¿ù»~
+  * 400: å¸³è™Ÿå¯†ç¢¼éŒ¯èª¤
   * */
   Future<UserInfo?>? getUserInfo({
     GeneralCallback<UserInfo>? callback,
@@ -373,7 +373,7 @@ class SelcrsHelper {
           title: title,
           units: tdDoc[5].text,
           required:
-              tdDoc[7].text.length == 1 ? '${tdDoc[7].text}­×' : tdDoc[7].text,
+              tdDoc[7].text.length == 1 ? '${tdDoc[7].text}ä¿®' : tdDoc[7].text,
           location: location,
           instructors: <String>[instructors],
           times: <SectionTime>[],
@@ -510,13 +510,13 @@ class SelcrsHelper {
         if (tableDoc.length == 3) {
           final List<dom.Element> fontDoc =
               tableDoc[1].getElementsByTagName('font');
-          detail.creditTaken = double.parse(fontDoc[0].text.split('¡G')[1]);
-          detail.creditEarned = double.parse(fontDoc[1].text.split('¡G')[1]);
-          detail.average = double.parse(fontDoc[2].text.split('¡G')[1]);
+          detail.creditTaken = double.parse(fontDoc[0].text.split('ï¼š')[1]);
+          detail.creditEarned = double.parse(fontDoc[1].text.split('ï¼š')[1]);
+          detail.average = double.parse(fontDoc[2].text.split('ï¼š')[1]);
           detail.classRank =
-              '${fontDoc[4].text.split('¡G')[1]}/${fontDoc[5].text.split('¡G')[1]}';
-          double percentage = double.parse(fontDoc[4].text.split('¡G')[1]) /
-              double.parse(fontDoc[5].text.split('¡G')[1]);
+              '${fontDoc[4].text.split('ï¼š')[1]}/${fontDoc[5].text.split('ï¼š')[1]}';
+          double percentage = double.parse(fontDoc[4].text.split('ï¼š')[1]) /
+              double.parse(fontDoc[5].text.split('ï¼š')[1]);
           percentage = 1.0 - percentage;
           percentage *= 100;
           detail.classPercentage = double.parse(percentage.toStringAsFixed(2));
