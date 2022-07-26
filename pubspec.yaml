@@ -22,6 +22,7 @@ dependencies:
   #official plugin
   http: ^0.13.1
   html: ^0.15.0
+  url_launcher: ^6.1.5
 
   #third party plugin
   encrypt: ^5.0.0
