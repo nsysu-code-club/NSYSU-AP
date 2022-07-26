@@ -333,6 +333,7 @@ class HomePageState extends State<HomePage> {
                   ShareDataWidget.of(context)!.data.userInfo = null;
                 });
                 if (isMobile) {
+                  if (!mounted) return;
                   Navigator.of(context).pop();
                 }
                 _checkLoginState();
@@ -462,7 +463,11 @@ class HomePageState extends State<HomePage> {
               context,
               AppLocalizations.of(context).pleaseConfirmForm,
             );
-            Utils.openConfirmForm(context, username);
+            Utils.openConfirmForm(
+              context,
+              mounted: mounted,
+              username: username,
+            );
           } else {
             _homeKey.currentState!.showBasicHint(text: ap.unknownError);
           }
@@ -492,6 +497,7 @@ class HomePageState extends State<HomePage> {
       final Map<String, dynamic>? rawData = await FileAssets.changelogData;
       final updateNoteContent =
           rawData![packageInfo.buildNumber][ApLocalizations.current.locale];
+      if (!mounted) return;
       DialogUtils.showUpdateContent(
         context,
         'v${packageInfo.version}\n'
@@ -530,6 +536,7 @@ class HomePageState extends State<HomePage> {
       if (state != HomeState.finish) {
         _getAllAnnouncement();
       }
+      if (!mounted) return;
       ShareDataWidget.of(context)!.data.isLogin = true;
       ShareDataWidget.of(context)!.data.getUserInfo();
       _homeKey.currentState!.hideSnackBar();

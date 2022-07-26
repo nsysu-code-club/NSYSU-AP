@@ -112,6 +112,7 @@ class LoginPageState extends State<LoginPage> {
               setState(() {
                 _username.text = username;
               });
+              if (!mounted) return;
               ApUtils.showToast(
                 context,
                 AppLocalizations.of(context).firstLoginHint,
@@ -199,7 +200,11 @@ class LoginPageState extends State<LoginPage> {
                 context,
                 AppLocalizations.of(context).pleaseConfirmForm,
               );
-              Utils.openConfirmForm(context, _username.text);
+              Utils.openConfirmForm(
+                context,
+                mounted: mounted,
+                username: _username.text,
+              );
             } else {
               ApUtils.showToast(context, ap.unknownError);
             }
@@ -218,6 +223,7 @@ class LoginPageState extends State<LoginPage> {
               );
             }
             Preferences.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
+            if (!mounted) return;
             Navigator.of(context).pop(true);
             TextInput.finishAutofillContext();
           },

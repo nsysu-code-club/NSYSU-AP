@@ -89,6 +89,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                             (UserInfo userInfo) => userInfo,
                           ),
                         );
+                        if (!mounted) return;
                         Navigator.pop(context);
                         if (userInfo != null) {
                           ApUtils.showToast(context,

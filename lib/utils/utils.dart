@@ -30,7 +30,10 @@ class Utils {
   }
 
   static Future<void> openConfirmForm(
-      BuildContext context, String username) async {
+    BuildContext context, {
+    required bool mounted,
+    required String username,
+  }) async {
     String confirmFormUrl = '';
     try {
       final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
@@ -49,6 +52,7 @@ class Utils {
     }
     await Future<void>.delayed(const Duration(seconds: 1));
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      if (!mounted) return;
       Navigator.push(
         context,
         CupertinoPageRoute<dynamic>(
