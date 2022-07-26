@@ -521,8 +521,8 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> openLoginPage() async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute<dynamic>(
+    final bool? result = await Navigator.of(context).push(
+      MaterialPageRoute<bool>(
         builder: (_) => LoginPage(),
       ),
     );
