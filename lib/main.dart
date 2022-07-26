@@ -34,7 +34,7 @@ void main() {
       timeago.setLocaleMessages('zh-TW', timeago.ZhMessages());
       timeago.setLocaleMessages('en-US', timeago.EnMessages());
       final String currentVersion =
-          Preferences.getString(Constants.PREF_CURRENT_VERSION, '0');
+          Preferences.getString(Constants.prefCurrentVersion, '0');
       if (int.parse(currentVersion) < 700) _migrate700();
       FirebaseMessaging.onBackgroundMessage(
         _firebaseMessagingBackgroundHandler,
@@ -82,7 +82,7 @@ void _migrate700() {
   Preferences.setBool(
     ApConstants.showCourseSearchButton,
     Preferences.getBool(
-      Constants.PREF_IS_SHOW_COURSE_SEARCH_BUTTON,
+      Constants.prefIsShowCourseSearchButton,
       true,
     ),
   );

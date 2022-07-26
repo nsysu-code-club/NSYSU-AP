@@ -83,7 +83,7 @@ class SettingPageState extends State<SettingPage> {
               text: ap.feedback,
               subText: ap.feedbackViaFacebook,
               onTap: () {
-                ApUtils.launchFbFansPage(context, Constants.FANS_PAGE_ID);
+                ApUtils.launchFbFansPage(context, Constants.fansPageId);
                 AnalyticsUtils.instance?.logEvent('feedback_click');
               },
             ),
@@ -104,8 +104,7 @@ class SettingPageState extends State<SettingPage> {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     setState(() {
       appVersion = packageInfo.version;
-      displayPicture =
-          Preferences.getBool(Constants.PREF_DISPLAY_PICTURE, true);
+      displayPicture = Preferences.getBool(Constants.prefDisplayPicture, true);
     });
   }
 }

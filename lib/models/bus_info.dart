@@ -89,7 +89,7 @@ class BusInfo {
 
   static List<BusInfo>? load() {
     final List<String> rawStringList = Preferences.getStringList(
-      Constants.BUS_INFO_DATA,
+      Constants.busInfoData,
       <String>[],
     );
     if (rawStringList.isEmpty) {
@@ -107,7 +107,7 @@ class BusInfo {
 extension BusInfoExtension on List<BusTime> {
   void save() {
     Preferences.setStringList(
-      Constants.BUS_INFO_DATA,
+      Constants.busInfoData,
       List<String>.from(
         map(
           (BusTime x) => x.toRawJson(),

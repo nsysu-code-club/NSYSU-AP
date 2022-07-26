@@ -91,7 +91,7 @@ class HomePageState extends State<HomePage> {
       );
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       _getAllAnnouncement();
-      if (Preferences.getBool(Constants.PREF_AUTO_LOGIN, false)) {
+      if (Preferences.getBool(Constants.prefAutoLogin, false)) {
         _login();
       } else {
         _checkLoginState();
@@ -323,8 +323,8 @@ class HomePageState extends State<HomePage> {
                 color: ApTheme.of(context).grey,
               ),
               onTap: () async {
-                Preferences.setBool(Constants.PREF_AUTO_LOGIN, false);
-                await Preferences.setBool(Constants.PREF_AUTO_LOGIN, false);
+                Preferences.setBool(Constants.prefAutoLogin, false);
+                await Preferences.setBool(Constants.prefAutoLogin, false);
                 SelcrsHelper.instance.logout();
                 GraduationHelper.instance.logout();
                 TuitionHelper.instance.logout();
@@ -448,9 +448,9 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _login() async {
-    final String username = Preferences.getString(Constants.PREF_USERNAME, '');
+    final String username = Preferences.getString(Constants.prefUsername, '');
     final String password =
-        Preferences.getStringSecurity(Constants.PREF_PASSWORD, '')!;
+        Preferences.getStringSecurity(Constants.prefPassword, '')!;
     SelcrsHelper.instance.login(
       username: username,
       password: password,
@@ -492,7 +492,7 @@ class HomePageState extends State<HomePage> {
     if (kIsWeb) return;
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final String currentVersion =
-        Preferences.getString(Constants.PREF_CURRENT_VERSION, '');
+        Preferences.getString(Constants.prefCurrentVersion, '');
     if (currentVersion != packageInfo.buildNumber) {
       final Map<String, dynamic>? rawData = await FileAssets.changelogData;
       final updateNoteContent =
@@ -504,7 +504,7 @@ class HomePageState extends State<HomePage> {
         '$updateNoteContent',
       );
       Preferences.setString(
-        Constants.PREF_CURRENT_VERSION,
+        Constants.prefCurrentVersion,
         packageInfo.buildNumber,
       );
     }

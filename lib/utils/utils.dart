@@ -39,14 +39,14 @@ class Utils {
       final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
       await remoteConfig.fetch();
       await remoteConfig.activate();
-      confirmFormUrl = remoteConfig.getString(Constants.CONFIRM_FORM_URL);
+      confirmFormUrl = remoteConfig.getString(Constants.confirmFormUrl);
       Preferences.getString(
-        Constants.CONFIRM_FORM_URL,
+        Constants.confirmFormUrl,
         confirmFormUrl,
       );
     } catch (e) {
       confirmFormUrl = Preferences.getString(
-        Constants.CONFIRM_FORM_URL,
+        Constants.confirmFormUrl,
         'https://regweb.nsysu.edu.tw/webreg/confirm_wuhan_pneumonia.asp?STUID=%s&STAT_COD=1&STATUS_COD=1&LOGINURL=https://selcrs.nsysu.edu.tw/',
       );
     }

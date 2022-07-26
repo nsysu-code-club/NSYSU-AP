@@ -130,9 +130,9 @@ class LoginPageState extends State<LoginPage> {
       setState(() {
         isRememberPassword = value;
         if (!isRememberPassword) isAutoLogin = false;
-        Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
+        Preferences.setBool(Constants.prefAutoLogin, isAutoLogin);
         Preferences.setBool(
-          Constants.PREF_REMEMBER_PASSWORD,
+          Constants.prefRememberPassword,
           isRememberPassword,
         );
       });
@@ -144,9 +144,9 @@ class LoginPageState extends State<LoginPage> {
       setState(() {
         isAutoLogin = value;
         isRememberPassword = isAutoLogin;
-        Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
+        Preferences.setBool(Constants.prefAutoLogin, isAutoLogin);
         Preferences.setBool(
-          Constants.PREF_REMEMBER_PASSWORD,
+          Constants.prefRememberPassword,
           isRememberPassword,
         );
       });
@@ -155,12 +155,12 @@ class LoginPageState extends State<LoginPage> {
 
   Future<void> _getPreference() async {
     isRememberPassword =
-        Preferences.getBool(Constants.PREF_REMEMBER_PASSWORD, true);
-    final String username = Preferences.getString(Constants.PREF_USERNAME, '');
+        Preferences.getBool(Constants.prefRememberPassword, true);
+    final String username = Preferences.getString(Constants.prefUsername, '');
     String password = '';
     if (isRememberPassword) {
       password =
-          Preferences.getStringSecurity(Constants.PREF_PASSWORD, '') ?? '';
+          Preferences.getStringSecurity(Constants.prefPassword, '') ?? '';
     }
     setState(() {
       _username.text = username;
@@ -186,7 +186,7 @@ class LoginPageState extends State<LoginPage> {
         FirebaseAnalyticsUtils.instance.logEvent('username_has_empty');
       }
       _username.text = _username.text.replaceAll(' ', '');
-      Preferences.setString(Constants.PREF_USERNAME, _username.text);
+      Preferences.setString(Constants.prefUsername, _username.text);
       SelcrsHelper.instance.login(
         username: _username.text.toUpperCase(),
         password: _password.text,
@@ -215,14 +215,14 @@ class LoginPageState extends State<LoginPage> {
           },
           onSuccess: (GeneralResponse data) async {
             Navigator.pop(context);
-            Preferences.setString(Constants.PREF_USERNAME, _username.text);
+            Preferences.setString(Constants.prefUsername, _username.text);
             if (isRememberPassword) {
               await Preferences.setStringSecurity(
-                Constants.PREF_PASSWORD,
+                Constants.prefPassword,
                 _password.text,
               );
             }
-            Preferences.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
+            Preferences.setBool(Constants.prefIsOfflineLogin, false);
             if (!mounted) return;
             Navigator.of(context).pop(true);
             TextInput.finishAutofillContext();

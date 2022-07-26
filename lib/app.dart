@@ -39,8 +39,8 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     _analytics = FirebaseUtils.init();
-    themeMode = ThemeMode
-        .values[Preferences.getInt(Constants.PREF_THEME_MODE_INDEX, 0)];
+    themeMode =
+        ThemeMode.values[Preferences.getInt(Constants.prefThemeModeIndex, 0)];
     FirebaseAnalyticsUtils.instance.logThemeEvent(themeMode);
     WidgetsBinding.instance.addObserver(this);
     super.initState();
@@ -89,7 +89,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           localeResolutionCallback:
               (Locale? locale, Iterable<Locale> supportedLocales) {
             final String languageCode = Preferences.getString(
-              Constants.PREF_LANGUAGE_CODE,
+              Constants.prefLanguageCode,
               ApSupportLanguageConstants.system,
             );
             if (languageCode == ApSupportLanguageConstants.system) {
