@@ -495,8 +495,11 @@ class HomePageState extends State<HomePage> {
         Preferences.getString(Constants.prefCurrentVersion, '');
     if (currentVersion != packageInfo.buildNumber) {
       final Map<String, dynamic>? rawData = await FileAssets.changelogData;
-      final updateNoteContent =
-          rawData![packageInfo.buildNumber][ApLocalizations.current.locale];
+      //TODO: improve by object
+      final Map<String, dynamic> map =
+          rawData![packageInfo.buildNumber] as Map<String, dynamic>;
+      final String updateNoteContent =
+          map[ApLocalizations.current.locale] as String;
       if (!mounted) return;
       DialogUtils.showUpdateContent(
         context,

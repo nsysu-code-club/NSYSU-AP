@@ -21,7 +21,7 @@ class _AppLocalizationsDelegate
     return MultipleLocalizations.load(
       initializeMessages,
       locale,
-      (l) => AppLocalizations.load(locale),
+      (String l) => AppLocalizations.load(locale),
       setDefaultLocale: true,
     );
   }

@@ -6,7 +6,7 @@ import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:location_platform_interface/location_platform_interface.dart';
+import 'package:location/location.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/comfirm_form_page.dart';
 import 'package:nsysu_ap/utils/big5/big5.dart';
@@ -63,7 +63,11 @@ class Utils {
         ),
       );
     } else {
-      await launch(sprintf(confirmFormUrl, <String>[username]));
+      await launchUrl(
+        Uri.parse(
+          sprintf(confirmFormUrl, <String>[username]),
+        ),
+      );
     }
   }
 

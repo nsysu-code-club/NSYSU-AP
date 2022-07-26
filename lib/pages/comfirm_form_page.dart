@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:ap_common/resources/ap_icon.dart';
 import 'package:ap_common/resources/ap_theme.dart';
@@ -53,7 +53,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
         title: Text(ap.confirm),
         backgroundColor: ApTheme.of(context).blue,
         actions: <Widget>[
-          if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+          if (!kIsWeb && (io.Platform.isAndroid || io.Platform.isIOS))
             TextButton(
               onPressed: _launchUrl,
               child: Text(
@@ -65,7 +65,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
             ),
         ],
       ),
-      body: !kIsWeb && (Platform.isAndroid || Platform.isIOS)
+      body: !kIsWeb && (io.Platform.isAndroid || io.Platform.isIOS)
           ? InAppWebView(
               initialUrlRequest: URLRequest(
                 url: Uri.parse(
@@ -96,8 +96,11 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
 
   Future<void> _loadData() async {
     final CookieManager cookiesManager = CookieManager.instance();
-    for (final cookie in await SelcrsHelper.instance.cookieJar
-        .loadForRequest(Uri.parse(SelcrsHelper.baseUrl))) {
+    final List<io.Cookie> list =
+        await SelcrsHelper.instance.cookieJar.loadForRequest(
+      Uri.parse(SelcrsHelper.baseUrl),
+    );
+    for (final io.Cookie cookie in list) {
       cookiesManager.setCookie(
         url: Uri.parse(SelcrsHelper.baseUrl),
         name: cookie.name,
