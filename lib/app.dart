@@ -82,7 +82,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           darkTheme: ApTheme.dark,
           themeMode: themeMode,
           locale: locale,
-          navigatorObservers: <FirebaseAnalyticsObserver>[
+          navigatorObservers: <NavigatorObserver>[
             if (FirebaseAnalyticsUtils.isSupported && _analytics != null)
               FirebaseAnalyticsObserver(analytics: _analytics!),
           ],

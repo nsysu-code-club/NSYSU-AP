@@ -235,7 +235,12 @@ class SelcrsHelper {
         return dumpError('getUserInfo', text, callback) as Future<UserInfo?>;
       }
       reLoginCount = 0;
-      return callback?.onSuccess(parserUserInfo(text)) as Future<UserInfo?>;
+      if (callback == null) {
+        return parserUserInfo(text);
+      } else {
+        callback.onSuccess(parserUserInfo(text));
+        return null;
+      }
     } on DioError catch (e) {
       callback?.onFailure(e);
     } on Exception {
