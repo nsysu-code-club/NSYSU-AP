@@ -450,7 +450,7 @@ class HomePageState extends State<HomePage> {
   Future<void> _login() async {
     final String username = Preferences.getString(Constants.prefUsername, '');
     final String password =
-        Preferences.getStringSecurity(Constants.prefPassword, '')!;
+        Preferences.getStringSecurity(Constants.prefPassword, '');
     SelcrsHelper.instance.login(
       username: username,
       password: password,

@@ -159,8 +159,7 @@ class LoginPageState extends State<LoginPage> {
     final String username = Preferences.getString(Constants.prefUsername, '');
     String password = '';
     if (isRememberPassword) {
-      password =
-          Preferences.getStringSecurity(Constants.prefPassword, '') ?? '';
+      password = Preferences.getStringSecurity(Constants.prefPassword, '');
     }
     setState(() {
       _username.text = username;
