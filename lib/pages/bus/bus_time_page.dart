@@ -32,8 +32,8 @@ class _BusTimePageState extends State<BusTimePage>
     with SingleTickerProviderStateMixin {
   _State state = _State.loading;
 
-  List<BusTime> startList = [];
-  List<BusTime> endList = [];
+  List<BusTime> startList = <BusTime>[];
+  List<BusTime> endList = <BusTime>[];
 
   TabController? _tabController;
 
@@ -47,14 +47,14 @@ class _BusTimePageState extends State<BusTimePage>
     );
     _getData();
     timer = Timer.periodic(
-      Duration(seconds: 10),
-      (timer) {
+      const Duration(seconds: 10),
+      (Timer timer) {
         _getData();
       },
     );
     FirebaseAnalyticsUtils.instance.setCurrentScreen(
-      "BusTimePage",
-      "bus_time_page.dart",
+      'BusTimePage',
+      'bus_time_page.dart',
     );
     super.initState();
   }
@@ -68,14 +68,14 @@ class _BusTimePageState extends State<BusTimePage>
 
   @override
   Widget build(BuildContext context) {
-    final busInfo = widget.busInfo;
+    final BusInfo busInfo = widget.busInfo;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.busInfo.name),
         backgroundColor: ApTheme.of(context).blue,
         bottom: TabBar(
           controller: _tabController,
-          tabs: [
+          tabs: <Widget>[
             Tab(
               text: busInfo.departure,
             ),
@@ -92,7 +92,7 @@ class _BusTimePageState extends State<BusTimePage>
   Widget _body() {
     switch (state) {
       case _State.loading:
-        return Center(
+        return const Center(
           child: CircularProgressIndicator(),
         );
       case _State.error:
@@ -106,7 +106,7 @@ class _BusTimePageState extends State<BusTimePage>
           ),
         );
       default:
-        return startList.length == 0 && startList.length == 0
+        return startList.isEmpty && startList.isEmpty
             ? InkWell(
                 onTap: () => _getData(),
                 child: HintContent(
@@ -119,15 +119,15 @@ class _BusTimePageState extends State<BusTimePage>
                 children: <Widget>[
                   ListView.separated(
                     itemCount: startList.length,
-                    separatorBuilder: (_, __) => Divider(height: 1.0),
-                    itemBuilder: (_, index) => BusTimeItem(
+                    separatorBuilder: (_, __) => const Divider(height: 1.0),
+                    itemBuilder: (_, int index) => BusTimeItem(
                       busTime: startList[index],
                     ),
                   ),
                   ListView.separated(
                     itemCount: endList.length,
-                    separatorBuilder: (_, __) => Divider(height: 1.0),
-                    itemBuilder: (_, index) => BusTimeItem(
+                    separatorBuilder: (_, __) => const Divider(height: 1.0),
+                    itemBuilder: (_, int index) => BusTimeItem(
                       busTime: endList[index],
                     ),
                   )
@@ -140,22 +140,23 @@ class _BusTimePageState extends State<BusTimePage>
     BusHelper.instance.getBusTime(
       locale: widget.locale,
       busInfo: widget.busInfo,
-      callback: GeneralCallback(
+      callback: GeneralCallback<List<BusTime>?>(
         onFailure: (_) {
           if (mounted) setState(() => state = _State.error);
         },
         onError: (_) {
           if (mounted) setState(() => state = _State.error);
         },
-        onSuccess: (data) {
+        onSuccess: (List<BusTime>? data) {
           startList.clear();
           endList.clear();
-          data!.forEach((element) {
-            if (element.isGoBack == 'Y')
+          for (final BusTime element in data!) {
+            if (element.isGoBack == 'Y') {
               endList.add(element);
-            else
+            } else {
               startList.add(element);
-          });
+            }
+          }
           if (mounted) setState(() => state = _State.finish);
         },
       ),
@@ -173,26 +174,25 @@ class BusTimeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final postfix = int.tryParse(busTime.arrivedTime) == null
+    final String postfix = int.tryParse(busTime.arrivedTime) == null
         ? ''
         : ' ${AppLocalizations.of(context).minute}';
-    final isComing =
+    final bool isComing =
         busTime.arrivedTime == '進站中' || busTime.arrivedTime == '將到站';
     return ListTile(
       leading: Container(
-        constraints: BoxConstraints(
+        constraints: const BoxConstraints(
           minWidth: 65.0,
         ),
         decoration: BoxDecoration(
           border: Border.all(
-            width: 1.0,
             color: isComing ? Colors.red : ApTheme.of(context).greyText,
           ),
-          borderRadius: BorderRadius.all(
+          borderRadius: const BorderRadius.all(
             Radius.circular(16.0),
           ),
         ),
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         child: Text(
           '${busTime.arrivedTime}$postfix',
           style: TextStyle(

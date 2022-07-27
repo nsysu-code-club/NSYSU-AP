@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 
 class SchoolInfoPage extends StatefulWidget {
-  static const String routerName = "/ShcoolInfo";
+  static const String routerName = '/ShcoolInfo';
 
   @override
   SchoolInfoPageState createState() => SchoolInfoPageState();
@@ -23,17 +23,17 @@ class SchoolInfoPage extends StatefulWidget {
 
 class SchoolInfoPageState extends State<SchoolInfoPage>
     with SingleTickerProviderStateMixin {
-  final phoneModelList = [
-    PhoneModel("總機", "(07)5252-000#2350"),
-    PhoneModel("校安專線", ''),
-    PhoneModel("生輔組", "0911-705-999"),
-    PhoneModel("值班室1", "(07)525-6666#6666"),
-    PhoneModel("值班室2", "(07)525-6666#6667"),
+  final List<PhoneModel> phoneModelList = <PhoneModel>[
+    PhoneModel('總機', '(07)5252-000#2350'),
+    PhoneModel('校安專線', ''),
+    PhoneModel('生輔組', '0911-705-999'),
+    PhoneModel('值班室1', '(07)525-6666#6666'),
+    PhoneModel('值班室2', '(07)525-6666#6667'),
   ];
 
   NotificationState notificationState = NotificationState.loading;
 
-  List<Notifications> notificationList = [];
+  List<Notifications> notificationList = <Notifications>[];
 
   int page = 1;
 
@@ -52,7 +52,7 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
   @override
   void initState() {
     FirebaseAnalyticsUtils.instance
-        .setCurrentScreen("SchoolInfoPage", "school_info_page.dart");
+        .setCurrentScreen('SchoolInfoPage', 'school_info_page.dart');
     controller = TabController(length: 2, vsync: this);
     _getSchedules();
     super.initState();
@@ -73,7 +73,9 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
         backgroundColor: ApTheme.of(context).blue,
       ),
       body: TabBarView(
-        children: [
+        controller: controller,
+        physics: const NeverScrollableScrollPhysics(),
+        children: <Widget>[
           PhoneListView(
             state: phoneState,
             phoneModelList: phoneModelList,
@@ -87,19 +89,17 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
             },
           ),
         ],
-        controller: controller,
-        physics: NeverScrollableScrollPhysics(),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
+        onTap: (int index) {
           setState(() {
             _currentIndex = index;
             controller.animateTo(_currentIndex);
           });
         },
         fixedColor: ApTheme.of(context).yellow,
-        items: [
+        items: <BottomNavigationBarItem>[
 //          BottomNavigationBarItem(
 //            icon: Icon(ApIcon.fiberNew),
 //            title: Text(ap.notifications),
@@ -117,15 +117,15 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
     );
   }
 
-  _getSchedules() async {
+  Future<void> _getSchedules() async {
     String pdfUrl =
         'https://raw.githubusercontent.com/abc873693/NSYSU-AP/master/school_schedule.pdf';
     if (FirebaseRemoteConfigUtils.isSupported) {
       try {
-        final RemoteConfig remoteConfig = RemoteConfig.instance;
+        final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
         await remoteConfig.fetch();
         await remoteConfig.activate();
-        pdfUrl = remoteConfig.getString(Constants.SCHEDULE_PDF_URL);
+        pdfUrl = remoteConfig.getString(Constants.schedulePdfUrl);
         downloadFdf(pdfUrl);
       } catch (exception) {
         downloadFdf(pdfUrl);
@@ -135,9 +135,9 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
     }
   }
 
-  void downloadFdf(String url) async {
+  Future<void> downloadFdf(String url) async {
     try {
-      var response = await Dio().get(
+      final Response<Uint8List> response = await Dio().get<Uint8List>(
         url,
         options: Options(responseType: ResponseType.bytes),
       );
@@ -149,7 +149,7 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
       setState(() {
         pdfState = PdfState.error;
       });
-      throw e;
+      rethrow;
     }
   }
 }

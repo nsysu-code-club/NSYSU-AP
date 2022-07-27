@@ -1,3 +1,7 @@
+// ignore_for_file: unnecessary_string_interpolations
+
+import 'dart:typed_data';
+
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
@@ -6,7 +10,6 @@ import 'package:ap_common/views/pdf_view.dart';
 import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
@@ -29,16 +32,17 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   _State state = _State.loading;
 
-  List<TuitionAndFees> items = [];
+  List<TuitionAndFees> items = <TuitionAndFees>[];
 
   @override
   void initState() {
     FirebaseAnalyticsUtils.instance
-        .setCurrentScreen("TuitionAndFeesPage", "tuition_and_fees_page.dart");
-    if (TuitionHelper.instance.isLogin)
+        .setCurrentScreen('TuitionAndFeesPage', 'tuition_and_fees_page.dart');
+    if (TuitionHelper.instance.isLogin) {
       _getData();
-    else
+    } else {
       _login();
+    }
     super.initState();
   }
 
@@ -59,7 +63,9 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     switch (state) {
       case _State.loading:
         return Container(
-            child: CircularProgressIndicator(), alignment: Alignment.center);
+          alignment: Alignment.center,
+          child: const CircularProgressIndicator(),
+        );
       case _State.error:
       case _State.empty:
         return InkWell(
@@ -79,20 +85,21 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             });
             await _getData();
             FirebaseAnalyticsUtils.instance.logEvent('t_and_f_refresh');
-            return null;
+            return;
           },
           child: ListView.builder(
             shrinkWrap: true,
-            padding: EdgeInsets.all(8.0),
-            itemBuilder: (context, index) {
-              if (index == 0)
+            padding: const EdgeInsets.all(8.0),
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 0) {
                 return Text(
                   app.tuitionAndFeesPageHint,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: ApTheme.of(context).grey),
                 );
-              else
+              } else {
                 return _notificationItem(items[index - 1]);
+              }
             },
             itemCount: items.length + 1,
           ),
@@ -112,7 +119,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
         child: ListTile(
           title: Text(
             item.title,
-            style: TextStyle(fontSize: 18.0),
+            style: const TextStyle(fontSize: 18.0),
           ),
           trailing: Text(
             '${item.paymentStatus}',
@@ -125,15 +132,16 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             showDialog(
               context: context,
               builder: (BuildContext context) => WillPopScope(
-                  child: ProgressDialog(ap.loading),
-                  onWillPop: () async {
-                    return false;
-                  }),
+                child: ProgressDialog(ap.loading),
+                onWillPop: () async {
+                  return false;
+                },
+              ),
               barrierDismissible: false,
             );
             TuitionHelper.instance.downloadFdf(
               serialNumber: item.serialNumber,
-              callback: GeneralCallback(
+              callback: GeneralCallback<Uint8List?>(
                 onError: (GeneralResponse e) {
                   Navigator.of(context, rootNavigator: true).pop();
                   ApUtils.showToast(
@@ -148,7 +156,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                     e.i18nMessage,
                   );
                 },
-                onSuccess: (data) {
+                onSuccess: (Uint8List? data) {
                   Navigator.of(context, rootNavigator: true).pop();
                   ApUtils.pushCupertinoStyle(
                     context,
@@ -166,7 +174,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             child: Text(
               sprintf(
                 app.tuitionAndFeesItemTitleFormat,
-                [
+                <String>[
                   item.amount,
                   item.dateOfPayment,
                 ],
@@ -189,18 +197,17 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             break;
           case DioErrorType.other:
             throw e;
-            break;
         }
       });
 
   Function(GeneralResponse) get _onError =>
       (_) => setState(() => state = _State.error);
 
-  _login() {
+  void _login() {
     TuitionHelper.instance.login(
       username: SelcrsHelper.instance.username,
       password: SelcrsHelper.instance.password,
-      callback: GeneralCallback(
+      callback: GeneralCallback<GeneralResponse>(
         onFailure: _onFailure,
         onError: _onError,
         onSuccess: (GeneralResponse data) {
@@ -210,20 +217,22 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     );
   }
 
-  Future<Null> _getData() async {
+  Future<void> _getData() async {
     TuitionHelper.instance.getData(
-      callback: GeneralCallback(
+      callback: GeneralCallback<List<TuitionAndFees>>(
         onFailure: _onFailure,
         onError: _onError,
         onSuccess: (List<TuitionAndFees> data) {
           items = data;
-          if (mounted)
+          if (mounted) {
             setState(() {
-              if (items.length == 0)
+              if (items.isEmpty) {
                 state = _State.empty;
-              else
+              } else {
                 state = _State.finish;
+              }
             });
+          }
         },
       ),
     );

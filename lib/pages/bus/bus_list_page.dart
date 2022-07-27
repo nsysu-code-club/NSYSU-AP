@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_single_quotes
+
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/l10n/l10n.dart';
 import 'package:ap_common/resources/ap_icon.dart';
@@ -6,7 +8,6 @@ import 'package:ap_common/widgets/hint_content.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:nsysu_ap/api/bus_helper.dart';
 import 'package:nsysu_ap/models/bus_info.dart';
 import 'package:nsysu_ap/pages/bus/bus_time_page.dart';
@@ -34,7 +35,7 @@ class _BusListPageState extends State<BusListPage> {
   void initState() {
     _getData();
     FirebaseAnalyticsUtils.instance.setCurrentScreen(
-      "BusListPage",
+      'BusListPage',
       "bus_list_page.dart",
     );
     super.initState();
@@ -42,7 +43,7 @@ class _BusListPageState extends State<BusListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ap = ApLocalizations.of(context);
+    final ApLocalizations ap = ApLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(ap.bus),
@@ -55,7 +56,7 @@ class _BusListPageState extends State<BusListPage> {
   Widget _body() {
     switch (state) {
       case _State.loading:
-        return Center(
+        return const Center(
           child: CircularProgressIndicator(),
         );
       case _State.error:
@@ -71,8 +72,8 @@ class _BusListPageState extends State<BusListPage> {
       default:
         return ListView.builder(
           itemCount: busList.length,
-          itemBuilder: (_, index) {
-            final bus = busList[index];
+          itemBuilder: (_, int index) {
+            final BusInfo bus = busList[index];
             return ListTile(
               title: Text(bus.name),
               trailing: Text(
@@ -84,7 +85,7 @@ class _BusListPageState extends State<BusListPage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  CupertinoPageRoute(
+                  CupertinoPageRoute<dynamic>(
                     builder: (_) => BusTimePage(
                       busInfo: bus,
                       locale: widget.locale,
@@ -101,14 +102,14 @@ class _BusListPageState extends State<BusListPage> {
   Future<void> _getData() async {
     BusHelper.instance.getBusInfoList(
       locale: widget.locale,
-      callback: GeneralCallback(
+      callback: GeneralCallback<List<BusInfo>?>(
         onFailure: (_) {
           setState(() => state = _State.error);
         },
         onError: (_) {
           setState(() => state = _State.error);
         },
-        onSuccess: (data) {
+        onSuccess: (List<BusInfo>? data) {
           busList = data ?? <BusInfo>[];
           setState(() => state = _State.finish);
         },

@@ -1,5 +1,4 @@
 import 'package:ap_common/api/announcement_helper.dart';
-import 'package:ap_common/models/ap_support_language.dart';
 import 'package:ap_common/models/user_info.dart';
 import 'package:ap_common/resources/ap_theme.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
@@ -7,20 +6,17 @@ import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
+import 'package:nsysu_ap/pages/home_page.dart';
+import 'package:nsysu_ap/pages/setting_page.dart';
+import 'package:nsysu_ap/pages/study/course_page.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
-
-import 'api/selcrs_helper.dart';
-import 'pages/home_page.dart';
-import 'pages/setting_page.dart';
-import 'pages/study/course_page.dart';
 
 class MyApp extends StatefulWidget {
   @override
@@ -43,8 +39,8 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     _analytics = FirebaseUtils.init();
-    themeMode = ThemeMode
-        .values[Preferences.getInt(Constants.PREF_THEME_MODE_INDEX, 0)];
+    themeMode =
+        ThemeMode.values[Preferences.getInt(Constants.prefThemeModeIndex, 0)];
     FirebaseAnalyticsUtils.instance.logThemeEvent(themeMode);
     WidgetsBinding.instance.addObserver(this);
     super.initState();
@@ -70,53 +66,55 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       child: ApTheme(
         themeMode,
         child: MaterialApp(
-          onGenerateTitle: (context) => AppLocalizations.of(context).appName,
+          onGenerateTitle: (BuildContext context) =>
+              AppLocalizations.of(context).appName,
           debugShowCheckedModeBanner: false,
           routes: <String, WidgetBuilder>{
-            Navigator.defaultRouteName: (context) => HomePage(),
-            HomePage.routerName: (context) => HomePage(),
-            CoursePage.routerName: (context) => CoursePage(),
-            ScorePage.routerName: (context) => ScorePage(),
-            GraduationReportPage.routerName: (context) =>
-                GraduationReportPage(),
-            SettingPage.routerName: (context) => SettingPage(),
+            Navigator.defaultRouteName: (BuildContext context) => HomePage(),
+            HomePage.routerName: (BuildContext context) => HomePage(),
+            CoursePage.routerName: (BuildContext context) => CoursePage(),
+            ScorePage.routerName: (BuildContext context) => ScorePage(),
+            GraduationReportPage.routerName: (BuildContext context) =>
+                const GraduationReportPage(),
+            SettingPage.routerName: (BuildContext context) => SettingPage(),
           },
           theme: ApTheme.light,
           darkTheme: ApTheme.dark,
           themeMode: themeMode,
           locale: locale,
-          navigatorObservers: [
+          navigatorObservers: <NavigatorObserver>[
             if (FirebaseAnalyticsUtils.isSupported && _analytics != null)
               FirebaseAnalyticsObserver(analytics: _analytics!),
           ],
           localeResolutionCallback:
               (Locale? locale, Iterable<Locale> supportedLocales) {
-            String languageCode = Preferences.getString(
-              Constants.PREF_LANGUAGE_CODE,
+            final String languageCode = Preferences.getString(
+              Constants.prefLanguageCode,
               ApSupportLanguageConstants.system,
             );
-            if (languageCode == ApSupportLanguageConstants.system)
+            if (languageCode == ApSupportLanguageConstants.system) {
               this.locale = ApLocalizations.delegate.isSupported(locale!)
                   ? locale
-                  : Locale('en');
-            else
+                  : const Locale('en');
+            } else {
               this.locale = Locale(
                 languageCode,
                 languageCode == ApSupportLanguageConstants.zh ? 'TW' : null,
               );
+            }
             AnnouncementHelper.instance.setLocale(this.locale!);
             return this.locale;
           },
-          localizationsDelegates: [
+          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
             apLocalizationsDelegate,
             appDelegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: [
-            const Locale('en', 'US'), // English
-            const Locale('zh', 'TW'), // Chinese
+          supportedLocales: const <Locale>[
+            Locale('en', 'US'), // English
+            Locale('zh', 'TW'), // Chinese
           ],
         ),
       ),

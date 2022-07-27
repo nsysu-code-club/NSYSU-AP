@@ -1,16 +1,16 @@
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/widgets.dart';
 import 'package:nsysu_ap/models/bus_info.dart';
 import 'package:nsysu_ap/models/bus_time.dart';
 
 class BusHelper {
-  static const BASE_PATH = 'https://ibus.nsysu.edu.tw';
+  static const String basePath = 'https://ibus.nsysu.edu.tw';
 
   static BusHelper? _instance;
 
+  //ignore: prefer_constructors_over_static_methods
   static BusHelper get instance {
     return _instance ??= BusHelper();
   }
@@ -26,7 +26,7 @@ class BusHelper {
 
   void initCookiesJar() {
     dio.interceptors.add(CookieManager(cookieJar));
-    cookieJar.loadForRequest(Uri.parse(BASE_PATH));
+    cookieJar.loadForRequest(Uri.parse(basePath));
   }
 
   Future<void> getBusInfoList({
@@ -35,24 +35,29 @@ class BusHelper {
   }) async {
     try {
       String languageCode;
-      if (locale.languageCode.contains('zh'))
+      if (locale.languageCode.contains('zh')) {
         languageCode = 'zh';
-      else
+      } else {
         languageCode = 'en';
-      final path =
+      }
+      final String path =
           'https://nsysu-code-club.github.io/nsysu-bus/bus_info_data_$languageCode.json';
-      var response = await dio.get(
+      final Response<String> response = await dio.get<String>(
         path,
         options: Options(
           responseType: ResponseType.plain,
         ),
       );
-      final list = BusInfo.fromRawList(response.data);
-      callback.onSuccess(list);
+      if (response.data != null) {
+        final List<BusInfo>? list = BusInfo.fromRawList(response.data!);
+        callback.onSuccess(list);
+      } else {
+        callback.onError(GeneralResponse.unknownError());
+        throw response.statusMessage ?? response.toString();
+      }
     } on DioError catch (e) {
       callback.onFailure(e);
       // debugPrint(big5.decode(e.response.data));
-      rethrow;
     } on Exception catch (_) {
       callback.onError(GeneralResponse.unknownError());
       rethrow;
@@ -66,33 +71,37 @@ class BusHelper {
   }) async {
     try {
       String languageCode;
-      if (locale.languageCode.contains('zh'))
+      if (locale.languageCode.contains('zh')) {
         languageCode = 'zh';
-      else
+      } else {
         languageCode = 'en';
-      var response = await dio.post(
-        '$BASE_PATH/API/RoutePathStop.aspx?${DateTime.now().millisecondsSinceEpoch}',
+      }
+      final Response<String> response = await dio.post<String>(
+        '$basePath/API/RoutePathStop.aspx?${DateTime.now().millisecondsSinceEpoch}',
         options: Options(
           responseType: ResponseType.plain,
         ),
         data: FormData.fromMap(
-          {
-            "RID": busInfo.routeId,
-            "C": languageCode,
-            "CID": busInfo.carId,
+          <String, dynamic>{
+            'RID': busInfo.routeId,
+            'C': languageCode,
+            'CID': busInfo.carId,
           },
         ),
       );
-      final list = BusTime.fromRawList(response.data);
-      callback.onSuccess(list);
+      if (response.data != null) {
+        final List<BusTime>? list = BusTime.fromRawList(response.data!);
+        callback.onSuccess(list);
+      } else {
+        callback.onError(GeneralResponse.unknownError());
+        throw response.statusMessage ?? response.toString();
+      }
     } on DioError catch (e) {
       callback.onFailure(e);
       // debugPrint(big5.decode(e.response.data));
-      rethrow;
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       callback.onError(GeneralResponse.unknownError());
       rethrow;
     }
-    return null;
   }
 }

@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 class ImageAssets {
   static const String basePath = 'assets/images';
 
-  static const nsysu = '$basePath/nsysu.webp';
+  static const String nsysu = '$basePath/nsysu.webp';
 
-  static const schoolMap = '$basePath/map.webp';
+  static const String schoolMap = '$basePath/map.webp';
 }
 
 class FileAssets {
@@ -17,10 +17,12 @@ class FileAssets {
   static const String carParkArea = '$basePath/car_park_area.json';
 
   static Future<Map<String, dynamic>?> get changelogData async {
-    return jsonDecode(await rootBundle.loadString(changelog));
+    return jsonDecode(await rootBundle.loadString(changelog))
+        as Map<String, dynamic>?;
   }
 
   static Future<Map<String, dynamic>?> get carParkAreaData async {
-    return jsonDecode(await rootBundle.loadString(carParkArea));
+    return jsonDecode(await rootBundle.loadString(carParkArea))
+        as Map<String, dynamic>?;
   }
 }

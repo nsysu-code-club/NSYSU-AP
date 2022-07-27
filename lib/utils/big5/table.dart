@@ -10,7 +10,7 @@ part of big5;
 // encode5 table  line 32248
 // encode6, 7 table  line 32268
 
-final Map<int, int> decode = {
+final Map<int, int> decode = <int, int>{
   0xA140: 0x3000,
   0xA141: 0xFF0C,
   0xA142: 0x3001,
@@ -13722,10 +13722,10 @@ final Map<int, int> decode = {
 // encode6:   263 entries for runes in [ 63751,  64014).
 // encode7:     1 entries for runes in [175615, 175616).
 
-final int encode0Low = 131105;
-final int encode0High = 173738;
+const int encode0Low = 131105;
+const int encode0High = 173738;
 
-final Map<int, int> encode0 = {
+final Map<int, int> encode0 = <int, int>{
   131105 - 131105: 0x9C71,
   131134 - 131105: 0x9375,
   131142 - 131105: 0x9376,
@@ -15429,10 +15429,10 @@ final Map<int, int> encode0 = {
   173737 - 131105: 0x9E75,
 };
 
-final int encode1Low = 11904;
-final int encode1High = 40908;
+const int encode1Low = 11904;
+const int encode1High = 40908;
 
-final Map<int, int> encode1 = {
+final Map<int, int> encode1 = <int, int>{
   11904 - 11904: 0xC8D6,
   11908 - 11904: 0xC8D7,
   11910 - 11904: 0xC8D8,
@@ -31663,10 +31663,10 @@ final Map<int, int> encode1 = {
   40907 - 11904: 0x87DF,
 };
 
-final int encode2Low = 7870;
-final int encode2High = 10046;
+const int encode2Low = 7870;
+const int encode2High = 10046;
 
-final Map<int, int> encode2 = {
+final Map<int, int> encode2 = <int, int>{
   7870 - 7870: 0x8863,
   7871 - 7870: 0x88A4,
   7872 - 7870: 0x8865,
@@ -31884,10 +31884,10 @@ final Map<int, int> encode2 = {
   10045 - 7870: 0xC6E6,
 };
 
-final int encode3Low = 167;
-final int encode3High = 1106;
+const int encode3Low = 167;
+const int encode3High = 1106;
 
-final Map<int, int> encode3 = {
+final Map<int, int> encode3 = <int, int>{
   167 - 167: 0xA1B1,
   168 - 167: 0xC6D8,
   175 - 167: 0xA1C2,
@@ -32070,10 +32070,10 @@ final Map<int, int> encode3 = {
   1105 - 167: 0xC85B,
 };
 
-final int encode4Low = 65072;
-final int encode4High = 65518;
+const int encode4Low = 65072;
+const int encode4High = 65518;
 
-final Map<int, int> encode4 = {
+final Map<int, int> encode4 = <int, int>{
   65072 - 65072: 0xA14A,
   65073 - 65072: 0xA157,
   65075 - 65072: 0xA159,
@@ -32227,10 +32227,10 @@ final Map<int, int> encode4 = {
   65517 - 65072: 0xF9FE,
 };
 
-final int encode5Low = 194597;
-final int encode5High = 195029;
+const int encode5Low = 194597;
+const int encode5High = 195029;
 
-final Map<int, int> encode5 = {
+final Map<int, int> encode5 = <int, int>{
   194597 - 194597: 0x9874,
   194619 - 194597: 0x9AC8,
   194624 - 194597: 0xA047,
@@ -32244,18 +32244,18 @@ final Map<int, int> encode5 = {
   195028 - 194597: 0x8FF0,
 };
 
-final int encode6Low = 63751;
-final int encode6High = 64014;
+const int encode6Low = 63751;
+const int encode6High = 64014;
 
-final Map<int, int> encode6 = {
+final Map<int, int> encode6 = <int, int>{
   63751 - 63751: 0x8BF8,
   64012 - 63751: 0xC94A,
   64013 - 63751: 0xDDFC,
 };
 
-final int encode7Low = 175615;
-final int encode7High = 175616;
+const int encode7Low = 175615;
+const int encode7High = 175616;
 
-final Map<int, int> encode7 = {
+final Map<int, int> encode7 = <int, int>{
   175615 - 175615: 0x87DC,
 };

@@ -1,12 +1,10 @@
 import 'package:ap_common/callback/general_callback.dart';
-import 'package:ap_common/models/general_response.dart';
 import 'package:ap_common/scaffold/login_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/ap_utils.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common/widgets/progress_dialog.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
@@ -16,7 +14,7 @@ import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
 class LoginPage extends StatefulWidget {
-  static const String routerName = "/login";
+  static const String routerName = '/login';
 
   @override
   LoginPageState createState() => LoginPageState();
@@ -38,7 +36,7 @@ class LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     FirebaseAnalyticsUtils.instance
-        .setCurrentScreen("LoginPage", "login_page.dart");
+        .setCurrentScreen('LoginPage', 'login_page.dart');
     _getPreference();
   }
 
@@ -51,20 +49,18 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     ap = ApLocalizations.of(context);
     return LoginScaffold(
-      logoMode: LogoMode.text,
       logoSource: 'N',
-      forms: [
+      forms: <Widget>[
         ApTextField(
           key: const Key('username'),
           controller: _username,
-          textInputAction: TextInputAction.next,
           focusNode: usernameFocusNode,
-          onSubmitted: (text) {
+          onSubmitted: (String text) {
             usernameFocusNode.unfocus();
             FocusScope.of(context).requestFocus(passwordFocusNode);
           },
           labelText: ap.studentId,
-          autofillHints: [AutofillHints.username],
+          autofillHints: const <String>[AutofillHints.username],
         ),
         ApTextField(
           key: const Key('password'),
@@ -72,14 +68,14 @@ class LoginPageState extends State<LoginPage> {
           textInputAction: TextInputAction.send,
           controller: _password,
           focusNode: passwordFocusNode,
-          onSubmitted: (text) {
+          onSubmitted: (String text) {
             passwordFocusNode.unfocus();
             _login();
           },
           labelText: ap.password,
-          autofillHints: [AutofillHints.password],
+          autofillHints: const <String>[AutofillHints.password],
         ),
-        SizedBox(height: 8.0),
+        const SizedBox(height: 8.0),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -95,7 +91,7 @@ class LoginPageState extends State<LoginPage> {
             ),
           ],
         ),
-        SizedBox(height: 8.0),
+        const SizedBox(height: 8.0),
         ApButton(
           text: ap.login,
           onPressed: () {
@@ -106,9 +102,9 @@ class LoginPageState extends State<LoginPage> {
         ),
         ApFlatButton(
           onPressed: () async {
-            var username = await Navigator.push(
+            final dynamic username = await Navigator.push(
               context,
-              MaterialPageRoute(
+              MaterialPageRoute<dynamic>(
                 builder: (_) => SearchStudentIdPage(),
               ),
             );
@@ -116,6 +112,7 @@ class LoginPageState extends State<LoginPage> {
               setState(() {
                 _username.text = username;
               });
+              if (!mounted) return;
               ApUtils.showToast(
                 context,
                 AppLocalizations.of(context).firstLoginHint,
@@ -128,38 +125,41 @@ class LoginPageState extends State<LoginPage> {
     );
   }
 
-  _onRememberPasswordChanged(bool? value) async {
+  Future<void> _onRememberPasswordChanged(bool? value) async {
     if (value != null) {
       setState(() {
         isRememberPassword = value;
         if (!isRememberPassword) isAutoLogin = false;
-        Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
+        Preferences.setBool(Constants.prefAutoLogin, isAutoLogin);
         Preferences.setBool(
-            Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
+          Constants.prefRememberPassword,
+          isRememberPassword,
+        );
       });
     }
   }
 
-  _onAutoLoginChanged(bool? value) async {
+  Future<void> _onAutoLoginChanged(bool? value) async {
     if (value != null) {
       setState(() {
         isAutoLogin = value;
         isRememberPassword = isAutoLogin;
-        Preferences.setBool(Constants.PREF_AUTO_LOGIN, isAutoLogin);
+        Preferences.setBool(Constants.prefAutoLogin, isAutoLogin);
         Preferences.setBool(
-            Constants.PREF_REMEMBER_PASSWORD, isRememberPassword);
+          Constants.prefRememberPassword,
+          isRememberPassword,
+        );
       });
     }
   }
 
-  _getPreference() async {
+  Future<void> _getPreference() async {
     isRememberPassword =
-        Preferences.getBool(Constants.PREF_REMEMBER_PASSWORD, true);
-    var username = Preferences.getString(Constants.PREF_USERNAME, '');
+        Preferences.getBool(Constants.prefRememberPassword, true);
+    final String username = Preferences.getString(Constants.prefUsername, '');
     String password = '';
     if (isRememberPassword) {
-      password =
-          Preferences.getStringSecurity(Constants.PREF_PASSWORD, '') ?? '';
+      password = Preferences.getStringSecurity(Constants.prefPassword, '');
     }
     setState(() {
       _username.text = username;
@@ -167,7 +167,7 @@ class LoginPageState extends State<LoginPage> {
     });
   }
 
-  _login() async {
+  Future<void> _login() async {
     if (_username.text.isEmpty || _password.text.isEmpty) {
       ApUtils.showToast(context, ap.doNotEmpty);
     } else {
@@ -181,24 +181,32 @@ class LoginPageState extends State<LoginPage> {
         ),
         barrierDismissible: false,
       );
-      if (_username.text.indexOf(' ') != -1)
+      if (_username.text.contains(' ')) {
         FirebaseAnalyticsUtils.instance.logEvent('username_has_empty');
+      }
       _username.text = _username.text.replaceAll(' ', '');
-      Preferences.setString(Constants.PREF_USERNAME, _username.text);
+      Preferences.setString(Constants.prefUsername, _username.text);
       SelcrsHelper.instance.login(
         username: _username.text.toUpperCase(),
         password: _password.text,
-        callback: GeneralCallback(
+        callback: GeneralCallback<GeneralResponse>(
           onError: (GeneralResponse e) {
             Navigator.pop(context);
-            if (e.statusCode == 400)
+            if (e.statusCode == 400) {
               ApUtils.showToast(context, ap.loginFail);
-            else if (e.statusCode == 401) {
+            } else if (e.statusCode == 401) {
               ApUtils.showToast(
-                  context, AppLocalizations.of(context).pleaseConfirmForm);
-              Utils.openConfirmForm(context, _username.text);
-            } else
+                context,
+                AppLocalizations.of(context).pleaseConfirmForm,
+              );
+              Utils.openConfirmForm(
+                context,
+                mounted: mounted,
+                username: _username.text,
+              );
+            } else {
               ApUtils.showToast(context, ap.unknownError);
+            }
           },
           onFailure: (DioError e) {
             Navigator.pop(context);
@@ -206,14 +214,15 @@ class LoginPageState extends State<LoginPage> {
           },
           onSuccess: (GeneralResponse data) async {
             Navigator.pop(context);
-            Preferences.setString(Constants.PREF_USERNAME, _username.text);
+            Preferences.setString(Constants.prefUsername, _username.text);
             if (isRememberPassword) {
               await Preferences.setStringSecurity(
-                Constants.PREF_PASSWORD,
+                Constants.prefPassword,
                 _password.text,
               );
             }
-            Preferences.setBool(Constants.PREF_IS_OFFLINE_LOGIN, false);
+            Preferences.setBool(Constants.prefIsOfflineLogin, false);
+            if (!mounted) return;
             Navigator.of(context).pop(true);
             TextInput.finishAutofillContext();
           },

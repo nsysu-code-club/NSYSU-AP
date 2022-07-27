@@ -49,3 +49,73 @@ Map<String, dynamic> _$GraduationReportDataToJson(
       'otherEducationsCourse':
           instance.otherEducationsCourse.map((e) => e.toJson()).toList(),
     };
+
+MissingRequiredCourse _$MissingRequiredCourseFromJson(
+        Map<String, dynamic> json) =>
+    MissingRequiredCourse(
+      name: json['name'] as String?,
+      credit: json['credit'] as String?,
+      description: json['description'] as String?,
+    );
+
+Map<String, dynamic> _$MissingRequiredCourseToJson(
+        MissingRequiredCourse instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'credit': instance.credit,
+      'description': instance.description,
+    };
+
+GeneralEducationCourse _$GeneralEducationCourseFromJson(
+        Map<String, dynamic> json) =>
+    GeneralEducationCourse(
+      type: json['type'] as String?,
+      generalEducationItem: (json['generalEducationItem'] as List<dynamic>?)
+          ?.map((e) => GeneralEducationItem.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$GeneralEducationCourseToJson(
+        GeneralEducationCourse instance) =>
+    <String, dynamic>{
+      'type': instance.type,
+      'generalEducationItem': instance.generalEducationItem,
+    };
+
+GeneralEducationItem _$GeneralEducationItemFromJson(
+        Map<String, dynamic> json) =>
+    GeneralEducationItem(
+      name: json['name'] as String?,
+      credit: json['credit'] as String?,
+      check: json['check'] as String?,
+      actualCredits: json['actualCredits'] as String?,
+      totalCredits: json['totalCredits'] as String?,
+      practiceSituation: json['practiceSituation'] as String?,
+    );
+
+Map<String, dynamic> _$GeneralEducationItemToJson(
+        GeneralEducationItem instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'credit': instance.credit,
+      'check': instance.check,
+      'actualCredits': instance.actualCredits,
+      'totalCredits': instance.totalCredits,
+      'practiceSituation': instance.practiceSituation,
+    };
+
+OtherEducationsCourse _$OtherEducationsCourseFromJson(
+        Map<String, dynamic> json) =>
+    OtherEducationsCourse(
+      name: json['name'] as String?,
+      semester: json['semester'] as String?,
+      credit: json['credit'] as String?,
+    );
+
+Map<String, dynamic> _$OtherEducationsCourseToJson(
+        OtherEducationsCourse instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'semester': instance.semester,
+      'credit': instance.credit,
+    };

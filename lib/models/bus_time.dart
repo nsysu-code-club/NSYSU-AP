@@ -66,14 +66,16 @@ class BusTime {
   String toRawJson() => jsonEncode(toJson());
 
   static List<BusTime>? fromRawList(String rawString) {
-    final rawStringList = json.decode(rawString);
-    if (rawStringList == null)
+    final List<Map<String, dynamic>>? rawStringList =
+        json.decode(rawString) as List<Map<String, dynamic>>?;
+    if (rawStringList == null) {
       return null;
-    else
+    } else {
       return List<BusTime>.from(
         rawStringList.map(
-          (dynamic x) => BusTime.fromJson(x),
+          (Map<String, dynamic> x) => BusTime.fromJson(x),
         ),
       );
+    }
   }
 }

@@ -28,7 +28,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   @override
   void initState() {
     FirebaseAnalyticsUtils.instance
-        .setCurrentScreen("UserInfoPage", "user_info_page.dart");
+        .setCurrentScreen('UserInfoPage', 'user_info_page.dart');
     userInfo = widget.userInfo;
     super.initState();
   }
@@ -39,7 +39,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       userInfo: userInfo,
       onRefresh: () async {
         return (await SelcrsHelper.instance.getUserInfo(
-              callback: GeneralCallback(
+              callback: GeneralCallback<UserInfo>(
                 onSuccess: (UserInfo data) {
                   setState(() {
                     userInfo = data;
@@ -73,24 +73,29 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           context: context,
                           builder: (BuildContext context) => WillPopScope(
                             child: ProgressDialog(
-                                ApLocalizations.of(context).loading),
+                              ApLocalizations.of(context).loading,
+                            ),
                             onWillPop: () async {
                               return false;
                             },
                           ),
                           barrierDismissible: false,
                         );
-                        var userInfo = await SelcrsHelper.instance.changeMail(
+                        final UserInfo? userInfo =
+                            await SelcrsHelper.instance.changeMail(
                           mail: newEmail.text,
-                          callback: GeneralCallback.simple(
+                          callback: GeneralCallback<UserInfo>.simple(
                             context,
-                            (userInfo) => userInfo,
+                            (UserInfo userInfo) => userInfo,
                           ),
                         );
+                        if (!mounted) return;
                         Navigator.pop(context);
                         if (userInfo != null) {
-                          ApUtils.showToast(context,
-                              ApLocalizations.of(context).updateSuccess);
+                          ApUtils.showToast(
+                            context,
+                            ApLocalizations.of(context).updateSuccess,
+                          );
                           setState(() {
                             this.userInfo = userInfo;
                           });
@@ -103,7 +108,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
               },
             );
           },
-          icon: Icon(Icons.edit),
+          icon: const Icon(Icons.edit),
         )
       ],
     );

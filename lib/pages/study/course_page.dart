@@ -7,14 +7,14 @@ import 'package:ap_common/scaffold/course_scaffold.dart';
 import 'package:ap_common/utils/ap_localizations.dart';
 import 'package:ap_common/utils/preferences.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
 class CoursePage extends StatefulWidget {
-  static const String routerName = "/course";
+  static const String routerName = '/course';
 
   @override
   CoursePageState createState() => CoursePageState();
@@ -45,12 +45,12 @@ class CoursePageState extends State<CoursePage> {
   void initState() {
     super.initState();
     FirebaseAnalyticsUtils.instance
-        .setCurrentScreen("CoursePage", "course_page.dart");
+        .setCurrentScreen('CoursePage', 'course_page.dart');
     CourseNotifyData.clearOldVersionNotification(
       tag: '${SelcrsHelper.instance.username}_latest',
       newTag: courseNotifyCacheKey,
     );
-    Future.microtask(() => _getSemester());
+    Future<void>.microtask(() => _getSemester());
   }
 
   @override
@@ -66,8 +66,8 @@ class CoursePageState extends State<CoursePage> {
       courseData: courseData,
       notifyData: notifyData,
       semesterData: semesterData,
-      onSelect: (index) {
-        this.semesterData!.currentIndex = index;
+      onSelect: (int index) {
+        semesterData!.currentIndex = index;
         _getCourseTables();
       },
       onRefresh: _getCourseTables,
@@ -76,19 +76,20 @@ class CoursePageState extends State<CoursePage> {
           semesterData?.currentSemester.code == defaultSemesterCode,
       courseNotifySaveKey: courseNotifyCacheKey,
       enableCaptureCourseTable: true,
-      actions: <Widget>[],
+      actions: const <Widget>[],
     );
   }
 
   Function(DioError) get _onFailure => (DioError e) {
         setState(() {
-          if (courseData != null) {
-            customHint = '${ap.offlineCourse}';
-            state = CourseState.finish;
-          } else {
-            customStateHint = e.i18nMessage;
-            state = CourseState.error;
-          }
+          //if (courseData != null) {
+          customHint = ap.offlineCourse;
+          state = CourseState.finish;
+          //}
+          // else {
+          //   customStateHint = e.i18nMessage;
+          //   state = CourseState.error;
+          // }
         });
       };
 
@@ -97,44 +98,52 @@ class CoursePageState extends State<CoursePage> {
 
   Future<void> _getSemester() async {
     SelcrsHelper.instance.getCourseSemesterData(
-      callback: GeneralCallback(
+      callback: GeneralCallback<SemesterData>(
         onFailure: _onFailure,
         onError: _onError,
         onSuccess: (SemesterData data) async {
           semesterData = data;
-          RemoteConfig remoteConfig;
+          FirebaseRemoteConfig remoteConfig;
           try {
-            remoteConfig = RemoteConfig.instance;
+            //TODO improve
+            remoteConfig = FirebaseRemoteConfigUtils.instance.remoteConfig!;
             await remoteConfig.fetch();
             await remoteConfig.activate();
             defaultSemesterCode =
-                remoteConfig.getString(Constants.DEFAULT_COURSE_SEMESTER_CODE);
-            String rawTimeCodeConfig =
-                remoteConfig.getString(Constants.TIME_CODE_CONFIG);
+                remoteConfig.getString(Constants.defaultCourseSemesterCode);
+            final String rawTimeCodeConfig =
+                remoteConfig.getString(Constants.timeCodeConfig);
             timeCodeConfig = TimeCodeConfig.fromRawJson(rawTimeCodeConfig);
             Preferences.setString(
-                Constants.DEFAULT_COURSE_SEMESTER_CODE, defaultSemesterCode);
+              Constants.defaultCourseSemesterCode,
+              defaultSemesterCode,
+            );
             Preferences.setString(
-                Constants.TIME_CODE_CONFIG, rawTimeCodeConfig);
+              Constants.timeCodeConfig,
+              rawTimeCodeConfig,
+            );
           } catch (exception) {
             defaultSemesterCode = Preferences.getString(
-              Constants.DEFAULT_COURSE_SEMESTER_CODE,
-              '${Constants.DEFAULT_YEAR}${Constants.DEFAULT_SEMESTER}',
+              Constants.defaultCourseSemesterCode,
+              '${Constants.defaultYear}${Constants.defaultSemester}',
             );
             timeCodeConfig = TimeCodeConfig.fromRawJson(
               Preferences.getString(
-                Constants.TIME_CODE_CONFIG,
+                Constants.timeCodeConfig,
+                //ignore: lines_longer_than_80_chars
                 '{  "timeCodes":[{"title":"A",         "startTime": "7:00"         ,"endTime": "7:50"        },{       "title":"1",         "startTime": "8:10"         ,"endTime": "9:00"        },{       "title":"2",         "startTime": "9:10"         ,"endTime": "10:00"        },{       "title":"3",         "startTime": "10:10"         ,"endTime": "11:00"        },{       "title":"4",         "startTime": "11:10"         ,"endTime": "12:00"        },{       "title":"B",         "startTime": "12:10"         ,"endTime": "13:00"        },{       "title":"5",         "startTime": "13:10"         ,"endTime": "14:00"        },{       "title":"6",         "startTime": "14:10"         ,"endTime": "15:00"        },{       "title":"7",         "startTime": "15:10"         ,"endTime": "16:00"        },{       "title":"8",         "startTime": "16:10"         ,"endTime": "17:00"        },{       "title":"9",         "startTime": "17:10"         ,"endTime": "18:00"        },{       "title":"C",         "startTime": "18:20"         ,"endTime": "19:10"        },{       "title":"D",         "startTime": "19:15"         ,"endTime": "20:05"        },{       "title":"E",         "startTime": "20:10"         ,"endTime": "21:00"        },{       "title":"F",         "startTime": "21:05"         ,"endTime": "21:55"        }] }',
               ),
             );
           }
-          var semester = Preferences.getString(
+          final String semester = Preferences.getString(
             ApConstants.currentSemesterCode,
             ApConstants.semesterLatest,
           );
           if (semester != defaultSemesterCode) {
             CourseNotifyData.clearOldVersionNotification(
-                tag: semester, newTag: defaultSemesterCode);
+              tag: semester,
+              newTag: defaultSemesterCode,
+            );
             Preferences.setString(
               ApConstants.currentSemesterCode,
               defaultSemesterCode,
@@ -145,8 +154,9 @@ class CoursePageState extends State<CoursePage> {
             value: defaultSemesterCode.substring(3),
             text: parser(defaultSemesterCode),
           );
-          semesterData!.data!
-              .forEach((option) => option.text = parser(option.text!));
+          for (final Semester option in semesterData!.data!) {
+            option.text = parser(option.text!);
+          }
           semesterData!.currentIndex = semesterData!.defaultIndex;
           _getCourseTables();
         },
@@ -155,9 +165,9 @@ class CoursePageState extends State<CoursePage> {
   }
 
   String parser(String text) {
-    final app = AppLocalizations.of(context);
+    final AppLocalizations app = AppLocalizations.of(context);
     if (text.length == 4) {
-      String lastCode = text.substring(3);
+      final String lastCode = text.substring(3);
       String last = '';
       switch (lastCode) {
         case '0':
@@ -178,14 +188,16 @@ class CoursePageState extends State<CoursePage> {
         int year = int.parse(text.substring(0, 3));
         year += 1911;
         first = '$year~${year + 1}';
-      } else
+      } else {
         first = '${text.substring(0, 3)}${app.courseYear}';
+      }
       return '$first $last';
-    } else
+    } else {
       return text;
+    }
   }
 
-  _getCourseTables() async {
+  Future<void> _getCourseTables() async {
     if (semesterData == null) {
       _getSemester();
       return;
@@ -195,19 +207,21 @@ class CoursePageState extends State<CoursePage> {
       username: SelcrsHelper.instance.username,
       timeCodeConfig: timeCodeConfig,
       semester: semesterData!.currentSemester.code,
-      callback: GeneralCallback(
+      callback: GeneralCallback<CourseData>(
         onFailure: _onFailure,
         onError: _onError,
         onSuccess: (CourseData data) {
           courseData = data;
           courseData.save(courseNotifyCacheKey);
-          if (mounted)
+          if (mounted) {
             setState(() {
-              if (courseData.courses == null || courseData.courses?.length == 0)
+              if (courseData.courses == null || courseData.courses!.isEmpty) {
                 state = CourseState.empty;
-              else
+              } else {
                 state = CourseState.finish;
+              }
             });
+          }
         },
       ),
     );

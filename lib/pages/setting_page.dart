@@ -10,26 +10,26 @@ import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 
 class SettingPage extends StatefulWidget {
-  static const String routerName = "/setting";
+  static const String routerName = '/setting';
 
   @override
-  SettingPageState createState() => new SettingPageState();
+  SettingPageState createState() => SettingPageState();
 }
 
 class SettingPageState extends State<SettingPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   late ApLocalizations ap;
 
   bool displayPicture = true;
 
-  String appVersion = "1.0.0";
+  String appVersion = '1.0.0';
 
   @override
   void initState() {
     super.initState();
     FirebaseAnalyticsUtils.instance
-        .setCurrentScreen("SettingPage", "setting_page.dart");
+        .setCurrentScreen('SettingPage', 'setting_page.dart');
     _getPreference();
   }
 
@@ -52,20 +52,20 @@ class SettingPageState extends State<SettingPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             SettingTitle(text: ap.otherSettings),
-            CheckCourseNotifyItem(),
-            ClearAllNotifyItem(),
-            Divider(
+            const CheckCourseNotifyItem(),
+            const ClearAllNotifyItem(),
+            const Divider(
               color: Colors.grey,
               height: 0.5,
             ),
             SettingTitle(text: ap.environmentSettings),
             ChangeLanguageItem(
-              onChange: (locale) {
+              onChange: (Locale locale) {
                 ShareDataWidget.of(context)!.data.loadLocale(locale);
               },
             ),
             ChangeThemeModeItem(
-              onChange: (themeMode) {
+              onChange: (ThemeMode themeMode) {
                 ShareDataWidget.of(context)!.data.loadTheme(themeMode);
               },
             ),
@@ -74,7 +74,7 @@ class SettingPageState extends State<SettingPage> {
                 ShareDataWidget.of(context)!.data.update();
               },
             ),
-            Divider(
+            const Divider(
               color: Colors.grey,
               height: 0.5,
             ),
@@ -83,13 +83,13 @@ class SettingPageState extends State<SettingPage> {
               text: ap.feedback,
               subText: ap.feedbackViaFacebook,
               onTap: () {
-                ApUtils.launchFbFansPage(context, Constants.FANS_PAGE_ID);
+                ApUtils.launchFbFansPage(context, Constants.fansPageId);
                 AnalyticsUtils.instance?.logEvent('feedback_click');
               },
             ),
             SettingItem(
               text: ap.appVersion,
-              subText: "v$appVersion",
+              subText: 'v$appVersion',
               onTap: () {
                 AnalyticsUtils.instance?.logEvent('app_version_click');
               },
@@ -100,12 +100,11 @@ class SettingPageState extends State<SettingPage> {
     );
   }
 
-  _getPreference() async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  Future<void> _getPreference() async {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     setState(() {
       appVersion = packageInfo.version;
-      displayPicture =
-          Preferences.getBool(Constants.PREF_DISPLAY_PICTURE, true);
+      displayPicture = Preferences.getBool(Constants.prefDisplayPicture, true);
     });
   }
 }

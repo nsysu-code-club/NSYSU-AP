@@ -7,11 +7,12 @@ import 'package:ap_common/widgets/item_picker.dart';
 import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
+import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
 class ScorePage extends StatefulWidget {
-  static const String routerName = "/score";
+  static const String routerName = '/score';
 
   @override
   ScorePageState createState() => ScorePageState();
@@ -26,15 +27,15 @@ class ScorePageState extends State<ScorePage> {
   ScoreSemesterData? scoreSemesterData;
   ScoreData? scoreData;
 
-  List<String> years = [];
-  List<String> semesters = [];
+  List<String> years = <String>[];
+  List<String> semesters = <String>[];
 
-  var currentYearsIndex = 0;
-  var currentSemesterIndex = 0;
+  int currentYearsIndex = 0;
+  int currentSemesterIndex = 0;
 
   bool get hasPreScore {
     bool _hasPreScore = false;
-    scoreData?.scores?.forEach((score) {
+    scoreData?.scores?.forEach((Score score) {
       if (score.isPreScore) _hasPreScore = true;
     });
     return _hasPreScore;
@@ -44,7 +45,7 @@ class ScorePageState extends State<ScorePage> {
   void initState() {
     super.initState();
     FirebaseAnalyticsUtils.instance
-        .setCurrentScreen("ScorePage", "score_page.dart");
+        .setCurrentScreen('ScorePage', 'score_page.dart');
     _getSemester();
   }
 
@@ -110,11 +111,11 @@ class ScorePageState extends State<ScorePage> {
       },
       details: (scoreData == null)
           ? null
-          : [
-              '${ap.creditsTakenEarned}：'
+          : <String>[
+              '${ap.creditsTakenEarned}：' +
                   '${scoreData!.detail!.creditTaken ?? ''}'
-                  '${scoreData!.detail!.isCreditEmpty ? '' : ' / '}'
-                  '${scoreData!.detail!.creditEarned ?? ''}',
+                      '${scoreData!.detail!.isCreditEmpty ? '' : ' / '}'
+                      '${scoreData!.detail!.creditEarned ?? ''}',
               '${ap.average}：${scoreData!.detail!.average ?? ''}',
               '${ap.rank}：${scoreData!.detail!.classRank ?? ''}',
               '${ap.percentage}：${scoreData!.detail!.classPercentage ?? ''}',
@@ -133,52 +134,51 @@ class ScorePageState extends State<ScorePage> {
             break;
           case DioErrorType.other:
             throw e;
-            break;
         }
       });
 
   Function(GeneralResponse e) get _onError =>
       (_) => setState(() => state = ScoreState.error);
 
-  void _getSemester() async {
+  Future<void> _getSemester() async {
     SelcrsHelper.instance.getScoreSemesterData(
-      callback: GeneralCallback(
+      callback: GeneralCallback<ScoreSemesterData>(
         onFailure: _onFailure,
         onError: _onError,
         onSuccess: (ScoreSemesterData data) {
           scoreSemesterData = data;
           years = <String>[];
           semesters = <String>[];
-          scoreSemesterData!.years.forEach((option) {
+          for (final SemesterOptions option in scoreSemesterData!.years) {
             years.add(option.text);
-          });
-          scoreSemesterData!.semesters.forEach((option) {
+          }
+          for (final SemesterOptions option in scoreSemesterData!.semesters) {
             semesters.add(option.text);
-          });
+          }
           _getSemesterScore();
         },
       ),
     );
   }
 
-  void _getSemesterScore() async {
+  Future<void> _getSemesterScore() async {
     if (scoreSemesterData == null) {
       _getSemester();
       return;
     }
-    final month = DateTime.now().month;
+    final int month = DateTime.now().month;
     SelcrsHelper.instance.getScoreData(
       year: scoreSemesterData!.years[currentYearsIndex].value,
       semester: scoreSemesterData!.semesters[currentSemesterIndex].value,
-      searchPreScore: (month == 6 || month == 7 || month == 1 || month == 2),
-      callback: GeneralCallback(
+      searchPreScore: month == 6 || month == 7 || month == 1 || month == 2,
+      callback: GeneralCallback<ScoreData>(
         onFailure: _onFailure,
         onError: _onError,
         onSuccess: (ScoreData data) {
           scoreData = data;
-          if (mounted && this.scoreData != null) {
+          if (mounted && scoreData != null) {
             setState(() {
-              if (scoreData!.scores == null || scoreData!.scores!.length == 0) {
+              if (scoreData!.scores == null || scoreData!.scores!.isEmpty) {
                 state = ScoreState.empty;
               } else {
                 state = ScoreState.finish;
