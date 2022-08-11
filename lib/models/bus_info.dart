@@ -74,14 +74,14 @@ class BusInfo {
   String toRawJson() => jsonEncode(toJson());
 
   static List<BusInfo>? fromRawList(String rawString) {
-    final List<Map<String, dynamic>>? rawStringList =
-        json.decode(rawString) as List<Map<String, dynamic>>?;
+    final List<dynamic>? rawStringList =
+        json.decode(rawString) as List<dynamic>?;
     if (rawStringList == null) {
       return null;
     } else {
       return List<BusInfo>.from(
         rawStringList.map(
-          (Map<String, dynamic> x) => BusInfo.fromJson(x),
+          (dynamic x) => BusInfo.fromJson(x as Map<String, dynamic>),
         ),
       );
     }
