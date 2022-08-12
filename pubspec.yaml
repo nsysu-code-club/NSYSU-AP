@@ -15,7 +15,7 @@ dependencies:
   multiple_localization: ^0.3.0
 
   ap_common: ^0.21.2
-  ap_common_firebase: ^0.14.0
+  ap_common_firebase: ^0.15.0
   ap_common_plugin: 0.4.0
   #     path: ../ap_common_plugin
 
@@ -37,7 +37,7 @@ dependencies:
   timeago: ^3.0.2
   location: ^4.4.0
   google_sign_in_dartio: ^0.2.1
-  firebase_core_desktop: ^1.0.0
+  firebase_core_desktop: ^1.0.1
   json_annotation: ^4.6.0
 
 dev_dependencies:
