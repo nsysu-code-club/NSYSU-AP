@@ -27,7 +27,9 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
   void initState() {
     FirebaseAnalyticsUtils.instance
         .setCurrentScreen('AdmissionGuidePage', 'admission_guide_page.dart');
-    initWindowsPlatformState();
+    if (!kIsWeb && Platform.isWindows) {
+      initWindowsPlatformState();
+    }
     super.initState();
   }
 
