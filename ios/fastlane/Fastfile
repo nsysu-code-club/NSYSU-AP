@@ -76,11 +76,11 @@ platform :ios do
         }
     )
 
-    firebase_app_distribution(
-        app: "#{GOOGLE_APP_ID}",
-        release_notes_file: "./zh-TW.txt",
-        firebase_cli_token: "#{FIREBASE_CLI_TOKEN}"
-    )
+#     firebase_app_distribution(
+#         app: "#{GOOGLE_APP_ID}",
+#         release_notes_file: "./zh-TW.txt",
+#         firebase_cli_token: "#{FIREBASE_CLI_TOKEN}"
+#     )
 
     delete_temp_keychain(keychain_name)
   end
