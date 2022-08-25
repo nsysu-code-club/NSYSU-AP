@@ -34,7 +34,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
 
   String get url => sprintf(
         widget.confirmFormUrl,
-        <String>[widget.username],
+        <String>[widget.username.toUpperCase()],
       );
 
   @override
