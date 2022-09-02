@@ -1,4 +1,10 @@
 {
+  "10201": {
+    "visible": true,
+    "date": "2022/09/02",
+    "zh-TW": "* 加入隱藏課表特定課程選項",
+    "en-US": "* Add invisible course in course table."
+  },
   "10200": {
     "visible": true,
     "date": "2022/08/26",
