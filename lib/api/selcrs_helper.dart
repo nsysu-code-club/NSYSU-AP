@@ -194,6 +194,7 @@ class SelcrsHelper {
         error++;
         if (error > 5) {
           callback?.onFailure(e);
+          rethrow;
         } else {
           changeSelcrsUrl();
           return login(
