@@ -9,6 +9,7 @@ import 'package:ap_common_firebase/utils/firebase_performance_utils.dart';
 import 'package:ap_common_firebase/utils/firebase_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in_dartio/google_sign_in_dartio.dart';
 import 'package:nsysu_ap/app.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -26,6 +27,14 @@ void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+
+      final ByteData data = await PlatformAssetBundle().load(
+        'assets/ca/twca_nsysu.cer',
+      );
+      SecurityContext.defaultContext.setTrustedCertificatesBytes(
+        data.buffer.asUint8List(),
+      );
+
       await Preferences.init(
         key: Constants.key,
         iv: Constants.iv,

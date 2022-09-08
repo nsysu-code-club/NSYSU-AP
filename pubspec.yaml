@@ -60,6 +60,7 @@ flutter:
     - assets/images/
     - changelog.json
     - assets/car_park_area.json
+    - assets/ca/
 
 flutter_intl:
   enabled: true
