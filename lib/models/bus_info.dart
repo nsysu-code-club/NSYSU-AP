@@ -63,7 +63,7 @@ class BusInfo {
       );
 
   factory BusInfo.fromJson(Map<String, dynamic> json) =>
-      _$BusInfoFromJson(json);
+      _$CustomBusInfoFromJson(json);
 
   Map<String, dynamic> toJson() => _$BusInfoToJson(this);
 
@@ -103,6 +103,23 @@ class BusInfo {
     }
   }
 }
+
+BusInfo _$CustomBusInfoFromJson(Map<String, dynamic> json) => BusInfo(
+      carId: json['CarID'] as String?,
+      stopName: json['StopName'] as String,
+      routeId: json['RouteID'] as int,
+      name: json['Name'] == null
+          ? json['NameEn'] as String
+          : json['Name'] as String,
+      isOpenData: json['isOpenData'] as String,
+      departure: json['Departure'] == null
+          ? json['DepartureEn'] as String
+          : json['Departure'] as String,
+      destination: json['Destination'] == null
+          ? json['DestinationEn'] as String
+          : json['Destination'] as String,
+      updateTime: json['UpdateTime'] as String?,
+    );
 
 extension BusInfoExtension on List<BusTime> {
   void save() {

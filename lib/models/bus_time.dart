@@ -55,7 +55,7 @@ class BusTime {
       );
 
   factory BusTime.fromJson(Map<String, dynamic> json) =>
-      _$BusTimeFromJson(json);
+      _$CustomBusTimeFromJson(json);
 
   Map<String, dynamic> toJson() => _$BusTimeToJson(this);
 
@@ -79,3 +79,15 @@ class BusTime {
     }
   }
 }
+
+BusTime _$CustomBusTimeFromJson(Map<String, dynamic> json) => BusTime(
+      routeId: json['RouteID'] as int,
+      stopId: json['StopID'] as String,
+      name: json['Name'] == null
+          ? json['NameEn'] as String
+          : json['Name'] as String,
+      arrivedTime: json['ArrivedTime'] as String?,
+      realArrivedTime: json['RealArrivedTime'] as String?,
+      isGoBack: json['isGoBack'] as String,
+      seqNo: json['SeqNo'] as int,
+    );
