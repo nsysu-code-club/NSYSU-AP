@@ -188,7 +188,7 @@ class SelcrsHelper {
           return GeneralResponse.success();
         } else {
           return callback.onSuccess(GeneralResponse.success())
-              as Future<GeneralResponse>?;
+              as Future<GeneralResponse?>?;
         }
       } else {
         error++;
