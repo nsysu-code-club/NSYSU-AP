@@ -174,7 +174,7 @@ class BusTimeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String postfix = int.tryParse(busTime.arrivedTime) == null
+    final String postfix = int.tryParse(busTime.arrivedTime ?? '') == null
         ? ''
         : ' ${AppLocalizations.of(context).minute}';
     final bool isComing =
@@ -194,7 +194,7 @@ class BusTimeItem extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(8.0),
         child: Text(
-          '${busTime.arrivedTime}$postfix',
+          '${busTime.arrivedTime ?? '已離站'}$postfix',
           style: TextStyle(
             color: isComing ? Colors.red : ApTheme.of(context).greyText,
           ),

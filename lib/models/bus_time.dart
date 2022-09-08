@@ -27,9 +27,9 @@ class BusTime {
   @JsonKey(name: 'Name')
   String name;
   @JsonKey(name: 'ArrivedTime')
-  String arrivedTime;
+  String? arrivedTime;
   @JsonKey(name: 'RealArrivedTime')
-  String realArrivedTime;
+  String? realArrivedTime;
   @JsonKey(name: 'isGoBack')
   String isGoBack;
   @JsonKey(name: 'SeqNo')

@@ -10,8 +10,8 @@ BusTime _$BusTimeFromJson(Map<String, dynamic> json) => BusTime(
       routeId: json['RouteID'] as int,
       stopId: json['StopID'] as String,
       name: json['Name'] as String,
-      arrivedTime: json['ArrivedTime'] as String,
-      realArrivedTime: json['RealArrivedTime'] as String,
+      arrivedTime: json['ArrivedTime'] as String?,
+      realArrivedTime: json['RealArrivedTime'] as String?,
       isGoBack: json['isGoBack'] as String,
       seqNo: json['SeqNo'] as int,
     );
