@@ -1,6 +1,12 @@
 {
-  "10202": {
+  "10203": {
     "visible": true,
+    "date": "2022/09/09",
+    "zh-TW": "* 加入隱藏課表特定課程選項\n* 修正最新消息無法送出\n* 修正公車無法顯示錯誤\n* 修正登入憑證錯誤",
+    "en-US": "* Add invisible course in course table.\n* Fix announcement system can't send request.\n* Fix bus display error.\n* Fix login certificates error."
+  },
+  "10202": {
+    "visible": false,
     "date": "2022/09/09",
     "zh-TW": "* 加入隱藏課表特定課程選項\n* 修正最新消息無法送出\n* 修正公車無法顯示錯誤",
     "en-US": "* Add invisible course in course table.\n* Fix announcement system can't send request.\n* Fix bus display error."
