@@ -6,7 +6,6 @@ import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:location/location.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/comfirm_form_page.dart';
 import 'package:nsysu_ap/utils/big5/big5.dart';
@@ -71,15 +70,18 @@ class Utils {
     }
   }
 
-  static bool checkIsInSchool(LocationData currentPosition) {
+  static bool checkIsInSchool({
+    required double latitude,
+    required double longitude,
+  }) {
     //TODO more accuracy position check
     const double latBottom = 22.622056;
     const double latTop = 22.636574;
     const double longLeft = 120.258485;
     const double lonRight = 120.271779;
-    return currentPosition.latitude! >= latBottom &&
-        currentPosition.latitude! <= latTop &&
-        currentPosition.longitude! >= longLeft &&
-        currentPosition.longitude! <= lonRight;
+    return latitude >= latBottom &&
+        latitude <= latTop &&
+        longitude >= longLeft &&
+        longitude <= lonRight;
   }
 }
