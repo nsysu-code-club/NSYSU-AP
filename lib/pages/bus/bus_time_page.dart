@@ -122,6 +122,7 @@ class _BusTimePageState extends State<BusTimePage>
                     separatorBuilder: (_, __) => const Divider(height: 1.0),
                     itemBuilder: (_, int index) => BusTimeItem(
                       busTime: startList[index],
+                      locale: widget.locale,
                     ),
                   ),
                   ListView.separated(
@@ -129,6 +130,7 @@ class _BusTimePageState extends State<BusTimePage>
                     separatorBuilder: (_, __) => const Divider(height: 1.0),
                     itemBuilder: (_, int index) => BusTimeItem(
                       busTime: endList[index],
+                      locale: widget.locale,
                     ),
                   )
                 ],
@@ -166,37 +168,69 @@ class _BusTimePageState extends State<BusTimePage>
 
 class BusTimeItem extends StatelessWidget {
   final BusTime busTime;
+  final Locale locale;
 
   const BusTimeItem({
     Key? key,
     required this.busTime,
+    required this.locale,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final bool isEnglish = locale.languageCode.contains('en');
     final String postfix = int.tryParse(busTime.arrivedTime ?? '') == null
         ? ''
         : ' ${AppLocalizations.of(context).minute}';
-    final bool isComing =
-        busTime.arrivedTime == '進站中' || busTime.arrivedTime == '將到站';
+    String arrivedTimeText = '';
+    double? fontSize;
+    Color color = ApTheme.of(context).greyText;
+    if (busTime.arrivedTime != null) {
+      arrivedTimeText = busTime.arrivedTime!;
+      switch (busTime.arrivedTime) {
+        case '進站中':
+          if (isEnglish) {
+            arrivedTimeText = 'Arriving';
+          }
+          color = Colors.red;
+          break;
+        case '將到站':
+          if (isEnglish) {
+            arrivedTimeText = 'Coming\nSoon';
+            fontSize = 12.0;
+          }
+          color = Colors.green;
+          break;
+        default:
+          break;
+      }
+    } else {
+      if (isEnglish) {
+        arrivedTimeText = 'Departed';
+        fontSize = 12.0;
+      } else {
+        arrivedTimeText = '已離站';
+      }
+    }
     return ListTile(
       leading: Container(
-        constraints: const BoxConstraints(
-          minWidth: 65.0,
-        ),
+        height: 40.0,
+        width: 72.0,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           border: Border.all(
-            color: isComing ? Colors.red : ApTheme.of(context).greyText,
+            color: color,
           ),
           borderRadius: const BorderRadius.all(
-            Radius.circular(16.0),
+            Radius.circular(32.0),
           ),
         ),
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Text(
-          '${busTime.arrivedTime ?? '已離站'}$postfix',
+          '$arrivedTimeText$postfix',
           style: TextStyle(
-            color: isComing ? Colors.red : ApTheme.of(context).greyText,
+            fontSize: fontSize,
+            color: color,
           ),
           textAlign: TextAlign.center,
         ),
