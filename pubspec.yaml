@@ -35,7 +35,6 @@ dependencies:
   desktop_webview_window: ^0.1.6
   webview_windows: ^0.2.0
   timeago: ^3.0.2
-  location: ^4.4.0
   google_sign_in_dartio: ^0.2.1
   firebase_core_desktop: ^1.0.1
   json_annotation: ^4.6.0
