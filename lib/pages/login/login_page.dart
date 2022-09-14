@@ -184,10 +184,13 @@ class LoginPageState extends State<LoginPage> {
       if (_username.text.contains(' ')) {
         FirebaseAnalyticsUtils.instance.logEvent('username_has_empty');
       }
-      _username.text = _username.text.replaceAll(' ', '');
-      Preferences.setString(Constants.prefUsername, _username.text);
+      final String username = _username.text.replaceAll(' ', '').toUpperCase();
+      Preferences.setString(
+        Constants.prefUsername,
+        username.toUpperCase(),
+      );
       SelcrsHelper.instance.login(
-        username: _username.text.toUpperCase(),
+        username: username,
         password: _password.text,
         callback: GeneralCallback<GeneralResponse>(
           onError: (GeneralResponse e) {
@@ -202,7 +205,7 @@ class LoginPageState extends State<LoginPage> {
               Utils.openConfirmForm(
                 context,
                 mounted: mounted,
-                username: _username.text,
+                username: username,
               );
             } else {
               ApUtils.showToast(context, ap.unknownError);
@@ -214,7 +217,7 @@ class LoginPageState extends State<LoginPage> {
           },
           onSuccess: (GeneralResponse data) async {
             Navigator.pop(context);
-            Preferences.setString(Constants.prefUsername, _username.text);
+            Preferences.setString(Constants.prefUsername, username);
             if (isRememberPassword) {
               await Preferences.setStringSecurity(
                 Constants.prefPassword,
