@@ -135,7 +135,7 @@ class SelcrsHelper {
       if (text.contains('資料錯誤請重新輸入')) {
         return callback?.onError(
           GeneralResponse(statusCode: 400, message: 'score error'),
-        ) as Future<GeneralResponse>;
+        ) as Future<GeneralResponse>?;
       } else {
         dumpError('score', text, null);
       }
