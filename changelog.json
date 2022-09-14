@@ -1,4 +1,10 @@
 {
+  "10204": {
+    "visible": true,
+    "date": "2022/09/14",
+    "zh-TW": "* 修正自動登入無法顯示課表錯誤",
+    "en-US": "* Fix course not showing in auto-login."
+  },
   "10203": {
     "visible": true,
     "date": "2022/09/09",
