@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/course_data.dart';
 import 'package:ap_common/models/score_data.dart';
@@ -161,7 +163,7 @@ class SelcrsHelper {
           'SPassword': base64md5Password,
         },
       );
-      final String text = big5.decode(courseResponse.data!);
+      final String text = const Utf8Decoder().convert(courseResponse.data!);
 //      debugPrint('course =  $text');
       if (text.contains('學號碼密碼不符')) {
         return callback?.onError(
@@ -223,7 +225,7 @@ class SelcrsHelper {
       final Response<Uint8List> response = await dio.get<Uint8List>(
         '$selcrsUrl/menu4/tools/changedat.asp',
       );
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
         return getUserInfo(
@@ -250,7 +252,7 @@ class SelcrsHelper {
   }
 
   UserInfo parserUserInfo(String text) {
-    final dom.Document document = parse(text, encoding: 'BIG-5');
+    final dom.Document document = parse(text);
     final List<dom.Element> tdDoc = document.getElementsByTagName('td');
     UserInfo userInfo = UserInfo.empty();
     if (tdDoc.isNotEmpty) {
@@ -272,7 +274,7 @@ class SelcrsHelper {
     final String url = '$selcrsUrl/menu4/query/stu_slt_up.asp';
     try {
       final Response<Uint8List> response = await dio.post(url);
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
 //      print('text =  ${text}');
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
@@ -286,7 +288,7 @@ class SelcrsHelper {
         return;
       }
       reLoginCount = 0;
-      final dom.Document document = parse(text, encoding: 'BIG-5');
+      final dom.Document document = parse(text);
       final List<dom.Element> options = document.getElementsByTagName('option');
       final SemesterData courseSemesterData = SemesterData(
         data: <Semester>[],
@@ -329,7 +331,7 @@ class SelcrsHelper {
         },
         options: _courseOption,
       );
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
 //      debugPrint('text =  ${text}');
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
@@ -346,7 +348,7 @@ class SelcrsHelper {
       }
       reLoginCount = 0;
       final int startTime = DateTime.now().millisecondsSinceEpoch;
-      final dom.Document document = parse(text, encoding: 'BIG-5');
+      final dom.Document document = parse(text);
       final List<dom.Element> trDoc = document.getElementsByTagName('tr');
       final CourseData courseData =
           CourseData(courses: <Course>[], timeCodes: timeCodeConfig.timeCodes);
@@ -688,7 +690,7 @@ class SelcrsHelper {
           'T1': mail,
         },
       );
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
         return changeMail(

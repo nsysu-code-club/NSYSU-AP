@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:ap_common/callback/general_callback.dart';
@@ -6,7 +7,6 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
-import 'package:nsysu_ap/utils/big5/big5.dart';
 
 class TuitionHelper {
   static const String basePATH = 'https://tfstu.nsysu.edu.tw';
@@ -60,7 +60,7 @@ class TuitionHelper {
           'passwd': password,
         },
       );
-      final String _ = big5.decode(response.data!);
+      final String _ = const Utf8Decoder().convert(response.data!);
       // debugPrint('Request =  ${response.request.data}');
       // debugPrint('Response =  $text');
       //    debugPrint('response.statusCode = ${response.statusCode}');
@@ -87,7 +87,7 @@ class TuitionHelper {
         url,
         options: _tfOption,
       );
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
       // debugPrint('text =  ${text}');
       if (text.contains('沒有合乎查詢條件的資料')) {
         callback.onSuccess(<TuitionAndFees>[]);
