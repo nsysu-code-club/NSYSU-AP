@@ -65,7 +65,7 @@ class TuitionHelper {
       // debugPrint('Response =  $text');
       //    debugPrint('response.statusCode = ${response.statusCode}');
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
+      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
         isLogin = true;
         return callback.onSuccess(GeneralResponse.success());
       } else {

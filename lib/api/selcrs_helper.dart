@@ -42,8 +42,8 @@ class SelcrsHelper {
   Dio dio = Dio(
     BaseOptions(
       responseType: ResponseType.bytes,
-      sendTimeout: 10000,
-      receiveTimeout: 10000,
+      sendTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
     ),
   );
   CookieJar cookieJar = CookieJar();
@@ -140,7 +140,7 @@ class SelcrsHelper {
         dumpError('score', text, null);
       }
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
+      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
       } else {
         error++;
         if (error > 5) {
@@ -178,7 +178,7 @@ class SelcrsHelper {
         return dumpError('course', text, callback) as Future<GeneralResponse?>;
       }
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
+      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
         final String _ = big5.decode(e.response!.data as Uint8List);
 //        debugPrint('text =  $text');
         this.username = username;
@@ -459,7 +459,7 @@ class SelcrsHelper {
       }
       return callback.onSuccess(scoreSemesterData);
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
+      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
         final String text = big5.decode(e.response!.data as Uint8List);
         if (text.contains(scoreTimeoutText) && canReLogin) {
           await reLogin();
