@@ -25,10 +25,10 @@ class CoursePageState extends State<CoursePage> {
 
   CourseState state = CourseState.loading;
 
-  TimeCodeConfig? timeCodeConfig;
+  late TimeCodeConfig timeCodeConfig;
 
   SemesterData? semesterData;
-  CourseData courseData = CourseData();
+  CourseData courseData = CourseData.empty();
   CourseNotifyData? notifyData;
 
   String? customStateHint;
@@ -39,7 +39,7 @@ class CoursePageState extends State<CoursePage> {
   String defaultSemesterCode = '';
 
   String get courseNotifyCacheKey =>
-      semesterData?.defaultSemester?.code ?? '1091';
+      semesterData?.defaultSemester.code ?? '1091';
 
   @override
   void initState() {
@@ -97,44 +97,50 @@ class CoursePageState extends State<CoursePage> {
       (_) => setState(() => state = CourseState.error);
 
   Future<void> _getSemester() async {
+    FirebaseRemoteConfig remoteConfig;
+    try {
+      //TODO improve
+      remoteConfig = FirebaseRemoteConfigUtils.instance.remoteConfig!;
+      await remoteConfig.fetch();
+      await remoteConfig.activate();
+      defaultSemesterCode =
+          remoteConfig.getString(Constants.defaultCourseSemesterCode);
+      final String rawTimeCodeConfig =
+          remoteConfig.getString(Constants.timeCodeConfig);
+      timeCodeConfig = TimeCodeConfig.fromRawJson(rawTimeCodeConfig);
+      Preferences.setString(
+        Constants.defaultCourseSemesterCode,
+        defaultSemesterCode,
+      );
+      Preferences.setString(
+        Constants.timeCodeConfig,
+        rawTimeCodeConfig,
+      );
+    } catch (exception) {
+      defaultSemesterCode = Preferences.getString(
+        Constants.defaultCourseSemesterCode,
+        '${Constants.defaultYear}${Constants.defaultSemester}',
+      );
+      timeCodeConfig = TimeCodeConfig.fromRawJson(
+        Preferences.getString(
+          Constants.timeCodeConfig,
+          //ignore: lines_longer_than_80_chars
+          '{  "timeCodes":[{"title":"A",         "startTime": "7:00"         ,"endTime": "7:50"        },{       "title":"1",         "startTime": "8:10"         ,"endTime": "9:00"        },{       "title":"2",         "startTime": "9:10"         ,"endTime": "10:00"        },{       "title":"3",         "startTime": "10:10"         ,"endTime": "11:00"        },{       "title":"4",         "startTime": "11:10"         ,"endTime": "12:00"        },{       "title":"B",         "startTime": "12:10"         ,"endTime": "13:00"        },{       "title":"5",         "startTime": "13:10"         ,"endTime": "14:00"        },{       "title":"6",         "startTime": "14:10"         ,"endTime": "15:00"        },{       "title":"7",         "startTime": "15:10"         ,"endTime": "16:00"        },{       "title":"8",         "startTime": "16:10"         ,"endTime": "17:00"        },{       "title":"9",         "startTime": "17:10"         ,"endTime": "18:00"        },{       "title":"C",         "startTime": "18:20"         ,"endTime": "19:10"        },{       "title":"D",         "startTime": "19:15"         ,"endTime": "20:05"        },{       "title":"E",         "startTime": "20:10"         ,"endTime": "21:00"        },{       "title":"F",         "startTime": "21:05"         ,"endTime": "21:55"        }] }',
+        ),
+      );
+    }
+    final Semester defaultSemester = Semester(
+      year: defaultSemesterCode.substring(0, 3),
+      value: defaultSemesterCode.substring(3),
+      text: parser(defaultSemesterCode),
+    );
     SelcrsHelper.instance.getCourseSemesterData(
+      defaultSemester: defaultSemester,
       callback: GeneralCallback<SemesterData>(
         onFailure: _onFailure,
         onError: _onError,
         onSuccess: (SemesterData data) async {
           semesterData = data;
-          FirebaseRemoteConfig remoteConfig;
-          try {
-            //TODO improve
-            remoteConfig = FirebaseRemoteConfigUtils.instance.remoteConfig!;
-            await remoteConfig.fetch();
-            await remoteConfig.activate();
-            defaultSemesterCode =
-                remoteConfig.getString(Constants.defaultCourseSemesterCode);
-            final String rawTimeCodeConfig =
-                remoteConfig.getString(Constants.timeCodeConfig);
-            timeCodeConfig = TimeCodeConfig.fromRawJson(rawTimeCodeConfig);
-            Preferences.setString(
-              Constants.defaultCourseSemesterCode,
-              defaultSemesterCode,
-            );
-            Preferences.setString(
-              Constants.timeCodeConfig,
-              rawTimeCodeConfig,
-            );
-          } catch (exception) {
-            defaultSemesterCode = Preferences.getString(
-              Constants.defaultCourseSemesterCode,
-              '${Constants.defaultYear}${Constants.defaultSemester}',
-            );
-            timeCodeConfig = TimeCodeConfig.fromRawJson(
-              Preferences.getString(
-                Constants.timeCodeConfig,
-                //ignore: lines_longer_than_80_chars
-                '{  "timeCodes":[{"title":"A",         "startTime": "7:00"         ,"endTime": "7:50"        },{       "title":"1",         "startTime": "8:10"         ,"endTime": "9:00"        },{       "title":"2",         "startTime": "9:10"         ,"endTime": "10:00"        },{       "title":"3",         "startTime": "10:10"         ,"endTime": "11:00"        },{       "title":"4",         "startTime": "11:10"         ,"endTime": "12:00"        },{       "title":"B",         "startTime": "12:10"         ,"endTime": "13:00"        },{       "title":"5",         "startTime": "13:10"         ,"endTime": "14:00"        },{       "title":"6",         "startTime": "14:10"         ,"endTime": "15:00"        },{       "title":"7",         "startTime": "15:10"         ,"endTime": "16:00"        },{       "title":"8",         "startTime": "16:10"         ,"endTime": "17:00"        },{       "title":"9",         "startTime": "17:10"         ,"endTime": "18:00"        },{       "title":"C",         "startTime": "18:20"         ,"endTime": "19:10"        },{       "title":"D",         "startTime": "19:15"         ,"endTime": "20:05"        },{       "title":"E",         "startTime": "20:10"         ,"endTime": "21:00"        },{       "title":"F",         "startTime": "21:05"         ,"endTime": "21:55"        }] }',
-              ),
-            );
-          }
           final String semester = Preferences.getString(
             ApConstants.currentSemesterCode,
             ApConstants.semesterLatest,
@@ -149,13 +155,8 @@ class CoursePageState extends State<CoursePage> {
               defaultSemesterCode,
             );
           }
-          semesterData!.defaultSemester = Semester(
-            year: defaultSemesterCode.substring(0, 3),
-            value: defaultSemesterCode.substring(3),
-            text: parser(defaultSemesterCode),
-          );
-          for (final Semester option in semesterData!.data!) {
-            option.text = parser(option.text!);
+          for (final Semester option in semesterData!.data) {
+            option.text = parser(option.text);
           }
           semesterData!.currentIndex = semesterData!.defaultIndex;
           _getCourseTables();
@@ -215,7 +216,7 @@ class CoursePageState extends State<CoursePage> {
           courseData.save(courseNotifyCacheKey);
           if (mounted) {
             setState(() {
-              if (courseData.courses == null || courseData.courses!.isEmpty) {
+              if (courseData.courses.isEmpty) {
                 state = CourseState.empty;
               } else {
                 state = CourseState.finish;

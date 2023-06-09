@@ -409,7 +409,7 @@ class HomePageState extends State<HomePage> {
   Future<void> _getAllAnnouncement() async {
     AnnouncementHelper.instance.getAnnouncements(
       tags: <String>['nsysu'],
-      callback: GeneralCallback<List<Announcement>?>(
+      callback: GeneralCallback<List<Announcement>>(
         onFailure: (_) => setState(() => state = HomeState.error),
         onError: (_) => setState(() => state = HomeState.error),
         onSuccess: (List<Announcement>? data) {

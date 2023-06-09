@@ -34,11 +34,10 @@ class ScorePageState extends State<ScorePage> {
   int currentSemesterIndex = 0;
 
   bool get hasPreScore {
-    bool _hasPreScore = false;
-    scoreData?.scores?.forEach((Score score) {
-      if (score.isPreScore) _hasPreScore = true;
-    });
-    return _hasPreScore;
+    for (final Score score in scoreData?.scores ?? <Score>[]) {
+      if (score.isPreScore) return true;
+    }
+    return false;
   }
 
   @override
@@ -100,10 +99,10 @@ class ScorePageState extends State<ScorePage> {
       },
       finalScoreBuilder: (int index) {
         return ScoreTextBorder(
-          text: scoreData!.scores![index].finalScore,
+          text: scoreData!.scores[index].finalScore,
           style: TextStyle(
             fontSize: 15.0,
-            color: scoreData!.scores![index].isPreScore
+            color: scoreData!.scores[index].isPreScore
                 ? ApTheme.of(context).yellow
                 : null,
           ),
@@ -113,12 +112,12 @@ class ScorePageState extends State<ScorePage> {
           ? null
           : <String>[
               '${ap.creditsTakenEarned}：' +
-                  '${scoreData!.detail!.creditTaken ?? ''}'
-                      '${scoreData!.detail!.isCreditEmpty ? '' : ' / '}'
-                      '${scoreData!.detail!.creditEarned ?? ''}',
-              '${ap.average}：${scoreData!.detail!.average ?? ''}',
-              '${ap.rank}：${scoreData!.detail!.classRank ?? ''}',
-              '${ap.percentage}：${scoreData!.detail!.classPercentage ?? ''}',
+                  '${scoreData!.detail.creditTaken ?? ''}'
+                      '${scoreData!.detail.isCreditEmpty ? '' : ' / '}'
+                      '${scoreData!.detail.creditEarned ?? ''}',
+              '${ap.average}：${scoreData!.detail.average ?? ''}',
+              '${ap.rank}：${scoreData!.detail.classRank ?? ''}',
+              '${ap.percentage}：${scoreData!.detail.classPercentage ?? ''}',
             ],
     );
   }
@@ -180,7 +179,7 @@ class ScorePageState extends State<ScorePage> {
           scoreData = data;
           if (mounted && scoreData != null) {
             setState(() {
-              if (scoreData!.scores == null || scoreData!.scores!.isEmpty) {
+              if (scoreData!.scores.isEmpty) {
                 state = ScoreState.empty;
               } else {
                 state = ScoreState.finish;
