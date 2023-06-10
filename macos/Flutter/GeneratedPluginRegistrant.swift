@@ -14,7 +14,7 @@ import firebase_messaging
 import firebase_remote_config
 import flutter_local_notifications
 import in_app_review
-import package_info_plus_macos
+import package_info_plus
 import path_provider_macos
 import photo_manager
 import printing
