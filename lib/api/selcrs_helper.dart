@@ -205,7 +205,6 @@ class SelcrsHelper {
         }
       }
     }
-    return null;
   }
 
   Future<GeneralResponse?> reLogin() async {

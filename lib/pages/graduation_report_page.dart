@@ -48,11 +48,6 @@ class GraduationReportPageState extends State<GraduationReportPage>
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     ap = ApLocalizations.of(context);
     app = AppLocalizations.of(context);
