@@ -1,4 +1,10 @@
 {
+  "10300": {
+    "visible": true,
+    "date": "2023/06/11",
+    "zh-TW": "* 修正部分功能文字顯示錯誤\n* 穩定性更新",
+    "en-US": "* Fix a part of text display error.\nStability update."
+  },
   "10205": {
     "visible": false,
     "date": "2023/06/10",
