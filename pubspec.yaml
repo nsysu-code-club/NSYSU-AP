@@ -30,7 +30,7 @@ dependencies:
   crypto: ^3.0.1
   dio: ^5.0.0
   dio_cookie_manager: ^3.0.0
-  cookie_jar: ^4.0.1
+  cookie_jar: ^4.0.3
   flutter_inappwebview: ^5.7.2+3
   desktop_webview_window: ^0.1.6
   webview_windows: ^0.2.0
