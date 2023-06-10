@@ -15,7 +15,7 @@ dependencies:
   multiple_localization: ^0.3.0
 
   ap_common: ^0.23.0-dev.0
-  ap_common_firebase: ^0.15.0
+  ap_common_firebase: ^0.16.0-dev.0
   ap_common_plugin: 0.4.0
   #     path: ../ap_common_plugin
 
