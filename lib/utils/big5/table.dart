@@ -1,5 +1,3 @@
-part of big5;
-
 // this decode table is copy from https://gist.github.com/shiedman/5477198
 // decode table   line 13
 // encode0 table  line 13729

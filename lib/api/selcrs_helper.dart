@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:ap_common/models/course_data.dart';
@@ -42,8 +42,8 @@ class SelcrsHelper {
   Dio dio = Dio(
     BaseOptions(
       responseType: ResponseType.bytes,
-      sendTimeout: 10000,
-      receiveTimeout: 10000,
+      sendTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
     ),
   );
   CookieJar cookieJar = CookieJar();
@@ -140,7 +140,7 @@ class SelcrsHelper {
         dumpError('score', text, null);
       }
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
+      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
       } else {
         error++;
         if (error > 5) {
@@ -163,7 +163,7 @@ class SelcrsHelper {
           'SPassword': base64md5Password,
         },
       );
-      final String text = big5.decode(courseResponse.data!);
+      final String text = const Utf8Decoder().convert(courseResponse.data!);
 //      debugPrint('course =  $text');
       if (text.contains('學號碼密碼不符')) {
         return callback?.onError(
@@ -178,7 +178,7 @@ class SelcrsHelper {
         return dumpError('course', text, callback) as Future<GeneralResponse?>;
       }
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
+      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
         final String _ = big5.decode(e.response!.data as Uint8List);
 //        debugPrint('text =  $text');
         this.username = username;
@@ -205,7 +205,6 @@ class SelcrsHelper {
         }
       }
     }
-    return null;
   }
 
   Future<GeneralResponse?> reLogin() async {
@@ -225,7 +224,7 @@ class SelcrsHelper {
       final Response<Uint8List> response = await dio.get<Uint8List>(
         '$selcrsUrl/menu4/tools/changedat.asp',
       );
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
         return getUserInfo(
@@ -252,9 +251,9 @@ class SelcrsHelper {
   }
 
   UserInfo parserUserInfo(String text) {
-    final dom.Document document = parse(text, encoding: 'BIG-5');
+    final dom.Document document = parse(text);
     final List<dom.Element> tdDoc = document.getElementsByTagName('td');
-    UserInfo userInfo = UserInfo();
+    UserInfo userInfo = UserInfo.empty();
     if (tdDoc.isNotEmpty) {
       userInfo = UserInfo(
         department: tdDoc[1].text,
@@ -268,16 +267,18 @@ class SelcrsHelper {
   }
 
   Future<void> getCourseSemesterData({
+    required Semester defaultSemester,
     required GeneralCallback<SemesterData> callback,
   }) async {
     final String url = '$selcrsUrl/menu4/query/stu_slt_up.asp';
     try {
       final Response<Uint8List> response = await dio.post(url);
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
 //      print('text =  ${text}');
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
         return getCourseSemesterData(
+          defaultSemester: defaultSemester,
           callback: callback,
         );
       }
@@ -286,12 +287,15 @@ class SelcrsHelper {
         return;
       }
       reLoginCount = 0;
-      final dom.Document document = parse(text, encoding: 'BIG-5');
+      final dom.Document document = parse(text);
       final List<dom.Element> options = document.getElementsByTagName('option');
-      final SemesterData courseSemesterData = SemesterData(data: <Semester>[]);
+      final SemesterData courseSemesterData = SemesterData(
+        data: <Semester>[],
+        defaultSemester: defaultSemester,
+      );
       for (int i = 0; i < options.length; i++) {
         //print('$i => ${tdDoc[i].text}');
-        courseSemesterData.data!.add(
+        courseSemesterData.data.add(
           Semester(
             text: options[i].text,
             year: options[i].attributes['value']!.substring(0, 3),
@@ -310,7 +314,7 @@ class SelcrsHelper {
 
   Future<void> getCourseData({
     required String username,
-    required TimeCodeConfig? timeCodeConfig,
+    required TimeCodeConfig timeCodeConfig,
     required String semester,
     required GeneralCallback<CourseData> callback,
   }) async {
@@ -326,7 +330,7 @@ class SelcrsHelper {
         },
         options: _courseOption,
       );
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
 //      debugPrint('text =  ${text}');
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
@@ -343,13 +347,11 @@ class SelcrsHelper {
       }
       reLoginCount = 0;
       final int startTime = DateTime.now().millisecondsSinceEpoch;
-      final dom.Document document = parse(text, encoding: 'BIG-5');
+      final dom.Document document = parse(text);
       final List<dom.Element> trDoc = document.getElementsByTagName('tr');
       final CourseData courseData =
-          CourseData(courses: (trDoc.isEmpty) ? null : <Course>[]);
-      if (courseData.courses != null) {
-        courseData.timeCodes = timeCodeConfig!.timeCodes;
-      }
+          CourseData(courses: <Course>[], timeCodes: timeCodeConfig.timeCodes);
+
       //print(DateTime.now());
       for (int i = 1; i < trDoc.length; i++) {
         final List<dom.Element> tdDoc = trDoc[i].getElementsByTagName('td');
@@ -389,14 +391,14 @@ class SelcrsHelper {
             final List<String> sections = tdDoc[j].text.split('');
             if (sections.isNotEmpty && sections[0] != ' ') {
               for (final String section in sections) {
-                final int index = timeCodeConfig!.indexOf(section);
+                final int index = timeCodeConfig.indexOf(section);
                 if (index == -1) continue;
-                course.times!.add(SectionTime(weekday: j - 9, index: index));
+                course.times.add(SectionTime(weekday: j - 9, index: index));
               }
             }
           }
         }
-        courseData.courses!.add(course);
+        courseData.courses.add(course);
       }
       if (trDoc.isNotEmpty) {
         final int endTime = DateTime.now().millisecondsSinceEpoch;
@@ -459,7 +461,7 @@ class SelcrsHelper {
       }
       return callback.onSuccess(scoreSemesterData);
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
+      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
         final String text = big5.decode(e.response!.data as Uint8List);
         if (text.contains(scoreTimeoutText) && canReLogin) {
           await reLogin();
@@ -503,7 +505,7 @@ class SelcrsHelper {
       final int startTime = DateTime.now().millisecondsSinceEpoch;
       final dom.Document document = parse(text, encoding: 'BIG-5');
       final List<Score> list = <Score>[];
-      final Detail detail = Detail();
+      Detail detail = Detail();
       final List<dom.Element> tableDoc = document.getElementsByTagName('tbody');
       if (tableDoc.length >= 2) {
         //      for (var i = 0; i < tableDoc.length; i++) {
@@ -516,16 +518,18 @@ class SelcrsHelper {
         if (tableDoc.length == 3) {
           final List<dom.Element> fontDoc =
               tableDoc[1].getElementsByTagName('font');
-          detail.creditTaken = double.parse(fontDoc[0].text.split('：')[1]);
-          detail.creditEarned = double.parse(fontDoc[1].text.split('：')[1]);
-          detail.average = double.parse(fontDoc[2].text.split('：')[1]);
-          detail.classRank =
-              '${fontDoc[4].text.split('：')[1]}/${fontDoc[5].text.split('：')[1]}';
           double percentage = double.parse(fontDoc[4].text.split('：')[1]) /
               double.parse(fontDoc[5].text.split('：')[1]);
           percentage = 1.0 - percentage;
           percentage *= 100;
-          detail.classPercentage = double.parse(percentage.toStringAsFixed(2));
+          detail = Detail(
+            creditTaken: double.parse(fontDoc[0].text.split('：')[1]),
+            creditEarned: double.parse(fontDoc[1].text.split('：')[1]),
+            average: double.parse(fontDoc[2].text.split('：')[1]),
+            classRank:
+                '${fontDoc[4].text.split('：')[1]}/${fontDoc[5].text.split('：')[1]}',
+            classPercentage: double.parse(percentage.toStringAsFixed(2)),
+          );
         }
         final List<dom.Element> trDoc = tableDoc[0].getElementsByTagName('tr');
         for (int i = 0; i < trDoc.length; i++) {
@@ -533,13 +537,14 @@ class SelcrsHelper {
               trDoc[i].getElementsByTagName('font');
           if (fontDoc.length != 6) continue;
           if (i != 0) {
-            final Score score = Score(
+            Score score = Score(
               courseNumber:
                   fontDoc[2].text.substring(1, fontDoc[2].text.length - 1),
               title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
                   fontDoc[3].text,
               middleScore: fontDoc[4].text,
               finalScore: fontDoc[5].text,
+              units: '',
             );
             if (searchPreScore &&
                 (score.finalScore == null ||
@@ -547,8 +552,10 @@ class SelcrsHelper {
               final PreScore? preScore =
                   await getPreScoreData(score.courseNumber);
               if (preScore != null) {
-                score.finalScore = preScore.grades;
-                score.isPreScore = true;
+                score = score.copyWith(
+                  finalScore: preScore.grades,
+                  isPreScore: true,
+                );
               }
             }
             list.add(score);
@@ -578,7 +585,7 @@ class SelcrsHelper {
       );
       return callback.onSuccess(scoreData);
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
+      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
         final String text = big5.decode(e.response!.data as Uint8List);
         if (text.contains(scoreTimeoutText) && canReLogin) {
           await reLogin();
@@ -682,7 +689,7 @@ class SelcrsHelper {
           'T1': mail,
         },
       );
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
         return changeMail(

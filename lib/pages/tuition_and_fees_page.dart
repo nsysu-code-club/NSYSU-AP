@@ -189,13 +189,15 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   Function(DioError) get _onFailure => (DioError e) => setState(() {
         state = _State.error;
         switch (e.type) {
-          case DioErrorType.connectTimeout:
+          case DioErrorType.connectionTimeout:
+          case DioErrorType.connectionError:
           case DioErrorType.sendTimeout:
           case DioErrorType.receiveTimeout:
-          case DioErrorType.response:
+          case DioErrorType.badResponse:
           case DioErrorType.cancel:
+          case DioErrorType.badCertificate:
             break;
-          case DioErrorType.other:
+          case DioErrorType.unknown:
             throw e;
         }
       });

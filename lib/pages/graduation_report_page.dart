@@ -48,11 +48,6 @@ class GraduationReportPageState extends State<GraduationReportPage>
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     ap = ApLocalizations.of(context);
     app = AppLocalizations.of(context);
@@ -349,13 +344,15 @@ class GraduationReportPageState extends State<GraduationReportPage>
   Function(DioError) get _onFailure => (DioError e) => setState(() {
         state = _State.error;
         switch (e.type) {
-          case DioErrorType.connectTimeout:
+          case DioErrorType.connectionTimeout:
+          case DioErrorType.connectionError:
           case DioErrorType.sendTimeout:
           case DioErrorType.receiveTimeout:
-          case DioErrorType.response:
+          case DioErrorType.badResponse:
           case DioErrorType.cancel:
+          case DioErrorType.badCertificate:
             break;
-          case DioErrorType.other:
+          case DioErrorType.unknown:
             throw e;
         }
       });

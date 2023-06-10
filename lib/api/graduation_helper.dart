@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:ap_common/callback/general_callback.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -8,7 +8,6 @@ import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
-import 'package:nsysu_ap/utils/big5/big5.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
 class GraduationHelper {
@@ -63,7 +62,7 @@ class GraduationHelper {
           'ACTION': '0',
         },
       );
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
 //          print('Response =  $text');
       //    print('response.statusCode = ${response.statusCode}');
       if (text.contains('資料錯誤請重新輸入')) {
@@ -76,7 +75,7 @@ class GraduationHelper {
         );
       }
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response && e.response!.statusCode == 302) {
+      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
         isLogin = true;
         callback.onSuccess(GeneralResponse.success());
       } else {
@@ -108,11 +107,11 @@ class GraduationHelper {
         generalEducationCourse: <GeneralEducationCourse>[],
         otherEducationsCourse: <OtherEducationsCourse>[],
       );
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
       final int startTime = DateTime.now().millisecondsSinceEpoch;
 //      debugPrint('text = $text');
 //      debugPrint(DateTime.now().toString());
-      final Document document = parse(text, encoding: 'BIG-5');
+      final Document document = parse(text);
       final List<Element> tableDoc = document.getElementsByTagName('tbody');
       if (tableDoc.length >= 2) {
         for (int i = 0; i < tableDoc.length; i++) {

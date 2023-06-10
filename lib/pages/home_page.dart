@@ -101,6 +101,8 @@ class HomePageState extends State<HomePage> {
       }
       if (await AppTrackingUtils.trackingAuthorizationStatus ==
           TrackingStatus.notDetermined) {
+        //ignore: use_build_context_synchronously
+        if (!context.mounted) return;
         AppTrackingUtils.show(context: context);
       }
     });
@@ -409,7 +411,7 @@ class HomePageState extends State<HomePage> {
   Future<void> _getAllAnnouncement() async {
     AnnouncementHelper.instance.getAnnouncements(
       tags: <String>['nsysu'],
-      callback: GeneralCallback<List<Announcement>?>(
+      callback: GeneralCallback<List<Announcement>>(
         onFailure: (_) => setState(() => state = HomeState.error),
         onError: (_) => setState(() => state = HomeState.error),
         onSuccess: (List<Announcement>? data) {
@@ -519,6 +521,8 @@ class HomePageState extends State<HomePage> {
       await remoteConfig.fetch();
       await remoteConfig.activate();
       final VersionInfo versionInfo = remoteConfig.versionInfo;
+      //ignore: use_build_context_synchronously
+      if (!context.mounted) return;
       DialogUtils.showNewVersionContent(
         context: context,
         iOSAppId: '146752219',

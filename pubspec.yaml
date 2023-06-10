@@ -14,8 +14,8 @@ dependencies:
   intl: ^0.17.0
   multiple_localization: ^0.3.0
 
-  ap_common: ^0.22.0-dev.1
-  ap_common_firebase: ^0.15.0
+  ap_common: ^0.23.0-dev.0
+  ap_common_firebase: ^0.16.0-dev.0
   ap_common_plugin: 0.4.0
   #     path: ../ap_common_plugin
 
@@ -28,10 +28,10 @@ dependencies:
   encrypt: ^5.0.0
   sprintf: ^6.0.0
   crypto: ^3.0.1
-  dio: ^4.0.0
-  dio_cookie_manager: ^2.0.0
-  cookie_jar: ^3.0.1
-  flutter_inappwebview: ^5.4.3+7
+  dio: ^5.0.0
+  dio_cookie_manager: ^3.0.0
+  cookie_jar: ^4.0.3
+  flutter_inappwebview: ^5.7.2+3
   desktop_webview_window: ^0.1.6
   webview_windows: ^0.2.0
   timeago: ^3.0.2
@@ -43,15 +43,16 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  lint: ^1.8.2
+  lint: ^2.1.2
   build_runner: ^2.1.5
   json_serializable: ^6.0.1
 
-#dependency_overrides:
+dependency_overrides:
 #  ap_common:
 #    path: ../../GitHub-NKUST-ITC/ap_common
 #  ap_common_firebase:
 #    path: ../ap_common_firebase
+  intl: 0.18.0
 
 flutter:
 
