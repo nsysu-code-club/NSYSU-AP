@@ -31,6 +31,8 @@ jobs:
         with:
           flutter-version: '3.10.x'
           channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
@@ -52,6 +54,8 @@ jobs:
         with:
           flutter-version: '3.10.x'
           channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
@@ -70,6 +74,8 @@ jobs:
         with:
           flutter-version: '3.10.x'
           channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
@@ -116,6 +122,8 @@ jobs:
         with:
           flutter-version: '3.10.x'
           channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
@@ -148,6 +156,8 @@ jobs:
         with:
           flutter-version: '3.10.x'
           channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
