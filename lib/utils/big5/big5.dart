@@ -1,8 +1,6 @@
-library big5;
-
-part 'table.dart';
-
 // only non-sream version
+
+import 'package:nsysu_ap/utils/big5/table.dart';
 
 const Big5Codec big5 = Big5Codec();
 
