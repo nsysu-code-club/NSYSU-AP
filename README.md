@@ -15,7 +15,7 @@
 - [ ] Linux
 
 ## 開發環境
- - Flutter 穩定版本 v2.10.2
+ - Flutter 穩定版本 v3.10
 ## 功能列表
 
 - 首頁最新消息
@@ -47,6 +47,7 @@
 - [ap_common](https://pub.dev/packages/ap_common)：提供校務通系列共用的介面與程式碼工程
 - [ap_common_firebase](https://pub.dev/packages/ap_common_firebase)：串接 Firebase 中校務通會使用到的功能
 - [ap_common_plugin](https://pub.dev/packages/ap_common_plugin)：校務通系列的原生套件，目前支援 Android 的 課堂桌面小工具
+
 ## 爬蟲
 
 邏輯以需要登入做系統區隔，若有功能有問題可向 [中山大學軟體工程組執掌查詢](https://lis.nsysu.edu.tw/p/405-1001-180580,c1173.php) 聯絡
