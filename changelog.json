@@ -1,4 +1,10 @@
 {
+  "10301": {
+    "visible": true,
+    "date": "2023/06/21",
+    "zh-TW": "* 修正成績功能文字顯示錯誤",
+    "en-US": "* Fix score system text display error."
+  },
   "10300": {
     "visible": true,
     "date": "2023/06/11",
