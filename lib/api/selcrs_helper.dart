@@ -179,7 +179,8 @@ class SelcrsHelper {
       }
     } on DioError catch (e) {
       if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
-        final String _ = big5.decode(e.response!.data as Uint8List);
+        final String _ =
+            const Utf8Decoder().convert(e.response!.data as Uint8List);
 //        debugPrint('text =  $text');
         this.username = username;
         this.password = password;
@@ -425,7 +426,7 @@ class SelcrsHelper {
         url,
         options: _scoreOption,
       );
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
       //print('text =  ${text}');
       final dom.Document document = parse(text, encoding: 'BIG-5');
       final List<dom.Element> selectDoc =
@@ -462,7 +463,8 @@ class SelcrsHelper {
       return callback.onSuccess(scoreSemesterData);
     } on DioError catch (e) {
       if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
-        final String text = big5.decode(e.response!.data as Uint8List);
+        final String text =
+            const Utf8Decoder().convert(e.response!.data as Uint8List);
         if (text.contains(scoreTimeoutText) && canReLogin) {
           await reLogin();
           return getScoreSemesterData(
@@ -501,7 +503,7 @@ class SelcrsHelper {
           'SEM': semester,
         },
       );
-      final String text = big5.decode(response.data!);
+      final String text = const Utf8Decoder().convert(response.data!);
       final int startTime = DateTime.now().millisecondsSinceEpoch;
       final dom.Document document = parse(text, encoding: 'BIG-5');
       final List<Score> list = <Score>[];
@@ -586,7 +588,8 @@ class SelcrsHelper {
       return callback.onSuccess(scoreData);
     } on DioError catch (e) {
       if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
-        final String text = big5.decode(e.response!.data as Uint8List);
+        final String text =
+            const Utf8Decoder().convert(e.response!.data as Uint8List);
         if (text.contains(scoreTimeoutText) && canReLogin) {
           await reLogin();
           return getScoreData(
@@ -620,7 +623,7 @@ class SelcrsHelper {
         'CRSNO': courseNumber,
       },
     );
-    final String text = big5.decode(response.data!);
+    final String text = const Utf8Decoder().convert(response.data!);
     //print('text = $text}');
     final dom.Document document = parse(text, encoding: 'BIG-5');
     PreScore? detail;
