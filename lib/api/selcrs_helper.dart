@@ -179,8 +179,6 @@ class SelcrsHelper {
       }
     } on DioError catch (e) {
       if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
-        final String _ =
-            const Utf8Decoder().convert(e.response!.data as Uint8List);
 //        debugPrint('text =  $text');
         this.username = username;
         this.password = password;
