@@ -130,7 +130,7 @@ class SelcrsHelper {
           'INTYPE': '1',
         },
       );
-      final String text = big5.decode(scoreResponse.data!);
+      final String text = const Utf8Decoder().convert(scoreResponse.data!);
 //      debugPrint(text);
       if (text.contains('資料錯誤請重新輸入')) {
         return callback?.onError(
