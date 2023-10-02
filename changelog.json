@@ -1,4 +1,10 @@
 {
+  "10303": {
+    "visible": true,
+    "date": "2023/10/03",
+    "zh-TW": "* 修正解析密碼錯誤導致無限迴圈",
+    "en-US": "* Fix password error message decode error."
+  },
   "10302": {
     "visible": true,
     "date": "2023/06/21",
