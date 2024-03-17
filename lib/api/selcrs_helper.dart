@@ -168,7 +168,7 @@ class SelcrsHelper {
       if (text.contains('學號碼密碼不符')) {
         return callback?.onError(
           GeneralResponse(statusCode: 400, message: 'course error'),
-        ) as Future<GeneralResponse>;
+        ) as Future<GeneralResponse>?;
       } else if (text.contains('請先填寫')) {
         ///https://regweb.nsysu.edu.tw/webreg/confirm_wuhan_pneumonia.asp?STUID=%s&STAT_COD=1&STATUS_COD=1&LOGINURL=https://selcrs.nsysu.edu.tw/
         return callback?.onError(
@@ -713,7 +713,7 @@ class SelcrsHelper {
     return null;
   }
 
-  Future<dynamic> dumpError(
+  Future<dynamic>? dumpError(
     String feature,
     String text,
     GeneralCallback<dynamic>? callback,
@@ -722,6 +722,7 @@ class SelcrsHelper {
     if (FirebaseCrashlyticsUtils.isSupported) {
       FirebaseCrashlytics.instance.setCustomKey('crawler_error_$feature', text);
     }
-    return callback?.onError(GeneralResponse.unknownError()) as Future<dynamic>;
+    return callback?.onError(GeneralResponse.unknownError())
+        as Future<dynamic>?;
   }
 }
