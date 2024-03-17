@@ -477,7 +477,7 @@ class HomePageState extends State<HomePage> {
             _homeKey.currentState!.showBasicHint(text: ap.unknownError);
           }
         },
-        onFailure: (DioError e) {
+        onFailure: (DioException e) {
           _homeKey.currentState!.showBasicHint(
             text: e.i18nMessage!,
           );

@@ -147,7 +147,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                     ApLocalizations.of(context).somethingError,
                   );
                 },
-                onFailure: (DioError e) {
+                onFailure: (DioException e) {
                   Navigator.of(context, rootNavigator: true).pop();
                   ApUtils.showToast(
                     context,
@@ -184,18 +184,18 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     );
   }
 
-  Function(DioError) get _onFailure => (DioError e) => setState(() {
+  Function(DioException) get _onFailure => (DioException e) => setState(() {
         state = _State.error;
         switch (e.type) {
-          case DioErrorType.connectionTimeout:
-          case DioErrorType.connectionError:
-          case DioErrorType.sendTimeout:
-          case DioErrorType.receiveTimeout:
-          case DioErrorType.badResponse:
-          case DioErrorType.cancel:
-          case DioErrorType.badCertificate:
+          case DioExceptionType.connectionTimeout:
+          case DioExceptionType.connectionError:
+          case DioExceptionType.sendTimeout:
+          case DioExceptionType.receiveTimeout:
+          case DioExceptionType.badResponse:
+          case DioExceptionType.cancel:
+          case DioExceptionType.badCertificate:
             break;
-          case DioErrorType.unknown:
+          case DioExceptionType.unknown:
             throw e;
         }
       });

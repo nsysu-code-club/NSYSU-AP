@@ -74,8 +74,9 @@ class GraduationHelper {
           GeneralResponse.unknownError(),
         );
       }
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.badResponse &&
+          e.response!.statusCode == 302) {
         isLogin = true;
         callback.onSuccess(GeneralResponse.success());
       } else {
@@ -219,7 +220,7 @@ class GraduationHelper {
       final int endTime = DateTime.now().millisecondsSinceEpoch;
       debugPrint(((endTime - startTime) / 1000.0).toString());
       callback.onSuccess(graduationReportData);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       callback.onFailure(e);
       rethrow;
     } catch (e) {

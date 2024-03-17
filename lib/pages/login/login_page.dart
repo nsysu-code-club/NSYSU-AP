@@ -209,7 +209,7 @@ class LoginPageState extends State<LoginPage> {
               ApUtils.showToast(context, ap.unknownError);
             }
           },
-          onFailure: (DioError e) {
+          onFailure: (DioException e) {
             Navigator.pop(context);
             ApUtils.showToast(context, e.i18nMessage);
           },

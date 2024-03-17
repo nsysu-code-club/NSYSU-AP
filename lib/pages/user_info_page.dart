@@ -47,7 +47,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   FirebaseAnalyticsUtils.instance.logUserInfo(userInfo);
                   return data;
                 },
-                onFailure: (DioError e) {},
+                onFailure: (DioException e) {},
                 onError: (GeneralResponse e) {},
               ),
             )) ??
