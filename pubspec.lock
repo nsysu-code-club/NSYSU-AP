@@ -53,10 +53,10 @@ packages:
     dependency: "direct main"
     description:
       name: ap_common_plugin
-      sha256: f5b28fe3a1f962c543d2b81d01d87dc590742c08ef2c066023a531b079b9f2bf
+      sha256: "6285861bcd480ab28f3d8a8b58928c3e7c8fc3c699a788c1331565267eeff99f"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.4.1"
   app_tracking_transparency:
     dependency: transitive
     description:

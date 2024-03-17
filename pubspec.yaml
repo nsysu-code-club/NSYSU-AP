@@ -16,7 +16,7 @@ dependencies:
 
   ap_common: ^0.24.0-dev.2
   ap_common_firebase: ^0.16.0-dev.2
-  ap_common_plugin: 0.4.0
+  ap_common_plugin: 0.4.1
   #     path: ../ap_common_plugin
 
   #official plugin
@@ -51,6 +51,8 @@ dependency_overrides:
 #    path: ../../GitHub-NKUST-ITC/ap_common
 #  ap_common_firebase:
 #    path: ../ap_common_firebase
+#  ap_common_plugin:
+#    path: ../ap_common_plugin
   intl: 0.18.0
 
 flutter:
