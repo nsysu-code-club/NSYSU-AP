@@ -218,6 +218,8 @@
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
 			buildPhases = (
 				5A70A84C204C3C82707F46B5 /* [CP] Check Pods Manifest.lock */,
+				A4E3F61D2525B59800343570 /* Embed App Extensions */,
+				A404C23825DD843200AAB332 /* ShellScript */,
 				9740EEB61CF901F6004384FC /* Run Script */,
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
@@ -226,8 +228,6 @@
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				C5C69C4274830CDFF1F48AE0 /* [CP] Embed Pods Frameworks */,
 				A48806D922AF5CC500608B9C /* ShellScript */,
-				A4E3F61D2525B59800343570 /* Embed App Extensions */,
-				A404C23825DD843200AAB332 /* ShellScript */,
 			);
 			buildRules = (
 			);
