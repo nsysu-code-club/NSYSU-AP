@@ -51,7 +51,7 @@ class Utils {
     }
     await Future<void>.delayed(const Duration(seconds: 1));
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      if (!mounted) return;
+      if (!context.mounted) return;
       Navigator.push(
         context,
         CupertinoPageRoute<dynamic>(

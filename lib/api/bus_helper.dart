@@ -55,7 +55,7 @@ class BusHelper {
         callback.onError(GeneralResponse.unknownError());
         throw response.statusMessage ?? response.toString();
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       callback.onFailure(e);
       // debugPrint(big5.decode(e.response.data));
     } on Exception catch (_) {
@@ -96,7 +96,7 @@ class BusHelper {
         callback.onError(GeneralResponse.unknownError());
         throw response.statusMessage ?? response.toString();
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       callback.onFailure(e);
       // debugPrint(big5.decode(e.response.data));
     } on Exception catch (_) {

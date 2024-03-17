@@ -47,7 +47,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   FirebaseAnalyticsUtils.instance.logUserInfo(userInfo);
                   return data;
                 },
-                onFailure: (DioError e) {},
+                onFailure: (DioException e) {},
                 onError: (GeneralResponse e) {},
               ),
             )) ??
@@ -71,13 +71,11 @@ class _UserInfoPageState extends State<UserInfoPage> {
                         Navigator.pop(context);
                         showDialog(
                           context: context,
-                          builder: (BuildContext context) => WillPopScope(
+                          builder: (BuildContext context) => PopScope(
+                            canPop: false,
                             child: ProgressDialog(
                               ApLocalizations.of(context).loading,
                             ),
-                            onWillPop: () async {
-                              return false;
-                            },
                           ),
                           barrierDismissible: false,
                         );
@@ -89,7 +87,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                             (UserInfo userInfo) => userInfo,
                           ),
                         );
-                        if (!mounted) return;
+                        if (!context.mounted) return;
                         Navigator.pop(context);
                         if (userInfo != null) {
                           ApUtils.showToast(
@@ -109,7 +107,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
             );
           },
           icon: const Icon(Icons.edit),
-        )
+        ),
       ],
     );
   }

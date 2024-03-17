@@ -68,7 +68,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
       body: !kIsWeb && (io.Platform.isAndroid || io.Platform.isIOS)
           ? InAppWebView(
               initialUrlRequest: URLRequest(
-                url: Uri.parse(
+                url: WebUri(
                   sprintf(
                     widget.confirmFormUrl,
                     <String>[widget.username],
@@ -102,7 +102,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
     );
     for (final io.Cookie cookie in list) {
       cookiesManager.setCookie(
-        url: Uri.parse(SelcrsHelper.baseUrl),
+        url: WebUri(SelcrsHelper.baseUrl),
         name: cookie.name,
         value: cookie.value,
       );

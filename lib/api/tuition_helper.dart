@@ -64,8 +64,9 @@ class TuitionHelper {
       // debugPrint('Request =  ${response.request.data}');
       // debugPrint('Response =  $text');
       //    debugPrint('response.statusCode = ${response.statusCode}');
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.badResponse &&
+          e.response!.statusCode == 302) {
         isLogin = true;
         return callback.onSuccess(GeneralResponse.success());
       } else {
@@ -135,7 +136,7 @@ class TuitionHelper {
       }
       list = list.reversed.toList();
       callback.onSuccess(list);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       callback.onFailure(e);
     } on Exception catch (_) {
       callback.onError(GeneralResponse.unknownError());
@@ -161,7 +162,7 @@ class TuitionHelper {
       //    File file = new File('$dir/$filename');
       //    await file.writeAsBytes(bytes);
       return callback.onSuccess(response.data) ?? response.data;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       callback.onFailure(e);
     } on Exception {
       callback.onError(GeneralResponse.unknownError());

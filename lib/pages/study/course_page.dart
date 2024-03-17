@@ -80,7 +80,7 @@ class CoursePageState extends State<CoursePage> {
     );
   }
 
-  Function(DioError) get _onFailure => (DioError e) {
+  Function(DioException) get _onFailure => (DioException e) {
         setState(() {
           //if (courseData != null) {
           customHint = ap.offlineCourse;

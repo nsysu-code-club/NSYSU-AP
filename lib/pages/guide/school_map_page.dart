@@ -17,7 +17,7 @@ class _SchoolMapPageState extends State<SchoolMapPage> {
         ImageViewer(
           title: '',
           assetName: ImageAssets.schoolMap,
-        )
+        ),
       ],
     );
   }
