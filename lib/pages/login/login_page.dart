@@ -112,7 +112,7 @@ class LoginPageState extends State<LoginPage> {
               setState(() {
                 _username.text = username;
               });
-              if (!mounted) return;
+              if (!context.mounted) return;
               ApUtils.showToast(
                 context,
                 AppLocalizations.of(context).firstLoginHint,
@@ -173,11 +173,9 @@ class LoginPageState extends State<LoginPage> {
     } else {
       showDialog(
         context: context,
-        builder: (BuildContext context) => WillPopScope(
+        builder: (BuildContext context) => PopScope(
+          canPop: false,
           child: ProgressDialog(ap.logining),
-          onWillPop: () async {
-            return false;
-          },
         ),
         barrierDismissible: false,
       );

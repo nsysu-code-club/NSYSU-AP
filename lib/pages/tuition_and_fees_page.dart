@@ -131,11 +131,9 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
           onTap: () async {
             showDialog(
               context: context,
-              builder: (BuildContext context) => WillPopScope(
+              builder: (BuildContext context) => PopScope(
+                canPop: false,
                 child: ProgressDialog(ap.loading),
-                onWillPop: () async {
-                  return false;
-                },
               ),
               barrierDismissible: false,
             );

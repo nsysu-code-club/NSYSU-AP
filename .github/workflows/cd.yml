@@ -30,7 +30,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.10.x'
+          flutter-version: '3.19.x'
           channel: 'stable'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
@@ -69,7 +69,7 @@ jobs:
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.10.x'
+          flutter-version: '3.19.x'
           channel: 'stable'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
@@ -163,7 +163,7 @@ jobs:
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.10.x'
+          flutter-version: '3.19.x'
           channel: 'stable'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
