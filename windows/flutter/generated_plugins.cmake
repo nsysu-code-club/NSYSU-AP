@@ -4,9 +4,11 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
+  file_saver
   file_selector_windows
   firebase_core
   printing
+  share_plus
   url_launcher_windows
   webview_windows
 )
