@@ -40,7 +40,6 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 
@@ -55,7 +54,9 @@ android/android_keys.zip
 
 .vscode/
 
-.fvm/flutter_sdk
 lib/config/sdk_constants.dart
 dev_configs.zip
 lib/firebase_options.dart
+
+# FVM Version Cache
+.fvm/
