@@ -72,7 +72,7 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
           if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
             return InAppWebView(
               initialUrlRequest: URLRequest(
-                url: Uri.parse(Constants.admissionGuideUrl),
+                url: WebUri(Constants.admissionGuideUrl),
               ),
               onWebViewCreated: (InAppWebViewController webViewController) {
                 this.webViewController = webViewController;
@@ -130,7 +130,7 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-              )
+              ),
             ],
           ),
         );

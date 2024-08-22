@@ -164,7 +164,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                             _scoreTextBorder(ap.description, true),
                           ],
                         ),
-                        for (MissingRequiredCourse missingRequiredCourse
+                        for (final MissingRequiredCourse missingRequiredCourse
                             in graduationReportData!.missingRequiredCourse)
                           TableRow(
                             children: <Widget>[
@@ -204,7 +204,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                     fontSize: 14.0,
                   ),
                 ),
-                for (GeneralEducationCourse generalEducationCourse
+                for (final GeneralEducationCourse generalEducationCourse
                     in graduationReportData!
                         .generalEducationCourse) ...<Widget>[
                   Text(
@@ -233,7 +233,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                             _scoreTextBorder(app.check, true),
                           ],
                         ),
-                        for (GeneralEducationItem item
+                        for (final GeneralEducationItem item
                             in generalEducationCourse.generalEducationItem!)
                           TableRow(
                             children: <Widget>[
@@ -285,7 +285,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                           _scoreTextBorder(ap.credits, true),
                         ],
                       ),
-                      for (OtherEducationsCourse course
+                      for (final OtherEducationsCourse course
                           in graduationReportData!.otherEducationsCourse)
                         TableRow(
                           children: <Widget>[
@@ -341,18 +341,18 @@ class GraduationReportPageState extends State<GraduationReportPage>
     );
   }
 
-  Function(DioError) get _onFailure => (DioError e) => setState(() {
+  Function(DioException) get _onFailure => (DioException e) => setState(() {
         state = _State.error;
         switch (e.type) {
-          case DioErrorType.connectionTimeout:
-          case DioErrorType.connectionError:
-          case DioErrorType.sendTimeout:
-          case DioErrorType.receiveTimeout:
-          case DioErrorType.badResponse:
-          case DioErrorType.cancel:
-          case DioErrorType.badCertificate:
+          case DioExceptionType.connectionTimeout:
+          case DioExceptionType.connectionError:
+          case DioExceptionType.sendTimeout:
+          case DioExceptionType.receiveTimeout:
+          case DioExceptionType.badResponse:
+          case DioExceptionType.cancel:
+          case DioExceptionType.badCertificate:
             break;
-          case DioErrorType.unknown:
+          case DioExceptionType.unknown:
             throw e;
         }
       });

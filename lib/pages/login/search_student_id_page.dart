@@ -155,7 +155,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                 Text(
                   ap.autoFill,
                   style: const TextStyle(color: Colors.white),
-                )
+                ),
               ],
             ),
             onTap: () => _onAutoFillChanged(!isAutoFill),

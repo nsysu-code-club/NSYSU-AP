@@ -132,7 +132,7 @@ class _BusTimePageState extends State<BusTimePage>
                       busTime: endList[index],
                       locale: widget.locale,
                     ),
-                  )
+                  ),
                 ],
               );
     }

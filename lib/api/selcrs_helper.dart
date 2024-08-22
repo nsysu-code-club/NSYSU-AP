@@ -139,8 +139,9 @@ class SelcrsHelper {
       } else {
         dumpError('score', text, null);
       }
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.badResponse &&
+          e.response!.statusCode == 302) {
       } else {
         error++;
         if (error > 5) {
@@ -168,7 +169,7 @@ class SelcrsHelper {
       if (text.contains('學號碼密碼不符')) {
         return callback?.onError(
           GeneralResponse(statusCode: 400, message: 'course error'),
-        ) as Future<GeneralResponse>;
+        ) as Future<GeneralResponse>?;
       } else if (text.contains('請先填寫')) {
         ///https://regweb.nsysu.edu.tw/webreg/confirm_wuhan_pneumonia.asp?STUID=%s&STAT_COD=1&STATUS_COD=1&LOGINURL=https://selcrs.nsysu.edu.tw/
         return callback?.onError(
@@ -177,8 +178,9 @@ class SelcrsHelper {
       } else {
         return dumpError('course', text, callback) as Future<GeneralResponse?>;
       }
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.badResponse &&
+          e.response!.statusCode == 302) {
 //        debugPrint('text =  $text');
         this.username = username;
         this.password = password;
@@ -240,7 +242,7 @@ class SelcrsHelper {
         callback.onSuccess(parserUserInfo(text));
         return null;
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       callback?.onFailure(e);
     } on Exception {
       callback?.onError(GeneralResponse.unknownError());
@@ -303,7 +305,7 @@ class SelcrsHelper {
         );
       }
       callback.onSuccess(courseSemesterData);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       callback.onFailure(e);
     } on Exception catch (_) {
       callback.onError(GeneralResponse.unknownError());
@@ -406,7 +408,7 @@ class SelcrsHelper {
       }
       //print(DateTime.now());
       return callback.onSuccess(courseData);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       callback.onFailure(e);
     } on Exception catch (_) {
       callback.onError(GeneralResponse.unknownError());
@@ -459,8 +461,9 @@ class SelcrsHelper {
         // print('document.text = ${document.text}');
       }
       return callback.onSuccess(scoreSemesterData);
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.badResponse &&
+          e.response!.statusCode == 302) {
         final String text =
             const Utf8Decoder().convert(e.response!.data as Uint8List);
         if (text.contains(scoreTimeoutText) && canReLogin) {
@@ -584,8 +587,9 @@ class SelcrsHelper {
         detail: detail,
       );
       return callback.onSuccess(scoreData);
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.badResponse && e.response!.statusCode == 302) {
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.badResponse &&
+          e.response!.statusCode == 302) {
         final String text =
             const Utf8Decoder().convert(e.response!.data as Uint8List);
         if (text.contains(scoreTimeoutText) && canReLogin) {
@@ -670,7 +674,7 @@ class SelcrsHelper {
       final dom.Document document = parse(text, encoding: 'BIG-5');
       final List<dom.Element> elements = document.getElementsByTagName('b');
       return callback.onSuccess(elements.isNotEmpty ? elements[0].text : '');
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       callback.onFailure(e);
     } on Exception catch (_) {
       callback.onError(GeneralResponse.unknownError());
@@ -704,7 +708,7 @@ class SelcrsHelper {
       }
       reLoginCount = 0;
       return callback.onSuccess(parserUserInfo(text)) as Future<UserInfo?>;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       callback.onFailure(e);
     } on Exception catch (_) {
       callback.onError(GeneralResponse.unknownError());
@@ -713,7 +717,7 @@ class SelcrsHelper {
     return null;
   }
 
-  Future<dynamic> dumpError(
+  Future<dynamic>? dumpError(
     String feature,
     String text,
     GeneralCallback<dynamic>? callback,
@@ -722,6 +726,7 @@ class SelcrsHelper {
     if (FirebaseCrashlyticsUtils.isSupported) {
       FirebaseCrashlytics.instance.setCustomKey('crawler_error_$feature', text);
     }
-    return callback?.onError(GeneralResponse.unknownError()) as Future<dynamic>;
+    return callback?.onError(GeneralResponse.unknownError())
+        as Future<dynamic>?;
   }
 }
