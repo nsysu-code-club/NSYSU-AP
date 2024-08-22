@@ -32,5 +32,7 @@
 	<string>NSApplication</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Feature course table export</string>
+	<key>FLTEnableImpeller</key>
+    <true />
 </dict>
 </plist>
