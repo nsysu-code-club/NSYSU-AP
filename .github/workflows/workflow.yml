@@ -116,40 +116,40 @@ jobs:
 #      - run: flutter pub get
 #      - name: Build macOS
 #        run: flutter build macos --release
-
-  build_linux:
-    name: Build Linux App
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Run Flutter tasks
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.x'
-          channel: 'stable'
-          cache: true
-          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
-      - name: Decrypt dev configs
-        run: sh ./scripts/decrypt_dev_configs.sh
-        env:
-          DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
-      - name: Get new source_list
-        run: git clone https://github.com/Yukimura0119/source_list.git
-      - name: Copy to /etc/apt/sources.list
-        run: sudo cp -f source_list/sources.list /etc/apt/sources.list
-      - name: Update apt
-        run: sudo apt update
-      - name: Intall requird Dependencies
-        run: sudo apt -y install ninja-build libgtk-3-dev libblkid-dev libwebkit2gtk-4.0-dev
-      - name: Upgrades flutter
-        run: flutter upgrade
-      - name: Enable linux
-        run: flutter config --enable-linux-desktop
-      - run: flutter doctor -v
-      - run: flutter pub get
-      - name: Build linux
-        run: flutter build linux --release
+# TODO: comment for release not usage
+#  build_linux:
+#    name: Build Linux App
+#    runs-on: ubuntu-20.04
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#      - name: Run Flutter tasks
+#        uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: '3.24.x'
+#          channel: 'stable'
+#          cache: true
+#          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+#      - name: Decrypt dev configs
+#        run: sh ./scripts/decrypt_dev_configs.sh
+#        env:
+#          DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
+#      - name: Get new source_list
+#        run: git clone https://github.com/Yukimura0119/source_list.git
+#      - name: Copy to /etc/apt/sources.list
+#        run: sudo cp -f source_list/sources.list /etc/apt/sources.list
+#      - name: Update apt
+#        run: sudo apt update
+#      - name: Intall requird Dependencies
+#        run: sudo apt --fix-broken -y install ninja-build libgtk-3-dev libblkid-dev libwebkit2gtk-4.0-dev
+#      - name: Upgrades flutter
+#        run: flutter upgrade
+#      - name: Enable linux
+#        run: flutter config --enable-linux-desktop
+#      - run: flutter doctor -v
+#      - run: flutter pub get
+#      - name: Build linux
+#        run: flutter build linux --release
 
   build_windows:
     name: Build Windows App
