@@ -12,30 +12,30 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.17.0
-  multiple_localization: ^0.4.0
+  multiple_localization: ^0.5.0
 
-  ap_common: ^0.24.0-dev.2
+  ap_common: ^0.25.0-dev.0
   ap_common_firebase: ^0.16.0-dev.2
   ap_common_plugin: 0.4.1
   #     path: ../ap_common_plugin
 
   #official plugin
-  http: ^0.13.1
+  http: ^1.2.2
   html: ^0.15.0
   url_launcher: ^6.1.5
 
   #third party plugin
   encrypt: ^5.0.0
-  sprintf: ^6.0.0
+  sprintf: ^7.0.0
   crypto: ^3.0.1
   dio: ^5.0.0
   dio_cookie_manager: ^3.0.0
   cookie_jar: ^4.0.3
   flutter_inappwebview: ^6.0.0
-  desktop_webview_window: ^0.1.6
-  webview_windows: ^0.2.0
+  desktop_webview_window: ^0.2.3
+  webview_windows: ^0.4.0
   timeago: ^3.0.2
-  google_sign_in_dartio: ^0.2.1
+  google_sign_in_dartio: ^0.3.0
   json_annotation: ^4.6.0
 
 dev_dependencies:

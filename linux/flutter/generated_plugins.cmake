@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
+  file_saver
   file_selector_linux
   printing
   url_launcher_linux
