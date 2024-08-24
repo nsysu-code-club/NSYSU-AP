@@ -32,6 +32,8 @@
 	<string>NSApplication</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Feature course table export</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>FLTEnableImpeller</key>
     <true />
 </dict>
