@@ -184,7 +184,7 @@ jobs:
       - name: Build windows
         run: flutter build windows --release
       - name: 'Zip files'
-        run: powershell Compress-Archive build\windows\runner\Release\ windows.zip
+        run: powershell Compress-Archive build\windows\x64\runner\Release\ windows.zip
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
