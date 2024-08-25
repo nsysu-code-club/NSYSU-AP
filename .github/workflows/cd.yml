@@ -160,7 +160,7 @@ jobs:
 #          TEMP_KEYCHAIN_PASSWORD: '${{ secrets.TEMP_KEYCHAIN_PASSWORD }}'
 #          TEMP_KEYCHAIN_USER: '${{ secrets.TEMP_KEYCHAIN_USER }}'
 
-  deploy_windows:
+  deploy_windows_zip:
     name: Windows App
     runs-on: windows-latest
     steps:
@@ -188,12 +188,45 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: windows-artifact
+          name: windows-zip-artifact
           path: windows.zip
+  
+  deploy_windows_installer:
+    name: Windows App Installer
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Get Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Build Windows App
+        run: |
+          flutter config --enable-windows-desktop
+          flutter build windows
+
+      - name: Build iss script
+        run: dart run inno_bundle:build --no-app --release --no-installer
+
+      - name: Output config into github output
+        id: envs
+        # thanks to https://github.com/actions/runner/issues/2224#issuecomment-1289925992
+        run: echo $(dart run inno_bundle:build --envs --no-hf) | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Build installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: ./build/windows/x64/installer/Release/inno-script.iss
+      - name: upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-installer-artifact
+          path: ./build/windows/x64/installer/Release/${{ steps.envs.outputs.APP_NAME_CAMEL_CASE }}-x86_64-${{ steps.envs.outputs.APP_VERSION }}-Installer.exe
 
   github_release:
     name: Create GitHub Release
-    needs: [deploy_android, deploy_ios, deploy_windows]
+    needs: [deploy_android, deploy_ios, deploy_windows_zip, deploy_windows_installer]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -209,11 +242,15 @@ jobs:
           body_path: RELEASE_NOTE.md
           draft: false
           prerelease: false
-      - name: Use Download Artifact v2
+      - name: Download Windwos Zip Artifact
         uses: actions/download-artifact@v2
         with:
-          name: windows-artifact
-      - name: Upload Release Asset
+          name: windows-zip-artifact
+      - name: Download Windwos Installer Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: windows-installer-artifact
+      - name: Upload Release Windwos Zip Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
@@ -223,3 +260,12 @@ jobs:
           asset_path: ./windows.zip
           asset_name: nsysu_ap_windows.zip
           asset_content_type: application/zip
+      - name: Upload Release Windwos Installer Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ${{ steps.envs.outputs.APP_NAME_CAMEL_CASE }}-x86_64-${{ steps.envs.outputs.APP_VERSION }}-Installer.exe
+          asset_name: ${{ steps.envs.outputs.APP_NAME_CAMEL_CASE }}-x86_64-${{ steps.envs.outputs.APP_VERSION }}-Installer.exe
