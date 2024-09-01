@@ -1,12 +1,18 @@
 {
-  "10305": {
+  "10400": {
     "visible": true,
+    "date": "2024/09/01",
+    "zh-TW": "* 支援 Android 14 相關 API\n* 修正 Android 7 以下裝置無法連線錯誤\n* 修正部分介面高度錯誤",
+    "en-US": "* Supports Android 14.\n* Fixed connectivity issues on older Android 7 devices.\n* Corrected UI height discrepancies."
+  },
+  "10305": {
+    "visible": false,
     "date": "2024/08/29",
     "zh-TW": "* 技術支援更新",
     "en-US": "* SDK support update."
   },
   "10304": {
-    "visible": true,
+    "visible": false,
     "date": "2024/08/24",
     "zh-TW": "* 技術支援更新",
     "en-US": "* SDK support update."
