@@ -42,6 +42,10 @@ void main() {
 
       timeago.setLocaleMessages('zh-TW', timeago.ZhMessages());
       timeago.setLocaleMessages('en-US', timeago.EnMessages());
+      if (!kIsWeb && Platform.isAndroid) {
+        //TODO: 改使用原生方式限制特定網域
+        HttpOverrides.global = MyHttpOverrides();
+      }
       final String currentVersion =
           Preferences.getString(Constants.prefCurrentVersion, '0');
       if (int.parse(currentVersion) < 700) _migrate700();
@@ -95,4 +99,13 @@ void _migrate700() {
       true,
     ),
   );
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
 }
