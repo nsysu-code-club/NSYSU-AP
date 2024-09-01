@@ -302,12 +302,13 @@ class HomePageState extends State<HomePage> {
             onTap: () => _openPage(
               AboutUsPage(
                 assetImage: ImageAssets.nsysu,
-                githubName: 'NKUST-ITC',
-                email: 'abc873693@gmail.com',
+                githubName: 'nsysu-code-club',
+                email: 'nsysu.gdsc@gmail.com',
                 appLicense: app.aboutOpenSourceContent,
-                fbFanPageId: '735951703168873',
-                fbFanPageUrl: 'https://www.facebook.com/NKUST.ITC/',
-                githubUrl: 'https://github.com/NKUST-ITC',
+                fbFanPageId: 'NSYSUGDSC',
+                instagramUsername: 'gdsc_nsysu',
+                fbFanPageUrl: 'https://www.facebook.com/NSYSUGDSC',
+                githubUrl: 'https://github.com/nsysu-code-club',
               ),
             ),
           ),
