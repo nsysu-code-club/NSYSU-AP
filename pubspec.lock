@@ -957,14 +957,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.5"
-  inno_bundle:
-    dependency: "direct dev"
-    description:
-      name: inno_bundle
-      sha256: "8e5f11039a8f246fab75d1ee0bc4b4f20fa7d907fdaaf77a833507327a6549ab"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.1"
   intl:
     dependency: "direct main"
     description:
