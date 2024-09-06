@@ -305,7 +305,7 @@ class HomePageState extends State<HomePage> {
                 githubName: 'nsysu-code-club',
                 email: 'nsysu.gdsc@gmail.com',
                 appLicense: app.aboutOpenSourceContent,
-                fbFanPageId: 'NSYSUGDSC',
+                fbFanPageId: '100906232372556',
                 instagramUsername: 'gdsc_nsysu',
                 fbFanPageUrl: 'https://www.facebook.com/NSYSUGDSC',
                 githubUrl: 'https://github.com/nsysu-code-club',
