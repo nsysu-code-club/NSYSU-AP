@@ -57,9 +57,6 @@ dependencies {
     implementation 'androidx.window:window-java:1.0.0'
 }
 
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
-
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
