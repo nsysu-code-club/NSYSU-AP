@@ -23,71 +23,62 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   );
 }
 
-void main() {
-  runZonedGuarded(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-      final ByteData data = await PlatformAssetBundle().load(
-        'assets/ca/twca_nsysu.cer',
-      );
-      SecurityContext.defaultContext.setTrustedCertificatesBytes(
-        data.buffer.asUint8List(),
-      );
-
-      await Preferences.init(
-        key: Constants.key,
-        iv: Constants.iv,
-      );
-
-      timeago.setLocaleMessages('zh-TW', timeago.ZhMessages());
-      timeago.setLocaleMessages('en-US', timeago.EnMessages());
-      if (!kIsWeb && Platform.isAndroid) {
-        //TODO: 改使用原生方式限制特定網域
-        HttpOverrides.global = MyHttpOverrides();
-      }
-      final String currentVersion =
-          Preferences.getString(Constants.prefCurrentVersion, '0');
-      if (int.parse(currentVersion) < 700) _migrate700();
-      FirebaseMessaging.onBackgroundMessage(
-        _firebaseMessagingBackgroundHandler,
-      );
-      if (FirebaseUtils.isSupportCore ||
-          Platform.isWindows ||
-          Platform.isLinux) {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
-      }
-      if (kDebugMode) {
-        if (FirebaseCrashlyticsUtils.isSupported) {
-          await FirebaseCrashlytics.instance
-              .setCrashlyticsCollectionEnabled(false);
-        }
-        if (FirebasePerformancesUtils.isSupported) {
-          await FirebasePerformance.instance
-              .setPerformanceCollectionEnabled(false);
-        }
-      }
-      if (!kIsWeb &&
-          (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
-        GoogleSignInDart.register(
-          clientId: SdkConstants.googleSignInDesktopClientId,
-        );
-      }
-      if (!kDebugMode && FirebaseCrashlyticsUtils.isSupported) {
-        FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
-      }
-      runApp(MyApp());
-    },
-    (Object e, StackTrace s) {
-      if (!kDebugMode && FirebaseCrashlyticsUtils.isSupported) {
-        FirebaseCrashlytics.instance.recordError(e, s);
-      } else {
-        throw e;
-      }
-    },
+  final ByteData data = await PlatformAssetBundle().load(
+    'assets/ca/twca_nsysu.cer',
   );
+  SecurityContext.defaultContext.setTrustedCertificatesBytes(
+    data.buffer.asUint8List(),
+  );
+
+  await Preferences.init(
+    key: Constants.key,
+    iv: Constants.iv,
+  );
+
+  timeago.setLocaleMessages('zh-TW', timeago.ZhMessages());
+  timeago.setLocaleMessages('en-US', timeago.EnMessages());
+  if (!kIsWeb && Platform.isAndroid) {
+    //TODO: 改使用原生方式限制特定網域
+    HttpOverrides.global = MyHttpOverrides();
+  }
+  final String currentVersion =
+      Preferences.getString(Constants.prefCurrentVersion, '0');
+  if (int.parse(currentVersion) < 700) _migrate700();
+  FirebaseMessaging.onBackgroundMessage(
+    _firebaseMessagingBackgroundHandler,
+  );
+  if (FirebaseUtils.isSupportCore || Platform.isWindows || Platform.isLinux) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+  if (kDebugMode) {
+    if (FirebaseCrashlyticsUtils.isSupported) {
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
+    }
+    if (FirebasePerformancesUtils.isSupported) {
+      await FirebasePerformance.instance.setPerformanceCollectionEnabled(false);
+    }
+  }
+  if (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
+    GoogleSignInDart.register(
+      clientId: SdkConstants.googleSignInDesktopClientId,
+    );
+  }
+
+  if (!kDebugMode && FirebaseCrashlyticsUtils.isSupported) {
+    FlutterError.onError = (FlutterErrorDetails errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack);
+      return true;
+    };
+  }
+  runApp(MyApp());
 }
 
 void _migrate700() {
