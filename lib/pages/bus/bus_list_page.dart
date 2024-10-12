@@ -1,11 +1,6 @@
 // ignore_for_file: prefer_single_quotes
 
-import 'package:ap_common/callback/general_callback.dart';
-import 'package:ap_common/l10n/l10n.dart';
-import 'package:ap_common/resources/ap_icon.dart';
-import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/widgets/hint_content.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common/ap_common.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/bus_helper.dart';
@@ -34,7 +29,7 @@ class _BusListPageState extends State<BusListPage> {
   @override
   void initState() {
     _getData();
-    FirebaseAnalyticsUtils.instance.setCurrentScreen(
+    AnalyticsUtil.instance.setCurrentScreen(
       'BusListPage',
       "bus_list_page.dart",
     );

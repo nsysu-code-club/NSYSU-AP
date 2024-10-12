@@ -1,12 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:ap_common/config/ap_constants.dart';
-import 'package:ap_common/models/course_data.dart';
-import 'package:ap_common/utils/preferences.dart';
-import 'package:ap_common_firebase/utils/firebase_crashlytics_utils.dart';
-import 'package:ap_common_firebase/utils/firebase_performance_utils.dart';
-import 'package:ap_common_firebase/utils/firebase_utils.dart';
+import 'package:ap_common/ap_common.dart';
+import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -33,7 +29,10 @@ Future<void> main() async {
     data.buffer.asUint8List(),
   );
 
-  await Preferences.init(
+  /// Register all ap_common injection util
+  registerOneForAll();
+
+  await (PreferenceUtil.instance as ApPreferenceUtil).init(
     key: Constants.key,
     iv: Constants.iv,
   );
@@ -45,7 +44,7 @@ Future<void> main() async {
     HttpOverrides.global = MyHttpOverrides();
   }
   final String currentVersion =
-      Preferences.getString(Constants.prefCurrentVersion, '0');
+      PreferenceUtil.instance.getString(Constants.prefCurrentVersion, '0');
   if (int.parse(currentVersion) < 700) _migrate700();
   FirebaseMessaging.onBackgroundMessage(
     _firebaseMessagingBackgroundHandler,
@@ -83,9 +82,9 @@ Future<void> main() async {
 
 void _migrate700() {
   CourseData.migrateFrom0_10();
-  Preferences.setBool(
+  PreferenceUtil.instance.setBool(
     ApConstants.showCourseSearchButton,
-    Preferences.getBool(
+    PreferenceUtil.instance.getBool(
       Constants.prefIsShowCourseSearchButton,
       true,
     ),

@@ -1,9 +1,4 @@
-import 'package:ap_common/callback/general_callback.dart';
-import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/widgets/default_dialog.dart';
-import 'package:ap_common/widgets/hint_content.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
@@ -36,7 +31,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance.setCurrentScreen(
+    AnalyticsUtil.instance.setCurrentScreen(
       'GraduationReportPage',
       'graduation_report_page.dart',
     );
@@ -73,8 +68,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
             child: RefreshIndicator(
               onRefresh: () async {
                 _getGraduationReport();
-                FirebaseAnalyticsUtils.instance
-                    .logEvent('graduation_report_refresh');
+                AnalyticsUtil.instance.logEvent('graduation_report_refresh');
                 return;
               },
               child: _body(),
@@ -97,7 +91,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
         return InkWell(
           onTap: () {
             _getGraduationReport();
-            FirebaseAnalyticsUtils.instance.logEvent('click_retry');
+            AnalyticsUtil.instance.logEvent('click_retry');
           },
           child: HintContent(
             icon: Icons.assignment,

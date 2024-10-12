@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:ap_common/utils/preferences.dart';
-import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
+import 'package:ap_common/ap_common.dart';
+import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -39,12 +39,12 @@ class Utils {
       await remoteConfig.fetch();
       await remoteConfig.activate();
       confirmFormUrl = remoteConfig.getString(Constants.confirmFormUrl);
-      Preferences.getString(
+      PreferenceUtil.instance.getString(
         Constants.confirmFormUrl,
         confirmFormUrl,
       );
     } catch (e) {
-      confirmFormUrl = Preferences.getString(
+      confirmFormUrl = PreferenceUtil.instance.getString(
         Constants.confirmFormUrl,
         'https://regweb.nsysu.edu.tw/webreg/confirm_wuhan_pneumonia.asp?STUID=%s&STAT_COD=1&STATUS_COD=1&LOGINURL=https://selcrs.nsysu.edu.tw/',
       );

@@ -1,14 +1,7 @@
 import 'dart:convert';
 
-import 'package:ap_common/callback/general_callback.dart';
-import 'package:ap_common/models/course_data.dart';
-import 'package:ap_common/models/score_data.dart';
-import 'package:ap_common/models/semester_data.dart';
-import 'package:ap_common/models/time_code.dart';
-import 'package:ap_common/models/user_info.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
-import 'package:ap_common_firebase/utils/firebase_crashlytics_utils.dart';
+import 'package:ap_common/ap_common.dart';
+import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
@@ -403,7 +396,7 @@ class SelcrsHelper {
       }
       if (trDoc.isNotEmpty) {
         final int endTime = DateTime.now().millisecondsSinceEpoch;
-        FirebaseAnalyticsUtils.instance
+        AnalyticsUtil.instance
             .logTimeEvent('course_html_parser', (endTime - startTime) / 1000.0);
       }
       //print(DateTime.now());
@@ -565,7 +558,7 @@ class SelcrsHelper {
           }
         }
         final int endTime = DateTime.now().millisecondsSinceEpoch;
-        FirebaseAnalyticsUtils.instance
+        AnalyticsUtil.instance
             .logTimeEvent('score_html_parser', (endTime - startTime) / 1000.0);
       }
       /*var trDoc = document.getElementsByTagName('tr');

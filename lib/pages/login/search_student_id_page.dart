@@ -1,10 +1,4 @@
-import 'package:ap_common/callback/general_callback.dart';
-import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/scaffold/login_scaffold.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/utils/ap_utils.dart';
-import 'package:ap_common/widgets/default_dialog.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
@@ -28,7 +22,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
 
   @override
   void initState() {
-    FirebaseAnalyticsUtils.instance
+    AnalyticsUtil.instance
         .setCurrentScreen('SearchStudentIdPage', 'search_student_id_page.dart');
     super.initState();
   }
@@ -166,7 +160,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
       ApButton(
         text: ap.search,
         onPressed: () {
-          FirebaseAnalyticsUtils.instance.logEvent('search_student_id_click');
+          AnalyticsUtil.instance.logEvent('search_student_id_click');
           _search();
         },
       ),
@@ -196,7 +190,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
 
   Future<void> _search() async {
     if (_name.text.isEmpty || _id.text.isEmpty) {
-      ApUtils.showToast(context, ap.doNotEmpty);
+      UiUtil.instance.showToast(context, ap.doNotEmpty);
     } else {
       SelcrsHelper.instance.getUsername(
         name: _name.text,

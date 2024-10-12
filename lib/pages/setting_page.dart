@@ -1,13 +1,8 @@
-import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/utils/analytics_utils.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/utils/ap_utils.dart';
-import 'package:ap_common/utils/preferences.dart';
-import 'package:ap_common/widgets/setting_page_widgets.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingPage extends StatefulWidget {
   static const String routerName = '/setting';
@@ -28,8 +23,7 @@ class SettingPageState extends State<SettingPage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance
-        .setCurrentScreen('SettingPage', 'setting_page.dart');
+    AnalyticsUtil.instance.setCurrentScreen('SettingPage', 'setting_page.dart');
     _getPreference();
   }
 
@@ -84,14 +78,14 @@ class SettingPageState extends State<SettingPage> {
               subText: ap.feedbackViaFacebook,
               onTap: () {
                 ApUtils.launchFbFansPage(context, Constants.fansPageId);
-                AnalyticsUtils.instance?.logEvent('feedback_click');
+                AnalyticsUtil.instance.logEvent('feedback_click');
               },
             ),
             SettingItem(
               text: ap.appVersion,
               subText: 'v$appVersion',
               onTap: () {
-                AnalyticsUtils.instance?.logEvent('app_version_click');
+                AnalyticsUtil.instance.logEvent('app_version_click');
               },
             ),
           ],
@@ -104,7 +98,8 @@ class SettingPageState extends State<SettingPage> {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     setState(() {
       appVersion = packageInfo.version;
-      displayPicture = Preferences.getBool(Constants.prefDisplayPicture, true);
+      displayPicture =
+          PreferenceUtil.instance.getBool(Constants.prefDisplayPicture, true);
     });
   }
 }

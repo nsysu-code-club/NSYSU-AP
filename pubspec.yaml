@@ -4,7 +4,7 @@ description: NSYSU AP
 version: 1.4.2+10402
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.15.0 <3.0.0'
 
 dependencies:
   flutter:
@@ -14,8 +14,8 @@ dependencies:
   intl: ^0.17.0
   multiple_localization: ^0.5.0
 
-  ap_common: ^0.25.1
-  ap_common_firebase: ^0.16.0
+  ap_common: ^0.26.0-dev.2
+  ap_common_firebase: ^0.17.0-dev.3
   ap_common_plugin: 0.4.1
   #     path: ../ap_common_plugin
 
@@ -37,6 +37,7 @@ dependencies:
   timeago: ^3.0.2
   google_sign_in_dartio: ^0.3.0
   json_annotation: ^4.6.0
+  package_info_plus: ^8.0.3
 
 dev_dependencies:
   flutter_test:
@@ -48,11 +49,11 @@ dev_dependencies:
 
 dependency_overrides:
 #  ap_common:
-#    path: ../../GitHub-NKUST-ITC/ap_common
+#    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common
 #  ap_common_firebase:
-#    path: ../ap_common_firebase
+#    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_firebase
 #  ap_common_plugin:
-#    path: ../ap_common_plugin
+#    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_plugin
   intl: 0.18.0
 
 flutter:

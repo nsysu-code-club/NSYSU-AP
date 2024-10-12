@@ -1,5 +1,4 @@
-import 'package:ap_common/scaffold/image_viewer_scaffold.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
+import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/resources/image_assets.dart';
 

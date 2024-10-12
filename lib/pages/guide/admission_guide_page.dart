@@ -1,10 +1,6 @@
 import 'dart:io';
 
-import 'package:ap_common/resources/ap_icon.dart';
-import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/widgets/hint_content.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common/ap_common.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,7 +21,7 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
 
   @override
   void initState() {
-    FirebaseAnalyticsUtils.instance
+    AnalyticsUtil.instance
         .setCurrentScreen('AdmissionGuidePage', 'admission_guide_page.dart');
     if (!kIsWeb && Platform.isWindows) {
       initWindowsPlatformState();

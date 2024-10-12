@@ -1,11 +1,5 @@
-import 'package:ap_common/api/announcement_helper.dart';
-import 'package:ap_common/models/user_info.dart';
-import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/utils/ap_utils.dart';
-import 'package:ap_common/utils/preferences.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
-import 'package:ap_common_firebase/utils/firebase_utils.dart';
+import 'package:ap_common/ap_common.dart';
+import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
@@ -39,9 +33,9 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     _analytics = FirebaseUtils.init();
-    themeMode =
-        ThemeMode.values[Preferences.getInt(Constants.prefThemeModeIndex, 0)];
-    FirebaseAnalyticsUtils.instance.logThemeEvent(themeMode);
+    themeMode = ThemeMode.values[
+        PreferenceUtil.instance.getInt(Constants.prefThemeModeIndex, 0)];
+    (AnalyticsUtil.instance as FirebaseAnalyticsUtils).logThemeEvent(themeMode);
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
@@ -55,7 +49,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void didChangePlatformBrightness() {
     setState(() {});
-    FirebaseAnalyticsUtils.instance.logThemeEvent(themeMode);
+    (AnalyticsUtil.instance as FirebaseAnalyticsUtils).logThemeEvent(themeMode);
     super.didChangePlatformBrightness();
   }
 
@@ -88,7 +82,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ],
           localeResolutionCallback:
               (Locale? locale, Iterable<Locale> supportedLocales) {
-            final String languageCode = Preferences.getString(
+            final String languageCode = PreferenceUtil.instance.getString(
               Constants.prefLanguageCode,
               ApSupportLanguageConstants.system,
             );
@@ -143,16 +137,19 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void getUserInfo() {
     SelcrsHelper.instance.getUserInfo(
       callback: GeneralCallback<UserInfo>(
-        onFailure: (DioException e) =>
-            ApUtils.showToast(context, e.i18nMessage),
-        onError: (GeneralResponse e) =>
-            ApUtils.showToast(context, ApLocalizations.current.somethingError),
+        onFailure: (DioException e) {
+          if (e.i18nMessage != null) {
+            UiUtil.instance.showToast(context, e.i18nMessage!);
+          }
+        },
+        onError: (GeneralResponse e) => UiUtil.instance
+            .showToast(context, ApLocalizations.current.somethingError),
         onSuccess: (UserInfo data) {
           setState(() {
             userInfo = data;
           });
           if (userInfo != null) {
-            FirebaseAnalyticsUtils.instance.logUserInfo(userInfo);
+            AnalyticsUtil.instance.logUserInfo(userInfo!);
           }
         },
       ),

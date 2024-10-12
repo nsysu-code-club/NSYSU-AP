@@ -1,4 +1,4 @@
-import 'package:ap_common/utils/ap_localizations.dart';
+import 'package:intl/intl.dart';
 
 class TuitionAndFees {
   final String titleZH;

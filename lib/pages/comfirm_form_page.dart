@@ -1,11 +1,6 @@
 import 'dart:io' as io;
 
-import 'package:ap_common/resources/ap_icon.dart';
-import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/utils/ap_utils.dart';
-import 'package:ap_common/widgets/hint_content.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common/ap_common.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -39,7 +34,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
 
   @override
   void initState() {
-    FirebaseAnalyticsUtils.instance
+    AnalyticsUtil.instance
         .setCurrentScreen('ConfirmFormPage', 'confirm_form_page.dart');
     Future<void>.microtask(() => _loadData());
     super.initState();
@@ -91,7 +86,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
   }
 
   void _launchUrl() {
-    ApUtils.launchUrl(url);
+    PlatformUtil.instance.launchUrl(url);
   }
 
   Future<void> _loadData() async {

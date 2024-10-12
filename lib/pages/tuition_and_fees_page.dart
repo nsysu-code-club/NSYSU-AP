@@ -2,14 +2,7 @@
 
 import 'dart:typed_data';
 
-import 'package:ap_common/callback/general_callback.dart';
-import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/utils/ap_utils.dart';
-import 'package:ap_common/views/pdf_view.dart';
-import 'package:ap_common/widgets/hint_content.dart';
-import 'package:ap_common/widgets/progress_dialog.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
@@ -36,7 +29,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   @override
   void initState() {
-    FirebaseAnalyticsUtils.instance
+    AnalyticsUtil.instance
         .setCurrentScreen('TuitionAndFeesPage', 'tuition_and_fees_page.dart');
     if (TuitionHelper.instance.isLogin) {
       _getData();
@@ -84,7 +77,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
               state = _State.loading;
             });
             await _getData();
-            FirebaseAnalyticsUtils.instance.logEvent('t_and_f_refresh');
+            AnalyticsUtil.instance.logEvent('t_and_f_refresh');
             return;
           },
           child: ListView.builder(
@@ -142,17 +135,19 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
               callback: GeneralCallback<Uint8List?>(
                 onError: (GeneralResponse e) {
                   Navigator.of(context, rootNavigator: true).pop();
-                  ApUtils.showToast(
+                  UiUtil.instance.showToast(
                     context,
                     ApLocalizations.of(context).somethingError,
                   );
                 },
                 onFailure: (DioException e) {
                   Navigator.of(context, rootNavigator: true).pop();
-                  ApUtils.showToast(
-                    context,
-                    e.i18nMessage,
-                  );
+                  if (e.i18nMessage != null) {
+                    UiUtil.instance.showToast(
+                      context,
+                      e.i18nMessage!,
+                    );
+                  }
                 },
                 onSuccess: (Uint8List? data) {
                   Navigator.of(context, rootNavigator: true).pop();

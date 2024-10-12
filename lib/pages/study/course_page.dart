@@ -1,13 +1,5 @@
-import 'package:ap_common/callback/general_callback.dart';
-import 'package:ap_common/config/ap_constants.dart';
-import 'package:ap_common/models/course_notify_data.dart';
-import 'package:ap_common/models/semester_data.dart';
-import 'package:ap_common/models/time_code.dart';
-import 'package:ap_common/scaffold/course_scaffold.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/utils/preferences.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
-import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
+import 'package:ap_common/ap_common.dart';
+import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -44,12 +36,12 @@ class CoursePageState extends State<CoursePage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance
-        .setCurrentScreen('CoursePage', 'course_page.dart');
-    CourseNotifyData.clearOldVersionNotification(
-      tag: '${SelcrsHelper.instance.username}_latest',
-      newTag: courseNotifyCacheKey,
-    );
+    AnalyticsUtil.instance.setCurrentScreen('CoursePage', 'course_page.dart');
+    //TODO: 確認是否需要
+    // CourseNotifyData.clearOldVersionNotification(
+    //   tag: '${SelcrsHelper.instance.username}_latest',
+    //   newTag: courseNotifyCacheKey,
+    // );
     Future<void>.microtask(() => _getSemester());
   }
 
@@ -108,21 +100,21 @@ class CoursePageState extends State<CoursePage> {
       final String rawTimeCodeConfig =
           remoteConfig.getString(Constants.timeCodeConfig);
       timeCodeConfig = TimeCodeConfig.fromRawJson(rawTimeCodeConfig);
-      Preferences.setString(
+      PreferenceUtil.instance.setString(
         Constants.defaultCourseSemesterCode,
         defaultSemesterCode,
       );
-      Preferences.setString(
+      PreferenceUtil.instance.setString(
         Constants.timeCodeConfig,
         rawTimeCodeConfig,
       );
     } catch (exception) {
-      defaultSemesterCode = Preferences.getString(
+      defaultSemesterCode = PreferenceUtil.instance.getString(
         Constants.defaultCourseSemesterCode,
         '${Constants.defaultYear}${Constants.defaultSemester}',
       );
       timeCodeConfig = TimeCodeConfig.fromRawJson(
-        Preferences.getString(
+        PreferenceUtil.instance.getString(
           Constants.timeCodeConfig,
           //ignore: lines_longer_than_80_chars
           '{  "timeCodes":[{"title":"A",         "startTime": "7:00"         ,"endTime": "7:50"        },{       "title":"1",         "startTime": "8:10"         ,"endTime": "9:00"        },{       "title":"2",         "startTime": "9:10"         ,"endTime": "10:00"        },{       "title":"3",         "startTime": "10:10"         ,"endTime": "11:00"        },{       "title":"4",         "startTime": "11:10"         ,"endTime": "12:00"        },{       "title":"B",         "startTime": "12:10"         ,"endTime": "13:00"        },{       "title":"5",         "startTime": "13:10"         ,"endTime": "14:00"        },{       "title":"6",         "startTime": "14:10"         ,"endTime": "15:00"        },{       "title":"7",         "startTime": "15:10"         ,"endTime": "16:00"        },{       "title":"8",         "startTime": "16:10"         ,"endTime": "17:00"        },{       "title":"9",         "startTime": "17:10"         ,"endTime": "18:00"        },{       "title":"C",         "startTime": "18:20"         ,"endTime": "19:10"        },{       "title":"D",         "startTime": "19:15"         ,"endTime": "20:05"        },{       "title":"E",         "startTime": "20:10"         ,"endTime": "21:00"        },{       "title":"F",         "startTime": "21:05"         ,"endTime": "21:55"        }] }',
@@ -141,16 +133,12 @@ class CoursePageState extends State<CoursePage> {
         onError: _onError,
         onSuccess: (SemesterData data) async {
           semesterData = data;
-          final String semester = Preferences.getString(
+          final String semester = PreferenceUtil.instance.getString(
             ApConstants.currentSemesterCode,
             ApConstants.semesterLatest,
           );
           if (semester != defaultSemesterCode) {
-            CourseNotifyData.clearOldVersionNotification(
-              tag: semester,
-              newTag: defaultSemesterCode,
-            );
-            Preferences.setString(
+            PreferenceUtil.instance.setString(
               ApConstants.currentSemesterCode,
               defaultSemesterCode,
             );

@@ -1,23 +1,7 @@
 import 'dart:io';
 
-import 'package:ap_common/api/announcement_helper.dart';
-import 'package:ap_common/config/analytics_constants.dart';
-import 'package:ap_common/models/user_info.dart';
-import 'package:ap_common/pages/about_us_page.dart';
-import 'package:ap_common/pages/announcement/home_page.dart';
-import 'package:ap_common/pages/announcement_content_page.dart';
-import 'package:ap_common/resources/ap_icon.dart';
-import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/scaffold/home_page_scaffold.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/utils/ap_utils.dart';
-import 'package:ap_common/utils/app_tracking_utils.dart';
-import 'package:ap_common/utils/dialog_utils.dart';
-import 'package:ap_common/utils/preferences.dart';
-import 'package:ap_common/widgets/ap_drawer.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
-import 'package:ap_common_firebase/utils/firebase_message_utils.dart';
-import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
+import 'package:ap_common/ap_common.dart';
+import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -42,6 +26,7 @@ import 'package:nsysu_ap/resources/image_assets.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class HomePage extends StatefulWidget {
   static const String routerName = '/home';
@@ -80,8 +65,7 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance
-        .setCurrentScreen('HomePage', 'home_page.dart');
+    AnalyticsUtil.instance.setCurrentScreen('HomePage', 'home_page.dart');
     Future<void>.microtask(() async {
       SystemChrome.setSystemUIOverlayStyle(
         const SystemUiOverlayStyle(
@@ -91,7 +75,7 @@ class HomePageState extends State<HomePage> {
       );
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       _getAllAnnouncement();
-      if (Preferences.getBool(Constants.prefAutoLogin, false)) {
+      if (PreferenceUtil.instance.getBool(Constants.prefAutoLogin, false)) {
         _login();
       } else {
         _checkLoginState();
@@ -99,14 +83,14 @@ class HomePageState extends State<HomePage> {
       if (FirebaseRemoteConfigUtils.isSupported) {
         _checkUpdate();
       }
-      if (await AppTrackingUtils.trackingAuthorizationStatus ==
-          TrackingStatus.notDetermined) {
+      if (await AppStoreUtil.instance.trackingAuthorizationStatus ==
+          GeneralPermissionStatus.notDetermined) {
         //ignore: use_build_context_synchronously
         if (!mounted) return;
         AppTrackingUtils.show(context: context);
       }
     });
-    FirebaseAnalyticsUtils.instance.setUserProperty(
+    AnalyticsUtil.instance.setUserProperty(
       AnalyticsConstants.language,
       Locale(Intl.defaultLocale!).languageCode,
     );
@@ -326,8 +310,9 @@ class HomePageState extends State<HomePage> {
                 color: ApTheme.of(context).grey,
               ),
               onTap: () async {
-                Preferences.setBool(Constants.prefAutoLogin, false);
-                await Preferences.setBool(Constants.prefAutoLogin, false);
+                PreferenceUtil.instance.setBool(Constants.prefAutoLogin, false);
+                await PreferenceUtil.instance
+                    .setBool(Constants.prefAutoLogin, false);
                 SelcrsHelper.instance.logout();
                 GraduationHelper.instance.logout();
                 TuitionHelper.instance.logout();
@@ -395,14 +380,14 @@ class HomePageState extends State<HomePage> {
           if (isLogin) {
             ApUtils.pushCupertinoStyle(context, CoursePage());
           } else {
-            ApUtils.showToast(context, ap.notLoginHint);
+            UiUtil.instance.showToast(context, ap.notLoginHint);
           }
           break;
         case 2:
           if (isLogin) {
             ApUtils.pushCupertinoStyle(context, ScorePage());
           } else {
-            ApUtils.showToast(context, ap.notLoginHint);
+            UiUtil.instance.showToast(context, ap.notLoginHint);
           }
           break;
       }
@@ -451,12 +436,14 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _login() async {
-    final String username = Preferences.getString(
-      Constants.prefUsername,
-      '',
-    ).toUpperCase();
+    final String username = PreferenceUtil.instance
+        .getString(
+          Constants.prefUsername,
+          '',
+        )
+        .toUpperCase();
     final String password =
-        Preferences.getStringSecurity(Constants.prefPassword, '');
+        PreferenceUtil.instance.getStringSecurity(Constants.prefPassword, '');
     SelcrsHelper.instance.login(
       username: username,
       password: password,
@@ -465,7 +452,7 @@ class HomePageState extends State<HomePage> {
           if (e.statusCode == 400) {
             _homeKey.currentState!.showBasicHint(text: ap.loginFail);
           } else if (e.statusCode == 401) {
-            ApUtils.showToast(
+            UiUtil.instance.showToast(
               context,
               AppLocalizations.of(context).pleaseConfirmForm,
             );
@@ -498,7 +485,7 @@ class HomePageState extends State<HomePage> {
     if (kIsWeb) return;
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final String currentVersion =
-        Preferences.getString(Constants.prefCurrentVersion, '');
+        PreferenceUtil.instance.getString(Constants.prefCurrentVersion, '');
     if (currentVersion != packageInfo.buildNumber) {
       final Map<String, dynamic>? rawData = await FileAssets.changelogData;
       //TODO: improve by object
@@ -512,7 +499,7 @@ class HomePageState extends State<HomePage> {
         'v${packageInfo.version}\n'
         '$updateNoteContent',
       );
-      Preferences.setString(
+      PreferenceUtil.instance.setString(
         Constants.prefCurrentVersion,
         packageInfo.buildNumber,
       );
@@ -563,7 +550,7 @@ class HomePageState extends State<HomePage> {
   }) async {
     if (isMobile) Navigator.of(context).pop();
     if (needLogin && !isLogin) {
-      ApUtils.showToast(
+      UiUtil.instance.showToast(
         context,
         ApLocalizations.of(context).notLoginHint,
       );

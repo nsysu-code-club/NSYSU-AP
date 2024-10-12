@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:ap_common/utils/preferences.dart';
+import 'package:ap_common/ap_common.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/bus_time.dart';
@@ -88,7 +88,7 @@ class BusInfo {
   }
 
   static List<BusInfo>? load() {
-    final List<String> rawStringList = Preferences.getStringList(
+    final List<String> rawStringList = PreferenceUtil.instance.getStringList(
       Constants.busInfoData,
       <String>[],
     );
@@ -123,7 +123,7 @@ BusInfo _$CustomBusInfoFromJson(Map<String, dynamic> json) => BusInfo(
 
 extension BusInfoExtension on List<BusTime> {
   void save() {
-    Preferences.setStringList(
+    PreferenceUtil.instance.setStringList(
       Constants.busInfoData,
       List<String>.from(
         map(

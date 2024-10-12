@@ -1,10 +1,4 @@
-import 'package:ap_common/callback/general_callback.dart';
-import 'package:ap_common/models/score_data.dart';
-import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/scaffold/score_scaffold.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/widgets/item_picker.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/models/options.dart';
@@ -43,8 +37,7 @@ class ScorePageState extends State<ScorePage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance
-        .setCurrentScreen('ScorePage', 'score_page.dart');
+    AnalyticsUtil.instance.setCurrentScreen('ScorePage', 'score_page.dart');
     _getSemester();
   }
 

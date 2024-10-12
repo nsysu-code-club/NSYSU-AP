@@ -1,10 +1,4 @@
-import 'package:ap_common/callback/general_callback.dart';
-import 'package:ap_common/scaffold/login_scaffold.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/utils/ap_utils.dart';
-import 'package:ap_common/utils/preferences.dart';
-import 'package:ap_common/widgets/progress_dialog.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
+import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
@@ -35,8 +29,7 @@ class LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalyticsUtils.instance
-        .setCurrentScreen('LoginPage', 'login_page.dart');
+    AnalyticsUtil.instance.setCurrentScreen('LoginPage', 'login_page.dart');
     _getPreference();
   }
 
@@ -97,7 +90,7 @@ class LoginPageState extends State<LoginPage> {
           onPressed: () {
             SelcrsHelper.instance.error = 0;
             _login();
-            FirebaseAnalyticsUtils.instance.logEvent('login_click');
+            AnalyticsUtil.instance.logEvent('login_click');
           },
         ),
         ApFlatButton(
@@ -113,7 +106,7 @@ class LoginPageState extends State<LoginPage> {
                 _username.text = username;
               });
               if (!context.mounted) return;
-              ApUtils.showToast(
+              UiUtil.instance.showToast(
                 context,
                 AppLocalizations.of(context).firstLoginHint,
               );
@@ -130,8 +123,8 @@ class LoginPageState extends State<LoginPage> {
       setState(() {
         isRememberPassword = value;
         if (!isRememberPassword) isAutoLogin = false;
-        Preferences.setBool(Constants.prefAutoLogin, isAutoLogin);
-        Preferences.setBool(
+        PreferenceUtil.instance.setBool(Constants.prefAutoLogin, isAutoLogin);
+        PreferenceUtil.instance.setBool(
           Constants.prefRememberPassword,
           isRememberPassword,
         );
@@ -144,8 +137,8 @@ class LoginPageState extends State<LoginPage> {
       setState(() {
         isAutoLogin = value;
         isRememberPassword = isAutoLogin;
-        Preferences.setBool(Constants.prefAutoLogin, isAutoLogin);
-        Preferences.setBool(
+        PreferenceUtil.instance.setBool(Constants.prefAutoLogin, isAutoLogin);
+        PreferenceUtil.instance.setBool(
           Constants.prefRememberPassword,
           isRememberPassword,
         );
@@ -155,11 +148,13 @@ class LoginPageState extends State<LoginPage> {
 
   Future<void> _getPreference() async {
     isRememberPassword =
-        Preferences.getBool(Constants.prefRememberPassword, true);
-    final String username = Preferences.getString(Constants.prefUsername, '');
+        PreferenceUtil.instance.getBool(Constants.prefRememberPassword, true);
+    final String username =
+        PreferenceUtil.instance.getString(Constants.prefUsername, '');
     String password = '';
     if (isRememberPassword) {
-      password = Preferences.getStringSecurity(Constants.prefPassword, '');
+      password =
+          PreferenceUtil.instance.getStringSecurity(Constants.prefPassword, '');
     }
     setState(() {
       _username.text = username;
@@ -169,7 +164,7 @@ class LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     if (_username.text.isEmpty || _password.text.isEmpty) {
-      ApUtils.showToast(context, ap.doNotEmpty);
+      UiUtil.instance.showToast(context, ap.doNotEmpty);
     } else {
       showDialog(
         context: context,
@@ -180,10 +175,10 @@ class LoginPageState extends State<LoginPage> {
         barrierDismissible: false,
       );
       if (_username.text.contains(' ')) {
-        FirebaseAnalyticsUtils.instance.logEvent('username_has_empty');
+        AnalyticsUtil.instance.logEvent('username_has_empty');
       }
       final String username = _username.text.replaceAll(' ', '').toUpperCase();
-      Preferences.setString(
+      PreferenceUtil.instance.setString(
         Constants.prefUsername,
         username.toUpperCase(),
       );
@@ -194,9 +189,9 @@ class LoginPageState extends State<LoginPage> {
           onError: (GeneralResponse e) {
             Navigator.pop(context);
             if (e.statusCode == 400) {
-              ApUtils.showToast(context, ap.loginFail);
+              UiUtil.instance.showToast(context, ap.loginFail);
             } else if (e.statusCode == 401) {
-              ApUtils.showToast(
+              UiUtil.instance.showToast(
                 context,
                 AppLocalizations.of(context).pleaseConfirmForm,
               );
@@ -206,23 +201,26 @@ class LoginPageState extends State<LoginPage> {
                 username: username,
               );
             } else {
-              ApUtils.showToast(context, ap.unknownError);
+              UiUtil.instance.showToast(context, ap.unknownError);
             }
           },
           onFailure: (DioException e) {
-            Navigator.pop(context);
-            ApUtils.showToast(context, e.i18nMessage);
+            if (e.i18nMessage != null) {
+              Navigator.pop(context);
+              UiUtil.instance.showToast(context, e.i18nMessage!);
+            }
           },
           onSuccess: (GeneralResponse data) async {
             Navigator.pop(context);
-            Preferences.setString(Constants.prefUsername, username);
+            PreferenceUtil.instance.setString(Constants.prefUsername, username);
             if (isRememberPassword) {
-              await Preferences.setStringSecurity(
+              await PreferenceUtil.instance.setStringSecurity(
                 Constants.prefPassword,
                 _password.text,
               );
             }
-            Preferences.setBool(Constants.prefIsOfflineLogin, false);
+            PreferenceUtil.instance
+                .setBool(Constants.prefIsOfflineLogin, false);
             if (!mounted) return;
             Navigator.of(context).pop(true);
             TextInput.finishAutofillContext();

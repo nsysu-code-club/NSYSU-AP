@@ -1,16 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:ap_common/models/notification_data.dart';
-import 'package:ap_common/models/phone_model.dart';
-import 'package:ap_common/resources/ap_icon.dart';
-import 'package:ap_common/resources/ap_theme.dart';
-import 'package:ap_common/utils/ap_localizations.dart';
-import 'package:ap_common/utils/ap_utils.dart';
-import 'package:ap_common/views/notification_list_view.dart';
-import 'package:ap_common/views/pdf_view.dart';
-import 'package:ap_common/views/phone_list_view.dart';
-import 'package:ap_common_firebase/utils/firebase_analytics_utils.dart';
-import 'package:ap_common_firebase/utils/firebase_remote_config_utils.dart';
+import 'package:ap_common/ap_common.dart';
+import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 
@@ -51,7 +42,7 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
 
   @override
   void initState() {
-    FirebaseAnalyticsUtils.instance
+    AnalyticsUtil.instance
         .setCurrentScreen('SchoolInfoPage', 'school_info_page.dart');
     controller = TabController(length: 2, vsync: this);
     _getSchedules();
