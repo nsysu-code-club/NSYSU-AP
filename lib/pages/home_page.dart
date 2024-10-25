@@ -375,21 +375,18 @@ class HomePageState extends State<HomePage> {
               locale: Locale(Intl.defaultLocale!),
             ),
           );
-          break;
         case 1:
           if (isLogin) {
             ApUtils.pushCupertinoStyle(context, CoursePage());
           } else {
             UiUtil.instance.showToast(context, ap.notLoginHint);
           }
-          break;
         case 2:
           if (isLogin) {
             ApUtils.pushCupertinoStyle(context, ScorePage());
           } else {
             UiUtil.instance.showToast(context, ap.notLoginHint);
           }
-          break;
       }
     });
   }

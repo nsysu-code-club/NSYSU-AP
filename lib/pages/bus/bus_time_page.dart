@@ -14,10 +14,10 @@ class BusTimePage extends StatefulWidget {
   final BusInfo busInfo;
 
   const BusTimePage({
-    Key? key,
+    super.key,
     required this.busInfo,
     required this.locale,
-  }) : super(key: key);
+  });
 
   @override
   _BusTimePageState createState() => _BusTimePageState();
@@ -166,10 +166,10 @@ class BusTimeItem extends StatelessWidget {
   final Locale locale;
 
   const BusTimeItem({
-    Key? key,
+    super.key,
     required this.busTime,
     required this.locale,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -188,14 +188,12 @@ class BusTimeItem extends StatelessWidget {
             arrivedTimeText = 'Arriving';
           }
           color = Colors.red;
-          break;
         case '將到站':
           if (isEnglish) {
             arrivedTimeText = 'Coming\nSoon';
             fontSize = 12.0;
           }
           color = Colors.green;
-          break;
         default:
           break;
       }

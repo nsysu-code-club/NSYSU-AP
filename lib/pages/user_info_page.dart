@@ -6,9 +6,9 @@ class UserInfoPage extends StatefulWidget {
   final UserInfo userInfo;
 
   const UserInfoPage({
-    Key? key,
+    super.key,
     required this.userInfo,
-  }) : super(key: key);
+  });
 
   @override
   _UserInfoPageState createState() => _UserInfoPageState();

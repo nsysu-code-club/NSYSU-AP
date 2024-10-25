@@ -161,16 +161,12 @@ class CoursePageState extends State<CoursePage> {
       switch (lastCode) {
         case '0':
           last = app.continuingSummerEducationProgram;
-          break;
         case '1':
           last = app.fallSemester;
-          break;
         case '2':
           last = app.springSemester;
-          break;
         case '3':
           last = app.summerSemester;
-          break;
       }
       String first;
       if (Intl.defaultLocale!.contains('en')) {

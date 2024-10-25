@@ -10,7 +10,7 @@ enum _State { loading, finish, error, empty, offlineEmpty }
 class GraduationReportPage extends StatefulWidget {
   static const String routerName = '/graduationReport';
 
-  const GraduationReportPage({Key? key}) : super(key: key);
+  const GraduationReportPage({super.key});
 
   @override
   GraduationReportPageState createState() => GraduationReportPageState();
@@ -441,9 +441,9 @@ class BorderContainer extends StatelessWidget {
   final Widget child;
 
   const BorderContainer({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

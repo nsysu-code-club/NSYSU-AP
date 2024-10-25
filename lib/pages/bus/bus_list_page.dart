@@ -13,9 +13,9 @@ class BusListPage extends StatefulWidget {
   final Locale locale;
 
   const BusListPage({
-    Key? key,
+    super.key,
     required this.locale,
-  }) : super(key: key);
+  });
 
   @override
   _BusListPageState createState() => _BusListPageState();

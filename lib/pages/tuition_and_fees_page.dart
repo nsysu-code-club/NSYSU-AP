@@ -13,7 +13,7 @@ import 'package:sprintf/sprintf.dart';
 enum _State { loading, finish, error, empty }
 
 class TuitionAndFeesPage extends StatefulWidget {
-  const TuitionAndFeesPage({Key? key}) : super(key: key);
+  const TuitionAndFeesPage({super.key});
 
   @override
   _TuitionAndFeesPageState createState() => _TuitionAndFeesPageState();

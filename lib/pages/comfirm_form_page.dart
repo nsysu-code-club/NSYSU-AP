@@ -13,10 +13,10 @@ class ConfirmFormPage extends StatefulWidget {
   final String username;
 
   const ConfirmFormPage({
-    Key? key,
+    super.key,
     required this.confirmFormUrl,
     required this.username,
-  }) : super(key: key);
+  });
 
   @override
   _ConfirmFormPageState createState() => _ConfirmFormPageState();

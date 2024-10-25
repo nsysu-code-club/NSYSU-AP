@@ -169,7 +169,7 @@ class SelcrsHelper {
           GeneralResponse(statusCode: 401, message: 'need to fill out form'),
         ) as Future<GeneralResponse>;
       } else {
-        return dumpError('course', text, callback) as Future<GeneralResponse?>;
+        return dumpError('course', text, callback)! as Future<GeneralResponse?>;
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
@@ -226,7 +226,7 @@ class SelcrsHelper {
         );
       }
       if (!canReLogin) {
-        return dumpError('getUserInfo', text, callback) as Future<UserInfo?>;
+        return dumpError('getUserInfo', text, callback)! as Future<UserInfo?>;
       }
       reLoginCount = 0;
       if (callback == null) {
@@ -357,7 +357,6 @@ class SelcrsHelper {
           switch (Locale(Intl.defaultLocale!).languageCode) {
             case 'en':
               title = titles[1];
-              break;
             case 'zh':
             default:
               title = titles[0];
