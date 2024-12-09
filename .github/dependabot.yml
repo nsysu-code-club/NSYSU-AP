@@ -1,0 +1,10 @@
+version: 2
+
+updates:
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "20:00"
+      # Use Japan Standard Time (UTC +09:00)
+      timezone: "Asia/Taipei"
