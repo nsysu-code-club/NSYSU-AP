@@ -33,7 +33,6 @@ dependencies:
   cookie_jar: ^4.0.3
   flutter_inappwebview: ^6.1.5
   desktop_webview_window: ^0.2.3
-  webview_windows: ^0.4.0
   timeago: ^3.0.2
   google_sign_in_dartio: ^0.3.0
   json_annotation: ^4.6.0

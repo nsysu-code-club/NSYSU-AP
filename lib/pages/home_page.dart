@@ -233,6 +233,7 @@ class HomePageState extends State<HomePage> {
                   if (kIsWeb ||
                       Platform.isAndroid ||
                       Platform.isIOS ||
+                      Platform.isMacOS ||
                       Platform.isWindows) {
                     _openPage(
                       AdmissionGuidePage(),
