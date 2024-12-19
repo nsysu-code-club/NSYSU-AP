@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.nsysu.nsysuap"
-    compileSdk = 34
+    compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

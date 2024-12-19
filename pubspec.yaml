@@ -14,9 +14,9 @@ dependencies:
   intl: ^0.17.0
   multiple_localization: ^0.5.0
 
-  ap_common: ^0.26.0-dev.2
+  ap_common: ^0.26.0-dev.4
   ap_common_firebase: ^0.17.0-dev.3
-  ap_common_plugin: 0.4.1
+  ap_common_plugin: 0.5.0-dev.3
   #     path: ../ap_common_plugin
 
   #official plugin
@@ -31,7 +31,7 @@ dependencies:
   dio: ^5.0.0
   dio_cookie_manager: ^3.0.0
   cookie_jar: ^4.0.3
-  flutter_inappwebview: ^6.0.0
+  flutter_inappwebview: ^6.1.5
   desktop_webview_window: ^0.2.3
   webview_windows: ^0.4.0
   timeago: ^3.0.2
@@ -55,6 +55,7 @@ dependency_overrides:
 #  ap_common_plugin:
 #    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_plugin
   intl: 0.18.0
+  web: 1.0.0
 
 flutter:
 
