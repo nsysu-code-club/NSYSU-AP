@@ -95,20 +95,14 @@ class _BusListPageState extends State<BusListPage> {
   }
 
   Future<void> _getData() async {
-    BusHelper.instance.getBusInfoList(
-      locale: widget.locale,
-      callback: GeneralCallback<List<BusInfo>?>(
-        onFailure: (_) {
-          setState(() => state = _State.error);
-        },
-        onError: (_) {
-          setState(() => state = _State.error);
-        },
-        onSuccess: (List<BusInfo>? data) {
-          busList = data ?? <BusInfo>[];
-          setState(() => state = _State.finish);
-        },
-      ),
-    );
+    try {
+      final List<BusInfo> data = await BusHelper.instance.getBusInfoList(
+        locale: widget.locale,
+      );
+      busList = data;
+      setState(() => state = _State.finish);
+    } on Exception catch (_) {
+      setState(() => state = _State.error);
+    }
   }
 }

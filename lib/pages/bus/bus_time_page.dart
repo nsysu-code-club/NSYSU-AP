@@ -133,31 +133,25 @@ class _BusTimePageState extends State<BusTimePage>
     }
   }
 
-  void _getData() {
-    BusHelper.instance.getBusTime(
-      locale: widget.locale,
-      busInfo: widget.busInfo,
-      callback: GeneralCallback<List<BusTime>?>(
-        onFailure: (_) {
-          if (mounted) setState(() => state = _State.error);
-        },
-        onError: (_) {
-          if (mounted) setState(() => state = _State.error);
-        },
-        onSuccess: (List<BusTime>? data) {
-          startList.clear();
-          endList.clear();
-          for (final BusTime element in data!) {
-            if (element.isGoBack == 'Y') {
-              endList.add(element);
-            } else {
-              startList.add(element);
-            }
-          }
-          if (mounted) setState(() => state = _State.finish);
-        },
-      ),
-    );
+  Future<void> _getData() async {
+    try {
+      final List<BusTime> data = await BusHelper.instance.getBusTime(
+        locale: widget.locale,
+        busInfo: widget.busInfo,
+      );
+      startList.clear();
+      endList.clear();
+      for (final BusTime element in data) {
+        if (element.isGoBack == 'Y') {
+          endList.add(element);
+        } else {
+          startList.add(element);
+        }
+      }
+      if (mounted) setState(() => state = _State.finish);
+    } catch (_) {
+      if (mounted) setState(() => state = _State.error);
+    }
   }
 }
 

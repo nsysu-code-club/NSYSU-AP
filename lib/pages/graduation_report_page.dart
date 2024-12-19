@@ -335,57 +335,55 @@ class GraduationReportPageState extends State<GraduationReportPage>
     );
   }
 
-  Function(DioException) get _onFailure => (DioException e) => setState(() {
-        state = _State.error;
-        switch (e.type) {
-          case DioExceptionType.connectionTimeout:
-          case DioExceptionType.connectionError:
-          case DioExceptionType.sendTimeout:
-          case DioExceptionType.receiveTimeout:
-          case DioExceptionType.badResponse:
-          case DioExceptionType.cancel:
-          case DioExceptionType.badCertificate:
-            break;
-          case DioExceptionType.unknown:
-            throw e;
+  Future<void> _login() async {
+    try {
+      final GeneralResponse _ = await GraduationHelper.instance.login(
+        username: SelcrsHelper.instance.username,
+        password: SelcrsHelper.instance.password,
+      );
+      _getGraduationReport();
+    } catch (e, s) {
+      setState(() {
+        switch (e) {
+          case DioException():
+            state = _State.error;
+            if (e.type == DioExceptionType.unknown) {
+              CrashlyticsUtil.instance.recordError(e, s);
+            }
+          case GeneralResponse():
+            state = _State.error;
         }
       });
-
-  Function(GeneralResponse) get _onError =>
-      (_) => setState(() => state = _State.error);
-
-  void _login() {
-    GraduationHelper.instance.login(
-      username: SelcrsHelper.instance.username,
-      password: SelcrsHelper.instance.password,
-      callback: GeneralCallback<GeneralResponse>(
-        onError: _onError,
-        onFailure: _onFailure,
-        onSuccess: (GeneralResponse data) {
-          _getGraduationReport();
-        },
-      ),
-    );
+    }
   }
 
-  void _getGraduationReport() {
-    GraduationHelper.instance.getGraduationReport(
-      username: SelcrsHelper.instance.username,
-      callback: GeneralCallback<GraduationReportData?>(
-        onError: _onError,
-        onFailure: _onFailure,
-        onSuccess: (GraduationReportData? data) {
-          graduationReportData = data;
-          setState(() {
-            if (data == null) {
-              state = _State.empty;
-            } else {
-              state = _State.finish;
+  Future<void> _getGraduationReport() async {
+    try {
+      final GraduationReportData? data =
+          await GraduationHelper.instance.getGraduationReport(
+        username: SelcrsHelper.instance.username,
+      );
+      graduationReportData = data;
+      setState(() {
+        if (data == null) {
+          state = _State.empty;
+        } else {
+          state = _State.finish;
+        }
+      });
+    } catch (e, s) {
+      setState(() {
+        switch (e) {
+          case DioException():
+            state = _State.error;
+            if (e.type == DioExceptionType.unknown) {
+              CrashlyticsUtil.instance.recordError(e, s);
             }
-          });
-        },
-      ),
-    );
+          case GeneralResponse():
+            state = _State.error;
+        }
+      });
+    }
   }
 
   void _showGeneralEducationCourseDetail(GeneralEducationItem course) {

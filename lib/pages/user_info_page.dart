@@ -32,20 +32,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return UserInfoScaffold(
       userInfo: userInfo,
       onRefresh: () async {
-        return (await SelcrsHelper.instance.getUserInfo(
-              callback: GeneralCallback<UserInfo>(
-                onSuccess: (UserInfo data) {
-                  setState(() {
-                    userInfo = data;
-                  });
-                  AnalyticsUtil.instance.logUserInfo(userInfo);
-                  return data;
-                },
-                onFailure: (DioException e) {},
-                onError: (GeneralResponse e) {},
-              ),
-            )) ??
-            userInfo;
+        final UserInfo data = await SelcrsHelper.instance.getUserInfo();
+        setState(() {
+          userInfo = data;
+        });
+        AnalyticsUtil.instance.logUserInfo(userInfo);
+        return data;
       },
       actions: <Widget>[
         IconButton(
@@ -73,17 +65,13 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           ),
                           barrierDismissible: false,
                         );
-                        final UserInfo? userInfo =
-                            await SelcrsHelper.instance.changeMail(
-                          mail: newEmail.text,
-                          callback: GeneralCallback<UserInfo>.simple(
-                            context,
-                            (UserInfo userInfo) => userInfo,
-                          ),
-                        );
-                        if (!context.mounted) return;
-                        Navigator.pop(context);
-                        if (userInfo != null) {
+                        try {
+                          final UserInfo userInfo =
+                              await SelcrsHelper.instance.changeMail(
+                            mail: newEmail.text,
+                          );
+                          if (!context.mounted) return;
+                          Navigator.pop(context);
                           UiUtil.instance.showToast(
                             context,
                             ApLocalizations.of(context).updateSuccess,
@@ -91,6 +79,20 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           setState(() {
                             this.userInfo = userInfo;
                           });
+                        } catch (e) {
+                          switch (e) {
+                            case DioException():
+                              if (e.i18nMessage case final String message?) {
+                                UiUtil.instance.showToast(context, message);
+                              }
+                            case GeneralResponse():
+                              UiUtil.instance.showToast(context, e.message);
+                            default:
+                              UiUtil.instance.showToast(
+                                context,
+                                ApLocalizations.of(context).somethingError,
+                              );
+                          }
                         }
                       },
                       child: Text(ApLocalizations.of(context).confirm),

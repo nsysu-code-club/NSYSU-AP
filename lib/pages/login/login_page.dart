@@ -182,11 +182,32 @@ class LoginPageState extends State<LoginPage> {
         Constants.prefUsername,
         username.toUpperCase(),
       );
-      SelcrsHelper.instance.login(
-        username: username,
-        password: _password.text,
-        callback: GeneralCallback<GeneralResponse>(
-          onError: (GeneralResponse e) {
+      try {
+        final GeneralResponse _ = await SelcrsHelper.instance.login(
+          username: username,
+          password: _password.text,
+        );
+        if (!mounted) return;
+        Navigator.pop(context);
+        PreferenceUtil.instance.setString(Constants.prefUsername, username);
+        if (isRememberPassword) {
+          await PreferenceUtil.instance.setStringSecurity(
+            Constants.prefPassword,
+            _password.text,
+          );
+        }
+        PreferenceUtil.instance.setBool(Constants.prefIsOfflineLogin, false);
+        if (!mounted) return;
+        Navigator.of(context).pop(true);
+        TextInput.finishAutofillContext();
+      } catch (e) {
+        switch (e) {
+          case DioException():
+            if (e.i18nMessage != null) {
+              Navigator.pop(context);
+              UiUtil.instance.showToast(context, e.i18nMessage!);
+            }
+          case GeneralResponse():
             Navigator.pop(context);
             if (e.statusCode == 400) {
               UiUtil.instance.showToast(context, ap.loginFail);
@@ -203,30 +224,10 @@ class LoginPageState extends State<LoginPage> {
             } else {
               UiUtil.instance.showToast(context, ap.unknownError);
             }
-          },
-          onFailure: (DioException e) {
-            if (e.i18nMessage != null) {
-              Navigator.pop(context);
-              UiUtil.instance.showToast(context, e.i18nMessage!);
-            }
-          },
-          onSuccess: (GeneralResponse data) async {
-            Navigator.pop(context);
-            PreferenceUtil.instance.setString(Constants.prefUsername, username);
-            if (isRememberPassword) {
-              await PreferenceUtil.instance.setStringSecurity(
-                Constants.prefPassword,
-                _password.text,
-              );
-            }
-            PreferenceUtil.instance
-                .setBool(Constants.prefIsOfflineLogin, false);
-            if (!mounted) return;
-            Navigator.of(context).pop(true);
-            TextInput.finishAutofillContext();
-          },
-        ),
-      );
+          default:
+            UiUtil.instance.showToast(context, ap.unknownError);
+        }
+      }
     }
   }
 }

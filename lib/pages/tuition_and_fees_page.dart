@@ -130,37 +130,37 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
               ),
               barrierDismissible: false,
             );
-            TuitionHelper.instance.downloadFdf(
-              serialNumber: item.serialNumber,
-              callback: GeneralCallback<Uint8List?>(
-                onError: (GeneralResponse e) {
+            try {
+              final Uint8List? data = await TuitionHelper.instance.downloadFdf(
+                serialNumber: item.serialNumber,
+              );
+              if (!mounted) return;
+              Navigator.of(context, rootNavigator: true).pop();
+              ApUtils.pushCupertinoStyle(
+                context,
+                PdfView(
+                  state: PdfState.finish,
+                  data: data,
+                ),
+              );
+            } on Exception catch (e) {
+              switch (e) {
+                case DioException():
+                  Navigator.of(context, rootNavigator: true).pop();
+                  if (e.i18nMessage case final String message?) {
+                    UiUtil.instance.showToast(
+                      context,
+                      message,
+                    );
+                  }
+                case GeneralResponse():
                   Navigator.of(context, rootNavigator: true).pop();
                   UiUtil.instance.showToast(
                     context,
                     ApLocalizations.of(context).somethingError,
                   );
-                },
-                onFailure: (DioException e) {
-                  Navigator.of(context, rootNavigator: true).pop();
-                  if (e.i18nMessage != null) {
-                    UiUtil.instance.showToast(
-                      context,
-                      e.i18nMessage!,
-                    );
-                  }
-                },
-                onSuccess: (Uint8List? data) {
-                  Navigator.of(context, rootNavigator: true).pop();
-                  ApUtils.pushCupertinoStyle(
-                    context,
-                    PdfView(
-                      state: PdfState.finish,
-                      data: data,
-                    ),
-                  );
-                },
-              ),
-            );
+              }
+            }
           },
           subtitle: Padding(
             padding: const EdgeInsets.all(4.0),
@@ -179,57 +179,53 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     );
   }
 
-  Function(DioException) get _onFailure => (DioException e) => setState(() {
-        state = _State.error;
-        switch (e.type) {
-          case DioExceptionType.connectionTimeout:
-          case DioExceptionType.connectionError:
-          case DioExceptionType.sendTimeout:
-          case DioExceptionType.receiveTimeout:
-          case DioExceptionType.badResponse:
-          case DioExceptionType.cancel:
-          case DioExceptionType.badCertificate:
-            break;
-          case DioExceptionType.unknown:
-            throw e;
+  Future<void> _login() async {
+    try {
+      final GeneralResponse _ = await TuitionHelper.instance.login(
+        username: SelcrsHelper.instance.username,
+        password: SelcrsHelper.instance.password,
+      );
+      _getData();
+    } catch (e, s) {
+      setState(() {
+        switch (e) {
+          case DioException():
+            state = _State.error;
+            if (e.type == DioExceptionType.unknown) {
+              CrashlyticsUtil.instance.recordError(e, s);
+            }
+          case GeneralResponse():
+            state = _State.error;
         }
       });
-
-  Function(GeneralResponse) get _onError =>
-      (_) => setState(() => state = _State.error);
-
-  void _login() {
-    TuitionHelper.instance.login(
-      username: SelcrsHelper.instance.username,
-      password: SelcrsHelper.instance.password,
-      callback: GeneralCallback<GeneralResponse>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (GeneralResponse data) {
-          _getData();
-        },
-      ),
-    );
+    }
   }
 
   Future<void> _getData() async {
-    TuitionHelper.instance.getData(
-      callback: GeneralCallback<List<TuitionAndFees>>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (List<TuitionAndFees> data) {
-          items = data;
-          if (mounted) {
-            setState(() {
-              if (items.isEmpty) {
-                state = _State.empty;
-              } else {
-                state = _State.finish;
-              }
-            });
+    try {
+      final List<TuitionAndFees> data = await TuitionHelper.instance.getData();
+      items = data;
+      if (mounted) {
+        setState(() {
+          if (items.isEmpty) {
+            state = _State.empty;
+          } else {
+            state = _State.finish;
           }
-        },
-      ),
-    );
+        });
+      }
+    } catch (e, s) {
+      setState(() {
+        switch (e) {
+          case DioException():
+            state = _State.error;
+            if (e.type == DioExceptionType.unknown) {
+              CrashlyticsUtil.instance.recordError(e, s);
+            }
+          case GeneralResponse():
+            state = _State.error;
+        }
+      });
+    }
   }
 }

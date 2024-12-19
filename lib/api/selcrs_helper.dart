@@ -106,10 +106,9 @@ class SelcrsHelper {
   * 401: 需要填寫表單
   * 1000: 未知錯誤
   * */
-  Future<GeneralResponse?>? login({
+  Future<GeneralResponse> login({
     required String username,
     required String password,
-    GeneralCallback<GeneralResponse>? callback,
   }) async {
     final String base64md5Password = Utils.base64md5(password);
     dio.options.contentType = Headers.formUrlEncodedContentType;
@@ -126,11 +125,10 @@ class SelcrsHelper {
       final String text = const Utf8Decoder().convert(scoreResponse.data!);
 //      debugPrint(text);
       if (text.contains('資料錯誤請重新輸入')) {
-        return callback?.onError(
-          GeneralResponse(statusCode: 400, message: 'score error'),
-        ) as Future<GeneralResponse>?;
+        throw GeneralResponse(statusCode: 400, message: 'score error');
       } else {
-        dumpError('score', text, null);
+        dumpError('score', text);
+        throw GeneralResponse.unknownError();
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
@@ -138,13 +136,12 @@ class SelcrsHelper {
       } else {
         error++;
         if (error > 5) {
-          callback?.onFailure(e);
+          rethrow;
         } else {
           changeSelcrsUrl();
           return login(
             username: username,
             password: password,
-            callback: callback,
           );
         }
       }
@@ -160,16 +157,16 @@ class SelcrsHelper {
       final String text = const Utf8Decoder().convert(courseResponse.data!);
 //      debugPrint('course =  $text');
       if (text.contains('學號碼密碼不符')) {
-        return callback?.onError(
-          GeneralResponse(statusCode: 400, message: 'course error'),
-        ) as Future<GeneralResponse>?;
+        throw GeneralResponse(statusCode: 400, message: 'course error');
       } else if (text.contains('請先填寫')) {
         ///https://regweb.nsysu.edu.tw/webreg/confirm_wuhan_pneumonia.asp?STUID=%s&STAT_COD=1&STATUS_COD=1&LOGINURL=https://selcrs.nsysu.edu.tw/
-        return callback?.onError(
-          GeneralResponse(statusCode: 401, message: 'need to fill out form'),
-        ) as Future<GeneralResponse>;
+        throw GeneralResponse(
+          statusCode: 401,
+          message: 'need to fill out form',
+        );
       } else {
-        return dumpError('course', text, callback)! as Future<GeneralResponse?>;
+        dumpError('course', text);
+        throw GeneralResponse.unknownError();
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
@@ -178,23 +175,16 @@ class SelcrsHelper {
         this.username = username;
         this.password = password;
         isLogin = true;
-        if (callback == null) {
-          return GeneralResponse.success();
-        } else {
-          return callback.onSuccess(GeneralResponse.success())
-              as Future<GeneralResponse?>?;
-        }
+        return GeneralResponse.success();
       } else {
         error++;
         if (error > 5) {
-          callback?.onFailure(e);
           rethrow;
         } else {
           changeSelcrsUrl();
           return login(
             username: username,
             password: password,
-            callback: callback,
           );
         }
       }
@@ -211,37 +201,21 @@ class SelcrsHelper {
   * error status code
   * 400: 帳號密碼錯誤
   * */
-  Future<UserInfo?>? getUserInfo({
-    GeneralCallback<UserInfo>? callback,
-  }) async {
-    try {
-      final Response<Uint8List> response = await dio.get<Uint8List>(
-        '$selcrsUrl/menu4/tools/changedat.asp',
-      );
-      final String text = const Utf8Decoder().convert(response.data!);
-      if (text.contains(courseTimeoutText) && canReLogin) {
-        await reLogin();
-        return getUserInfo(
-          callback: callback,
-        );
-      }
-      if (!canReLogin) {
-        return dumpError('getUserInfo', text, callback)! as Future<UserInfo?>;
-      }
-      reLoginCount = 0;
-      if (callback == null) {
-        return parserUserInfo(text);
-      } else {
-        callback.onSuccess(parserUserInfo(text));
-        return null;
-      }
-    } on DioException catch (e) {
-      callback?.onFailure(e);
-    } on Exception {
-      callback?.onError(GeneralResponse.unknownError());
-      rethrow;
+  Future<UserInfo> getUserInfo() async {
+    final Response<Uint8List> response = await dio.get<Uint8List>(
+      '$selcrsUrl/menu4/tools/changedat.asp',
+    );
+    final String text = const Utf8Decoder().convert(response.data!);
+    if (text.contains(courseTimeoutText) && canReLogin) {
+      await reLogin();
+      return getUserInfo();
     }
-    return null;
+    if (!canReLogin) {
+      dumpError('getUserInfo', text);
+      throw GeneralResponse.unknownError();
+    }
+    reLoginCount = 0;
+    return parserUserInfo(text);
   }
 
   UserInfo parserUserInfo(String text) {
@@ -260,157 +234,135 @@ class SelcrsHelper {
     return userInfo;
   }
 
-  Future<void> getCourseSemesterData({
+  Future<SemesterData> getCourseSemesterData({
     required Semester defaultSemester,
-    required GeneralCallback<SemesterData> callback,
   }) async {
     final String url = '$selcrsUrl/menu4/query/stu_slt_up.asp';
-    try {
-      final Response<Uint8List> response = await dio.post(url);
-      final String text = const Utf8Decoder().convert(response.data!);
+    final Response<Uint8List> response = await dio.post(url);
+    final String text = const Utf8Decoder().convert(response.data!);
 //      print('text =  ${text}');
-      if (text.contains(courseTimeoutText) && canReLogin) {
-        await reLogin();
-        return getCourseSemesterData(
-          defaultSemester: defaultSemester,
-          callback: callback,
-        );
-      }
-      if (!canReLogin) {
-        dumpError('getCourseSemesterData', text, callback);
-        return;
-      }
-      reLoginCount = 0;
-      final dom.Document document = parse(text);
-      final List<dom.Element> options = document.getElementsByTagName('option');
-      final SemesterData courseSemesterData = SemesterData(
-        data: <Semester>[],
+    if (text.contains(courseTimeoutText) && canReLogin) {
+      await reLogin();
+      return getCourseSemesterData(
         defaultSemester: defaultSemester,
       );
-      for (int i = 0; i < options.length; i++) {
-        //print('$i => ${tdDoc[i].text}');
-        courseSemesterData.data.add(
-          Semester(
-            text: options[i].text,
-            year: options[i].attributes['value']!.substring(0, 3),
-            value: options[i].attributes['value']!.substring(3),
-          ),
-        );
-      }
-      callback.onSuccess(courseSemesterData);
-    } on DioException catch (e) {
-      callback.onFailure(e);
-    } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
-      rethrow;
     }
+    if (!canReLogin) {
+      dumpError('getCourseSemesterData', text);
+      throw GeneralResponse.unknownError();
+    }
+    reLoginCount = 0;
+    final dom.Document document = parse(text);
+    final List<dom.Element> options = document.getElementsByTagName('option');
+    final SemesterData courseSemesterData = SemesterData(
+      data: <Semester>[],
+      defaultSemester: defaultSemester,
+    );
+    for (int i = 0; i < options.length; i++) {
+      //print('$i => ${tdDoc[i].text}');
+      courseSemesterData.data.add(
+        Semester(
+          text: options[i].text,
+          year: options[i].attributes['value']!.substring(0, 3),
+          value: options[i].attributes['value']!.substring(3),
+        ),
+      );
+    }
+    return courseSemesterData;
   }
 
-  Future<void> getCourseData({
+  Future<CourseData> getCourseData({
     required String username,
     required TimeCodeConfig timeCodeConfig,
     required String semester,
-    required GeneralCallback<CourseData> callback,
   }) async {
     final String url = '$selcrsUrl/menu4/query/stu_slt_data.asp';
-    try {
-      final Response<Uint8List> response = await dio.post(
-        url,
-        data: <String, String>{
-          'stuact': 'B',
-          'YRSM': semester,
-          'Stuid': username,
-          'B1': '%BDT%A9w%B0e%A5X',
-        },
-        options: _courseOption,
-      );
-      final String text = const Utf8Decoder().convert(response.data!);
+    final Response<Uint8List> response = await dio.post(
+      url,
+      data: <String, String>{
+        'stuact': 'B',
+        'YRSM': semester,
+        'Stuid': username,
+        'B1': '%BDT%A9w%B0e%A5X',
+      },
+      options: _courseOption,
+    );
+    final String text = const Utf8Decoder().convert(response.data!);
 //      debugPrint('text =  ${text}');
-      if (text.contains(courseTimeoutText) && canReLogin) {
-        await reLogin();
-        return getCourseData(
-          username: username,
-          timeCodeConfig: timeCodeConfig,
-          semester: semester,
-          callback: callback,
-        );
-      }
-      if (!canReLogin) {
-        dumpError('getCourseData', text, callback);
-        return;
-      }
-      reLoginCount = 0;
-      final int startTime = DateTime.now().millisecondsSinceEpoch;
-      final dom.Document document = parse(text);
-      final List<dom.Element> trDoc = document.getElementsByTagName('tr');
-      final CourseData courseData =
-          CourseData(courses: <Course>[], timeCodes: timeCodeConfig.timeCodes);
+    if (text.contains(courseTimeoutText) && canReLogin) {
+      await reLogin();
+      return getCourseData(
+        username: username,
+        timeCodeConfig: timeCodeConfig,
+        semester: semester,
+      );
+    }
+    if (!canReLogin) {
+      dumpError('getCourseData', text);
+      throw GeneralResponse.unknownError();
+    }
+    reLoginCount = 0;
+    final int startTime = DateTime.now().millisecondsSinceEpoch;
+    final dom.Document document = parse(text);
+    final List<dom.Element> trDoc = document.getElementsByTagName('tr');
+    final CourseData courseData =
+        CourseData(courses: <Course>[], timeCodes: timeCodeConfig.timeCodes);
 
-      //print(DateTime.now());
-      for (int i = 1; i < trDoc.length; i++) {
-        final List<dom.Element> tdDoc = trDoc[i].getElementsByTagName('td');
-        final dom.Element titleElement =
-            tdDoc[4].getElementsByTagName('a').first;
-        final List<String> titles = titleElement.innerHtml.split('<br>');
-        String title = titleElement.text;
-        if (titles.length >= 2) {
-          switch (Locale(Intl.defaultLocale!).languageCode) {
-            case 'en':
-              title = titles[1];
-            case 'zh':
-            default:
-              title = titles[0];
-              break;
-          }
+    //print(DateTime.now());
+    for (int i = 1; i < trDoc.length; i++) {
+      final List<dom.Element> tdDoc = trDoc[i].getElementsByTagName('td');
+      final dom.Element titleElement = tdDoc[4].getElementsByTagName('a').first;
+      final List<String> titles = titleElement.innerHtml.split('<br>');
+      String title = titleElement.text;
+      if (titles.length >= 2) {
+        switch (Locale(Intl.defaultLocale!).languageCode) {
+          case 'en':
+            title = titles[1];
+          case 'zh':
+          default:
+            title = titles[0];
         }
-        final String instructors = tdDoc[8].text;
-        final Location location = Location(
-          building: '',
-          room: tdDoc[9].text,
-        );
-        final Course course = Course(
-          code: tdDoc[2].text,
-          className: '${tdDoc[1].text} ${tdDoc[3].text}',
-          title: title,
-          units: tdDoc[5].text,
-          required:
-              tdDoc[7].text.length == 1 ? '${tdDoc[7].text}修' : tdDoc[7].text,
-          location: location,
-          instructors: <String>[instructors],
-          times: <SectionTime>[],
-        );
-        for (int j = 10; j < tdDoc.length; j++) {
-          if (tdDoc[j].text.isNotEmpty) {
-            final List<String> sections = tdDoc[j].text.split('');
-            if (sections.isNotEmpty && sections[0] != ' ') {
-              for (final String section in sections) {
-                final int index = timeCodeConfig.indexOf(section);
-                if (index == -1) continue;
-                course.times.add(SectionTime(weekday: j - 9, index: index));
-              }
+      }
+      final String instructors = tdDoc[8].text;
+      final Location location = Location(
+        building: '',
+        room: tdDoc[9].text,
+      );
+      final Course course = Course(
+        code: tdDoc[2].text,
+        className: '${tdDoc[1].text} ${tdDoc[3].text}',
+        title: title,
+        units: tdDoc[5].text,
+        required:
+            tdDoc[7].text.length == 1 ? '${tdDoc[7].text}修' : tdDoc[7].text,
+        location: location,
+        instructors: <String>[instructors],
+        times: <SectionTime>[],
+      );
+      for (int j = 10; j < tdDoc.length; j++) {
+        if (tdDoc[j].text.isNotEmpty) {
+          final List<String> sections = tdDoc[j].text.split('');
+          if (sections.isNotEmpty && sections[0] != ' ') {
+            for (final String section in sections) {
+              final int index = timeCodeConfig.indexOf(section);
+              if (index == -1) continue;
+              course.times.add(SectionTime(weekday: j - 9, index: index));
             }
           }
         }
-        courseData.courses.add(course);
       }
-      if (trDoc.isNotEmpty) {
-        final int endTime = DateTime.now().millisecondsSinceEpoch;
-        AnalyticsUtil.instance
-            .logTimeEvent('course_html_parser', (endTime - startTime) / 1000.0);
-      }
-      //print(DateTime.now());
-      return callback.onSuccess(courseData);
-    } on DioException catch (e) {
-      callback.onFailure(e);
-    } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
-      rethrow;
+      courseData.courses.add(course);
     }
+    if (trDoc.isNotEmpty) {
+      final int endTime = DateTime.now().millisecondsSinceEpoch;
+      AnalyticsUtil.instance
+          .logTimeEvent('course_html_parser', (endTime - startTime) / 1000.0);
+    }
+    //print(DateTime.now());
+    return courseData;
   }
 
-  Future<void> getScoreSemesterData({
-    required GeneralCallback<ScoreSemesterData> callback,
-  }) async {
+  Future<ScoreSemesterData> getScoreSemesterData() async {
     final String url =
         '$selcrsUrl/scoreqry/sco_query.asp?ACTION=702&KIND=2&LANGS=$language';
     try {
@@ -452,7 +404,7 @@ class SelcrsHelper {
       } else {
         // print('document.text = ${document.text}');
       }
-      return callback.onSuccess(scoreSemesterData);
+      return scoreSemesterData;
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
           e.response!.statusCode == 302) {
@@ -460,30 +412,24 @@ class SelcrsHelper {
             const Utf8Decoder().convert(e.response!.data as Uint8List);
         if (text.contains(scoreTimeoutText) && canReLogin) {
           await reLogin();
-          return getScoreSemesterData(
-            callback: callback,
-          );
-        }
-        if (!canReLogin) {
-          dumpError('getScoreSemesterData', text, callback);
-          return;
+          return getScoreSemesterData();
         }
         reLoginCount = 0;
-      } else {
-        callback.onFailure(e);
+        if (!canReLogin) {
+          dumpError('getScoreSemesterData', text);
+          throw GeneralResponse.unknownError();
+        }
       }
-    } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
+      rethrow;
+    } catch (_) {
       rethrow;
     }
-    return;
   }
 
-  Future<void> getScoreData({
+  Future<ScoreData> getScoreData({
     required String? year,
     required String? semester,
     bool searchPreScore = false,
-    required GeneralCallback<ScoreData> callback,
   }) async {
     final String url =
         '$selcrsUrl/scoreqry/sco_query.asp?ACTION=804&KIND=2&LANGS=$language';
@@ -578,7 +524,7 @@ class SelcrsHelper {
         scores: list,
         detail: detail,
       );
-      return callback.onSuccess(scoreData);
+      return scoreData;
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
           e.response!.statusCode == 302) {
@@ -590,19 +536,16 @@ class SelcrsHelper {
             year: year,
             semester: semester,
             searchPreScore: searchPreScore,
-            callback: callback,
           );
         }
-        if (!canReLogin) {
-          dumpError('getScoreData', text, callback);
-          return;
-        }
         reLoginCount = 0;
-      } else {
-        callback.onFailure(e);
+        if (!canReLogin) {
+          dumpError('getScoreData', text);
+          throw GeneralResponse.unknownError();
+        }
       }
-    } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
+      rethrow;
+    } catch (_) {
       rethrow;
     }
   }
@@ -642,41 +585,32 @@ class SelcrsHelper {
     return detail;
   }
 
-  Future<void> getUsername({
+  Future<String> getUsername({
     required String name,
     required String id,
-    required GeneralCallback<String> callback,
   }) async {
     final String url = '$selcrsUrl/newstu/stu_new.asp?action=16';
-    try {
-      final String encoded = Utils.uriEncodeBig5(name);
-      final Response<Uint8List> response = await dio.post(
-        url,
-        options: Options(
-          responseType: ResponseType.bytes,
-          contentType: Headers.formUrlEncodedContentType,
-        ),
-        data: <String, String>{
-          'CNAME': encoded,
-          'T_CID': id,
-          'B1': '%BDT%A9w%B0e%A5X',
-        },
-      );
-      final String text = big5.decode(response.data!);
-      final dom.Document document = parse(text, encoding: 'BIG-5');
-      final List<dom.Element> elements = document.getElementsByTagName('b');
-      return callback.onSuccess(elements.isNotEmpty ? elements[0].text : '');
-    } on DioException catch (e) {
-      callback.onFailure(e);
-    } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
-      rethrow;
-    }
+    final String encoded = Utils.uriEncodeBig5(name);
+    final Response<Uint8List> response = await dio.post(
+      url,
+      options: Options(
+        responseType: ResponseType.bytes,
+        contentType: Headers.formUrlEncodedContentType,
+      ),
+      data: <String, String>{
+        'CNAME': encoded,
+        'T_CID': id,
+        'B1': '%BDT%A9w%B0e%A5X',
+      },
+    );
+    final String text = big5.decode(response.data!);
+    final dom.Document document = parse(text, encoding: 'BIG-5');
+    final List<dom.Element> elements = document.getElementsByTagName('b');
+    return elements.isNotEmpty ? elements[0].text : '';
   }
 
-  Future<UserInfo?>? changeMail({
+  Future<UserInfo> changeMail({
     required String mail,
-    required GeneralCallback<UserInfo> callback,
   }) async {
     try {
       final Response<Uint8List> response = await dio.post(
@@ -689,36 +623,28 @@ class SelcrsHelper {
       final String text = const Utf8Decoder().convert(response.data!);
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
-        return changeMail(
-          mail: mail,
-          callback: callback,
-        );
+        return changeMail(mail: mail);
       }
       if (!canReLogin) {
-        dumpError('getCourseData', text, callback);
-        return null;
+        dumpError('changeMail', text);
+        throw GeneralResponse.unknownError();
       }
       reLoginCount = 0;
-      return callback.onSuccess(parserUserInfo(text)) as Future<UserInfo?>;
-    } on DioException catch (e) {
-      callback.onFailure(e);
+      return parserUserInfo(text);
+    } on DioException catch (_) {
+      rethrow;
     } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
-      return null;
+      rethrow;
     }
-    return null;
   }
 
-  Future<dynamic>? dumpError(
+  Future<void> dumpError(
     String feature,
     String text,
-    GeneralCallback<dynamic>? callback,
-  ) {
+  ) async {
     reLoginCount = 0;
     if (FirebaseCrashlyticsUtils.isSupported) {
       FirebaseCrashlytics.instance.setCustomKey('crawler_error_$feature', text);
     }
-    return callback?.onError(GeneralResponse.unknownError())
-        as Future<dynamic>?;
   }
 }

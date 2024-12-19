@@ -43,10 +43,9 @@ class TuitionHelper {
     initCookiesJar();
   }
 
-  Future<void> login({
+  Future<GeneralResponse> login({
     required String username,
     required String password,
-    required GeneralCallback<GeneralResponse> callback,
   }) async {
     try {
       final Response<Int8List> response = await dio.post<Int8List>(
@@ -60,28 +59,31 @@ class TuitionHelper {
           'passwd': password,
         },
       );
-      final String _ = const Utf8Decoder().convert(response.data!);
+      final String data = const Utf8Decoder().convert(response.data!);
       // debugPrint('Request =  ${response.request.data}');
       // debugPrint('Response =  $text');
       //    debugPrint('response.statusCode = ${response.statusCode}');
+      CrashlyticsUtil.instance.recordError(
+        GeneralResponse.unknownError(),
+        StackTrace.current,
+        information: <Object>[data],
+      );
+      throw GeneralResponse.unknownError();
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
           e.response!.statusCode == 302) {
         isLogin = true;
-        return callback.onSuccess(GeneralResponse.success());
+        return GeneralResponse.success();
       } else {
-        callback.onFailure(e);
         // debugPrint(big5.decode(e.response.data));
+        rethrow;
       }
-    } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
+    } catch (_) {
       rethrow;
     }
   }
 
-  Future<void> getData({
-    required GeneralCallback<List<TuitionAndFees>> callback,
-  }) async {
+  Future<List<TuitionAndFees>> getData() async {
     const String url = '$basePATH/tfstu/tfstudata.asp?act=11';
     try {
       final Response<Uint8List> response = await dio.get<Uint8List>(
@@ -91,11 +93,11 @@ class TuitionHelper {
       final String text = const Utf8Decoder().convert(response.data!);
       // debugPrint('text =  ${text}');
       if (text.contains('沒有合乎查詢條件的資料')) {
-        callback.onSuccess(<TuitionAndFees>[]);
+        return <TuitionAndFees>[];
       }
       final Document document = parse(text, encoding: 'BIG-5');
       final List<Element> tbody = document.getElementsByTagName('tbody');
-      List<TuitionAndFees> list = <TuitionAndFees>[];
+      final List<TuitionAndFees> list = <TuitionAndFees>[];
       final List<Element> trElements = tbody[1].getElementsByTagName('tr');
       for (int i = 1; i < trElements.length; i++) {
         final List<Element> tdDoc = trElements[i].getElementsByTagName('td');
@@ -134,19 +136,16 @@ class TuitionHelper {
           ),
         );
       }
-      list = list.reversed.toList();
-      callback.onSuccess(list);
-    } on DioException catch (e) {
-      callback.onFailure(e);
+      return list.reversed.toList();
+    } on DioException catch (_) {
+      rethrow;
     } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
       rethrow;
     }
   }
 
-  Future<void> downloadFdf({
+  Future<Uint8List?> downloadFdf({
     required String serialNumber,
-    required GeneralCallback<Uint8List?> callback,
   }) async {
     try {
       final Response<Uint8List> response = await dio.get<Uint8List>(
@@ -161,11 +160,10 @@ class TuitionHelper {
       //    String dir = (await getApplicationDocumentsDirectory()).path;
       //    File file = new File('$dir/$filename');
       //    await file.writeAsBytes(bytes);
-      return callback.onSuccess(response.data) ?? response.data;
-    } on DioException catch (e) {
-      callback.onFailure(e);
+      return response.data;
+    } on DioException catch (_) {
+      rethrow;
     } on Exception {
-      callback.onError(GeneralResponse.unknownError());
       rethrow;
     }
   }

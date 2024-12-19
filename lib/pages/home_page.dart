@@ -442,11 +442,25 @@ class HomePageState extends State<HomePage> {
         .toUpperCase();
     final String password =
         PreferenceUtil.instance.getStringSecurity(Constants.prefPassword, '');
-    SelcrsHelper.instance.login(
-      username: username,
-      password: password,
-      callback: GeneralCallback<GeneralResponse>(
-        onError: (GeneralResponse e) {
+    try {
+      final GeneralResponse _ = await SelcrsHelper.instance.login(
+        username: username,
+        password: password,
+      );
+      _homeKey.currentState!.showBasicHint(text: ap.loginSuccess);
+      setState(() {
+        ShareDataWidget.of(context)!.data.isLogin = true;
+      });
+      if (!mounted) return;
+      ShareDataWidget.of(context)!.data.getUserInfo();
+    } catch (e) {
+      if (!mounted) return;
+      switch (e) {
+        case DioException():
+          _homeKey.currentState!.showBasicHint(
+            text: e.i18nMessage!,
+          );
+        case GeneralResponse():
           if (e.statusCode == 400) {
             _homeKey.currentState!.showBasicHint(text: ap.loginFail);
           } else if (e.statusCode == 401) {
@@ -462,21 +476,8 @@ class HomePageState extends State<HomePage> {
           } else {
             _homeKey.currentState!.showBasicHint(text: ap.unknownError);
           }
-        },
-        onFailure: (DioException e) {
-          _homeKey.currentState!.showBasicHint(
-            text: e.i18nMessage!,
-          );
-        },
-        onSuccess: (GeneralResponse data) {
-          _homeKey.currentState!.showBasicHint(text: ap.loginSuccess);
-          setState(() {
-            ShareDataWidget.of(context)!.data.isLogin = true;
-          });
-          ShareDataWidget.of(context)!.data.getUserInfo();
-        },
-      ),
-    );
+      }
+    }
   }
 
   Future<void> _checkUpdate() async {

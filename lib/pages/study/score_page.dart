@@ -115,44 +115,33 @@ class ScorePageState extends State<ScorePage> {
     );
   }
 
-  Function(DioException e) get _onFailure => (DioException e) => setState(() {
-        state = ScoreState.error;
-        switch (e.type) {
-          case DioExceptionType.connectionError:
-          case DioExceptionType.connectionTimeout:
-          case DioExceptionType.sendTimeout:
-          case DioExceptionType.receiveTimeout:
-          case DioExceptionType.badResponse:
-          case DioExceptionType.cancel:
-          case DioExceptionType.badCertificate:
-            break;
-          case DioExceptionType.unknown:
-            throw e;
+  Future<void> _getSemester() async {
+    try {
+      final ScoreSemesterData data =
+          await SelcrsHelper.instance.getScoreSemesterData();
+      scoreSemesterData = data;
+      years = <String>[];
+      semesters = <String>[];
+      for (final SemesterOptions option in scoreSemesterData!.years) {
+        years.add(option.text);
+      }
+      for (final SemesterOptions option in scoreSemesterData!.semesters) {
+        semesters.add(option.text);
+      }
+      _getSemesterScore();
+    } catch (e, s) {
+      setState(() {
+        switch (e) {
+          case DioException():
+            state = ScoreState.error;
+            if (e.type == DioExceptionType.unknown) {
+              CrashlyticsUtil.instance.recordError(e, s);
+            }
+          case GeneralResponse():
+            state = ScoreState.error;
         }
       });
-
-  Function(GeneralResponse e) get _onError =>
-      (_) => setState(() => state = ScoreState.error);
-
-  Future<void> _getSemester() async {
-    SelcrsHelper.instance.getScoreSemesterData(
-      callback: GeneralCallback<ScoreSemesterData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (ScoreSemesterData data) {
-          scoreSemesterData = data;
-          years = <String>[];
-          semesters = <String>[];
-          for (final SemesterOptions option in scoreSemesterData!.years) {
-            years.add(option.text);
-          }
-          for (final SemesterOptions option in scoreSemesterData!.semesters) {
-            semesters.add(option.text);
-          }
-          _getSemesterScore();
-        },
-      ),
-    );
+    }
   }
 
   Future<void> _getSemesterScore() async {
@@ -161,26 +150,34 @@ class ScorePageState extends State<ScorePage> {
       return;
     }
     final int month = DateTime.now().month;
-    SelcrsHelper.instance.getScoreData(
-      year: scoreSemesterData!.years[currentYearsIndex].value,
-      semester: scoreSemesterData!.semesters[currentSemesterIndex].value,
-      searchPreScore: month == 6 || month == 7 || month == 1 || month == 2,
-      callback: GeneralCallback<ScoreData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (ScoreData data) {
-          scoreData = data;
-          if (mounted && scoreData != null) {
-            setState(() {
-              if (scoreData!.scores.isEmpty) {
-                state = ScoreState.empty;
-              } else {
-                state = ScoreState.finish;
-              }
-            });
+    try {
+      final ScoreData data = await SelcrsHelper.instance.getScoreData(
+        year: scoreSemesterData!.years[currentYearsIndex].value,
+        semester: scoreSemesterData!.semesters[currentSemesterIndex].value,
+        searchPreScore: month == 6 || month == 7 || month == 1 || month == 2,
+      );
+      scoreData = data;
+      if (mounted && scoreData != null) {
+        setState(() {
+          if (scoreData!.scores.isEmpty) {
+            state = ScoreState.empty;
+          } else {
+            state = ScoreState.finish;
           }
-        },
-      ),
-    );
+        });
+      }
+    } catch (e, s) {
+      setState(() {
+        switch (e) {
+          case DioException():
+            state = ScoreState.error;
+            if (e.type == DioExceptionType.unknown) {
+              CrashlyticsUtil.instance.recordError(e, s);
+            }
+          case GeneralResponse():
+            state = ScoreState.error;
+        }
+      });
+    }
   }
 }

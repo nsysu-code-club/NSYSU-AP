@@ -29,8 +29,7 @@ class BusHelper {
     cookieJar.loadForRequest(Uri.parse(basePath));
   }
 
-  Future<void> getBusInfoList({
-    required GeneralCallback<List<BusInfo>?> callback,
+  Future<List<BusInfo>> getBusInfoList({
     required Locale locale,
   }) async {
     try {
@@ -48,26 +47,39 @@ class BusHelper {
           responseType: ResponseType.plain,
         ),
       );
-      if (response.data != null) {
-        final List<BusInfo>? list = BusInfo.fromRawList(response.data!);
-        callback.onSuccess(list);
+      if (response.data case final String data?) {
+        if (BusInfo.fromRawList(data) case final List<BusInfo> list?) {
+          return list;
+        } else {
+          CrashlyticsUtil.instance.recordError(
+            GeneralResponse.unknownError(),
+            StackTrace.current,
+            information: <Object>[
+              data,
+            ],
+          );
+          throw GeneralResponse.unknownError();
+        }
       } else {
-        callback.onError(GeneralResponse.unknownError());
+        CrashlyticsUtil.instance.recordError(
+          GeneralResponse.unknownError(),
+          StackTrace.current,
+          information: <Object>[
+            response.statusMessage ?? response.toString(),
+          ],
+        );
         throw response.statusMessage ?? response.toString();
       }
-    } on DioException catch (e) {
-      callback.onFailure(e);
-      // debugPrint(big5.decode(e.response.data));
+    } on DioException catch (_) {
+      rethrow;
     } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
       rethrow;
     }
   }
 
-  Future<void> getBusTime({
+  Future<List<BusTime>> getBusTime({
     required Locale locale,
     required BusInfo busInfo,
-    required GeneralCallback<List<BusTime>?> callback,
   }) async {
     try {
       String languageCode;
@@ -89,18 +101,25 @@ class BusHelper {
           },
         ),
       );
-      if (response.data != null) {
-        final List<BusTime>? list = BusTime.fromRawList(response.data!);
-        callback.onSuccess(list);
+      if (response.data case final String data?) {
+        if (BusTime.fromRawList(data) case final List<BusTime> list?) {
+          return list;
+        } else {
+          CrashlyticsUtil.instance.recordError(
+            GeneralResponse.unknownError(),
+            StackTrace.current,
+            information: <Object>[
+              data,
+            ],
+          );
+          throw GeneralResponse.unknownError();
+        }
       } else {
-        callback.onError(GeneralResponse.unknownError());
         throw response.statusMessage ?? response.toString();
       }
-    } on DioException catch (e) {
-      callback.onFailure(e);
-      // debugPrint(big5.decode(e.response.data));
+    } on DioException catch (_) {
+      rethrow;
     } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
       rethrow;
     }
   }

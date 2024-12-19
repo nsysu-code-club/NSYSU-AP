@@ -72,22 +72,6 @@ class CoursePageState extends State<CoursePage> {
     );
   }
 
-  Function(DioException) get _onFailure => (DioException e) {
-        setState(() {
-          //if (courseData != null) {
-          customHint = ap.offlineCourse;
-          state = CourseState.finish;
-          //}
-          // else {
-          //   customStateHint = e.i18nMessage;
-          //   state = CourseState.error;
-          // }
-        });
-      };
-
-  Function(GeneralResponse) get _onError =>
-      (_) => setState(() => state = CourseState.error);
-
   Future<void> _getSemester() async {
     FirebaseRemoteConfig remoteConfig;
     try {
@@ -126,31 +110,38 @@ class CoursePageState extends State<CoursePage> {
       value: defaultSemesterCode.substring(3),
       text: parser(defaultSemesterCode),
     );
-    SelcrsHelper.instance.getCourseSemesterData(
-      defaultSemester: defaultSemester,
-      callback: GeneralCallback<SemesterData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (SemesterData data) async {
-          semesterData = data;
-          final String semester = PreferenceUtil.instance.getString(
-            ApConstants.currentSemesterCode,
-            ApConstants.semesterLatest,
-          );
-          if (semester != defaultSemesterCode) {
-            PreferenceUtil.instance.setString(
-              ApConstants.currentSemesterCode,
-              defaultSemesterCode,
-            );
-          }
-          for (final Semester option in semesterData!.data) {
-            option.text = parser(option.text);
-          }
-          semesterData!.currentIndex = semesterData!.defaultIndex;
-          _getCourseTables();
-        },
-      ),
-    );
+    try {
+      final SemesterData data =
+          await SelcrsHelper.instance.getCourseSemesterData(
+        defaultSemester: defaultSemester,
+      );
+      semesterData = data;
+      final String semester = PreferenceUtil.instance.getString(
+        ApConstants.currentSemesterCode,
+        ApConstants.semesterLatest,
+      );
+      if (semester != defaultSemesterCode) {
+        PreferenceUtil.instance.setString(
+          ApConstants.currentSemesterCode,
+          defaultSemesterCode,
+        );
+      }
+      for (final Semester option in semesterData!.data) {
+        option.text = parser(option.text);
+      }
+      semesterData!.currentIndex = semesterData!.defaultIndex;
+      _getCourseTables();
+    } catch (e) {
+      setState(() {
+        switch (e) {
+          case DioException():
+            customHint = ap.offlineCourse;
+            state = CourseState.finish;
+          default:
+            state = CourseState.error;
+        }
+      });
+    }
   }
 
   String parser(String text) {
@@ -188,27 +179,34 @@ class CoursePageState extends State<CoursePage> {
       return;
     }
     notifyData = CourseNotifyData.load(courseNotifyCacheKey);
-    SelcrsHelper.instance.getCourseData(
-      username: SelcrsHelper.instance.username,
-      timeCodeConfig: timeCodeConfig,
-      semester: semesterData!.currentSemester.code,
-      callback: GeneralCallback<CourseData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (CourseData data) {
-          courseData = data;
-          courseData.save(courseNotifyCacheKey);
-          if (mounted) {
-            setState(() {
-              if (courseData.courses.isEmpty) {
-                state = CourseState.empty;
-              } else {
-                state = CourseState.finish;
-              }
-            });
+    try {
+      final CourseData data = await SelcrsHelper.instance.getCourseData(
+        username: SelcrsHelper.instance.username,
+        timeCodeConfig: timeCodeConfig,
+        semester: semesterData!.currentSemester.code,
+      );
+      courseData = data;
+      courseData.save(courseNotifyCacheKey);
+      if (mounted) {
+        setState(() {
+          if (courseData.courses.isEmpty) {
+            state = CourseState.empty;
+          } else {
+            state = CourseState.finish;
           }
-        },
-      ),
-    );
+        });
+      }
+    } catch (e, s) {
+      setState(() {
+        switch (e) {
+          case DioException():
+            customHint = ap.offlineCourse;
+            state = CourseState.finish;
+          default:
+            state = CourseState.error;
+            CrashlyticsUtil.instance.recordError(e, s);
+        }
+      });
+    }
   }
 }

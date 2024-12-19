@@ -134,25 +134,29 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     });
   }
 
-  void getUserInfo() {
-    SelcrsHelper.instance.getUserInfo(
-      callback: GeneralCallback<UserInfo>(
-        onFailure: (DioException e) {
+  Future<void> getUserInfo() async {
+    try {
+      final UserInfo data = await SelcrsHelper.instance.getUserInfo();
+      setState(() {
+        userInfo = data;
+      });
+      AnalyticsUtil.instance.logUserInfo(data);
+    } catch (e, s) {
+      switch (e) {
+        case DioException():
           if (e.i18nMessage != null) {
+            if (!mounted) return;
             UiUtil.instance.showToast(context, e.i18nMessage!);
           }
-        },
-        onError: (GeneralResponse e) => UiUtil.instance
-            .showToast(context, ApLocalizations.current.somethingError),
-        onSuccess: (UserInfo data) {
-          setState(() {
-            userInfo = data;
-          });
-          if (userInfo != null) {
-            AnalyticsUtil.instance.logUserInfo(userInfo!);
-          }
-        },
-      ),
-    );
+        case GeneralResponse():
+        case Object():
+          if (!mounted) return;
+          UiUtil.instance.showToast(
+            context,
+            ApLocalizations.current.somethingError,
+          );
+          CrashlyticsUtil.instance.recordError(e, s);
+      }
+    }
   }
 }

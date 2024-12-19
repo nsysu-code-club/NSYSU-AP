@@ -192,49 +192,59 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     if (_name.text.isEmpty || _id.text.isEmpty) {
       UiUtil.instance.showToast(context, ap.doNotEmpty);
     } else {
-      SelcrsHelper.instance.getUsername(
-        name: _name.text,
-        id: _id.text,
-        callback: GeneralCallback<String>.simple(
-          context,
-          (String result) {
-            final List<String> list = result.split('--');
-            if (list.length == 2 && isAutoFill) {
-              Navigator.pop(context, list[1]);
-            } else {
-              final AppLocalizations app = AppLocalizations.of(context);
-              showDialog(
-                context: context,
-                builder: (BuildContext context) => DefaultDialog(
-                  title: ap.searchResult,
-                  actionText: ap.iKnow,
-                  actionFunction: () =>
-                      Navigator.of(context, rootNavigator: true).pop('dialog'),
-                  contentWidget: RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        color: ApTheme.of(context).grey,
-                        height: 1.3,
-                        fontSize: 16.0,
-                      ),
-                      children: <InlineSpan>[
-                        TextSpan(
-                          text: result,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        if (list.length == 2)
-                          TextSpan(
-                            text: '\n\n${app.firstLoginHint}',
-                          ),
-                      ],
-                    ),
+      try {
+        final String result = await SelcrsHelper.instance.getUsername(
+          name: _name.text,
+          id: _id.text,
+        );
+        if (!mounted) return;
+        final List<String> list = result.split('--');
+        if (list.length == 2 && isAutoFill) {
+          Navigator.pop(context, list[1]);
+        } else {
+          final AppLocalizations app = AppLocalizations.of(context);
+          showDialog(
+            context: context,
+            builder: (BuildContext context) => DefaultDialog(
+              title: ap.searchResult,
+              actionText: ap.iKnow,
+              actionFunction: () =>
+                  Navigator.of(context, rootNavigator: true).pop('dialog'),
+              contentWidget: RichText(
+                text: TextSpan(
+                  style: TextStyle(
+                    color: ApTheme.of(context).grey,
+                    height: 1.3,
+                    fontSize: 16.0,
                   ),
+                  children: <InlineSpan>[
+                    TextSpan(
+                      text: result,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    if (list.length == 2)
+                      TextSpan(
+                        text: '\n\n${app.firstLoginHint}',
+                      ),
+                  ],
                 ),
-              );
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        if (!mounted) return;
+        switch (e) {
+          case DioException():
+            if (e.i18nMessage case final String message?) {
+              UiUtil.instance.showToast(context, message);
             }
-          },
-        ),
-      );
+          case GeneralResponse():
+            UiUtil.instance.showToast(context, e.message);
+          default:
+            UiUtil.instance.showToast(context, ap.unknownError);
+        }
+      }
     }
   }
 }

@@ -42,10 +42,9 @@ class GraduationHelper {
   * error status code
   * 401: 帳號密碼錯誤
   * */
-  Future<void> login({
+  Future<GeneralResponse> login({
     required String username,
     required String password,
-    required GeneralCallback<GeneralResponse> callback,
   }) async {
     try {
       final String base64md5Password = Utils.base64md5(password);
@@ -66,32 +65,28 @@ class GraduationHelper {
 //          print('Response =  $text');
       //    print('response.statusCode = ${response.statusCode}');
       if (text.contains('資料錯誤請重新輸入')) {
-        callback.onError(
-          GeneralResponse(statusCode: 401, message: 'graduation login error'),
+        throw GeneralResponse(
+          statusCode: 401,
+          message: 'graduation login error',
         );
       } else {
-        callback.onError(
-          GeneralResponse.unknownError(),
-        );
+        throw GeneralResponse.unknownError();
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
           e.response!.statusCode == 302) {
         isLogin = true;
-        callback.onSuccess(GeneralResponse.success());
+        return GeneralResponse.success();
       } else {
-        callback.onFailure(e);
         rethrow;
       }
     } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
       rethrow;
     }
   }
 
-  Future<void> getGraduationReport({
+  Future<GraduationReportData?> getGraduationReport({
     required String username,
-    required GeneralCallback<GraduationReportData?> callback,
   }) async {
     final String url =
         '${SelcrsHelper.instance.selcrsUrl}/gadchk/gad_chk_stu_list.asp?'
@@ -211,20 +206,17 @@ class GraduationHelper {
           print(DateTime.now());
         }
       } else {
-        callback.onSuccess(null);
-        return;
+        return null;
       }
       //    graduationReportData.generalEducationCourse.forEach((i) {
       //      print('type = ${i.type}');
       //    });
       final int endTime = DateTime.now().millisecondsSinceEpoch;
       debugPrint(((endTime - startTime) / 1000.0).toString());
-      callback.onSuccess(graduationReportData);
-    } on DioException catch (e) {
-      callback.onFailure(e);
+      return graduationReportData;
+    } on DioException catch (_) {
       rethrow;
     } catch (e) {
-      callback.onError(GeneralResponse.unknownError());
       rethrow;
     }
   }
