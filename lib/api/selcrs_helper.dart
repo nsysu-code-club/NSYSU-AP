@@ -6,6 +6,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:nsysu_ap/api/exception/selcrs_exception.dart';
 import 'package:nsysu_ap/api/parser/selcrs_parser.dart';
 import 'package:nsysu_ap/models/pre_score.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
@@ -124,10 +125,10 @@ class SelcrsHelper {
       );
       final String text = const Utf8Decoder().convert(scoreResponse.data!);
       if (text.contains('資料錯誤請重新輸入')) {
-        throw GeneralResponse(statusCode: 400, message: 'score error');
+        throw SelcrsLoginScorePasswordException();
       } else {
         dumpError('score', text);
-        throw GeneralResponse.unknownError();
+        throw SelcrsLoginUnknownException();
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
@@ -156,16 +157,13 @@ class SelcrsHelper {
       final String text = const Utf8Decoder().convert(courseResponse.data!);
 //      debugPrint('course =  $text');
       if (text.contains('學號碼密碼不符')) {
-        throw GeneralResponse(statusCode: 400, message: 'course error');
+        throw SelcrsLoginCoursePasswordException();
       } else if (text.contains('請先填寫')) {
         ///https://regweb.nsysu.edu.tw/webreg/confirm_wuhan_pneumonia.asp?STUID=%s&STAT_COD=1&STATUS_COD=1&LOGINURL=https://selcrs.nsysu.edu.tw/
-        throw GeneralResponse(
-          statusCode: 401,
-          message: 'need to fill out form',
-        );
+        throw SelcrsLoginConfirmFormException();
       } else {
         dumpError('course', text);
-        throw GeneralResponse.unknownError();
+        throw SelcrsLoginUnknownException();
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&

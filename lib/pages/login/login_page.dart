@@ -1,6 +1,7 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:nsysu_ap/api/exception/selcrs_login_exception.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/login/search_student_id_page.dart';
@@ -200,33 +201,35 @@ class LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         Navigator.of(context).pop(true);
         TextInput.finishAutofillContext();
-      } catch (e) {
+      } on SelcrsLoginException catch (e) {
+        Navigator.pop(context);
         switch (e) {
-          case DioException():
-            if (e.i18nMessage != null) {
-              Navigator.pop(context);
-              UiUtil.instance.showToast(context, e.i18nMessage!);
-            }
-          case GeneralResponse():
-            Navigator.pop(context);
-            if (e.statusCode == 400) {
-              UiUtil.instance.showToast(context, ap.loginFail);
-            } else if (e.statusCode == 401) {
-              UiUtil.instance.showToast(
-                context,
-                AppLocalizations.of(context).pleaseConfirmForm,
-              );
-              Utils.openConfirmForm(
-                context,
-                mounted: mounted,
-                username: username,
-              );
-            } else {
-              UiUtil.instance.showToast(context, ap.unknownError);
-            }
-          default:
+          case SelcrsLoginCoursePasswordException() ||
+                SelcrsLoginScorePasswordException():
+            UiUtil.instance.showToast(context, ap.loginFail);
+          case SelcrsLoginConfirmFormException():
+            UiUtil.instance.showToast(
+              context,
+              AppLocalizations.of(context).pleaseConfirmForm,
+            );
+            Utils.openConfirmForm(
+              context,
+              mounted: mounted,
+              username: username,
+            );
+          case SelcrsLoginUnknownException():
             UiUtil.instance.showToast(context, ap.unknownError);
         }
+      } on DioException catch (e) {
+        Navigator.pop(context);
+        if (e.i18nMessage != null) {
+          Navigator.pop(context);
+          UiUtil.instance.showToast(context, e.i18nMessage!);
+        }
+      } catch (e, s) {
+        Navigator.pop(context);
+        UiUtil.instance.showToast(context, ap.unknownError);
+        CrashlyticsUtil.instance.recordError(e, s);
       }
     }
   }

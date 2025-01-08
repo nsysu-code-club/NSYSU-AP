@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:nsysu_ap/api/exception/selcrs_login_exception.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
@@ -453,30 +454,33 @@ class HomePageState extends State<HomePage> {
       });
       if (!mounted) return;
       ShareDataWidget.of(context)!.data.getUserInfo();
-    } catch (e) {
-      if (!mounted) return;
+    } on SelcrsLoginException catch (e) {
       switch (e) {
-        case DioException():
-          _homeKey.currentState!.showBasicHint(
-            text: e.i18nMessage!,
+        case SelcrsLoginCoursePasswordException() ||
+              SelcrsLoginScorePasswordException():
+          _homeKey.currentState?.showBasicHint(text: ap.loginFail);
+        case SelcrsLoginConfirmFormException():
+          UiUtil.instance.showToast(
+            context,
+            AppLocalizations.of(context).pleaseConfirmForm,
           );
-        case GeneralResponse():
-          if (e.statusCode == 400) {
-            _homeKey.currentState!.showBasicHint(text: ap.loginFail);
-          } else if (e.statusCode == 401) {
-            UiUtil.instance.showToast(
-              context,
-              AppLocalizations.of(context).pleaseConfirmForm,
-            );
-            Utils.openConfirmForm(
-              context,
-              mounted: mounted,
-              username: username,
-            );
-          } else {
-            _homeKey.currentState!.showBasicHint(text: ap.unknownError);
-          }
+          Utils.openConfirmForm(
+            context,
+            mounted: mounted,
+            username: username,
+          );
+        case SelcrsLoginUnknownException():
+          _homeKey.currentState?.showBasicHint(text: ap.unknownError);
       }
+    } on DioException catch (e) {
+      if (e.i18nMessage case final String message?) {
+        _homeKey.currentState?.showBasicHint(
+          text: message,
+        );
+      }
+    } catch (e, s) {
+      _homeKey.currentState?.showBasicHint(text: ap.unknownError);
+      CrashlyticsUtil.instance.recordError(e, s);
     }
   }
 
