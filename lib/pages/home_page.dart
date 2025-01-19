@@ -116,11 +116,11 @@ class HomePageState extends State<HomePage> {
       key: _homeKey,
       isLogin: isLogin,
       state: state,
-      title: app.appName,
+      title: (userInfo != null) ? 'Hi ${userInfo?.name}' : app.appName,
       content: content,
       actions: <Widget>[
         IconButton(
-          icon: const Icon(Icons.fiber_new_rounded),
+          icon: const Icon(Icons.post_add),
           tooltip: ap.announcementReviewSystem,
           onPressed: () async {
             AnnouncementHelper.instance.organization = 'nsysu';
@@ -349,16 +349,16 @@ class HomePageState extends State<HomePage> {
       ),
       announcements: announcements,
       onTabTapped: onTabTapped,
-      bottomNavigationBarItems: <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
+      bottomNavigationBarItems: <Widget>[
+        NavigationDestination(
           icon: Icon(ApIcon.directionsBus),
           label: ap.bus,
         ),
-        BottomNavigationBarItem(
+        NavigationDestination(
           icon: Icon(ApIcon.classIcon),
           label: ap.course,
         ),
-        BottomNavigationBarItem(
+        NavigationDestination(
           icon: Icon(ApIcon.assignment),
           label: ap.score,
         ),
