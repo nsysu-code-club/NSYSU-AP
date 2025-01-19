@@ -44,6 +44,20 @@ class SelcrsHelper {
   String username = '';
   String password = '';
 
+  Map<String, double> scoreToGPA = <String, double>{
+    'A+': 4.3,
+    'A': 4.0,
+    'A-': 3.7,
+    'B+': 3.3,
+    'B': 3.0,
+    'B-': 2.7,
+    'C+': 2.3,
+    'C': 2.0,
+    'C-': 1.7,
+    'D': 1.0,
+    'F': 0.0,
+  };
+
   bool isLogin = false;
 
   int reLoginCount = 0;
@@ -360,7 +374,6 @@ class SelcrsHelper {
             case 'zh':
             default:
               title = titles[0];
-              break;
           }
         }
         final String instructors = tdDoc[8].text;
@@ -510,23 +523,10 @@ class SelcrsHelper {
         //          print("i $i j $j => ${fontDoc[j].text}");
         //        }
         //      }
-        if (tableDoc.length == 3) {
-          final List<dom.Element> fontDoc =
-              tableDoc[1].getElementsByTagName('font');
-          double percentage = double.parse(fontDoc[4].text.split('：')[1]) /
-              double.parse(fontDoc[5].text.split('：')[1]);
-          percentage = 1.0 - percentage;
-          percentage *= 100;
-          detail = Detail(
-            creditTaken: double.parse(fontDoc[0].text.split('：')[1]),
-            creditEarned: double.parse(fontDoc[1].text.split('：')[1]),
-            average: double.parse(fontDoc[2].text.split('：')[1]),
-            classRank:
-                '${fontDoc[4].text.split('：')[1]}/${fontDoc[5].text.split('：')[1]}',
-            classPercentage: double.parse(percentage.toStringAsFixed(2)),
-          );
-        }
         final List<dom.Element> trDoc = tableDoc[0].getElementsByTagName('tr');
+        double preCreditTakenCount = 0;
+        double preCreditEarnedCount = 0;
+        double preAverage = 0;
         for (int i = 0; i < trDoc.length; i++) {
           final List<dom.Element> fontDoc =
               trDoc[i].getElementsByTagName('font');
@@ -541,6 +541,7 @@ class SelcrsHelper {
               finalScore: fontDoc[5].text,
               units: '',
             );
+            preCreditTakenCount += double.parse(fontDoc[4].text);
             if (searchPreScore &&
                 (score.finalScore == null ||
                     (score.finalScore ?? '') == '--')) {
@@ -553,7 +554,39 @@ class SelcrsHelper {
                 );
               }
             }
+            if (scoreToGPA.containsKey(score.finalScore)) {
+              preCreditEarnedCount += double.parse(fontDoc[4].text);
+              preAverage += (scoreToGPA[score.finalScore ?? ''] ?? 0) *
+                  double.parse(fontDoc[4].text);
+            }
             list.add(score);
+          }
+          if (tableDoc.length == 3) {
+            final List<dom.Element> fontDoc =
+                tableDoc[1].getElementsByTagName('font');
+            double percentage = double.parse(fontDoc[4].text.split('：')[1]) /
+                double.parse(fontDoc[5].text.split('：')[1]);
+            percentage = 1.0 - percentage;
+            percentage *= 100;
+            detail = Detail(
+              creditTaken: double.parse(fontDoc[0].text.split('：')[1]),
+              creditEarned: double.parse(fontDoc[1].text.split('：')[1]),
+              average: double.parse(fontDoc[2].text.split('：')[1]),
+              classRank:
+                  '${fontDoc[4].text.split('：')[1]}/${fontDoc[5].text.split('：')[1]}',
+              classPercentage: double.parse(percentage.toStringAsFixed(2)),
+            );
+          } else {
+            detail = Detail(
+              creditTaken: preCreditTakenCount,
+              creditEarned: preCreditEarnedCount,
+              average: (preCreditEarnedCount != 0)
+                  ? double.parse(
+                      (preAverage / preCreditEarnedCount).toStringAsFixed(2),
+                    )
+                  : 0,
+              classRank: '',
+            );
           }
         }
         final int endTime = DateTime.now().millisecondsSinceEpoch;

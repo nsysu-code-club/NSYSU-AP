@@ -60,3 +60,6 @@ lib/firebase_options.dart
 
 # FVM Version Cache
 .fvm/
+
+# Dev Configs
+pubspec_overrides.yaml
