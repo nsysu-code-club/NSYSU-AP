@@ -42,7 +42,6 @@ class _BusListPageState extends State<BusListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(ap.bus),
-        backgroundColor: ApTheme.of(context).blue,
       ),
       body: _body(),
     );

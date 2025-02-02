@@ -49,7 +49,6 @@ class GraduationReportPageState extends State<GraduationReportPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(app.graduationCheckChecklist),
-        backgroundColor: ApTheme.of(context).blue,
       ),
       body: Flex(
         direction: Axis.vertical,

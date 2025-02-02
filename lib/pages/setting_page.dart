@@ -39,7 +39,6 @@ class SettingPageState extends State<SettingPage> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text(ap.settings),
-        backgroundColor: ApTheme.of(context).blue,
       ),
       body: SingleChildScrollView(
         child: Column(

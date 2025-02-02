@@ -61,7 +61,6 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(ap.schoolInfo),
-        backgroundColor: ApTheme.of(context).blue,
       ),
       body: TabBarView(
         controller: controller,
