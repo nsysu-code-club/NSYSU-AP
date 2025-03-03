@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/exception/tuition_login_exception.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
@@ -186,6 +187,10 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
         password: SelcrsHelper.instance.password,
       );
       _getData();
+    } on TuitionLoginException catch (_) {
+      setState(() {
+        state = _State.error;
+      });
     } catch (e, s) {
       setState(() {
         switch (e) {

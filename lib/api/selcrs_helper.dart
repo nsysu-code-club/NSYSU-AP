@@ -6,7 +6,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:nsysu_ap/api/exception/selcrs_exception.dart';
+import 'package:nsysu_ap/api/exception/selcrs_login_exception.dart';
 import 'package:nsysu_ap/api/parser/selcrs_parser.dart';
 import 'package:nsysu_ap/models/pre_score.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';

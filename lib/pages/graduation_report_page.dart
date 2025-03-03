@@ -1,5 +1,6 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/api/exception/graduation_login_exception.dart';
 import 'package:nsysu_ap/api/graduation_helper.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
@@ -342,6 +343,14 @@ class GraduationReportPageState extends State<GraduationReportPage>
         password: SelcrsHelper.instance.password,
       );
       _getGraduationReport();
+    } on GraduationLoginException catch (e) {
+      setState(() {
+        switch (e) {
+          case GraduationLoginPasswordException():
+          case GraduationLoginUnknownException():
+            state = _State.error;
+        }
+      });
     } catch (e, s) {
       setState(() {
         switch (e) {

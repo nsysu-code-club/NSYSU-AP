@@ -4,6 +4,7 @@ import 'package:ap_common/ap_common.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart';
+import 'package:nsysu_ap/api/exception/graduation_login_exception.dart';
 import 'package:nsysu_ap/api/parser/graduation_parser.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/models/graduation_report_data.dart';
@@ -66,22 +67,19 @@ class GraduationHelper {
 //          print('Response =  $text');
       //    print('response.statusCode = ${response.statusCode}');
       if (text.contains('資料錯誤請重新輸入')) {
-        throw GeneralResponse(
-          statusCode: 401,
-          message: 'graduation login error',
-        );
+        throw GraduationLoginPasswordException();
       } else {
-        throw GeneralResponse.unknownError();
+        throw GraduationLoginUnknownException();
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
-          e.response!.statusCode == 302) {
+          e.response?.statusCode == 302) {
         isLogin = true;
         return GeneralResponse.success();
       } else {
         rethrow;
       }
-    } on Exception catch (_) {
+    } catch (_) {
       rethrow;
     }
   }

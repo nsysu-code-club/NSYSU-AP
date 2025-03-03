@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:ap_common/ap_common.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:nsysu_ap/api/exception/tuition_login_exception.dart';
 import 'package:nsysu_ap/api/parser/tuition_parser.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 
@@ -65,21 +66,22 @@ class TuitionHelper {
       // debugPrint('Response =  $text');
       //    debugPrint('response.statusCode = ${response.statusCode}');
       CrashlyticsUtil.instance.recordError(
-        GeneralResponse.unknownError(),
+        TuitionLoginUnknownException(),
         StackTrace.current,
         information: <Object>[data],
       );
-      throw GeneralResponse.unknownError();
+      throw TuitionLoginUnknownException();
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
-          e.response!.statusCode == 302) {
+          e.response?.statusCode == 302) {
         isLogin = true;
         return GeneralResponse.success();
       } else {
         // debugPrint(big5.decode(e.response.data));
         rethrow;
       }
-    } catch (_) {
+    } catch (e, s) {
+      CrashlyticsUtil.instance.recordError(e, s);
       rethrow;
     }
   }
