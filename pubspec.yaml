@@ -1,7 +1,7 @@
 name: nsysu_ap
 description: NSYSU AP
 
-version: 1.4.2+10402
+version: 1.4.3+10403
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
