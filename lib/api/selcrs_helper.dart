@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:ap_common/ap_common.dart';
@@ -527,6 +528,8 @@ class SelcrsHelper {
         double preCreditTakenCount = 0;
         double preCreditEarnedCount = 0;
         double preAverage = 0;
+        // double preClassPercentage = 0;
+        // String preRank = '';
         for (int i = 0; i < trDoc.length; i++) {
           final List<dom.Element> fontDoc =
               trDoc[i].getElementsByTagName('font');
@@ -566,7 +569,7 @@ class SelcrsHelper {
                 tableDoc[1].getElementsByTagName('font');
             double percentage = double.parse(fontDoc[4].text.split('：')[1]) /
                 double.parse(fontDoc[5].text.split('：')[1]);
-            percentage = 1.0 - percentage;
+            //percentage = 1.0 - percentage;
             percentage *= 100;
             detail = Detail(
               creditTaken: double.parse(fontDoc[0].text.split('：')[1]),
@@ -585,7 +588,6 @@ class SelcrsHelper {
                       (preAverage / preCreditEarnedCount).toStringAsFixed(2),
                     )
                   : 0,
-              classRank: '',
             );
           }
         }

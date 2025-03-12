@@ -60,7 +60,6 @@ class ScorePageState extends State<ScorePage> {
       state: state,
       scoreData: scoreData,
       middleTitle: ap.credits,
-      isShowSearchButton: false,
       customHint:
           hasPreScore ? AppLocalizations.of(context).hasPreScoreHint : null,
       itemPicker: Row(
