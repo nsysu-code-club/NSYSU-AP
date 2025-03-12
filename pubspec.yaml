@@ -16,7 +16,7 @@ dependencies:
 
   ap_common: ^0.26.0-dev.4
   ap_common_firebase: ^0.17.0-dev.3
-  ap_common_plugin: 0.5.0-dev.3
+  ap_common_plugin: 0.5.0-dev.4
   #     path: ../ap_common_plugin
 
   #official plugin
@@ -37,6 +37,7 @@ dependencies:
   google_sign_in_dartio: ^0.3.0
   json_annotation: ^4.6.0
   package_info_plus: ^8.0.3
+  printing: 5.13.4
 
 dev_dependencies:
   flutter_test:
