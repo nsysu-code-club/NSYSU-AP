@@ -45,7 +45,7 @@ jobs:
 
   build_ios:
     name: Build iOS App
-    runs-on: macos-13
+    runs-on: nsysu-test
     steps:
       # Ensure the xcode version is available
       - name: List Xcode installations
