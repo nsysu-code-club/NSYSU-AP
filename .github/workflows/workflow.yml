@@ -45,7 +45,7 @@ jobs:
 
   build_ios:
     name: Build iOS App
-    runs-on: nsysu-test
+    runs-on: self-hosted
     steps:
       # Ensure the xcode version is available
       - name: List Xcode installations
