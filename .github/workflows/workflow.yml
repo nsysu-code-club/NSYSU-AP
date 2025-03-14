@@ -64,7 +64,7 @@ jobs:
           DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
       - run: flutter pub get
       - name: Build iOS
-        run: flutter build ios --release --no-codesign
+        run: flutter build ipa
 
   build_web:
     name: Build Web App
