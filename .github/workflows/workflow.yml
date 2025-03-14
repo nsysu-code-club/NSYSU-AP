@@ -58,6 +58,8 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Flutter Version
         run: flutter doctor -v
+      - name: Activate flutterfire_cli
+        run: dart pub global activate flutterfire_cli 1.1.0
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
