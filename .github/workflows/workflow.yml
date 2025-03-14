@@ -31,7 +31,6 @@ jobs:
         with:
           flutter-version: '3.29.1'
           channel: 'stable'
-          cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
@@ -54,7 +53,6 @@ jobs:
         with:
           flutter-version: '3.29.1'
           channel: 'stable'
-          cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Flutter Version
         run: flutter doctor -v
