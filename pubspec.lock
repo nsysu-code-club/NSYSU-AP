@@ -41,12 +41,11 @@ packages:
     source: path
     version: "0.26.0-dev.4"
   ap_common_announcement_ui:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: ap_common_announcement_ui
-      sha256: "445bbeef73ddfb48dbd61cc5f3586e66ab1ca53f6a3c80f8cdd033012bbec98c"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../ap_common/packages/ap_common_announcement_ui"
+      relative: true
+    source: path
     version: "0.0.3"
   ap_common_core:
     dependency: transitive
@@ -91,10 +90,10 @@ packages:
     dependency: "direct main"
     description:
       name: ap_common_plugin
-      sha256: "6e9aa9f5458c448150f45b56e1bf21e88be50407fc4de0263d71fd8a2e7026f0"
+      sha256: f54435dc83443fc9996d86c17311eae73ed57347c499624f039f6e1e2293af6d
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.0-dev.3"
+    version: "0.5.0-dev.4"
   app_tracking_transparency:
     dependency: transitive
     description:
@@ -1007,10 +1006,10 @@ packages:
     dependency: "direct main"
     description:
       name: intl
-      sha256: a3715e3bc90294e971cb7dc063fbf3cd9ee0ebf8604ffeafabd9e6f16abbdbe6
+      sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
       url: "https://pub.dev"
     source: hosted
-    version: "0.18.0"
+    version: "0.20.2"
   io:
     dependency: transitive
     description:
