@@ -1,7 +1,7 @@
 [![Build Test](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/workflow.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/workflow.yml)
 # 中山校務通
 
- 提供中山大學學生查詢基本校務系統功能，由 Google 開源跨平台框架 [Flutter](https://flutter.dev/) 開發
+ 提供中山學生更方便的校務系統查詢入口，由 Google 開源跨平台框架 [Flutter](https://flutter.dev) 開發
 
 <a href='https://play.google.com/store/apps/details?id=com.nsysu.ap&hl=zh_TW'><img alt='Get it on the App Store' src='screenshots/google_play.png' height='48px'/></a>
 <a href='https://apps.apple.com/tw/app/id1467522198'><img alt='Get it on the App Store' src='screenshots/app_store.png' height='48px'/></a>
@@ -15,7 +15,7 @@
 - [ ] Linux
 
 ## 開發環境
- - Flutter 穩定版本 v3.24
+ - Flutter 穩定版本 v3.29
 ## 功能列表
 
 - 首頁最新消息
@@ -68,3 +68,11 @@
   - [ ] 總務處維修系統
   - [x] [學雜費繳費單列印暨繳費狀況查詢系統](https://tfstu.nsysu.edu.tw/)
   - [x] [校車系統](https://selcrs.nsysu.edu.tw/scoreqry/)
+
+## 維護團隊
+
+校務通源於高科校務通，後續衍伸出中山校務通，又因套件獨立而產生AP Common，讓校務通開發更加統一與高效。  
+目前由中山大學程式研習社做維護， App 商店託管由 [OCF 財團法人開放文化基金會](https://ocf.tw)管理。  
+開發人員：房志剛（Rainvisitor），胡智強（JohnHuCC），張柏瑄（Ryan Chang），蔡明軒（Yukimura），高聖傑（JasonZzz）
+
+OCF 由多個台灣開源社群共同發起，在開放源碼、開放資料、開放政府等領域，提供社群支援、組織合作、海外交流、顧問諮詢等服務。期待以法人組織的力量激起開放協作的火花。
