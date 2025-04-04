@@ -20,9 +20,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Setup Java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4
         with:
-          java-version: '17.0'
+          distribution: 'zulu'
+          java-version: '17'
       - name: Decrypt Android keys
         run: sh ./.github/scripts/decrypt_android_keys.sh
         env:
@@ -45,23 +46,24 @@ jobs:
 
   build_ios:
     name: Build iOS App
-    runs-on: macos-13
+    runs-on: self-hosted
     steps:
-      # Ensure the xcode version is available
-      - name: List Xcode installations
-        run: sudo ls -1 /Applications | grep "Xcode"
-      # Select your required version
-      - name: Select Xcode 15.0
-        run: sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
       - name: Checkout code
         uses: actions/checkout@v3
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.29.x'
           channel: 'stable'
-          cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+      - name: Flutter Version
+        run: flutter doctor -v
+      - name: Activate flutterfire_cli
+        run: dart pub global activate flutterfire_cli 1.1.0
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
