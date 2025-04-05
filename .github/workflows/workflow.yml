@@ -11,6 +11,10 @@ on:
     branches:
       - master
 
+env:
+  flutter_version: '3.29.2'
+  java_version: '17'
+
 jobs:
 
   build_android:
@@ -23,14 +27,14 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version:  ${{ env.java_version }}
       - name: Decrypt Android keys
         run: sh ./.github/scripts/decrypt_android_keys.sh
         env:
           KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.x'
+          flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
           cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
@@ -54,11 +58,11 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version:  ${{ env.java_version }}
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.x'
+          flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Flutter Initiaize

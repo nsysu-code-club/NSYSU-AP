@@ -5,6 +5,10 @@ on:
     tags:
       - "v*"
 
+env:
+  flutter_version: '3.29.2'
+  java_version: '17'
+
 jobs:
   # CD
   deploy_android:
@@ -17,7 +21,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: ${{ env.java_version }}
       - name: Decrypt Android keys
         run: sh ./.github/scripts/decrypt_android_keys.sh
         env:
@@ -31,7 +35,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.x'
+          flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
@@ -65,14 +69,19 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: ${{ env.java_version }}
       - name: Generate changelog
         run: bash ./.github/scripts/generate_ios_changelog.sh
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.x'
+          flutter-version:  ${{ env.flutter_version }}
           channel: 'stable'
+      - name: Flutter Initiaize
+        run: |
+            flutter doctor -v
+            flutter clean
+            dart pub global activate flutterfire_cli 1.1.0
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
@@ -155,7 +164,7 @@ jobs:
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.x'
+          flutter-version:  ${{ env.flutter_version }}
           channel: 'stable'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
