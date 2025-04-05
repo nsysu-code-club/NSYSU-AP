@@ -56,6 +56,7 @@ dependency_overrides:
 #    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_plugin
   intl: 0.18.0
   web: 1.0.0
+  share_plus: 10.1.0
 
 flutter:
 

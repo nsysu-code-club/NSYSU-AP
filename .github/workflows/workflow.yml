@@ -11,6 +11,10 @@ on:
     branches:
       - master
 
+env:
+  flutter_version: '3.29.2'
+  java_version: '17'
+
 jobs:
 
   build_android:
@@ -18,19 +22,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version:  ${{ env.java_version }}
       - name: Decrypt Android keys
         run: sh ./.github/scripts/decrypt_android_keys.sh
         env:
           KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.x'
+          flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
           cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
@@ -49,21 +53,23 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-      - uses: actions/setup-java@v4
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version:  ${{ env.java_version }}
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.x'
+          flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
-      - name: Flutter Version
-        run: flutter doctor -v
-      - name: Activate flutterfire_cli
-        run: dart pub global activate flutterfire_cli 1.1.0
+      - name: Flutter Initiaize
+        run: |
+            flutter doctor -v
+            flutter clean
+            dart pub global activate flutterfire_cli 1.1.0
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
@@ -158,7 +164,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
