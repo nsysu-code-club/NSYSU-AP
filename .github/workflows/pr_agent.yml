@@ -19,4 +19,8 @@ jobs:
         uses: Codium-ai/pr-agent@main
         env:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
+          CONFIG.MODEL: 'gpt-4o-mini'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_DESCRIPTION.EXTRA_INSTRUCTIONS: 'answer in Traditional Chinese'
+          PR_REVIEWER.EXTRA_INSTRUCTIONS: 'answer in Traditional Chinese'
+          PR_CODE_SUGGESTIONS.EXTRA_INSTRUCTIONS: 'answer in Traditional Chinese'
