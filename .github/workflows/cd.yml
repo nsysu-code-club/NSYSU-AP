@@ -5,6 +5,10 @@ on:
     tags:
       - "v*"
 
+env:
+  flutter_version: '3.29.2'
+  java_version: '17'
+
 jobs:
   # CD
   deploy_android:
@@ -12,11 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4
         with:
-          java-version: '17.0'
+          distribution: 'zulu'
+          java-version: ${{ env.java_version }}
       - name: Decrypt Android keys
         run: sh ./.github/scripts/decrypt_android_keys.sh
         env:
@@ -30,7 +35,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.x'
+          flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
@@ -57,20 +62,26 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: ${{ env.java_version }}
       - name: Generate changelog
         run: bash ./.github/scripts/generate_ios_changelog.sh
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.x'
+          flutter-version:  ${{ env.flutter_version }}
           channel: 'stable'
+      - name: Flutter Initiaize
+        run: |
+            flutter doctor -v
+            flutter clean
+            dart pub global activate flutterfire_cli 1.1.0
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
@@ -149,11 +160,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.x'
+          flutter-version:  ${{ env.flutter_version }}
           channel: 'stable'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
@@ -181,7 +192,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
