@@ -1,7 +1,7 @@
 name: nsysu_ap
 description: NSYSU AP
 
-version: 1.4.2+10402
+version: 1.4.3+10403
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -37,6 +37,7 @@ dependencies:
   google_sign_in_dartio: ^0.3.0
   json_annotation: ^4.6.0
   package_info_plus: ^8.0.3
+  printing: 5.13.4
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +56,7 @@ dependency_overrides:
 #    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_plugin
   intl: 0.18.0
   web: 1.0.0
+  share_plus: 10.1.0
 
 flutter:
 
