@@ -116,7 +116,7 @@ class HomePageState extends State<HomePage> {
       key: _homeKey,
       isLogin: isLogin,
       state: state,
-      title: (userInfo != null) ? 'Hi ${userInfo?.name}' : app.appName,
+      title: app.appName,
       content: content,
       actions: <Widget>[
         IconButton(
