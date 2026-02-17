@@ -2,4 +2,13 @@
 model = "gpt-4o-mini-2024-07-18"
 model_turbo = "gpt-4o-mini-2024-07-18"
 fallback_models = ["gpt-4o-mini-2024-07-18", "gpt-4o-mini"]
-response_language: "zh-TW"
+response_language = "zh-TW"
+
+[pr_description]
+extra_instructions = "answer in Traditional Chinese"
+
+[pr_reviewer]
+extra_instructions = "answer in Traditional Chinese"
+
+[pr_code_suggestions]
+extra_instructions = "answer in Traditional Chinese"
