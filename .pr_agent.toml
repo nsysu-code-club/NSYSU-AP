@@ -1,7 +1,7 @@
 [config]
-model = "gpt-4o-mini-2024-07-18"
-model_turbo = "gpt-4o-mini-2024-07-18"
-fallback_models = ["gpt-4o-mini-2024-07-18", "gpt-4o-mini"]
+model = "gemini-3-flash-preview"
+model_turbo = "gemini-3-flash-preview"
+fallback_models = ["gpt-5.2-mini"]
 response_language = "zh-TW"
 label_suggestions = true
 
