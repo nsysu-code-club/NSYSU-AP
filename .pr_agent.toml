@@ -3,6 +3,7 @@ model = "gpt-4o-mini-2024-07-18"
 model_turbo = "gpt-4o-mini-2024-07-18"
 fallback_models = ["gpt-4o-mini-2024-07-18", "gpt-4o-mini"]
 response_language = "zh-TW"
+label_suggestions = true
 
 [pr_description]
 extra_instructions = "answer in Traditional Chinese"
@@ -14,3 +15,7 @@ ignore_files = ["pubspec.lock", "*.g.dart", "*.freezed.dart", "ios/Podfile.lock"
 [pr_code_suggestions]
 extra_instructions = "answer in Traditional Chinese"
 ignore_files = ["pubspec.lock", "*.g.dart", "*.freezed.dart", "ios/Podfile.lock", "android/gradle.properties", "web/**/*"]
+
+[pr_update_changelog]
+push_changelog_changes = true
+extra_instructions = "answer in Traditional Chinese"
