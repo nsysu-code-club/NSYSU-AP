@@ -6,16 +6,16 @@ response_language = "zh-TW"
 label_suggestions = true
 
 [pr_description]
-extra_instructions = "answer in Traditional Chinese"
+extra_instructions = "請使用繁體中文台灣回答"
 
 [pr_reviewer]
-extra_instructions = "answer in Traditional Chinese"
+extra_instructions = "請使用繁體中文台灣回答"
 ignore_files = ["pubspec.lock", "*.g.dart", "*.freezed.dart", "ios/Podfile.lock", "android/gradle.properties", "web/**/*"]
 
 [pr_code_suggestions]
-extra_instructions = "answer in Traditional Chinese"
+extra_instructions = "請使用繁體中文台灣回答"
 ignore_files = ["pubspec.lock", "*.g.dart", "*.freezed.dart", "ios/Podfile.lock", "android/gradle.properties", "web/**/*"]
 
 [pr_update_changelog]
 push_changelog_changes = true
-extra_instructions = "answer in Traditional Chinese"
+extra_instructions = "請使用繁體中文台灣回答"
