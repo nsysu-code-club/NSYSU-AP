@@ -19,3 +19,6 @@ ignore_files = ["pubspec.lock", "*.g.dart", "*.freezed.dart", "ios/Podfile.lock"
 [pr_update_changelog]
 push_changelog_changes = true
 extra_instructions = "IMPORTANT: You MUST answer in Traditional Chinese (Taiwan). 請務必使用繁體中文（台灣）撰寫 Changelog。"
+[github_app]
+handle_pr_actions = true
+pr_commands = ["/review", "/describe", "/improve", "/ask", "/update_changelog"]
