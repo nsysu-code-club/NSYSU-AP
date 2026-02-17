@@ -9,6 +9,8 @@ extra_instructions = "answer in Traditional Chinese"
 
 [pr_reviewer]
 extra_instructions = "answer in Traditional Chinese"
+ignore_files = ["pubspec.lock", "*.g.dart", "*.freezed.dart", "ios/Podfile.lock", "android/gradle.properties", "web/**/*"]
 
 [pr_code_suggestions]
 extra_instructions = "answer in Traditional Chinese"
+ignore_files = ["pubspec.lock", "*.g.dart", "*.freezed.dart", "ios/Podfile.lock", "android/gradle.properties", "web/**/*"]
