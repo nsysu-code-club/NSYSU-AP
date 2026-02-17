@@ -47,7 +47,6 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
           backgroundColor: ApTheme.of(context).blue,
           resizeToAvoidBottomInset: orientation == Orientation.portrait,
           appBar: AppBar(
-            backgroundColor: ApTheme.of(context).blue,
             elevation: 0.0,
           ),
           body: Container(

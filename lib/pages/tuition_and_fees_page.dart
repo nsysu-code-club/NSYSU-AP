@@ -46,7 +46,6 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(app.tuitionAndFees),
-        backgroundColor: ApTheme.of(context).blue,
       ),
       body: _body(),
     );

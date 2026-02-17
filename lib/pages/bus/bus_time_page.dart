@@ -67,7 +67,6 @@ class _BusTimePageState extends State<BusTimePage>
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.busInfo.name),
-        backgroundColor: ApTheme.of(context).blue,
         bottom: TabBar(
           controller: _tabController,
           tabs: <Widget>[

@@ -360,7 +360,6 @@ class SelcrsHelper {
             case 'zh':
             default:
               title = titles[0];
-              break;
           }
         }
         final String instructors = tdDoc[8].text;

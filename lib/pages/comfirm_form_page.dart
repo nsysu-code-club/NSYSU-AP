@@ -46,7 +46,6 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(ap.confirm),
-        backgroundColor: ApTheme.of(context).blue,
         actions: <Widget>[
           if (!kIsWeb && (io.Platform.isAndroid || io.Platform.isIOS))
             TextButton(

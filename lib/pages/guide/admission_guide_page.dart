@@ -29,7 +29,6 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(ap.admissionGuide),
-        backgroundColor: ApTheme.of(context).blue,
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.arrow_back_ios),

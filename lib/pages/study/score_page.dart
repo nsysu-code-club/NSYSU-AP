@@ -34,6 +34,13 @@ class ScorePageState extends State<ScorePage> {
     return false;
   }
 
+  bool get hasPreAverage {
+    if (scoreData?.detail.average != 0.0 && scoreData?.detail.classRank == '') {
+      return true;
+    }
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -53,7 +60,6 @@ class ScorePageState extends State<ScorePage> {
       state: state,
       scoreData: scoreData,
       middleTitle: ap.credits,
-      isShowSearchButton: false,
       customHint:
           hasPreScore ? AppLocalizations.of(context).hasPreScoreHint : null,
       itemPicker: Row(
