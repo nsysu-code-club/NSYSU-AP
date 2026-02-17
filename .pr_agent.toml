@@ -1,5 +1,22 @@
 [config]
-model = "gpt-4o-mini-2024-07-18"
-model_turbo = "gpt-4o-mini-2024-07-18"
-fallback_models = ["gpt-4o-mini-2024-07-18", "gpt-4o-mini"]
-response_language: "zh-TW"
+model = "gemini-3-pro-preview"
+model_turbo = "gemini-3-pro-preview"
+fallback_models = ["gemini-2.5-pro", "gemini-1.5-pro-latest"]
+response_language = "zh-TW"
+label_suggestions = true
+
+
+[pr_reviewer]
+extra_instructions = "針對 Flutter/Dart 最佳實踐提出建議（如 const 建構子、避免大型 build 方法），並忽略格式化問題。"
+ignore_files = ["pubspec.lock", "*.g.dart", "*.freezed.dart", "ios/Podfile.lock", "android/gradle.properties", "web/**/*"]
+
+[pr_code_suggestions]
+extra_instructions = "專注於效能優化與安全性。"
+ignore_files = ["pubspec.lock", "*.g.dart", "*.freezed.dart", "ios/Podfile.lock", "android/gradle.properties", "web/**/*"]
+
+[pr_update_changelog]
+push_changelog_changes = true
+
+[github_app]
+handle_pr_actions = true
+pr_commands = ["/review", "/describe", "/improve", "/ask", "/update_changelog"]
