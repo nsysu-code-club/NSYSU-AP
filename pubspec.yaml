@@ -4,19 +4,19 @@ description: NSYSU AP
 version: 1.4.3+10403
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.10.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.17.0
-  multiple_localization: ^0.5.0
+  intl: ^0.20.2
+  multiple_localization: ^0.6.0
 
-  ap_common: ^0.26.0-dev.4
-  ap_common_firebase: ^0.17.0-dev.3
-  ap_common_plugin: ^0.5.0-dev.4
+  ap_common: ^0.26.0+3
+  ap_common_firebase: ^0.17.0+1
+  ap_common_plugin: ^0.5.0+1
   #     path: ../ap_common_plugin
 
   #official plugin
@@ -54,9 +54,9 @@ dependency_overrides:
 #    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_firebase
 #  ap_common_plugin:
 #    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_plugin
-  intl: 0.18.0
-  web: 1.0.0
-  share_plus: 10.1.0
+  web: 0.5.1
+  google_sign_in: 6.2.1
+  google_sign_in_ios: 5.7.6
 
 flutter:
 

@@ -57,10 +57,8 @@ class HomePageState extends State<HomePage> {
   bool isStudyExpanded = false;
   bool isSchoolNavigationExpanded = false;
 
-  TextStyle get _defaultStyle => TextStyle(
-        color: ApTheme.of(context).grey,
-        fontSize: 16.0,
-      );
+  TextStyle get _defaultStyle =>
+      TextStyle(color: ApTheme.of(context).grey, fontSize: 16.0);
 
   @override
   void initState() {
@@ -95,7 +93,7 @@ class HomePageState extends State<HomePage> {
       Locale(Intl.defaultLocale!).languageCode,
     );
     FirebaseMessagingUtils.instance.init(
-      onClick: (RemoteMessage message) async {
+      onClick: (RemoteMessage message) {
         if (kDebugMode) {
           print(message.data);
         }
@@ -134,8 +132,8 @@ class HomePageState extends State<HomePage> {
             if (FirebaseMessagingUtils.isSupported) {
               try {
                 final FirebaseMessaging messaging = FirebaseMessaging.instance;
-                final NotificationSettings settings =
-                    await messaging.getNotificationSettings();
+                final NotificationSettings settings = await messaging
+                    .getNotificationSettings();
                 if (settings.authorizationStatus ==
                         AuthorizationStatus.authorized ||
                     settings.authorizationStatus ==
@@ -181,29 +179,20 @@ class HomePageState extends State<HomePage> {
               DrawerSubItem(
                 icon: ApIcon.classIcon,
                 title: ap.course,
-                onTap: () => _openPage(
-                  CoursePage(),
-                  needLogin: true,
-                ),
+                onTap: () => _openPage(CoursePage(), needLogin: true),
               ),
               DrawerSubItem(
                 icon: ApIcon.assignment,
                 title: ap.score,
-                onTap: () => _openPage(
-                  ScorePage(),
-                  needLogin: true,
-                ),
+                onTap: () => _openPage(ScorePage(), needLogin: true),
               ),
             ],
           ),
           DrawerItem(
             icon: ApIcon.directionsBus,
             title: ap.bus,
-            onTap: () => _openPage(
-              BusListPage(
-                locale: Locale(Intl.defaultLocale!),
-              ),
-            ),
+            onTap: () =>
+                _openPage(BusListPage(locale: Locale(Intl.defaultLocale!))),
           ),
           ExpansionTile(
             initiallyExpanded: isSchoolNavigationExpanded,
@@ -221,10 +210,8 @@ class HomePageState extends State<HomePage> {
               DrawerSubItem(
                 icon: ApIcon.map,
                 title: ap.schoolMap,
-                onTap: () => _openPage(
-                  SchoolMapPage(),
-                  useCupertinoRoute: false,
-                ),
+                onTap: () =>
+                    _openPage(SchoolMapPage(), useCupertinoRoute: false),
               ),
               DrawerSubItem(
                 icon: ApIcon.accessibilityNew,
@@ -235,10 +222,7 @@ class HomePageState extends State<HomePage> {
                       Platform.isIOS ||
                       Platform.isMacOS ||
                       Platform.isWindows) {
-                    _openPage(
-                      AdmissionGuidePage(),
-                      useCupertinoRoute: false,
-                    );
+                    _openPage(AdmissionGuidePage(), useCupertinoRoute: false);
                   } else {
                     openDesktopWebViewPage(
                       Constants.admissionGuideUrl,
@@ -252,18 +236,13 @@ class HomePageState extends State<HomePage> {
           DrawerItem(
             icon: ApIcon.school,
             title: app.graduationCheckChecklist,
-            onTap: () => _openPage(
-              const GraduationReportPage(),
-              needLogin: true,
-            ),
+            onTap: () =>
+                _openPage(const GraduationReportPage(), needLogin: true),
           ),
           DrawerItem(
             icon: ApIcon.monetizationOn,
             title: app.tuitionAndFees,
-            onTap: () => _openPage(
-              const TuitionAndFeesPage(),
-              needLogin: true,
-            ),
+            onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
           ),
           // DrawerItem(
           //   icon: Icons.car_repair,
@@ -276,10 +255,7 @@ class HomePageState extends State<HomePage> {
           DrawerItem(
             icon: ApIcon.info,
             title: ap.schoolInfo,
-            onTap: () => _openPage(
-              SchoolInfoPage(),
-              useCupertinoRoute: false,
-            ),
+            onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
           ),
           DrawerItem(
             icon: ApIcon.face,
@@ -300,9 +276,7 @@ class HomePageState extends State<HomePage> {
           DrawerItem(
             icon: ApIcon.settings,
             title: ap.settings,
-            onTap: () => _openPage(
-              SettingPage(),
-            ),
+            onTap: () => _openPage(SettingPage()),
           ),
           if (isLogin)
             ListTile(
@@ -312,8 +286,10 @@ class HomePageState extends State<HomePage> {
               ),
               onTap: () async {
                 PreferenceUtil.instance.setBool(Constants.prefAutoLogin, false);
-                await PreferenceUtil.instance
-                    .setBool(Constants.prefAutoLogin, false);
+                await PreferenceUtil.instance.setBool(
+                  Constants.prefAutoLogin,
+                  false,
+                );
                 SelcrsHelper.instance.logout();
                 GraduationHelper.instance.logout();
                 TuitionHelper.instance.logout();
@@ -327,10 +303,7 @@ class HomePageState extends State<HomePage> {
                 }
                 _checkLoginState();
               },
-              title: Text(
-                ap.logout,
-                style: _defaultStyle,
-              ),
+              title: Text(ap.logout, style: _defaultStyle),
             ),
         ],
         onTapHeader: () {
@@ -350,18 +323,9 @@ class HomePageState extends State<HomePage> {
       announcements: announcements,
       onTabTapped: onTabTapped,
       bottomNavigationBarItems: <Widget>[
-        NavigationDestination(
-          icon: Icon(ApIcon.directionsBus),
-          label: ap.bus,
-        ),
-        NavigationDestination(
-          icon: Icon(ApIcon.classIcon),
-          label: ap.course,
-        ),
-        NavigationDestination(
-          icon: Icon(ApIcon.assignment),
-          label: ap.score,
-        ),
+        NavigationDestination(icon: Icon(ApIcon.directionsBus), label: ap.bus),
+        NavigationDestination(icon: Icon(ApIcon.classIcon), label: ap.course),
+        NavigationDestination(icon: Icon(ApIcon.assignment), label: ap.score),
       ],
     );
   }
@@ -372,9 +336,7 @@ class HomePageState extends State<HomePage> {
         case 0:
           ApUtils.pushCupertinoStyle(
             context,
-            BusListPage(
-              locale: Locale(Intl.defaultLocale!),
-            ),
+            BusListPage(locale: Locale(Intl.defaultLocale!)),
           );
         case 1:
           if (isLogin) {
@@ -425,23 +387,20 @@ class HomePageState extends State<HomePage> {
             onSnackBarTapped: openLoginPage,
           )
           ?.closed
-          .then(
-        (SnackBarClosedReason reason) {
-          _checkLoginState();
-        },
-      );
+          .then((SnackBarClosedReason reason) {
+            _checkLoginState();
+          });
     }
   }
 
   Future<void> _login() async {
     final String username = PreferenceUtil.instance
-        .getString(
-          Constants.prefUsername,
-          '',
-        )
+        .getString(Constants.prefUsername, '')
         .toUpperCase();
-    final String password =
-        PreferenceUtil.instance.getStringSecurity(Constants.prefPassword, '');
+    final String password = PreferenceUtil.instance.getStringSecurity(
+      Constants.prefPassword,
+      '',
+    );
     SelcrsHelper.instance.login(
       username: username,
       password: password,
@@ -464,9 +423,7 @@ class HomePageState extends State<HomePage> {
           }
         },
         onFailure: (DioException e) {
-          _homeKey.currentState!.showBasicHint(
-            text: e.i18nMessage!,
-          );
+          _homeKey.currentState!.showBasicHint(text: e.i18nMessage!);
         },
         onSuccess: (GeneralResponse data) {
           _homeKey.currentState!.showBasicHint(text: ap.loginSuccess);
@@ -482,8 +439,10 @@ class HomePageState extends State<HomePage> {
   Future<void> _checkUpdate() async {
     if (kIsWeb) return;
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    final String currentVersion =
-        PreferenceUtil.instance.getString(Constants.prefCurrentVersion, '');
+    final String currentVersion = PreferenceUtil.instance.getString(
+      Constants.prefCurrentVersion,
+      '',
+    );
     if (currentVersion != packageInfo.buildNumber) {
       final Map<String, dynamic>? rawData = await FileAssets.changelogData;
       //TODO: improve by object
@@ -523,11 +482,9 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> openLoginPage() async {
-    final bool? result = await Navigator.of(context).push(
-      MaterialPageRoute<bool>(
-        builder: (_) => LoginPage(),
-      ),
-    );
+    final bool? result = await Navigator.of(
+      context,
+    ).push(MaterialPageRoute<bool>(builder: (_) => LoginPage()));
     if (result ?? false) {
       if (state != HomeState.finish) {
         _getAllAnnouncement();

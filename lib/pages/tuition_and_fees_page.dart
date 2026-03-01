@@ -29,8 +29,10 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   @override
   void initState() {
-    AnalyticsUtil.instance
-        .setCurrentScreen('TuitionAndFeesPage', 'tuition_and_fees_page.dart');
+    AnalyticsUtil.instance.setCurrentScreen(
+      'TuitionAndFeesPage',
+      'tuition_and_fees_page.dart',
+    );
     if (TuitionHelper.instance.isLogin) {
       _getData();
     } else {
@@ -44,9 +46,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     ap = ApLocalizations.of(context);
     app = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(app.tuitionAndFees),
-      ),
+      appBar: AppBar(title: Text(app.tuitionAndFees)),
       body: _body(),
     );
   }
@@ -103,16 +103,11 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     return Card(
       elevation: 4.0,
       margin: const EdgeInsets.all(8.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListTile(
-          title: Text(
-            item.title,
-            style: const TextStyle(fontSize: 18.0),
-          ),
+          title: Text(item.title, style: const TextStyle(fontSize: 18.0)),
           trailing: Text(
             '${item.paymentStatus}',
             style: TextStyle(
@@ -120,13 +115,11 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
               color: item.isPayment ? Colors.green : Colors.red,
             ),
           ),
-          onTap: () async {
+          onTap: () {
             showDialog(
               context: context,
-              builder: (BuildContext context) => PopScope(
-                canPop: false,
-                child: ProgressDialog(ap.loading),
-              ),
+              builder: (BuildContext context) =>
+                  PopScope(canPop: false, child: ProgressDialog(ap.loading)),
               barrierDismissible: false,
             );
             TuitionHelper.instance.downloadFdf(
@@ -142,20 +135,14 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                 onFailure: (DioException e) {
                   Navigator.of(context, rootNavigator: true).pop();
                   if (e.i18nMessage != null) {
-                    UiUtil.instance.showToast(
-                      context,
-                      e.i18nMessage!,
-                    );
+                    UiUtil.instance.showToast(context, e.i18nMessage!);
                   }
                 },
                 onSuccess: (Uint8List? data) {
                   Navigator.of(context, rootNavigator: true).pop();
                   ApUtils.pushCupertinoStyle(
                     context,
-                    PdfView(
-                      state: PdfState.finish,
-                      data: data,
-                    ),
+                    PdfView(state: PdfState.finish, data: data),
                   );
                 },
               ),
@@ -164,13 +151,10 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
           subtitle: Padding(
             padding: const EdgeInsets.all(4.0),
             child: Text(
-              sprintf(
-                app.tuitionAndFeesItemTitleFormat,
-                <String>[
-                  item.amount,
-                  item.dateOfPayment,
-                ],
-              ),
+              sprintf(app.tuitionAndFeesItemTitleFormat, <String>[
+                item.amount,
+                item.dateOfPayment,
+              ]),
             ),
           ),
         ),
@@ -178,7 +162,8 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     );
   }
 
-  Function(DioException) get _onFailure => (DioException e) => setState(() {
+  Function(DioException) get _onFailure =>
+      (DioException e) => setState(() {
         state = _State.error;
         switch (e.type) {
           case DioExceptionType.connectionTimeout:
