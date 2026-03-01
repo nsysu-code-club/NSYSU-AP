@@ -60,8 +60,9 @@ class ScorePageState extends State<ScorePage> {
       state: state,
       scoreData: scoreData,
       middleTitle: ap.credits,
-      customHint:
-          hasPreScore ? AppLocalizations.of(context).hasPreScoreHint : null,
+      customHint: hasPreScore
+          ? AppLocalizations.of(context).hasPreScoreHint
+          : null,
       itemPicker: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -93,7 +94,7 @@ class ScorePageState extends State<ScorePage> {
           ),
         ],
       ),
-      onRefresh: () async {
+      onRefresh: () {
         _getSemesterScore();
       },
       finalScoreBuilder: (int index) {
@@ -121,7 +122,8 @@ class ScorePageState extends State<ScorePage> {
     );
   }
 
-  Function(DioException e) get _onFailure => (DioException e) => setState(() {
+  Function(DioException e) get _onFailure =>
+      (DioException e) => setState(() {
         state = ScoreState.error;
         switch (e.type) {
           case DioExceptionType.connectionError:
