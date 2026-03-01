@@ -25,7 +25,7 @@ android {
 
     defaultConfig {
         applicationId = "com.nsysu.ap"
-        minSdk = 21
+        minSdkVersion = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -51,7 +51,7 @@ flutter {
 
 dependencies {
     /// Version 10+ `flutter_local_notification` on the plugin now relies on desugaring to support scheduled notifications with backwards compatibility on older versions of Android.
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
     /// There have been reports that enabling desugaring may result in a Flutter apps crashing on Android 12L and above
     implementation 'androidx.window:window:1.0.0'
     implementation 'androidx.window:window-java:1.0.0'
