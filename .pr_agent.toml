@@ -1,8 +1,4 @@
 [config]
-model = "gemini-3-pro-preview"
-model_turbo = "gemini-3-pro-preview"
-fallback_models = ["gemini-2.5-pro", "gemini-1.5-pro-latest"]
-response_language = "zh-TW"
 label_suggestions = true
 
 
@@ -18,5 +14,17 @@ ignore_files = ["pubspec.lock", "*.g.dart", "*.freezed.dart", "ios/Podfile.lock"
 push_changelog_changes = true
 
 [github_app]
-handle_pr_actions = true
-pr_commands = ["/review", "/describe", "/improve", "/ask", "/update_changelog"]
+handle_pr_actions = ['opened', 'reopened', 'ready_for_review']
+handle_issue_actions = ['opened']
+pr_commands = [
+  "/describe --pr_description.use_description_markers=true",
+  "/review",
+  "/update_changelog",
+  "/similar_issue",
+  "/help_docs"
+]
+handle_push_trigger = true
+push_commands = [
+    "/describe",
+    "/review",
+]
