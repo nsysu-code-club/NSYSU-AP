@@ -77,30 +77,6 @@ jobs:
       - name: Build iOS
         run: flutter build ios --release --no-codesign
 
-  build_web:
-    name: Build Web App
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.29.x'
-          channel: 'stable'
-          cache: true
-          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
-      - name: Decrypt dev configs
-        run: sh ./scripts/decrypt_dev_configs.sh
-        env:
-          DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
-      - name: Upgrades flutter
-        run: flutter upgrade
-      - name: Enable Web
-        run: flutter config --enable-web
-      - run: flutter pub get
-      - name: Build Web
-        run: flutter build web
-
 #  build_macos:
 #    name: Build macOS App
 #    runs-on: macOS-latest
@@ -110,7 +86,7 @@ jobs:
 #      - name: Run Flutter tasks
 #        uses: subosito/flutter-action@v2
 #        with:
-#          flutter-version: '3.29.x'
+#          flutter-version: ${{ env.flutter_version }}
 #          channel: 'stable'
 #      - name: Decrypt dev configs
 #        run: sh ./scripts/decrypt_dev_configs.sh
@@ -167,7 +143,7 @@ jobs:
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.x'
+          flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
           cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
