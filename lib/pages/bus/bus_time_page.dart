@@ -13,11 +13,7 @@ class BusTimePage extends StatefulWidget {
   final Locale locale;
   final BusInfo busInfo;
 
-  const BusTimePage({
-    super.key,
-    required this.busInfo,
-    required this.locale,
-  });
+  const BusTimePage({super.key, required this.busInfo, required this.locale});
 
   @override
   _BusTimePageState createState() => _BusTimePageState();
@@ -36,17 +32,11 @@ class _BusTimePageState extends State<BusTimePage>
 
   @override
   void initState() {
-    _tabController = TabController(
-      vsync: this,
-      length: 2,
-    );
+    _tabController = TabController(vsync: this, length: 2);
     _getData();
-    timer = Timer.periodic(
-      const Duration(seconds: 10),
-      (Timer timer) {
-        _getData();
-      },
-    );
+    timer = Timer.periodic(const Duration(seconds: 10), (Timer timer) {
+      _getData();
+    });
     AnalyticsUtil.instance.setCurrentScreen(
       'BusTimePage',
       'bus_time_page.dart',
@@ -70,12 +60,8 @@ class _BusTimePageState extends State<BusTimePage>
         bottom: TabBar(
           controller: _tabController,
           tabs: <Widget>[
-            Tab(
-              text: busInfo.departure,
-            ),
-            Tab(
-              text: busInfo.destination,
-            ),
+            Tab(text: busInfo.departure),
+            Tab(text: busInfo.destination),
           ],
         ),
       ),
@@ -86,9 +72,7 @@ class _BusTimePageState extends State<BusTimePage>
   Widget _body() {
     switch (state) {
       case _State.loading:
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
+        return const Center(child: CircularProgressIndicator());
       case _State.error:
         return InkWell(
           onTap: () {
@@ -100,7 +84,7 @@ class _BusTimePageState extends State<BusTimePage>
           ),
         );
       default:
-        return startList.isEmpty && startList.isEmpty
+        return startList.isEmpty && endList.isEmpty
             ? InkWell(
                 onTap: () => _getData(),
                 child: HintContent(
@@ -164,11 +148,7 @@ class BusTimeItem extends StatelessWidget {
   final BusTime busTime;
   final Locale locale;
 
-  const BusTimeItem({
-    super.key,
-    required this.busTime,
-    required this.locale,
-  });
+  const BusTimeItem({super.key, required this.busTime, required this.locale});
 
   @override
   Widget build(BuildContext context) {
@@ -210,20 +190,13 @@ class BusTimeItem extends StatelessWidget {
         width: 72.0,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          border: Border.all(
-            color: color,
-          ),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(32.0),
-          ),
+          border: Border.all(color: color),
+          borderRadius: const BorderRadius.all(Radius.circular(32.0)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Text(
           '$arrivedTimeText$postfix',
-          style: TextStyle(
-            fontSize: fontSize,
-            color: color,
-          ),
+          style: TextStyle(fontSize: fontSize, color: color),
           textAlign: TextAlign.center,
         ),
       ),

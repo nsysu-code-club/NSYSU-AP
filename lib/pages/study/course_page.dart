@@ -64,7 +64,8 @@ class CoursePageState extends State<CoursePage> {
       },
       onRefresh: _getCourseTables,
       customHint: isOffline ? ap.offlineCourse : null,
-      enableNotifyControl: semesterData != null &&
+      enableNotifyControl:
+          semesterData != null &&
           semesterData?.currentSemester.code == defaultSemesterCode,
       courseNotifySaveKey: courseNotifyCacheKey,
       enableCaptureCourseTable: true,
@@ -73,17 +74,17 @@ class CoursePageState extends State<CoursePage> {
   }
 
   Function(DioException) get _onFailure => (DioException e) {
-        setState(() {
-          //if (courseData != null) {
-          customHint = ap.offlineCourse;
-          state = CourseState.finish;
-          //}
-          // else {
-          //   customStateHint = e.i18nMessage;
-          //   state = CourseState.error;
-          // }
-        });
-      };
+    setState(() {
+      //if (courseData != null) {
+      customHint = ap.offlineCourse;
+      state = CourseState.finish;
+      //}
+      // else {
+      //   customStateHint = e.i18nMessage;
+      //   state = CourseState.error;
+      // }
+    });
+  };
 
   Function(GeneralResponse) get _onError =>
       (_) => setState(() => state = CourseState.error);
@@ -95,10 +96,12 @@ class CoursePageState extends State<CoursePage> {
       remoteConfig = FirebaseRemoteConfigUtils.instance.remoteConfig!;
       await remoteConfig.fetch();
       await remoteConfig.activate();
-      defaultSemesterCode =
-          remoteConfig.getString(Constants.defaultCourseSemesterCode);
-      final String rawTimeCodeConfig =
-          remoteConfig.getString(Constants.timeCodeConfig);
+      defaultSemesterCode = remoteConfig.getString(
+        Constants.defaultCourseSemesterCode,
+      );
+      final String rawTimeCodeConfig = remoteConfig.getString(
+        Constants.timeCodeConfig,
+      );
       timeCodeConfig = TimeCodeConfig.fromRawJson(rawTimeCodeConfig);
       PreferenceUtil.instance.setString(
         Constants.defaultCourseSemesterCode,
@@ -131,7 +134,7 @@ class CoursePageState extends State<CoursePage> {
       callback: GeneralCallback<SemesterData>(
         onFailure: _onFailure,
         onError: _onError,
-        onSuccess: (SemesterData data) async {
+        onSuccess: (SemesterData data) {
           semesterData = data;
           final String semester = PreferenceUtil.instance.getString(
             ApConstants.currentSemesterCode,
