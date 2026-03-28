@@ -14,9 +14,9 @@ dependencies:
   intl: ^0.20.2
   multiple_localization: ^0.6.0
 
-  ap_common: ^0.26.0+3
-  ap_common_firebase: ^0.17.0+1
-  ap_common_plugin: ^0.5.0+1
+  ap_common: ^1.0.1-dev.0
+  ap_common_firebase: ^1.0.0-dev.0
+  ap_common_plugin: ^1.0.0-dev.0
   #     path: ../ap_common_plugin
 
   #official plugin
@@ -48,12 +48,16 @@ dev_dependencies:
   json_serializable: ^6.0.1
 
 dependency_overrides:
-#  ap_common:
-#    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common
-#  ap_common_firebase:
-#    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_firebase
-#  ap_common_plugin:
-#    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_plugin
+  # ap_common:
+  #   path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common
+  # ap_common_flutter_core:
+  #   path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_flutter_core
+  # ap_common_flutter_ui:
+  #   path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_flutter_ui
+  # ap_common_firebase:
+  #   path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_firebase
+  # ap_common_plugin:
+  #   path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_plugin
   web: 0.5.1
   google_sign_in: 6.2.1
   google_sign_in_ios: 5.7.6
