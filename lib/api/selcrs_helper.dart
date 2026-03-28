@@ -66,14 +66,14 @@ class SelcrsHelper {
   }
 
   Options get _courseOption => Options(
-        responseType: ResponseType.bytes,
-        contentType: Headers.formUrlEncodedContentType,
-      );
+    responseType: ResponseType.bytes,
+    contentType: Headers.formUrlEncodedContentType,
+  );
 
   Options get _scoreOption => Options(
-        responseType: ResponseType.bytes,
-        contentType: Headers.formUrlEncodedContentType,
-      );
+    responseType: ResponseType.bytes,
+    contentType: Headers.formUrlEncodedContentType,
+  );
 
   void changeSelcrsUrl() {
     index++;
@@ -124,11 +124,12 @@ class SelcrsHelper {
         },
       );
       final String text = const Utf8Decoder().convert(scoreResponse.data!);
-//      debugPrint(text);
+      //      debugPrint(text);
       if (text.contains('資料錯誤請重新輸入')) {
         return callback?.onError(
-          GeneralResponse(statusCode: 400, message: 'score error'),
-        ) as Future<GeneralResponse>?;
+              GeneralResponse(statusCode: 400, message: 'score error'),
+            )
+            as Future<GeneralResponse>?;
       } else {
         dumpError('score', text, null);
       }
@@ -158,23 +159,28 @@ class SelcrsHelper {
         },
       );
       final String text = const Utf8Decoder().convert(courseResponse.data!);
-//      debugPrint('course =  $text');
+      //      debugPrint('course =  $text');
       if (text.contains('學號碼密碼不符')) {
         return callback?.onError(
-          GeneralResponse(statusCode: 400, message: 'course error'),
-        ) as Future<GeneralResponse>?;
+              GeneralResponse(statusCode: 400, message: 'course error'),
+            )
+            as Future<GeneralResponse>?;
       } else if (text.contains('請先填寫')) {
         ///https://regweb.nsysu.edu.tw/webreg/confirm_wuhan_pneumonia.asp?STUID=%s&STAT_COD=1&STATUS_COD=1&LOGINURL=https://selcrs.nsysu.edu.tw/
         return callback?.onError(
-          GeneralResponse(statusCode: 401, message: 'need to fill out form'),
-        ) as Future<GeneralResponse>;
+              GeneralResponse(
+                statusCode: 401,
+                message: 'need to fill out form',
+              ),
+            )
+            as Future<GeneralResponse>;
       } else {
         return dumpError('course', text, callback)! as Future<GeneralResponse?>;
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
           e.response!.statusCode == 302) {
-//        debugPrint('text =  $text');
+        //        debugPrint('text =  $text');
         this.username = username;
         this.password = password;
         isLogin = true;
@@ -211,9 +217,7 @@ class SelcrsHelper {
   * error status code
   * 400: 帳號密碼錯誤
   * */
-  Future<UserInfo?>? getUserInfo({
-    GeneralCallback<UserInfo>? callback,
-  }) async {
+  Future<UserInfo?>? getUserInfo({GeneralCallback<UserInfo>? callback}) async {
     try {
       final Response<Uint8List> response = await dio.get<Uint8List>(
         '$selcrsUrl/menu4/tools/changedat.asp',
@@ -221,9 +225,7 @@ class SelcrsHelper {
       final String text = const Utf8Decoder().convert(response.data!);
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
-        return getUserInfo(
-          callback: callback,
-        );
+        return getUserInfo(callback: callback);
       }
       if (!canReLogin) {
         return dumpError('getUserInfo', text, callback)! as Future<UserInfo?>;
@@ -268,7 +270,7 @@ class SelcrsHelper {
     try {
       final Response<Uint8List> response = await dio.post(url);
       final String text = const Utf8Decoder().convert(response.data!);
-//      print('text =  ${text}');
+      //      print('text =  ${text}');
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
         return getCourseSemesterData(
@@ -325,7 +327,7 @@ class SelcrsHelper {
         options: _courseOption,
       );
       final String text = const Utf8Decoder().convert(response.data!);
-//      debugPrint('text =  ${text}');
+      //      debugPrint('text =  ${text}');
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
         return getCourseData(
@@ -343,14 +345,17 @@ class SelcrsHelper {
       final int startTime = DateTime.now().millisecondsSinceEpoch;
       final dom.Document document = parse(text);
       final List<dom.Element> trDoc = document.getElementsByTagName('tr');
-      final CourseData courseData =
-          CourseData(courses: <Course>[], timeCodes: timeCodeConfig.timeCodes);
+      final CourseData courseData = CourseData(
+        courses: <Course>[],
+        timeCodes: timeCodeConfig.timeCodes,
+      );
 
       //print(DateTime.now());
       for (int i = 1; i < trDoc.length; i++) {
         final List<dom.Element> tdDoc = trDoc[i].getElementsByTagName('td');
-        final dom.Element titleElement =
-            tdDoc[4].getElementsByTagName('a').first;
+        final dom.Element titleElement = tdDoc[4]
+            .getElementsByTagName('a')
+            .first;
         final List<String> titles = titleElement.innerHtml.split('<br>');
         String title = titleElement.text;
         if (titles.length >= 2) {
@@ -363,17 +368,15 @@ class SelcrsHelper {
           }
         }
         final String instructors = tdDoc[8].text;
-        final Location location = Location(
-          building: '',
-          room: tdDoc[9].text,
-        );
+        final Location location = Location(building: '', room: tdDoc[9].text);
         final Course course = Course(
           code: tdDoc[2].text,
           className: '${tdDoc[1].text} ${tdDoc[3].text}',
           title: title,
           units: tdDoc[5].text,
-          required:
-              tdDoc[7].text.length == 1 ? '${tdDoc[7].text}修' : tdDoc[7].text,
+          required: tdDoc[7].text.length == 1
+              ? '${tdDoc[7].text}修'
+              : tdDoc[7].text,
           location: location,
           instructors: <String>[instructors],
           times: <SectionTime>[],
@@ -394,8 +397,10 @@ class SelcrsHelper {
       }
       if (trDoc.isNotEmpty) {
         final int endTime = DateTime.now().millisecondsSinceEpoch;
-        AnalyticsUtil.instance
-            .logTimeEvent('course_html_parser', (endTime - startTime) / 1000.0);
+        AnalyticsUtil.instance.logTimeEvent(
+          'course_html_parser',
+          (endTime - startTime) / 1000.0,
+        );
       }
       //print(DateTime.now());
       return callback.onSuccess(courseData);
@@ -420,8 +425,9 @@ class SelcrsHelper {
       final String text = const Utf8Decoder().convert(response.data!);
       //print('text =  ${text}');
       final dom.Document document = parse(text, encoding: 'BIG-5');
-      final List<dom.Element> selectDoc =
-          document.getElementsByTagName('select');
+      final List<dom.Element> selectDoc = document.getElementsByTagName(
+        'select',
+      );
       final ScoreSemesterData scoreSemesterData = ScoreSemesterData(
         semesters: <SemesterOptions>[],
         years: <SemesterOptions>[],
@@ -455,13 +461,12 @@ class SelcrsHelper {
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
           e.response!.statusCode == 302) {
-        final String text =
-            const Utf8Decoder().convert(e.response!.data as Uint8List);
+        final String text = const Utf8Decoder().convert(
+          e.response!.data as Uint8List,
+        );
         if (text.contains(scoreTimeoutText) && canReLogin) {
           await reLogin();
-          return getScoreSemesterData(
-            callback: callback,
-          );
+          return getScoreSemesterData(callback: callback);
         }
         if (!canReLogin) {
           dumpError('getScoreSemesterData', text, callback);
@@ -490,10 +495,7 @@ class SelcrsHelper {
       final Response<Uint8List> response = await dio.post(
         url,
         options: _scoreOption,
-        data: <String, String?>{
-          'SYEAR': year,
-          'SEM': semester,
-        },
+        data: <String, String?>{'SYEAR': year, 'SEM': semester},
       );
       final String text = const Utf8Decoder().convert(response.data!);
       final int startTime = DateTime.now().millisecondsSinceEpoch;
@@ -510,9 +512,11 @@ class SelcrsHelper {
         //        }
         //      }
         if (tableDoc.length == 3) {
-          final List<dom.Element> fontDoc =
-              tableDoc[1].getElementsByTagName('font');
-          double percentage = double.parse(fontDoc[4].text.split('：')[1]) /
+          final List<dom.Element> fontDoc = tableDoc[1].getElementsByTagName(
+            'font',
+          );
+          double percentage =
+              double.parse(fontDoc[4].text.split('：')[1]) /
               double.parse(fontDoc[5].text.split('：')[1]);
           percentage = 1.0 - percentage;
           percentage *= 100;
@@ -527,24 +531,34 @@ class SelcrsHelper {
         }
         final List<dom.Element> trDoc = tableDoc[0].getElementsByTagName('tr');
         for (int i = 0; i < trDoc.length; i++) {
-          final List<dom.Element> fontDoc =
-              trDoc[i].getElementsByTagName('font');
+          final List<dom.Element> fontDoc = trDoc[i].getElementsByTagName(
+            'font',
+          );
           if (fontDoc.length != 6) continue;
           if (i != 0) {
             Score score = Score(
-              courseNumber:
-                  fontDoc[2].text.substring(1, fontDoc[2].text.length - 1),
+              courseNumber: fontDoc[2].text.substring(
+                1,
+                fontDoc[2].text.length - 1,
+              ),
               title: //'${trDoc[i].getElementsByTagName('font')[2].text}'
                   fontDoc[3].text,
               middleScore: fontDoc[4].text,
               finalScore: fontDoc[5].text,
               units: '',
+              hours: '',
+              required: '',
+              at: '',
+              generalScore: '',
+              semesterScore: '',
+              remark: '',
             );
             if (searchPreScore &&
                 (score.finalScore == null ||
                     (score.finalScore ?? '') == '--')) {
-              final PreScore? preScore =
-                  await getPreScoreData(score.courseNumber);
+              final PreScore? preScore = await getPreScoreData(
+                score.courseNumber,
+              );
               if (preScore != null) {
                 score = score.copyWith(
                   finalScore: preScore.grades,
@@ -556,8 +570,10 @@ class SelcrsHelper {
           }
         }
         final int endTime = DateTime.now().millisecondsSinceEpoch;
-        AnalyticsUtil.instance
-            .logTimeEvent('score_html_parser', (endTime - startTime) / 1000.0);
+        AnalyticsUtil.instance.logTimeEvent(
+          'score_html_parser',
+          (endTime - startTime) / 1000.0,
+        );
       }
       /*var trDoc = document.getElementsByTagName('tr');
       for (var i = 0; i < trDoc.length; i++) {
@@ -573,16 +589,14 @@ class SelcrsHelper {
           //print('${j.text}');
         }
       }*/
-      final ScoreData scoreData = ScoreData(
-        scores: list,
-        detail: detail,
-      );
+      final ScoreData scoreData = ScoreData(scores: list, detail: detail);
       return callback.onSuccess(scoreData);
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
           e.response!.statusCode == 302) {
-        final String text =
-            const Utf8Decoder().convert(e.response!.data as Uint8List);
+        final String text = const Utf8Decoder().convert(
+          e.response!.data as Uint8List,
+        );
         if (text.contains(scoreTimeoutText) && canReLogin) {
           await reLogin();
           return getScoreData(
@@ -612,9 +626,7 @@ class SelcrsHelper {
     final Response<Uint8List> response = await dio.post(
       url,
       options: _scoreOption,
-      data: <String, String?>{
-        'CRSNO': courseNumber,
-      },
+      data: <String, String?>{'CRSNO': courseNumber},
     );
     final String text = const Utf8Decoder().convert(response.data!);
     //print('text = $text}');
@@ -681,17 +693,12 @@ class SelcrsHelper {
       final Response<Uint8List> response = await dio.post(
         '$selcrsUrl/menu4/tools/changedat.asp',
         options: _courseOption,
-        data: <String, String>{
-          'T1': mail,
-        },
+        data: <String, String>{'T1': mail},
       );
       final String text = const Utf8Decoder().convert(response.data!);
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
-        return changeMail(
-          mail: mail,
-          callback: callback,
-        );
+        return changeMail(mail: mail, callback: callback);
       }
       if (!canReLogin) {
         dumpError('getCourseData', text, callback);
