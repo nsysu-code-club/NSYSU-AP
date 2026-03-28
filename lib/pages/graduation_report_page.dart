@@ -18,7 +18,6 @@ class GraduationReportPage extends StatefulWidget {
 
 class GraduationReportPageState extends State<GraduationReportPage>
     with SingleTickerProviderStateMixin {
-  late AppLocalizations app;
   late ApLocalizations ap;
 
   _State state = _State.loading;
@@ -45,7 +44,6 @@ class GraduationReportPageState extends State<GraduationReportPage>
   @override
   Widget build(BuildContext context) {
     ap = ApLocalizations.of(context);
-    app = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(app.graduationCheckChecklist),

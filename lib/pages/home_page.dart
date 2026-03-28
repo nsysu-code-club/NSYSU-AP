@@ -41,7 +41,6 @@ class HomePageState extends State<HomePage> {
 
   bool get isTablet => MediaQuery.of(context).size.shortestSide > 680;
 
-  late AppLocalizations app;
   late ApLocalizations ap;
 
   HomeState state = HomeState.loading;
@@ -115,7 +114,6 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    app = AppLocalizations.of(context);
     ap = ApLocalizations.of(context);
     return HomePageScaffold(
       key: _homeKey,
@@ -251,7 +249,7 @@ class HomePageState extends State<HomePage> {
           } else if (e.statusCode == 401) {
             UiUtil.instance.showToast(
               context,
-              AppLocalizations.of(context).pleaseConfirmForm,
+              app.pleaseConfirmForm,
             );
             Utils.openConfirmForm(
               context,
@@ -289,7 +287,7 @@ class HomePageState extends State<HomePage> {
       final Map<String, dynamic> map =
           rawData![packageInfo.buildNumber] as Map<String, dynamic>;
       final String updateNoteContent =
-          map[ApLocalizations.current.locale] as String;
+          map[ap.locale] as String;
       if (!mounted) return;
       DialogUtils.showUpdateContent(
         context,

@@ -80,7 +80,7 @@ class _BusTimePageState extends State<BusTimePage>
           },
           child: HintContent(
             icon: ApIcon.error,
-            content: ApLocalizations.current.clickToRetry,
+            content: ap.clickToRetry,
           ),
         );
       default:
@@ -155,7 +155,7 @@ class BusTimeItem extends StatelessWidget {
     final bool isEnglish = locale.languageCode.contains('en');
     final String postfix = int.tryParse(busTime.arrivedTime ?? '') == null
         ? ''
-        : ' ${AppLocalizations.of(context).minute}';
+        : ' ${app.minute}';
     String arrivedTimeText = '';
     double? fontSize;
     Color color = ApTheme.of(context).greyText;

@@ -1,4 +1,5 @@
-import 'package:ap_common/ap_common.dart';
+import 'package:ap_common/ap_common.dart'
+    hide TranslationProvider, LocaleSettings, AppLocaleUtils, AppLocale;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
@@ -164,7 +165,6 @@ class CoursePageState extends State<CoursePage> {
   }
 
   String parser(String text) {
-    final AppLocalizations app = AppLocalizations.of(context);
     if (text.length == 4) {
       final String lastCode = text.substring(3);
       String last = '';
@@ -179,7 +179,7 @@ class CoursePageState extends State<CoursePage> {
           last = app.summerSemester;
       }
       String first;
-      if (Intl.defaultLocale!.contains('en')) {
+      if (LocaleSettings.currentLocale == AppLocale.en) {
         int year = int.parse(text.substring(0, 3));
         year += 1911;
         first = '$year~${year + 1}';

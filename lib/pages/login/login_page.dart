@@ -108,7 +108,7 @@ class LoginPageState extends State<LoginPage> {
               if (!context.mounted) return;
               UiUtil.instance.showToast(
                 context,
-                AppLocalizations.of(context).firstLoginHint,
+                app.firstLoginHint,
               );
             }
           },
@@ -193,7 +193,7 @@ class LoginPageState extends State<LoginPage> {
             } else if (e.statusCode == 401) {
               UiUtil.instance.showToast(
                 context,
-                AppLocalizations.of(context).pleaseConfirmForm,
+                app.pleaseConfirmForm,
               );
               Utils.openConfirmForm(
                 context,

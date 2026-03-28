@@ -1,5 +1,7 @@
-import 'package:ap_common/ap_common.dart';
+import 'package:ap_common/ap_common.dart'
+    hide TranslationProvider, LocaleSettings, AppLocaleUtils, AppLocale;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
+import 'package:ap_common_flutter_core/src/l10n/strings.g.dart' as ap_l10n;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -53,6 +55,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         customColorValue != 0) {
       customColor = Color(customColorValue);
     }
+    _initLocale();
     (AnalyticsUtil.instance as FirebaseAnalyticsUtils).logThemeEvent(themeMode);
     WidgetsBinding.instance.addObserver(this);
     Future<void>.microtask(() {
@@ -65,6 +68,30 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       );
     });
     super.initState();
+  }
+
+  Future<void> _initLocale() async {
+    final String languageCode = PreferenceUtil.instance.getString(
+      Constants.prefLanguageCode,
+      ApSupportLanguageConstants.system,
+    );
+    if (languageCode == ApSupportLanguageConstants.system) {
+      await useApDeviceLocale();
+      await LocaleSettings.useDeviceLocale();
+    } else {
+      final Locale locale = Locale(
+        languageCode,
+        languageCode == ApSupportLanguageConstants.zh ? 'TW' : null,
+      );
+      await setApLocaleFromFlutter(locale);
+      final AppLocale appLocale = AppLocaleUtils.instance.parseLocaleParts(
+        languageCode: locale.languageCode,
+        scriptCode: locale.scriptCode,
+        countryCode: locale.countryCode,
+      );
+      await LocaleSettings.setLocale(appLocale);
+    }
+    if (mounted) setState(() {});
   }
 
   @override
@@ -92,55 +119,49 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         child: Builder(
           builder: (BuildContext context) {
             final Color seedColor = ApTheme.of(context).seedColor;
-            return MaterialApp(
-              onGenerateTitle: (BuildContext context) =>
-                  AppLocalizations.of(context).appName,
-              debugShowCheckedModeBanner: false,
-              routes: <String, WidgetBuilder>{
-                Navigator.defaultRouteName: (BuildContext context) =>
-                    HomePage(),
-                HomePage.routerName: (BuildContext context) => HomePage(),
-                CoursePage.routerName: (BuildContext context) => CoursePage(),
-                ScorePage.routerName: (BuildContext context) => ScorePage(),
-                GraduationReportPage.routerName: (BuildContext context) =>
-                    const GraduationReportPage(),
-                SettingPage.routerName: (BuildContext context) => SettingPage(),
-              },
-              theme: ApTheme.light(seedColor),
-              darkTheme: ApTheme.dark(seedColor),
-              themeMode: themeMode,
-              locale: locale,
-              navigatorObservers: <NavigatorObserver>[
-                if (FirebaseAnalyticsUtils.isSupported && _analytics != null)
-                  FirebaseAnalyticsObserver(analytics: _analytics!),
-              ],
-              localeResolutionCallback:
-                  (Locale? locale, Iterable<Locale> supportedLocales) {
-                final String languageCode = PreferenceUtil.instance.getString(
-                  Constants.prefLanguageCode,
-                  ApSupportLanguageConstants.system,
-                );
-                if (languageCode == ApSupportLanguageConstants.system) {
-                  return this.locale =
-                      ApLocalizations.delegate.isSupported(locale!)
-                          ? locale
-                          : const Locale('en');
-                } else {
-                  return this.locale = Locale(
-                    languageCode,
-                    languageCode == ApSupportLanguageConstants.zh ? 'TW' : null,
-                  );
-                }
-              },
-              localizationsDelegates:
-                  const <LocalizationsDelegate<dynamic>>[
-                apLocalizationsDelegate,
-                appDelegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: ApLocalizations.delegate.supportedLocales,
+            return ap_l10n.TranslationProvider(
+              child: TranslationProvider(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return MaterialApp(
+                      onGenerateTitle: (BuildContext context) =>
+                          context.app.appName,
+                      debugShowCheckedModeBanner: false,
+                      routes: <String, WidgetBuilder>{
+                        Navigator.defaultRouteName: (BuildContext context) =>
+                            HomePage(),
+                        HomePage.routerName: (BuildContext context) =>
+                            HomePage(),
+                        CoursePage.routerName: (BuildContext context) =>
+                            CoursePage(),
+                        ScorePage.routerName: (BuildContext context) =>
+                            ScorePage(),
+                        GraduationReportPage.routerName:
+                            (BuildContext context) =>
+                                const GraduationReportPage(),
+                        SettingPage.routerName: (BuildContext context) =>
+                            SettingPage(),
+                      },
+                      theme: ApTheme.light(seedColor),
+                      darkTheme: ApTheme.dark(seedColor),
+                      themeMode: themeMode,
+                      locale: TranslationProvider.of(context).flutterLocale,
+                      navigatorObservers: <NavigatorObserver>[
+                        if (FirebaseAnalyticsUtils.isSupported &&
+                            _analytics != null)
+                          FirebaseAnalyticsObserver(analytics: _analytics!),
+                      ],
+                      localizationsDelegates:
+                          const <LocalizationsDelegate<dynamic>>[
+                        GlobalMaterialLocalizations.delegate,
+                        GlobalWidgetsLocalizations.delegate,
+                        GlobalCupertinoLocalizations.delegate,
+                      ],
+                      supportedLocales: AppLocaleUtils.supportedLocales,
+                    );
+                  },
+                ),
+              ),
             );
           },
         ),
@@ -168,10 +189,13 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void loadLocale(Locale locale) {
     this.locale = locale;
     AnnouncementHelper.instance.setLocale(this.locale!);
-    setState(() {
-      apLocalizationsDelegate.load(locale);
-      appDelegate.load(locale);
-    });
+    setApLocaleFromFlutter(locale);
+    final AppLocale appLocale = AppLocaleUtils.instance.parseLocaleParts(
+      languageCode: locale.languageCode,
+      scriptCode: locale.scriptCode,
+      countryCode: locale.countryCode,
+    );
+    LocaleSettings.setLocale(appLocale);
   }
 
   void getUserInfo() {
@@ -183,7 +207,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           }
         },
         onError: (GeneralResponse e) =>
-            UiUtil.instance.showToast(context, ApLocalizations.current.somethingError),
+            UiUtil.instance.showToast(context, ap.somethingError),
         onSuccess: (UserInfo data) {
           setState(() {
             userInfo = data;

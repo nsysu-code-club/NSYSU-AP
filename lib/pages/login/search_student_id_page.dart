@@ -201,7 +201,6 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
             if (list.length == 2 && isAutoFill) {
               Navigator.pop(context, list[1]);
             } else {
-              final AppLocalizations app = AppLocalizations.of(context);
               showDialog(
                 context: context,
                 builder: (BuildContext context) => DefaultDialog(

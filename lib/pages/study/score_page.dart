@@ -61,7 +61,7 @@ class ScorePageState extends State<ScorePage> {
       scoreData: scoreData,
       middleTitle: ap.credits,
       customHint: hasPreScore
-          ? AppLocalizations.of(context).hasPreScoreHint
+          ? app.hasPreScoreHint
           : null,
       itemPicker: Row(
         mainAxisAlignment: MainAxisAlignment.center,

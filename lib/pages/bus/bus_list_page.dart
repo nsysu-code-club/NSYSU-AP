@@ -60,7 +60,7 @@ class _BusListPageState extends State<BusListPage> {
           },
           child: HintContent(
             icon: ApIcon.error,
-            content: ApLocalizations.current.clickToRetry,
+            content: ap.clickToRetry,
           ),
         );
       default:

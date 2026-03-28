@@ -8,7 +8,6 @@ import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:sprintf/sprintf.dart';
 
 enum _State { loading, finish, error, empty }
 
@@ -21,7 +20,6 @@ class TuitionAndFeesPage extends StatefulWidget {
 
 class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   late ApLocalizations ap;
-  late AppLocalizations app;
 
   _State state = _State.loading;
 
@@ -44,7 +42,6 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   @override
   Widget build(BuildContext context) {
     ap = ApLocalizations.of(context);
-    app = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(app.tuitionAndFees)),
       body: _body(),
@@ -151,10 +148,10 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
           subtitle: Padding(
             padding: const EdgeInsets.all(4.0),
             child: Text(
-              sprintf(app.tuitionAndFeesItemTitleFormat, <String>[
-                item.amount,
-                item.dateOfPayment,
-              ]),
+              app.tuitionAndFeesItemTitleFormat(
+                amount: item.amount,
+                date: item.dateOfPayment,
+              ),
             ),
           ),
         ),

@@ -37,26 +37,26 @@ packages:
     dependency: "direct main"
     description:
       name: ap_common
-      sha256: "45493cf054d64287f100c4280ba4e9e0b1ec37a39abc80ab05e498c8f3770335"
+      sha256: "39540d6215bad5b5b9f3fde13c8c7238f326a3cac8c836fcbe86ae0708d2afb8"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1-dev.0"
+    version: "1.0.1-dev.3"
   ap_common_announcement_ui:
     dependency: transitive
     description:
       name: ap_common_announcement_ui
-      sha256: "2a2b213c4e3e51ece631dcbcf0b1a12502f7ca0464b1a73bca121e9e4360b44c"
+      sha256: "39182431e9f9a0ff7236d87753f636303cde3a3eb1793a554e9d3421cd967167"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1-dev.0"
+    version: "1.0.1-dev.3"
   ap_common_core:
     dependency: transitive
     description:
       name: ap_common_core
-      sha256: "7b740f25d64a33d3ead7bbf764526ccd89dbf4ed963b3827156af84a4c0b38fe"
+      sha256: "941f50834ea696685bda7e30c756ac79c30b1b9b3630e4469705c810be1f27a3"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1-dev.0"
   ap_common_firebase:
     dependency: "direct main"
     description:
@@ -66,29 +66,29 @@ packages:
     source: hosted
     version: "1.0.0"
   ap_common_flutter_core:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: ap_common_flutter_core
-      sha256: c473c502882b073e72ad3f87d7b382dbbdfefe8225307f9fca59d27ed5afd544
+      sha256: efe83eb12d4461b4814ebed5058df06d0ba2ed0cbee93721ea8fa7f6f0efd6ed
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0-dev.0"
+    version: "1.1.0-dev.3"
   ap_common_flutter_platform:
     dependency: transitive
     description:
       name: ap_common_flutter_platform
-      sha256: "0d1e4df840f48350c28bd5ac04430060a6ead1ec84e395499d4c5bebb77a77dd"
+      sha256: de8a0114aa4dfb780536850f354165245079bdd331da075bd9c9fb5aa2f64c8e
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1-dev.0"
+    version: "1.0.1-dev.3"
   ap_common_flutter_ui:
     dependency: transitive
     description:
       name: ap_common_flutter_ui
-      sha256: e1c365d31bc392398e5ec3f08c1da0f0ff5bd7c6cffe5480b5cf4a1a13c4bd57
+      sha256: a016051586bbc18c5f383f9f66162a169ffba557805d5ca2d00394de10013db1
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0-dev.0"
+    version: "1.1.0-dev.3"
   ap_common_plugin:
     dependency: "direct main"
     description:
@@ -1014,7 +1014,7 @@ packages:
     source: hosted
     version: "4.0.0"
   intl:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: intl
       sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
@@ -1141,14 +1141,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-  multiple_localization:
-    dependency: "direct main"
-    description:
-      name: multiple_localization
-      sha256: "29c97a3fbf4d067ea5a63df1995465ea81ef28e2c817d9d0871983e50f4fd3f0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.0"
   native_toolchain_c:
     dependency: transitive
     description:
@@ -1381,6 +1373,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  serial_csv:
+    dependency: transitive
+    description:
+      name: serial_csv
+      sha256: "2d62bb70cb3ce7251383fc86ea9aae1298ab1e57af6ef4e93b6a9751c5c268dd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.2"
   share_plus:
     dependency: transitive
     description:
@@ -1498,6 +1498,30 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  slang:
+    dependency: "direct main"
+    description:
+      name: slang
+      sha256: ea6702ed6b1c82065fb2de906fe34ac9298117342e3c2ea2567132efdc81bd17
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.14.0"
+  slang_build_runner:
+    dependency: "direct dev"
+    description:
+      name: slang_build_runner
+      sha256: "1db59254041026aec97df5aca30a602e09e9d1546c3d16b55c3c7cf4c16cdb6c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.14.0"
+  slang_flutter:
+    dependency: "direct main"
+    description:
+      name: slang_flutter
+      sha256: dcc4e77527c91b12348fc8bdd43d3eb92d8cea37c12a23a1f9719cdc12c804c6
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.14.0"
   source_gen:
     dependency: transitive
     description:

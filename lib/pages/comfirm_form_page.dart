@@ -51,7 +51,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
             TextButton(
               onPressed: _launchUrl,
               child: Text(
-                AppLocalizations.of(context).openBrowserToFill,
+                app.openBrowserToFill,
                 style: TextStyle(
                   color: ApTheme.of(context).blueText,
                 ),
@@ -78,7 +78,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
               onTap: _launchUrl,
               child: HintContent(
                 icon: ApIcon.apps,
-                content: AppLocalizations.of(context).openBrowserToFill,
+                content: app.openBrowserToFill,
               ),
             ),
     );
