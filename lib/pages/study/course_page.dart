@@ -59,10 +59,12 @@ class CoursePageState extends State<CoursePage> {
       notifyData: notifyData,
       semesterData: semesterData,
       onSelect: (int index) {
-        semesterData!.currentIndex = index;
+        semesterData = semesterData!.copyWith(currentIndex: index);
         _getCourseTables();
       },
-      onRefresh: _getCourseTables,
+      onRefresh: () async {
+        await _getCourseTables();
+      },
       customHint: isOffline ? ap.offlineCourse : null,
       enableNotifyControl:
           semesterData != null &&
@@ -135,7 +137,6 @@ class CoursePageState extends State<CoursePage> {
         onFailure: _onFailure,
         onError: _onError,
         onSuccess: (SemesterData data) {
-          semesterData = data;
           final String semester = PreferenceUtil.instance.getString(
             ApConstants.currentSemesterCode,
             ApConstants.semesterLatest,
@@ -146,10 +147,16 @@ class CoursePageState extends State<CoursePage> {
               defaultSemesterCode,
             );
           }
-          for (final Semester option in semesterData!.data) {
-            option.text = parser(option.text);
-          }
-          semesterData!.currentIndex = semesterData!.defaultIndex;
+          final List<Semester> parsedData = data.data
+              .map(
+                (Semester option) =>
+                    option.copyWith(text: parser(option.text)),
+              )
+              .toList();
+          semesterData = data.copyWith(
+            data: parsedData,
+            currentIndex: data.defaultIndex,
+          );
           _getCourseTables();
         },
       ),

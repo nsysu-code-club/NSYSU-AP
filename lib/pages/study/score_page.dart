@@ -98,27 +98,18 @@ class ScorePageState extends State<ScorePage> {
         _getSemesterScore();
       },
       finalScoreBuilder: (int index) {
-        return ScoreTextBorder(
-          text: scoreData!.scores[index].finalScore,
+        final ColorScheme colorScheme = Theme.of(context).colorScheme;
+        return Text(
+          scoreData!.scores[index].finalScore ?? '',
           style: TextStyle(
-            fontSize: 15.0,
+            fontSize: 24.0,
+            fontWeight: FontWeight.bold,
             color: scoreData!.scores[index].isPreScore
-                ? ApTheme.of(context).yellow
+                ? colorScheme.tertiary
                 : null,
           ),
         );
       },
-      details: (scoreData == null)
-          ? null
-          : <String>[
-              '${ap.creditsTakenEarned}：' +
-                  '${scoreData!.detail.creditTaken ?? ''}'
-                      '${scoreData!.detail.isCreditEmpty ? '' : ' / '}'
-                      '${scoreData!.detail.creditEarned ?? ''}',
-              '${ap.average}：${scoreData!.detail.average ?? ''}',
-              '${ap.rank}：${scoreData!.detail.classRank ?? ''}',
-              '${ap.percentage}：${scoreData!.detail.classPercentage ?? ''}',
-            ],
     );
   }
 
