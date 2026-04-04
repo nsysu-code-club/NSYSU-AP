@@ -182,51 +182,50 @@ class LoginPageState extends State<LoginPage> {
         Constants.prefUsername,
         username.toUpperCase(),
       );
-      SelcrsHelper.instance.login(
+      final ApiResult<GeneralResponse> result =
+          await SelcrsHelper.instance.login(
         username: username,
         password: _password.text,
-        callback: GeneralCallback<GeneralResponse>(
-          onError: (GeneralResponse e) {
-            Navigator.pop(context);
-            if (e.statusCode == 400) {
-              UiUtil.instance.showToast(context, ap.loginFail);
-            } else if (e.statusCode == 401) {
-              UiUtil.instance.showToast(
-                context,
-                app.pleaseConfirmForm,
-              );
-              Utils.openConfirmForm(
-                context,
-                mounted: mounted,
-                username: username,
-              );
-            } else {
-              UiUtil.instance.showToast(context, ap.unknownError);
-            }
-          },
-          onFailure: (DioException e) {
-            if (e.i18nMessage != null) {
-              Navigator.pop(context);
-              UiUtil.instance.showToast(context, e.i18nMessage!);
-            }
-          },
-          onSuccess: (GeneralResponse data) async {
-            Navigator.pop(context);
-            PreferenceUtil.instance.setString(Constants.prefUsername, username);
-            if (isRememberPassword) {
-              await PreferenceUtil.instance.setStringSecurity(
-                Constants.prefPassword,
-                _password.text,
-              );
-            }
-            PreferenceUtil.instance
-                .setBool(Constants.prefIsOfflineLogin, false);
-            if (!mounted) return;
-            Navigator.of(context).pop(true);
-            TextInput.finishAutofillContext();
-          },
-        ),
       );
+      if (!mounted) return;
+      switch (result) {
+        case ApiSuccess<GeneralResponse>():
+          Navigator.pop(context);
+          PreferenceUtil.instance.setString(Constants.prefUsername, username);
+          if (isRememberPassword) {
+            await PreferenceUtil.instance.setStringSecurity(
+              Constants.prefPassword,
+              _password.text,
+            );
+          }
+          PreferenceUtil.instance
+              .setBool(Constants.prefIsOfflineLogin, false);
+          if (!mounted) return;
+          Navigator.of(context).pop(true);
+          TextInput.finishAutofillContext();
+        case ApiError<GeneralResponse>(:final GeneralResponse response):
+          Navigator.pop(context);
+          if (response.statusCode == 400) {
+            UiUtil.instance.showToast(context, ap.loginFail);
+          } else if (response.statusCode == 401) {
+            UiUtil.instance.showToast(
+              context,
+              app.pleaseConfirmForm,
+            );
+            Utils.openConfirmForm(
+              context,
+              mounted: mounted,
+              username: username,
+            );
+          } else {
+            UiUtil.instance.showToast(context, ap.unknownError);
+          }
+        case ApiFailure<GeneralResponse>(:final DioException exception):
+          Navigator.pop(context);
+          if (exception.i18nMessage != null) {
+            UiUtil.instance.showToast(context, exception.i18nMessage!);
+          }
+      }
     }
   }
 }

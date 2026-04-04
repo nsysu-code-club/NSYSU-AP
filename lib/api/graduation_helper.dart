@@ -42,10 +42,9 @@ class GraduationHelper {
   * error status code
   * 401: 帳號密碼錯誤
   * */
-  Future<void> login({
+  Future<ApiResult<GeneralResponse>> login({
     required String username,
     required String password,
-    required GeneralCallback<GeneralResponse> callback,
   }) async {
     try {
       final String base64md5Password = Utils.base64md5(password);
@@ -63,35 +62,28 @@ class GraduationHelper {
         },
       );
       final String text = const Utf8Decoder().convert(response.data!);
-//          print('Response =  $text');
-      //    print('response.statusCode = ${response.statusCode}');
       if (text.contains('資料錯誤請重新輸入')) {
-        callback.onError(
+        return ApiError<GeneralResponse>(
           GeneralResponse(statusCode: 401, message: 'graduation login error'),
         );
       } else {
-        callback.onError(
-          GeneralResponse.unknownError(),
-        );
+        return ApiError<GeneralResponse>(GeneralResponse.unknownError());
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
           e.response!.statusCode == 302) {
         isLogin = true;
-        callback.onSuccess(GeneralResponse.success());
+        return ApiSuccess<GeneralResponse>(GeneralResponse.success());
       } else {
-        callback.onFailure(e);
-        rethrow;
+        return ApiFailure<GeneralResponse>(e);
       }
     } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
-      rethrow;
+      return ApiError<GeneralResponse>(GeneralResponse.unknownError());
     }
   }
 
-  Future<void> getGraduationReport({
+  Future<ApiResult<GraduationReportData?>> getGraduationReport({
     required String username,
-    required GeneralCallback<GraduationReportData?> callback,
   }) async {
     final String url =
         '${SelcrsHelper.instance.selcrsUrl}/gadchk/gad_chk_stu_list.asp?'
@@ -110,16 +102,12 @@ class GraduationHelper {
       );
       final String text = const Utf8Decoder().convert(response.data!);
       final int startTime = DateTime.now().millisecondsSinceEpoch;
-//      debugPrint('text = $text');
-//      debugPrint(DateTime.now().toString());
       final Document document = parse(text);
       final List<Element> tableDoc = document.getElementsByTagName('tbody');
       if (tableDoc.length >= 2) {
         for (int i = 0; i < tableDoc.length; i++) {
-          //print('i => ${tableDoc[i].text}');
           final List<Element> trDoc = tableDoc[i].getElementsByTagName('tr');
           if (i == 4) {
-            //缺修學系必修課程
             if (trDoc.length > 3) {
               for (int j = 2; j < trDoc.length; j++) {
                 final List<Element> tdDoc = trDoc[j].getElementsByTagName('td');
@@ -132,9 +120,6 @@ class GraduationHelper {
                     ),
                   );
                 }
-                //              for (var k = 0; k < tdDoc.length; k++) {
-                //                print("i $i j $j k $k => ${tdDoc[k].text}");
-                //              }
               }
             }
             if (trDoc.isNotEmpty) {
@@ -142,10 +127,8 @@ class GraduationHelper {
                   trDoc.last.text.replaceAll(RegExp(r'[※\n]'), '');
             }
           } else if (i == 5) {
-            //通識課程
             for (int j = 2; j < trDoc.length; j++) {
               final List<Element> tdDoc = trDoc[j].getElementsByTagName('td');
-              //print('td lengh = ${tdDoc.length}');
               int base = 0;
               if (tdDoc.length == 7) {
                 base = 1;
@@ -176,7 +159,6 @@ class GraduationHelper {
                   trDoc.last.text.replaceAll(RegExp(r'[※\n]'), '');
             }
           } else if (i == 6) {
-            //其他
             if (trDoc.length > 3) {
               for (int j = 2; j < trDoc.length; j++) {
                 final List<Element> tdDoc = trDoc[j].getElementsByTagName('td');
@@ -189,9 +171,6 @@ class GraduationHelper {
                     ),
                   );
                 }
-                //              for (var k = 0; k < tdDoc.length; k++) {
-                //                print("i $i j $j k $k => ${tdDoc[k].text}");
-                //              }
               }
             }
             if (trDoc.isNotEmpty) {
@@ -211,21 +190,15 @@ class GraduationHelper {
           print(DateTime.now());
         }
       } else {
-        callback.onSuccess(null);
-        return;
+        return const ApiSuccess<GraduationReportData?>(null);
       }
-      //    graduationReportData.generalEducationCourse.forEach((i) {
-      //      print('type = ${i.type}');
-      //    });
       final int endTime = DateTime.now().millisecondsSinceEpoch;
       debugPrint(((endTime - startTime) / 1000.0).toString());
-      callback.onSuccess(graduationReportData);
+      return ApiSuccess<GraduationReportData?>(graduationReportData);
     } on DioException catch (e) {
-      callback.onFailure(e);
-      rethrow;
-    } catch (e) {
-      callback.onError(GeneralResponse.unknownError());
-      rethrow;
+      return ApiFailure<GraduationReportData?>(e);
+    } catch (_) {
+      return ApiError<GraduationReportData?>(GeneralResponse.unknownError());
     }
   }
 }

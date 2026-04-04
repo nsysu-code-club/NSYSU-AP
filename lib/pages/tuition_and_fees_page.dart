@@ -112,38 +112,35 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
               color: item.isPayment ? Colors.green : Colors.red,
             ),
           ),
-          onTap: () {
+          onTap: () async {
             showDialog(
               context: context,
               builder: (BuildContext context) =>
                   PopScope(canPop: false, child: ProgressDialog(ap.loading)),
               barrierDismissible: false,
             );
-            TuitionHelper.instance.downloadFdf(
+            final ApiResult<Uint8List?> result =
+                await TuitionHelper.instance.downloadFdf(
               serialNumber: item.serialNumber,
-              callback: GeneralCallback<Uint8List?>(
-                onError: (GeneralResponse e) {
-                  Navigator.of(context, rootNavigator: true).pop();
-                  UiUtil.instance.showToast(
-                    context,
-                    ApLocalizations.of(context).somethingError,
-                  );
-                },
-                onFailure: (DioException e) {
-                  Navigator.of(context, rootNavigator: true).pop();
-                  if (e.i18nMessage != null) {
-                    UiUtil.instance.showToast(context, e.i18nMessage!);
-                  }
-                },
-                onSuccess: (Uint8List? data) {
-                  Navigator.of(context, rootNavigator: true).pop();
-                  ApUtils.pushCupertinoStyle(
-                    context,
-                    PdfView(state: PdfState.finish, data: data),
-                  );
-                },
-              ),
             );
+            if (!mounted) return;
+            Navigator.of(context, rootNavigator: true).pop();
+            switch (result) {
+              case ApiSuccess<Uint8List?>(:final Uint8List? data):
+                ApUtils.pushCupertinoStyle(
+                  context,
+                  PdfView(state: PdfState.finish, data: data),
+                );
+              case ApiFailure<Uint8List?>(:final DioException exception):
+                if (exception.i18nMessage != null) {
+                  UiUtil.instance.showToast(context, exception.i18nMessage!);
+                }
+              case ApiError<Uint8List?>():
+                UiUtil.instance.showToast(
+                  context,
+                  ApLocalizations.of(context).somethingError,
+                );
+            }
           },
           subtitle: Padding(
             padding: const EdgeInsets.all(4.0),
@@ -159,58 +156,41 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     );
   }
 
-  Function(DioException) get _onFailure =>
-      (DioException e) => setState(() {
-        state = _State.error;
-        switch (e.type) {
-          case DioExceptionType.connectionTimeout:
-          case DioExceptionType.connectionError:
-          case DioExceptionType.sendTimeout:
-          case DioExceptionType.receiveTimeout:
-          case DioExceptionType.badResponse:
-          case DioExceptionType.cancel:
-          case DioExceptionType.badCertificate:
-            break;
-          case DioExceptionType.unknown:
-            throw e;
-        }
-      });
-
-  Function(GeneralResponse) get _onError =>
-      (_) => setState(() => state = _State.error);
-
-  void _login() {
-    TuitionHelper.instance.login(
+  Future<void> _login() async {
+    final ApiResult<GeneralResponse> result =
+        await TuitionHelper.instance.login(
       username: SelcrsHelper.instance.username,
       password: SelcrsHelper.instance.password,
-      callback: GeneralCallback<GeneralResponse>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (GeneralResponse data) {
-          _getData();
-        },
-      ),
     );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<GeneralResponse>():
+        _getData();
+      case ApiFailure<GeneralResponse>():
+        setState(() => state = _State.error);
+      case ApiError<GeneralResponse>():
+        setState(() => state = _State.error);
+    }
   }
 
   Future<void> _getData() async {
-    TuitionHelper.instance.getData(
-      callback: GeneralCallback<List<TuitionAndFees>>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (List<TuitionAndFees> data) {
-          items = data;
-          if (mounted) {
-            setState(() {
-              if (items.isEmpty) {
-                state = _State.empty;
-              } else {
-                state = _State.finish;
-              }
-            });
+    final ApiResult<List<TuitionAndFees>> result =
+        await TuitionHelper.instance.getData();
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<List<TuitionAndFees>>(:final List<TuitionAndFees> data):
+        items = data;
+        setState(() {
+          if (items.isEmpty) {
+            state = _State.empty;
+          } else {
+            state = _State.finish;
           }
-        },
-      ),
-    );
+        });
+      case ApiFailure<List<TuitionAndFees>>():
+        setState(() => state = _State.error);
+      case ApiError<List<TuitionAndFees>>():
+        setState(() => state = _State.error);
+    }
   }
 }

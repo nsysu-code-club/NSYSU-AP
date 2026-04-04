@@ -198,25 +198,24 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     LocaleSettings.setLocale(appLocale);
   }
 
-  void getUserInfo() {
-    SelcrsHelper.instance.getUserInfo(
-      callback: GeneralCallback<UserInfo>(
-        onFailure: (DioException e) {
-          if (e.i18nMessage != null) {
-            UiUtil.instance.showToast(context, e.i18nMessage!);
-          }
-        },
-        onError: (GeneralResponse e) =>
-            UiUtil.instance.showToast(context, ap.somethingError),
-        onSuccess: (UserInfo data) {
-          setState(() {
-            userInfo = data;
-          });
-          if (userInfo != null) {
-            AnalyticsUtil.instance.logUserInfo(userInfo!);
-          }
-        },
-      ),
-    );
+  Future<void> getUserInfo() async {
+    final ApiResult<UserInfo> result =
+        await SelcrsHelper.instance.getUserInfo();
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<UserInfo>(:final UserInfo data):
+        setState(() {
+          userInfo = data;
+        });
+        if (userInfo != null) {
+          AnalyticsUtil.instance.logUserInfo(userInfo!);
+        }
+      case ApiFailure<UserInfo>(:final DioException exception):
+        if (exception.i18nMessage != null) {
+          UiUtil.instance.showToast(context, exception.i18nMessage!);
+        }
+      case ApiError<UserInfo>():
+        UiUtil.instance.showToast(context, ap.somethingError);
+    }
   }
 }

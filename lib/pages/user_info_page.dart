@@ -32,20 +32,16 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return UserInfoScaffold(
       userInfo: userInfo,
       onRefresh: () async {
-        return (await SelcrsHelper.instance.getUserInfo(
-              callback: GeneralCallback<UserInfo>(
-                onSuccess: (UserInfo data) {
-                  setState(() {
-                    userInfo = data;
-                  });
-                  AnalyticsUtil.instance.logUserInfo(userInfo);
-                  return data;
-                },
-                onFailure: (DioException e) {},
-                onError: (GeneralResponse e) {},
-              ),
-            )) ??
-            userInfo;
+        final ApiResult<UserInfo> result =
+            await SelcrsHelper.instance.getUserInfo();
+        if (result case ApiSuccess<UserInfo>(:final UserInfo data)) {
+          setState(() {
+            userInfo = data;
+          });
+          AnalyticsUtil.instance.logUserInfo(userInfo);
+          return data;
+        }
+        return userInfo;
       },
       actions: <Widget>[
         IconButton(
@@ -73,24 +69,31 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           ),
                           barrierDismissible: false,
                         );
-                        final UserInfo? userInfo =
+                        final ApiResult<UserInfo> result =
                             await SelcrsHelper.instance.changeMail(
                           mail: newEmail.text,
-                          callback: GeneralCallback<UserInfo>.simple(
-                            context,
-                            (UserInfo userInfo) => userInfo,
-                          ),
                         );
                         if (!context.mounted) return;
                         Navigator.pop(context);
-                        if (userInfo != null) {
-                          UiUtil.instance.showToast(
-                            context,
-                            ApLocalizations.of(context).updateSuccess,
-                          );
-                          setState(() {
-                            this.userInfo = userInfo;
-                          });
+                        switch (result) {
+                          case ApiSuccess<UserInfo>(:final UserInfo data):
+                            UiUtil.instance.showToast(
+                              context,
+                              ApLocalizations.of(context).updateSuccess,
+                            );
+                            setState(() {
+                              userInfo = data;
+                            });
+                          case ApiFailure<UserInfo>(
+                              :final DioException exception):
+                            if (exception.i18nMessage != null) {
+                              UiUtil.instance.showToast(
+                                  context, exception.i18nMessage!);
+                            }
+                          case ApiError<UserInfo>(
+                              :final GeneralResponse response):
+                            UiUtil.instance.showToast(
+                                context, response.message);
                         }
                       },
                       child: Text(ApLocalizations.of(context).confirm),
