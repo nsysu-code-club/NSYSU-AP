@@ -219,6 +219,7 @@ class SelcrsHelper {
     } on DioException catch (e) {
       return ApiFailure<UserInfo>(e);
     } on Exception {
+      if (kDebugMode) rethrow;
       return ApiError<UserInfo>(GeneralResponse.unknownError());
     }
   }
@@ -276,6 +277,7 @@ class SelcrsHelper {
     } on DioException catch (e) {
       return ApiFailure<SemesterData>(e);
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<SemesterData>(GeneralResponse.unknownError());
     }
   }
@@ -377,6 +379,7 @@ class SelcrsHelper {
     } on DioException catch (e) {
       return ApiFailure<CourseData>(e);
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<CourseData>(GeneralResponse.unknownError());
     }
   }
@@ -440,6 +443,7 @@ class SelcrsHelper {
       }
       return ApiFailure<ScoreSemesterData>(e);
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<ScoreSemesterData>(GeneralResponse.unknownError());
     }
   }
@@ -551,6 +555,7 @@ class SelcrsHelper {
       }
       return ApiFailure<ScoreData>(e);
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<ScoreData>(GeneralResponse.unknownError());
     }
   }
@@ -613,6 +618,7 @@ class SelcrsHelper {
     } on DioException catch (e) {
       return ApiFailure<String>(e);
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<String>(GeneralResponse.unknownError());
     }
   }
@@ -638,6 +644,7 @@ class SelcrsHelper {
     } on DioException catch (e) {
       return ApiFailure<UserInfo>(e);
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<UserInfo>(GeneralResponse.unknownError());
     }
   }

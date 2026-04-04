@@ -78,6 +78,7 @@ class GraduationHelper {
         return ApiFailure<GeneralResponse>(e);
       }
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<GeneralResponse>(GeneralResponse.unknownError());
     }
   }
@@ -198,6 +199,7 @@ class GraduationHelper {
     } on DioException catch (e) {
       return ApiFailure<GraduationReportData?>(e);
     } catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<GraduationReportData?>(GeneralResponse.unknownError());
     }
   }

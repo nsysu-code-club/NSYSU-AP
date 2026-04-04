@@ -1,5 +1,6 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/widgets.dart';
 import 'package:nsysu_ap/models/bus_info.dart';
@@ -56,6 +57,7 @@ class BusHelper {
     } on DioException catch (e) {
       return ApiFailure<List<BusInfo>?>(e);
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<List<BusInfo>?>(GeneralResponse.unknownError());
     }
   }
@@ -93,6 +95,7 @@ class BusHelper {
     } on DioException catch (e) {
       return ApiFailure<List<BusTime>?>(e);
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<List<BusTime>?>(GeneralResponse.unknownError());
     }
   }

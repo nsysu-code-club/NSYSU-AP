@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
@@ -70,6 +71,7 @@ class TuitionHelper {
         return ApiFailure<GeneralResponse>(e);
       }
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<GeneralResponse>(GeneralResponse.unknownError());
     }
   }
@@ -131,6 +133,7 @@ class TuitionHelper {
     } on DioException catch (e) {
       return ApiFailure<List<TuitionAndFees>>(e);
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<List<TuitionAndFees>>(GeneralResponse.unknownError());
     }
   }
@@ -147,6 +150,7 @@ class TuitionHelper {
     } on DioException catch (e) {
       return ApiFailure<Uint8List?>(e);
     } on Exception catch (_) {
+      if (kDebugMode) rethrow;
       return ApiError<Uint8List?>(GeneralResponse.unknownError());
     }
   }
