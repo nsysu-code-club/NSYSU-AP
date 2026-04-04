@@ -14,11 +14,10 @@ dependencies:
   slang: ^4.5.0
   slang_flutter: ^4.5.0
 
-  ap_common: ^1.0.1-dev.3
-  ap_common_flutter_core: ^1.1.0-dev.0
-  ap_common_firebase: ^1.0.0-dev.3
-  ap_common_plugin: ^1.0.0-dev.3
-  #     path: ../ap_common_plugin
+  ap_common: ^1.0.1-dev.4
+  ap_common_flutter_core: ^1.1.0-dev.5
+  ap_common_firebase: ^1.0.0-dev.5
+  ap_common_plugin: ^1.0.0-dev.4
 
   #official plugin
   http: ^1.2.2
@@ -50,16 +49,6 @@ dev_dependencies:
   slang_build_runner: ^4.5.0
 
 dependency_overrides:
-  # ap_common:
-  #   path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common
-  # ap_common_flutter_core:
-  #   path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_flutter_core
-  # ap_common_flutter_ui:
-  #   path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_flutter_ui
-  # ap_common_firebase:
-  #   path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_firebase
-  # ap_common_plugin:
-  #   path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_plugin
   web: 0.5.1
   google_sign_in: 6.2.1
   google_sign_in_ios: 5.7.6

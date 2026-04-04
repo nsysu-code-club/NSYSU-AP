@@ -195,23 +195,20 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _getAllAnnouncement() async {
-    try {
-      final List<Announcement>? data =
-          await AnnouncementHelper.instance.getAnnouncements(
-        tags: <String>['nsysu'],
-      );
-      announcements = data ?? <Announcement>[];
-      if (mounted) {
+    final result = await AnnouncementHelper.instance.getAnnouncements(
+      tags: <String>['nsysu'],
+    );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<List<Announcement>>(:final data):
+        announcements = data;
         setState(() {
-          if (announcements.isEmpty) {
-            state = HomeState.empty;
-          } else {
-            state = HomeState.finish;
-          }
+          state =
+              announcements.isEmpty ? HomeState.empty : HomeState.finish;
         });
-      }
-    } catch (_) {
-      if (mounted) setState(() => state = HomeState.error);
+      case ApiError<List<Announcement>>():
+      case ApiFailure<List<Announcement>>():
+        setState(() => state = HomeState.error);
     }
   }
 
