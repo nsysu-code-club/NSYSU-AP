@@ -14,8 +14,8 @@ dependencies:
   slang: ^4.5.0
   slang_flutter: ^4.5.0
 
-  ap_common: ^1.0.1-dev.4
-  ap_common_flutter_core: ^1.1.0-dev.5
+  ap_common: ^1.0.1-dev.5
+  ap_common_flutter_core: ^1.1.0-dev.6
   ap_common_firebase: ^1.0.0-dev.5
   ap_common_plugin: ^1.0.0-dev.4
 
