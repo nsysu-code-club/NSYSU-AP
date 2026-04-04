@@ -256,20 +256,22 @@ class SelcrsHelper {
       }
       reLoginCount = 0;
       final dom.Document document = parse(text);
-      final List<dom.Element> options = document.getElementsByTagName('option');
-      final SemesterData courseSemesterData = SemesterData(
-        data: <Semester>[],
-        defaultSemester: defaultSemester,
-      );
-      for (int i = 0; i < options.length; i++) {
-        courseSemesterData.data.add(
+      final List<dom.Element> optionElements =
+          document.getElementsByTagName('option');
+      final List<Semester> semesters = <Semester>[];
+      for (int i = 0; i < optionElements.length; i++) {
+        semesters.add(
           Semester(
-            text: options[i].text,
-            year: options[i].attributes['value']!.substring(0, 3),
-            value: options[i].attributes['value']!.substring(3),
+            text: optionElements[i].text,
+            year: optionElements[i].attributes['value']!.substring(0, 3),
+            value: optionElements[i].attributes['value']!.substring(3),
           ),
         );
       }
+      final SemesterData courseSemesterData = SemesterData(
+        data: semesters,
+        defaultSemester: defaultSemester,
+      );
       return ApiSuccess<SemesterData>(courseSemesterData);
     } on DioException catch (e) {
       return ApiFailure<SemesterData>(e);
@@ -312,10 +314,7 @@ class SelcrsHelper {
       final int startTime = DateTime.now().millisecondsSinceEpoch;
       final dom.Document document = parse(text);
       final List<dom.Element> trDoc = document.getElementsByTagName('tr');
-      final CourseData courseData = CourseData(
-        courses: <Course>[],
-        timeCodes: timeCodeConfig.timeCodes,
-      );
+      final List<Course> courses = <Course>[];
 
       for (int i = 1; i < trDoc.length; i++) {
         final List<dom.Element> tdDoc = trDoc[i].getElementsByTagName('td');
@@ -335,18 +334,7 @@ class SelcrsHelper {
         }
         final String instructors = tdDoc[8].text;
         final Location location = Location(building: '', room: tdDoc[9].text);
-        final Course course = Course(
-          code: tdDoc[2].text,
-          className: '${tdDoc[1].text} ${tdDoc[3].text}',
-          title: title,
-          units: tdDoc[5].text,
-          required: tdDoc[7].text.length == 1
-              ? '${tdDoc[7].text}修'
-              : tdDoc[7].text,
-          location: location,
-          instructors: <String>[instructors],
-          times: <SectionTime>[],
-        );
+        final List<SectionTime> times = <SectionTime>[];
         for (int j = 10; j < tdDoc.length; j++) {
           if (tdDoc[j].text.isNotEmpty) {
             final List<String> sections = tdDoc[j].text.split('');
@@ -354,12 +342,25 @@ class SelcrsHelper {
               for (final String section in sections) {
                 final int index = timeCodeConfig.indexOf(section);
                 if (index == -1) continue;
-                course.times.add(SectionTime(weekday: j - 9, index: index));
+                times.add(SectionTime(weekday: j - 9, index: index));
               }
             }
           }
         }
-        courseData.courses.add(course);
+        courses.add(
+          Course(
+            code: tdDoc[2].text,
+            className: '${tdDoc[1].text} ${tdDoc[3].text}',
+            title: title,
+            units: tdDoc[5].text,
+            required: tdDoc[7].text.length == 1
+                ? '${tdDoc[7].text}修'
+                : tdDoc[7].text,
+            location: location,
+            instructors: <String>[instructors],
+            times: times,
+          ),
+        );
       }
       if (trDoc.isNotEmpty) {
         final int endTime = DateTime.now().millisecondsSinceEpoch;
@@ -368,6 +369,10 @@ class SelcrsHelper {
           (endTime - startTime) / 1000.0,
         );
       }
+      final CourseData courseData = CourseData(
+        courses: courses,
+        timeCodes: timeCodeConfig.timeCodes,
+      );
       return ApiSuccess<CourseData>(courseData);
     } on DioException catch (e) {
       return ApiFailure<CourseData>(e);
