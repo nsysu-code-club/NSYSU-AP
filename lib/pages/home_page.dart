@@ -94,10 +94,12 @@ class HomePageState extends State<HomePage> {
         AppTrackingUtils.show(context: context);
       }
     });
-    AnalyticsUtil.instance.setUserProperty(
-      AnalyticsConstants.language,
-      Locale(Intl.defaultLocale!).languageCode,
-    );
+    if (Intl.defaultLocale != null) {
+      AnalyticsUtil.instance.setUserProperty(
+        AnalyticsConstants.language,
+        Locale(Intl.defaultLocale!).languageCode,
+      );
+    }
     FirebaseMessagingUtils.instance.init(
       onClick: (RemoteMessage message) {
         if (kDebugMode) {
@@ -214,6 +216,7 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _checkLoginState() async {
+    if (!mounted) return;
     if (isLogin) {
       _homeKey.currentState!.hideSnackBar();
     } else {
@@ -281,10 +284,11 @@ class HomePageState extends State<HomePage> {
     if (currentVersion != packageInfo.buildNumber) {
       final Map<String, dynamic>? rawData = await FileAssets.changelogData;
       //TODO: improve by object
-      final Map<String, dynamic> map =
-          rawData![packageInfo.buildNumber] as Map<String, dynamic>;
-      final String updateNoteContent =
-          map[ap.locale] as String;
+      final Map<String, dynamic>? map =
+          rawData?[packageInfo.buildNumber] as Map<String, dynamic>?;
+      if (map == null) return;
+      final String? updateNoteContent =
+          map[ap.locale] as String?;
       if (!mounted) return;
       DialogUtils.showUpdateContent(
         context,
