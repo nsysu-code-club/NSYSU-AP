@@ -55,6 +55,7 @@ class LoginPageState extends State<LoginPage> {
           labelText: ap.studentId,
           autofillHints: const <String>[AutofillHints.username],
         ),
+        const SizedBox(height: 16.0),
         ApTextField(
           key: const Key('password'),
           obscureText: true,
@@ -77,6 +78,7 @@ class LoginPageState extends State<LoginPage> {
               value: isAutoLogin,
               onChanged: _onAutoLoginChanged,
             ),
+            const SizedBox(width: 16.0),
             TextCheckBox(
               text: ap.rememberPassword,
               value: isRememberPassword,
