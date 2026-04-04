@@ -191,48 +191,54 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     if (_name.text.isEmpty || _id.text.isEmpty) {
       UiUtil.instance.showToast(context, ap.doNotEmpty);
     } else {
-      SelcrsHelper.instance.getUsername(
+      final ApiResult<String> result =
+          await SelcrsHelper.instance.getUsername(
         name: _name.text,
         id: _id.text,
-        callback: GeneralCallback<String>.simple(
-          context,
-          (String result) {
-            final List<String> list = result.split('--');
-            if (list.length == 2 && isAutoFill) {
-              Navigator.pop(context, list[1]);
-            } else {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) => DefaultDialog(
-                  title: ap.searchResult,
-                  actionText: ap.iKnow,
-                  actionFunction: () =>
-                      Navigator.of(context, rootNavigator: true).pop('dialog'),
-                  contentWidget: RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        color: ApTheme.of(context).grey,
-                        height: 1.3,
-                        fontSize: 16.0,
-                      ),
-                      children: <InlineSpan>[
-                        TextSpan(
-                          text: result,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        if (list.length == 2)
-                          TextSpan(
-                            text: '\n\n${app.firstLoginHint}',
-                          ),
-                      ],
+      );
+      if (!mounted) return;
+      switch (result) {
+        case ApiSuccess<String>(:final String data):
+          final List<String> list = data.split('--');
+          if (list.length == 2 && isAutoFill) {
+            Navigator.pop(context, list[1]);
+          } else {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) => DefaultDialog(
+                title: ap.searchResult,
+                actionText: ap.iKnow,
+                actionFunction: () =>
+                    Navigator.of(context, rootNavigator: true).pop('dialog'),
+                contentWidget: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      color: ApTheme.of(context).grey,
+                      height: 1.3,
+                      fontSize: 16.0,
                     ),
+                    children: <InlineSpan>[
+                      TextSpan(
+                        text: data,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      if (list.length == 2)
+                        TextSpan(
+                          text: '\n\n${app.firstLoginHint}',
+                        ),
+                    ],
                   ),
                 ),
-              );
-            }
-          },
-        ),
-      );
+              ),
+            );
+          }
+        case ApiFailure<String>(:final DioException exception):
+          if (exception.i18nMessage != null) {
+            UiUtil.instance.showToast(context, exception.i18nMessage!);
+          }
+        case ApiError<String>(:final GeneralResponse response):
+          UiUtil.instance.showToast(context, response.message);
+      }
     }
   }
 }

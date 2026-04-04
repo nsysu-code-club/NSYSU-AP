@@ -332,57 +332,44 @@ class GraduationReportPageState extends State<GraduationReportPage>
     );
   }
 
-  Function(DioException) get _onFailure => (DioException e) => setState(() {
-        state = _State.error;
-        switch (e.type) {
-          case DioExceptionType.connectionTimeout:
-          case DioExceptionType.connectionError:
-          case DioExceptionType.sendTimeout:
-          case DioExceptionType.receiveTimeout:
-          case DioExceptionType.badResponse:
-          case DioExceptionType.cancel:
-          case DioExceptionType.badCertificate:
-            break;
-          case DioExceptionType.unknown:
-            throw e;
-        }
-      });
-
-  Function(GeneralResponse) get _onError =>
-      (_) => setState(() => state = _State.error);
-
-  void _login() {
-    GraduationHelper.instance.login(
+  Future<void> _login() async {
+    final ApiResult<GeneralResponse> result =
+        await GraduationHelper.instance.login(
       username: SelcrsHelper.instance.username,
       password: SelcrsHelper.instance.password,
-      callback: GeneralCallback<GeneralResponse>(
-        onError: _onError,
-        onFailure: _onFailure,
-        onSuccess: (GeneralResponse data) {
-          _getGraduationReport();
-        },
-      ),
     );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<GeneralResponse>():
+        _getGraduationReport();
+      case ApiFailure<GeneralResponse>():
+        setState(() => state = _State.error);
+      case ApiError<GeneralResponse>():
+        setState(() => state = _State.error);
+    }
   }
 
-  void _getGraduationReport() {
-    GraduationHelper.instance.getGraduationReport(
+  Future<void> _getGraduationReport() async {
+    final ApiResult<GraduationReportData?> result =
+        await GraduationHelper.instance.getGraduationReport(
       username: SelcrsHelper.instance.username,
-      callback: GeneralCallback<GraduationReportData?>(
-        onError: _onError,
-        onFailure: _onFailure,
-        onSuccess: (GraduationReportData? data) {
-          graduationReportData = data;
-          setState(() {
-            if (data == null) {
-              state = _State.empty;
-            } else {
-              state = _State.finish;
-            }
-          });
-        },
-      ),
     );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<GraduationReportData?>(:final GraduationReportData? data):
+        graduationReportData = data;
+        setState(() {
+          if (data == null) {
+            state = _State.empty;
+          } else {
+            state = _State.finish;
+          }
+        });
+      case ApiFailure<GraduationReportData?>():
+        setState(() => state = _State.error);
+      case ApiError<GraduationReportData?>():
+        setState(() => state = _State.error);
+    }
   }
 
   void _showGeneralEducationCourseDetail(GeneralEducationItem course) {

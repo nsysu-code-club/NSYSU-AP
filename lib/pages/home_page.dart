@@ -94,10 +94,12 @@ class HomePageState extends State<HomePage> {
         AppTrackingUtils.show(context: context);
       }
     });
-    AnalyticsUtil.instance.setUserProperty(
-      AnalyticsConstants.language,
-      Locale(Intl.defaultLocale!).languageCode,
-    );
+    if (Intl.defaultLocale != null) {
+      AnalyticsUtil.instance.setUserProperty(
+        AnalyticsConstants.language,
+        Locale(Intl.defaultLocale!).languageCode,
+      );
+    }
     FirebaseMessagingUtils.instance.init(
       onClick: (RemoteMessage message) {
         if (kDebugMode) {
@@ -193,28 +195,28 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _getAllAnnouncement() async {
-    AnnouncementHelper.instance.getAnnouncements(
-      tags: <String>['nsysu'],
-      callback: GeneralCallback<List<Announcement>>(
-        onFailure: (_) => setState(() => state = HomeState.error),
-        onError: (_) => setState(() => state = HomeState.error),
-        onSuccess: (List<Announcement>? data) {
-          announcements = data ?? <Announcement>[];
-          if (mounted) {
-            setState(() {
-              if (announcements.isEmpty) {
-                state = HomeState.empty;
-              } else {
-                state = HomeState.finish;
-              }
-            });
+    try {
+      final List<Announcement>? data =
+          await AnnouncementHelper.instance.getAnnouncements(
+        tags: <String>['nsysu'],
+      );
+      announcements = data ?? <Announcement>[];
+      if (mounted) {
+        setState(() {
+          if (announcements.isEmpty) {
+            state = HomeState.empty;
+          } else {
+            state = HomeState.finish;
           }
-        },
-      ),
-    );
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => state = HomeState.error);
+    }
   }
 
   Future<void> _checkLoginState() async {
+    if (!mounted) return;
     if (isLogin) {
       _homeKey.currentState!.hideSnackBar();
     } else {
@@ -239,39 +241,37 @@ class HomePageState extends State<HomePage> {
       Constants.prefPassword,
       '',
     );
-    SelcrsHelper.instance.login(
+    final ApiResult<GeneralResponse> result = await SelcrsHelper.instance.login(
       username: username,
       password: password,
-      callback: GeneralCallback<GeneralResponse>(
-        onError: (GeneralResponse e) {
-          if (e.statusCode == 400) {
-            _homeKey.currentState!.showBasicHint(text: ap.loginFail);
-          } else if (e.statusCode == 401) {
-            UiUtil.instance.showToast(
-              context,
-              app.pleaseConfirmForm,
-            );
-            Utils.openConfirmForm(
-              context,
-              mounted: mounted,
-              username: username,
-            );
-          } else {
-            _homeKey.currentState!.showBasicHint(text: ap.unknownError);
-          }
-        },
-        onFailure: (DioException e) {
-          _homeKey.currentState!.showBasicHint(text: e.i18nMessage!);
-        },
-        onSuccess: (GeneralResponse data) {
-          _homeKey.currentState!.showBasicHint(text: ap.loginSuccess);
-          setState(() {
-            ShareDataWidget.of(context)!.data.isLogin = true;
-          });
-          ShareDataWidget.of(context)!.data.getUserInfo();
-        },
-      ),
     );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<GeneralResponse>():
+        _homeKey.currentState!.showBasicHint(text: ap.loginSuccess);
+        setState(() {
+          ShareDataWidget.of(context)!.data.isLogin = true;
+        });
+        ShareDataWidget.of(context)!.data.getUserInfo();
+      case ApiError<GeneralResponse>(:final GeneralResponse response):
+        if (response.statusCode == 400) {
+          _homeKey.currentState!.showBasicHint(text: ap.loginFail);
+        } else if (response.statusCode == 401) {
+          UiUtil.instance.showToast(
+            context,
+            app.pleaseConfirmForm,
+          );
+          Utils.openConfirmForm(
+            context,
+            mounted: mounted,
+            username: username,
+          );
+        } else {
+          _homeKey.currentState!.showBasicHint(text: ap.unknownError);
+        }
+      case ApiFailure<GeneralResponse>(:final DioException exception):
+        _homeKey.currentState!.showBasicHint(text: exception.i18nMessage!);
+    }
   }
 
   Future<void> _checkUpdate() async {
@@ -284,10 +284,11 @@ class HomePageState extends State<HomePage> {
     if (currentVersion != packageInfo.buildNumber) {
       final Map<String, dynamic>? rawData = await FileAssets.changelogData;
       //TODO: improve by object
-      final Map<String, dynamic> map =
-          rawData![packageInfo.buildNumber] as Map<String, dynamic>;
-      final String updateNoteContent =
-          map[ap.locale] as String;
+      final Map<String, dynamic>? map =
+          rawData?[packageInfo.buildNumber] as Map<String, dynamic>?;
+      if (map == null) return;
+      final String? updateNoteContent =
+          map[ap.locale] as String?;
       if (!mounted) return;
       DialogUtils.showUpdateContent(
         context,

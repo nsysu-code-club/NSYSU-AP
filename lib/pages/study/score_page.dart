@@ -113,45 +113,27 @@ class ScorePageState extends State<ScorePage> {
     );
   }
 
-  Function(DioException e) get _onFailure =>
-      (DioException e) => setState(() {
-        state = ScoreState.error;
-        switch (e.type) {
-          case DioExceptionType.connectionError:
-          case DioExceptionType.connectionTimeout:
-          case DioExceptionType.sendTimeout:
-          case DioExceptionType.receiveTimeout:
-          case DioExceptionType.badResponse:
-          case DioExceptionType.cancel:
-          case DioExceptionType.badCertificate:
-            break;
-          case DioExceptionType.unknown:
-            throw e;
-        }
-      });
-
-  Function(GeneralResponse e) get _onError =>
-      (_) => setState(() => state = ScoreState.error);
-
   Future<void> _getSemester() async {
-    SelcrsHelper.instance.getScoreSemesterData(
-      callback: GeneralCallback<ScoreSemesterData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (ScoreSemesterData data) {
-          scoreSemesterData = data;
-          years = <String>[];
-          semesters = <String>[];
-          for (final SemesterOptions option in scoreSemesterData!.years) {
-            years.add(option.text);
-          }
-          for (final SemesterOptions option in scoreSemesterData!.semesters) {
-            semesters.add(option.text);
-          }
-          _getSemesterScore();
-        },
-      ),
-    );
+    final ApiResult<ScoreSemesterData> result =
+        await SelcrsHelper.instance.getScoreSemesterData();
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<ScoreSemesterData>(:final ScoreSemesterData data):
+        scoreSemesterData = data;
+        years = <String>[];
+        semesters = <String>[];
+        for (final SemesterOptions option in scoreSemesterData!.years) {
+          years.add(option.text);
+        }
+        for (final SemesterOptions option in scoreSemesterData!.semesters) {
+          semesters.add(option.text);
+        }
+        _getSemesterScore();
+      case ApiFailure<ScoreSemesterData>():
+        setState(() => state = ScoreState.error);
+      case ApiError<ScoreSemesterData>():
+        setState(() => state = ScoreState.error);
+    }
   }
 
   Future<void> _getSemesterScore() async {
@@ -160,26 +142,27 @@ class ScorePageState extends State<ScorePage> {
       return;
     }
     final int month = DateTime.now().month;
-    SelcrsHelper.instance.getScoreData(
+    final ApiResult<ScoreData> result =
+        await SelcrsHelper.instance.getScoreData(
       year: scoreSemesterData!.years[currentYearsIndex].value,
       semester: scoreSemesterData!.semesters[currentSemesterIndex].value,
       searchPreScore: month == 6 || month == 7 || month == 1 || month == 2,
-      callback: GeneralCallback<ScoreData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (ScoreData data) {
-          scoreData = data;
-          if (mounted && scoreData != null) {
-            setState(() {
-              if (scoreData!.scores.isEmpty) {
-                state = ScoreState.empty;
-              } else {
-                state = ScoreState.finish;
-              }
-            });
-          }
-        },
-      ),
     );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<ScoreData>(:final ScoreData data):
+        scoreData = data;
+        setState(() {
+          if (scoreData!.scores.isEmpty) {
+            state = ScoreState.empty;
+          } else {
+            state = ScoreState.finish;
+          }
+        });
+      case ApiFailure<ScoreData>():
+        setState(() => state = ScoreState.error);
+      case ApiError<ScoreData>():
+        setState(() => state = ScoreState.error);
+    }
   }
 }

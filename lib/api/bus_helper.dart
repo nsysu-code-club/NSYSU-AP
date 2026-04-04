@@ -1,5 +1,6 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/widgets.dart';
 import 'package:nsysu_ap/models/bus_info.dart';
@@ -29,8 +30,7 @@ class BusHelper {
     cookieJar.loadForRequest(Uri.parse(basePath));
   }
 
-  Future<void> getBusInfoList({
-    required GeneralCallback<List<BusInfo>?> callback,
+  Future<ApiResult<List<BusInfo>?>> getBusInfoList({
     required Locale locale,
   }) async {
     try {
@@ -50,24 +50,21 @@ class BusHelper {
       );
       if (response.data != null) {
         final List<BusInfo>? list = BusInfo.fromRawList(response.data!);
-        callback.onSuccess(list);
+        return ApiSuccess<List<BusInfo>?>(list);
       } else {
-        callback.onError(GeneralResponse.unknownError());
-        throw response.statusMessage ?? response.toString();
+        return ApiError<List<BusInfo>?>(GeneralResponse.unknownError());
       }
     } on DioException catch (e) {
-      callback.onFailure(e);
-      // debugPrint(big5.decode(e.response.data));
+      return ApiFailure<List<BusInfo>?>(e);
     } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
-      rethrow;
+      if (kDebugMode) rethrow;
+      return ApiError<List<BusInfo>?>(GeneralResponse.unknownError());
     }
   }
 
-  Future<void> getBusTime({
+  Future<ApiResult<List<BusTime>?>> getBusTime({
     required Locale locale,
     required BusInfo busInfo,
-    required GeneralCallback<List<BusTime>?> callback,
   }) async {
     try {
       String languageCode;
@@ -91,17 +88,15 @@ class BusHelper {
       );
       if (response.data != null) {
         final List<BusTime>? list = BusTime.fromRawList(response.data!);
-        callback.onSuccess(list);
+        return ApiSuccess<List<BusTime>?>(list);
       } else {
-        callback.onError(GeneralResponse.unknownError());
-        throw response.statusMessage ?? response.toString();
+        return ApiError<List<BusTime>?>(GeneralResponse.unknownError());
       }
     } on DioException catch (e) {
-      callback.onFailure(e);
-      // debugPrint(big5.decode(e.response.data));
+      return ApiFailure<List<BusTime>?>(e);
     } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
-      rethrow;
+      if (kDebugMode) rethrow;
+      return ApiError<List<BusTime>?>(GeneralResponse.unknownError());
     }
   }
 }

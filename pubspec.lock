@@ -53,10 +53,10 @@ packages:
     dependency: transitive
     description:
       name: ap_common_core
-      sha256: "941f50834ea696685bda7e30c756ac79c30b1b9b3630e4469705c810be1f27a3"
+      sha256: "44cb8a966d71f565b4b6d419f78f38130b6e609565d7e379491393b7a3615608"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1-dev.0"
+    version: "1.0.1-dev.2"
   ap_common_firebase:
     dependency: "direct main"
     description:

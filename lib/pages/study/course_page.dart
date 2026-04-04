@@ -38,11 +38,6 @@ class CoursePageState extends State<CoursePage> {
   void initState() {
     super.initState();
     AnalyticsUtil.instance.setCurrentScreen('CoursePage', 'course_page.dart');
-    //TODO: 確認是否需要
-    // CourseNotifyData.clearOldVersionNotification(
-    //   tag: '${SelcrsHelper.instance.username}_latest',
-    //   newTag: courseNotifyCacheKey,
-    // );
     Future<void>.microtask(() => _getSemester());
   }
 
@@ -76,26 +71,9 @@ class CoursePageState extends State<CoursePage> {
     );
   }
 
-  Function(DioException) get _onFailure => (DioException e) {
-    setState(() {
-      //if (courseData != null) {
-      customHint = ap.offlineCourse;
-      state = CourseState.finish;
-      //}
-      // else {
-      //   customStateHint = e.i18nMessage;
-      //   state = CourseState.error;
-      // }
-    });
-  };
-
-  Function(GeneralResponse) get _onError =>
-      (_) => setState(() => state = CourseState.error);
-
   Future<void> _getSemester() async {
     FirebaseRemoteConfig remoteConfig;
     try {
-      //TODO improve
       remoteConfig = FirebaseRemoteConfigUtils.instance.remoteConfig!;
       await remoteConfig.fetch();
       await remoteConfig.activate();
@@ -132,36 +110,42 @@ class CoursePageState extends State<CoursePage> {
       value: defaultSemesterCode.substring(3),
       text: parser(defaultSemesterCode),
     );
-    SelcrsHelper.instance.getCourseSemesterData(
+    final ApiResult<SemesterData> result =
+        await SelcrsHelper.instance.getCourseSemesterData(
       defaultSemester: defaultSemester,
-      callback: GeneralCallback<SemesterData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (SemesterData data) {
-          final String semester = PreferenceUtil.instance.getString(
-            ApConstants.currentSemesterCode,
-            ApConstants.semesterLatest,
-          );
-          if (semester != defaultSemesterCode) {
-            PreferenceUtil.instance.setString(
-              ApConstants.currentSemesterCode,
-              defaultSemesterCode,
-            );
-          }
-          final List<Semester> parsedData = data.data
-              .map(
-                (Semester option) =>
-                    option.copyWith(text: parser(option.text)),
-              )
-              .toList();
-          semesterData = data.copyWith(
-            data: parsedData,
-            currentIndex: data.defaultIndex,
-          );
-          _getCourseTables();
-        },
-      ),
     );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<SemesterData>(:final SemesterData data):
+        final String semester = PreferenceUtil.instance.getString(
+          ApConstants.currentSemesterCode,
+          ApConstants.semesterLatest,
+        );
+        if (semester != defaultSemesterCode) {
+          PreferenceUtil.instance.setString(
+            ApConstants.currentSemesterCode,
+            defaultSemesterCode,
+          );
+        }
+        final List<Semester> parsedData = data.data
+            .map(
+              (Semester option) =>
+                  option.copyWith(text: parser(option.text)),
+            )
+            .toList();
+        semesterData = data.copyWith(
+          data: parsedData,
+          currentIndex: data.defaultIndex,
+        );
+        _getCourseTables();
+      case ApiFailure<SemesterData>():
+        setState(() {
+          customHint = ap.offlineCourse;
+          state = CourseState.finish;
+        });
+      case ApiError<SemesterData>():
+        setState(() => state = CourseState.error);
+    }
   }
 
   String parser(String text) {
@@ -198,27 +182,31 @@ class CoursePageState extends State<CoursePage> {
       return;
     }
     notifyData = CourseNotifyData.load(courseNotifyCacheKey);
-    SelcrsHelper.instance.getCourseData(
+    final ApiResult<CourseData> result =
+        await SelcrsHelper.instance.getCourseData(
       username: SelcrsHelper.instance.username,
       timeCodeConfig: timeCodeConfig,
       semester: semesterData!.currentSemester.code,
-      callback: GeneralCallback<CourseData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (CourseData data) {
-          courseData = data;
-          courseData.save(courseNotifyCacheKey);
-          if (mounted) {
-            setState(() {
-              if (courseData.courses.isEmpty) {
-                state = CourseState.empty;
-              } else {
-                state = CourseState.finish;
-              }
-            });
-          }
-        },
-      ),
     );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<CourseData>(:final CourseData data):
+        courseData = data;
+        courseData.save(courseNotifyCacheKey);
+        setState(() {
+          if (courseData.courses.isEmpty) {
+            state = CourseState.empty;
+          } else {
+            state = CourseState.finish;
+          }
+        });
+      case ApiFailure<CourseData>():
+        setState(() {
+          customHint = ap.offlineCourse;
+          state = CourseState.finish;
+        });
+      case ApiError<CourseData>():
+        setState(() => state = CourseState.error);
+    }
   }
 }
