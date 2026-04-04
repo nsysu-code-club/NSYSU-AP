@@ -102,7 +102,9 @@ class ScorePageState extends State<ScorePage> {
     switch (result) {
       case ApiSuccess<ScoreSemesterData>(:final ScoreSemesterData data):
         scoreSemesterData = data;
-        semesterData = _toSemesterData(data);
+        setState(() {
+          semesterData = _toSemesterData(data);
+        });
         _getSemesterScore();
       case ApiFailure<ScoreSemesterData>():
         setState(() => state = ScoreState.error);
