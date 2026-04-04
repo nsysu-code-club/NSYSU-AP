@@ -1,7 +1,6 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
@@ -17,13 +16,8 @@ class ScorePageState extends State<ScorePage> {
   bool isOffline = false;
 
   ScoreSemesterData? scoreSemesterData;
+  SemesterData? semesterData;
   ScoreData? scoreData;
-
-  List<String> years = <String>[];
-  List<String> semesters = <String>[];
-
-  int currentYearsIndex = 0;
-  int currentSemesterIndex = 0;
 
   bool get hasPreScore {
     for (final Score score in scoreData?.scores ?? <Score>[]) {
@@ -56,41 +50,13 @@ class ScorePageState extends State<ScorePage> {
     return ScoreScaffold(
       state: state,
       scoreData: scoreData,
+      semesterData: semesterData,
+      onSelect: (int index) {
+        semesterData = semesterData!.copyWith(currentIndex: index);
+        _getSemesterScore();
+      },
       middleTitle: ap.credits,
-      customHint: hasPreScore
-          ? app.hasPreScoreHint
-          : null,
-      itemPicker: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Expanded(
-            child: ItemPicker(
-              dialogTitle: ap.pickSemester,
-              items: years,
-              currentIndex: currentYearsIndex,
-              onSelected: (int index) {
-                setState(() {
-                  currentYearsIndex = index;
-                });
-                _getSemesterScore();
-              },
-            ),
-          ),
-          Expanded(
-            child: ItemPicker(
-              dialogTitle: ap.pickSemester,
-              items: semesters,
-              currentIndex: currentSemesterIndex,
-              onSelected: (int index) {
-                setState(() {
-                  currentSemesterIndex = index;
-                });
-                _getSemesterScore();
-              },
-            ),
-          ),
-        ],
-      ),
+      customHint: hasPreScore ? app.hasPreScoreHint : null,
       onRefresh: () {
         _getSemesterScore();
       },
@@ -110,6 +76,25 @@ class ScorePageState extends State<ScorePage> {
     );
   }
 
+  SemesterData _toSemesterData(ScoreSemesterData data) {
+    final List<Semester> semesters = <Semester>[];
+    for (final yearOption in data.years) {
+      for (final semOption in data.semesters) {
+        semesters.add(
+          Semester(
+            year: yearOption.value,
+            value: semOption.value,
+            text: '${yearOption.text} ${semOption.text}',
+          ),
+        );
+      }
+    }
+    return SemesterData(
+      data: semesters,
+      defaultSemester: semesters.first,
+    );
+  }
+
   Future<void> _getSemester() async {
     final ApiResult<ScoreSemesterData> result =
         await SelcrsHelper.instance.getScoreSemesterData();
@@ -117,14 +102,7 @@ class ScorePageState extends State<ScorePage> {
     switch (result) {
       case ApiSuccess<ScoreSemesterData>(:final ScoreSemesterData data):
         scoreSemesterData = data;
-        years = <String>[];
-        semesters = <String>[];
-        for (final SemesterOptions option in scoreSemesterData!.years) {
-          years.add(option.text);
-        }
-        for (final SemesterOptions option in scoreSemesterData!.semesters) {
-          semesters.add(option.text);
-        }
+        semesterData = _toSemesterData(data);
         _getSemesterScore();
       case ApiFailure<ScoreSemesterData>():
         setState(() => state = ScoreState.error);
@@ -134,15 +112,16 @@ class ScorePageState extends State<ScorePage> {
   }
 
   Future<void> _getSemesterScore() async {
-    if (scoreSemesterData == null) {
+    if (semesterData == null) {
       _getSemester();
       return;
     }
+    final Semester current = semesterData!.currentSemester;
     final int month = DateTime.now().month;
     final ApiResult<ScoreData> result =
         await SelcrsHelper.instance.getScoreData(
-      year: scoreSemesterData!.years[currentYearsIndex].value,
-      semester: scoreSemesterData!.semesters[currentSemesterIndex].value,
+      year: current.year,
+      semester: current.value,
       searchPreScore: month == 6 || month == 7 || month == 1 || month == 2,
     );
     if (!mounted) return;
