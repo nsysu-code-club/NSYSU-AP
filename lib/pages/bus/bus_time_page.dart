@@ -89,7 +89,7 @@ class _BusTimePageState extends State<BusTimePage>
                 onTap: () => _getData(),
                 child: HintContent(
                   icon: ApIcon.info,
-                  content: ApLocalizations.of(context).busEmpty,
+                  content: ap.busEmpty,
                 ),
               )
             : TabBarView(
@@ -157,7 +157,7 @@ class BusTimeItem extends StatelessWidget {
         : ' ${app.minute}';
     String arrivedTimeText = '';
     double? fontSize;
-    Color color = ApTheme.of(context).greyText;
+    Color color = Theme.of(context).colorScheme.onSurfaceVariant;
     if (busTime.arrivedTime != null) {
       arrivedTimeText = busTime.arrivedTime!;
       switch (busTime.arrivedTime) {

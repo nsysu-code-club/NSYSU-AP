@@ -14,8 +14,6 @@ class CoursePage extends StatefulWidget {
 }
 
 class CoursePageState extends State<CoursePage> {
-  late ApLocalizations ap;
-
   CourseState state = CourseState.loading;
 
   late TimeCodeConfig timeCodeConfig;
@@ -48,7 +46,6 @@ class CoursePageState extends State<CoursePage> {
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
     return CourseScaffold(
       state: state,
       courseData: courseData,

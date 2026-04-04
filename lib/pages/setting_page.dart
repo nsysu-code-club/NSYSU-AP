@@ -14,8 +14,6 @@ class SettingPage extends StatefulWidget {
 class SettingPageState extends State<SettingPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late ApLocalizations ap;
-
   bool displayPicture = true;
 
   String appVersion = '1.0.0';
@@ -34,7 +32,7 @@ class SettingPageState extends State<SettingPage> {
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(

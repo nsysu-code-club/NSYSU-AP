@@ -1,7 +1,8 @@
 import 'package:ap_common/ap_common.dart'
     hide TranslationProvider, LocaleSettings, AppLocaleUtils, AppLocale;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
-import 'package:ap_common_flutter_core/src/l10n/strings.g.dart' as ap_l10n;
+import 'package:ap_common_flutter_core/ap_common_flutter_core.dart' as ap_l10n
+    show TranslationProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

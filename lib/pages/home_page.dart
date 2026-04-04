@@ -41,8 +41,6 @@ class HomePageState extends State<HomePage> {
 
   bool get isTablet => MediaQuery.of(context).size.shortestSide > 680;
 
-  late ApLocalizations ap;
-
   HomeState state = HomeState.loading;
 
   bool get isLogin => ShareDataWidget.of(context)?.data.isLogin ?? false;
@@ -57,7 +55,7 @@ class HomePageState extends State<HomePage> {
   bool isSchoolNavigationExpanded = false;
 
   String get drawerIcon {
-    switch (ApTheme.of(context).brightness) {
+    switch (Theme.of(context).brightness) {
       case Brightness.light:
         return ImageAssets.nsysu;
       case Brightness.dark:
@@ -116,7 +114,7 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
+
     return HomePageScaffold(
       key: _homeKey,
       isLogin: isLogin,
@@ -219,8 +217,8 @@ class HomePageState extends State<HomePage> {
     } else {
       _homeKey.currentState!
           .showSnackBar(
-            text: ApLocalizations.of(context).notLogin,
-            actionText: ApLocalizations.of(context).login,
+            text: ap.notLogin,
+            actionText: ap.login,
             onSnackBarTapped: openLoginPage,
           )
           ?.closed
@@ -515,7 +513,7 @@ class HomePageState extends State<HomePage> {
     if (needLogin && !isLogin) {
       UiUtil.instance.showToast(
         context,
-        ApLocalizations.of(context).notLoginHint,
+        ap.notLoginHint,
       );
     } else {
       if (isTablet) {

@@ -13,8 +13,6 @@ class ScorePage extends StatefulWidget {
 }
 
 class ScorePageState extends State<ScorePage> {
-  late ApLocalizations ap;
-
   ScoreState state = ScoreState.loading;
   bool isOffline = false;
 
@@ -55,7 +53,6 @@ class ScorePageState extends State<ScorePage> {
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
     return ScoreScaffold(
       state: state,
       scoreData: scoreData,

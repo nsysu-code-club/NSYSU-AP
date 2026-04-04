@@ -18,8 +18,6 @@ class GraduationReportPage extends StatefulWidget {
 
 class GraduationReportPageState extends State<GraduationReportPage>
     with SingleTickerProviderStateMixin {
-  late ApLocalizations ap;
-
   _State state = _State.loading;
   bool isOffline = false;
 
@@ -43,7 +41,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(app.graduationCheckChecklist),
@@ -57,7 +55,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
             child: isOffline
                 ? Text(
                     ap.offlineScore,
-                    style: TextStyle(color: ApTheme.of(context).grey),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                   )
                 : null,
           ),
@@ -113,7 +111,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   app.graduationCheckChecklistHint,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: ApTheme.of(context).greyText,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 16.0,
                   ),
                 ),
@@ -127,7 +125,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   Text(
                     ap.noData,
                     style: TextStyle(
-                      color: ApTheme.of(context).grey,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 14.0,
                     ),
                   )
@@ -143,7 +141,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                           TableCellVerticalAlignment.middle,
                       border: TableBorder.symmetric(
                         inside: BorderSide(
-                          color: ApTheme.of(context).grey,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           width: 0.5,
                         ),
                       ),
@@ -180,7 +178,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   graduationReportData!.missingRequiredCoursesCredit,
                   style: _textBlueStyle(),
                 ),
-                Divider(color: ApTheme.of(context).grey),
+                Divider(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 Text(
                   app.generalEducationCourse,
                   textAlign: TextAlign.start,
@@ -191,7 +189,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                       ? app.courseClickHint
                       : ap.noData,
                   style: TextStyle(
-                    color: ApTheme.of(context).grey,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 14.0,
                   ),
                 ),
@@ -213,7 +211,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                           TableCellVerticalAlignment.middle,
                       border: TableBorder.symmetric(
                         inside: BorderSide(
-                          color: ApTheme.of(context).grey,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           width: 0.5,
                         ),
                       ),
@@ -248,7 +246,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   )
                 else
                   const SizedBox(),
-                Divider(color: ApTheme.of(context).grey),
+                Divider(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 Text(
                   app.otherEducationsCourse,
                   textAlign: TextAlign.start,
@@ -264,7 +262,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                     border: TableBorder.symmetric(
                       inside: BorderSide(
-                        color: ApTheme.of(context).grey,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         width: 0.5,
                       ),
                     ),
@@ -292,7 +290,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
                   graduationReportData!.otherEducationsCourseCredit,
                   style: _textBlueStyle(),
                 ),
-                Divider(color: ApTheme.of(context).grey),
+                Divider(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 Text(
                   app.graduationCheckChecklistSummary,
                   style: const TextStyle(fontSize: 16.0),
@@ -312,7 +310,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
   }
 
   TextStyle _textBlueStyle() {
-    return TextStyle(color: ApTheme.of(context).blueText, fontSize: 16.0);
+    return TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 16.0);
   }
 
   TextStyle _textStyle() {
@@ -383,7 +381,7 @@ class GraduationReportPageState extends State<GraduationReportPage>
         contentWidget: RichText(
           text: TextSpan(
             style: TextStyle(
-              color: ApTheme.of(context).grey,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.3,
               fontSize: 16.0,
             ),
@@ -439,7 +437,7 @@ class BorderContainer extends StatelessWidget {
             10.0,
           ),
         ),
-        border: Border.all(color: ApTheme.of(context).grey, width: 1.5),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant, width: 1.5),
       ),
       child: child,
     );

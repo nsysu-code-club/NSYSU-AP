@@ -32,8 +32,6 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
 
   PdfState pdfState = PdfState.loading;
 
-  late ApLocalizations ap;
-
   late TabController controller;
 
   int _currentIndex = 0;
@@ -57,7 +55,6 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(ap.schoolInfo),
@@ -88,7 +85,7 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
             controller.animateTo(_currentIndex);
           });
         },
-        fixedColor: ApTheme.of(context).yellow,
+        fixedColor: Theme.of(context).colorScheme.primary,
         items: <BottomNavigationBarItem>[
 //          BottomNavigationBarItem(
 //            icon: Icon(ApIcon.fiberNew),

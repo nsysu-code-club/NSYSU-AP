@@ -19,8 +19,6 @@ class TuitionAndFeesPage extends StatefulWidget {
 }
 
 class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
-  late ApLocalizations ap;
-
   _State state = _State.loading;
 
   List<TuitionAndFees> items = <TuitionAndFees>[];
@@ -41,7 +39,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(title: Text(app.tuitionAndFees)),
       body: _body(),
@@ -62,7 +60,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
           child: HintContent(
             icon: Icons.assignment,
             content: state == _State.error
-                ? ApLocalizations.of(context).clickToRetry
+                ? ap.clickToRetry
                 : app.tuitionAndFeesEmpty,
           ),
         );
@@ -84,7 +82,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                 return Text(
                   app.tuitionAndFeesPageHint,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: ApTheme.of(context).grey),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 );
               } else {
                 return _notificationItem(items[index - 1]);
@@ -138,7 +136,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
               case ApiError<Uint8List?>():
                 UiUtil.instance.showToast(
                   context,
-                  ApLocalizations.of(context).somethingError,
+                  ap.somethingError,
                 );
             }
           },
