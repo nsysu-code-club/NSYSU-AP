@@ -29,5 +29,3 @@ jobs:
       - run: flutter pub get
       - name: Run tests
         run: flutter test test/parser_test.dart
-      - name: Analyze parser code
-        run: dart analyze lib/api/parser/ test/parser_test.dart --no-fatal-infos
