@@ -1,0 +1,33 @@
+name: Parser Tests
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+env:
+  flutter_version: '3.38.10'
+
+jobs:
+  test:
+    name: Run Parser Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+      - run: flutter pub get
+      - name: Run tests
+        run: flutter test test/parser_test.dart
+      - name: Run analyzer
+        run: flutter analyze --no-fatal-infos
