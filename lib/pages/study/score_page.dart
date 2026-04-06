@@ -94,7 +94,8 @@ class ScorePageState extends State<ScorePage> {
       }
     }
     final int defaultIndex =
-        data.selectYearsIndex * data.semesters.length + data.selectSemesterIndex;
+        data.selectYearsIndex * data.semesters.length +
+        data.selectSemesterIndex;
     final Semester defaultSemester = semesters[defaultIndex];
     return SemesterData(
       data: semesters,
@@ -104,8 +105,8 @@ class ScorePageState extends State<ScorePage> {
   }
 
   Future<void> _getSemester() async {
-    final ApiResult<ScoreSemesterData> result =
-        await SelcrsHelper.instance.getScoreSemesterData();
+    final ApiResult<ScoreSemesterData> result = await SelcrsHelper.instance
+        .getScoreSemesterData();
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<ScoreSemesterData>(:final ScoreSemesterData data):
@@ -128,12 +129,12 @@ class ScorePageState extends State<ScorePage> {
     }
     final Semester current = semesterData!.currentSemester;
     final int month = DateTime.now().month;
-    final ApiResult<ScoreData> result =
-        await SelcrsHelper.instance.getScoreData(
-      year: current.year,
-      semester: current.value,
-      searchPreScore: month == 6 || month == 7 || month == 1 || month == 2,
-    );
+    final ApiResult<ScoreData> result = await SelcrsHelper.instance
+        .getScoreData(
+          year: current.year,
+          semester: current.value,
+          searchPreScore: month == 6 || month == 7 || month == 1 || month == 2,
+        );
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<ScoreData>(:final ScoreData data):
