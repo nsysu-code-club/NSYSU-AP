@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:ap_common_firebase/ap_common_firebase.dart';
+import 'package:ap_common_plugin/ap_common_plugin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,6 +40,8 @@ Future<void> main() async {
     Constants.prefIconStyleCode,
     ApIcon.outlined,
   );
+
+  await ApCommonPlugin.configure(appGroupId: 'group.com.nsysu.ap');
 
   timeago.setLocaleMessages('zh-TW', timeago.ZhMessages());
   timeago.setLocaleMessages('en-US', timeago.EnMessages());
