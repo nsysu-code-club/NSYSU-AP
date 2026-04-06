@@ -118,7 +118,6 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     return HomePageScaffold(
       key: _homeKey,
       isLogin: isLogin,
@@ -206,8 +205,7 @@ class HomePageState extends State<HomePage> {
       case ApiSuccess<List<Announcement>>(:final data):
         announcements = data;
         setState(() {
-          state =
-              announcements.isEmpty ? HomeState.empty : HomeState.finish;
+          state = announcements.isEmpty ? HomeState.empty : HomeState.finish;
         });
       case ApiError<List<Announcement>>():
       case ApiFailure<List<Announcement>>():
@@ -258,15 +256,8 @@ class HomePageState extends State<HomePage> {
         if (response.statusCode == 400) {
           _homeKey.currentState!.showBasicHint(text: ap.loginFail);
         } else if (response.statusCode == 401) {
-          UiUtil.instance.showToast(
-            context,
-            app.pleaseConfirmForm,
-          );
-          Utils.openConfirmForm(
-            context,
-            mounted: mounted,
-            username: username,
-          );
+          UiUtil.instance.showToast(context, app.pleaseConfirmForm);
+          Utils.openConfirmForm(context, mounted: mounted, username: username);
         } else {
           _homeKey.currentState!.showBasicHint(text: ap.unknownError);
         }
@@ -288,8 +279,7 @@ class HomePageState extends State<HomePage> {
       final Map<String, dynamic>? map =
           rawData?[packageInfo.buildNumber] as Map<String, dynamic>?;
       if (map == null) return;
-      final String? updateNoteContent =
-          map[ap.locale] as String?;
+      final String? updateNoteContent = map[ap.locale] as String?;
       if (!mounted) return;
       DialogUtils.showUpdateContent(
         context,
@@ -347,7 +337,6 @@ class HomePageState extends State<HomePage> {
         Constants.prefDisplayPicture,
         true,
       ),
-      imageAsset: drawerIcon,
       onTapHeader: () {
         if (isLogin) {
           if (userInfo != null) {
@@ -379,20 +368,17 @@ class HomePageState extends State<HomePage> {
         DrawerMenuItem(
           icon: ApIcon.school,
           title: app.graduationCheckChecklist,
-          onTap: () =>
-              _openPage(const GraduationReportPage(), needLogin: true),
+          onTap: () => _openPage(const GraduationReportPage(), needLogin: true),
         ),
         DrawerMenuItem(
           icon: ApIcon.monetizationOn,
           title: app.tuitionAndFees,
-          onTap: () =>
-              _openPage(const TuitionAndFeesPage(), needLogin: true),
+          onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
         ),
         DrawerMenuItem(
           icon: ApIcon.info,
           title: ap.schoolInfo,
-          onTap: () =>
-              _openPage(SchoolInfoPage(), useCupertinoRoute: false),
+          onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
         ),
         DrawerMenuItem(
           icon: ApIcon.face,
@@ -487,8 +473,7 @@ class HomePageState extends State<HomePage> {
         DrawerSubMenuItem(
           icon: ApIcon.map,
           title: ap.schoolMap,
-          onTap: () =>
-              _openPage(SchoolMapPage(), useCupertinoRoute: false),
+          onTap: () => _openPage(SchoolMapPage(), useCupertinoRoute: false),
         ),
         DrawerSubMenuItem(
           icon: ApIcon.accessibilityNew,
@@ -519,10 +504,7 @@ class HomePageState extends State<HomePage> {
   }) async {
     if (!isTablet) Navigator.of(context).pop();
     if (needLogin && !isLogin) {
-      UiUtil.instance.showToast(
-        context,
-        ap.notLoginHint,
-      );
+      UiUtil.instance.showToast(context, ap.notLoginHint);
     } else {
       if (isTablet) {
         setState(() => content = page);
