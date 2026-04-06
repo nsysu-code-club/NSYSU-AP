@@ -12,8 +12,6 @@ class AdmissionGuidePage extends StatefulWidget {
 }
 
 class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
-  late ApLocalizations ap;
-
   InAppWebViewController? webViewController;
 
   @override
@@ -25,7 +23,6 @@ class _AdmissionGuidePageState extends State<AdmissionGuidePage> {
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(ap.admissionGuide),

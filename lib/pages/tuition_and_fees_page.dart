@@ -9,8 +9,6 @@ import 'package:nsysu_ap/api/tuition_helper.dart';
 import 'package:nsysu_ap/models/tuition_and_fees.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
-enum _State { loading, finish, error, empty }
-
 class TuitionAndFeesPage extends StatefulWidget {
   const TuitionAndFeesPage({super.key});
 
@@ -19,11 +17,10 @@ class TuitionAndFeesPage extends StatefulWidget {
 }
 
 class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
-  late ApLocalizations ap;
+  DataState<List<TuitionAndFees>> state =
+      const DataLoading<List<TuitionAndFees>>();
 
-  _State state = _State.loading;
-
-  List<TuitionAndFees> items = <TuitionAndFees>[];
+  List<TuitionAndFees> get items => state.dataOrNull ?? <TuitionAndFees>[];
 
   @override
   void initState() {
@@ -41,7 +38,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(title: Text(app.tuitionAndFees)),
       body: _body(),
@@ -49,51 +46,52 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   }
 
   Widget _body() {
-    switch (state) {
-      case _State.loading:
-        return Container(
-          alignment: Alignment.center,
-          child: const CircularProgressIndicator(),
-        );
-      case _State.error:
-      case _State.empty:
-        return InkWell(
-          onTap: _getData,
-          child: HintContent(
-            icon: Icons.assignment,
-            content: state == _State.error
-                ? ApLocalizations.of(context).clickToRetry
-                : app.tuitionAndFeesEmpty,
-          ),
-        );
-      default:
-        return RefreshIndicator(
-          onRefresh: () async {
-            setState(() {
-              state = _State.loading;
-            });
-            await _getData();
-            AnalyticsUtil.instance.logEvent('t_and_f_refresh');
-            return;
+    return state.when(
+      loading: () => Container(
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(),
+      ),
+      error: (String? hint) => InkWell(
+        onTap: _getData,
+        child: HintContent(
+          icon: Icons.assignment,
+          content: ap.clickToRetry,
+        ),
+      ),
+      empty: (String? hint) => InkWell(
+        onTap: _getData,
+        child: HintContent(
+          icon: Icons.assignment,
+          content: app.tuitionAndFeesEmpty,
+        ),
+      ),
+      loaded: (List<TuitionAndFees> data, String? hint) => RefreshIndicator(
+        onRefresh: () async {
+          setState(() {
+            state = const DataLoading<List<TuitionAndFees>>();
+          });
+          await _getData();
+          AnalyticsUtil.instance.logEvent('t_and_f_refresh');
+          return;
+        },
+        child: ListView.builder(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(8.0),
+          itemBuilder: (BuildContext context, int index) {
+            if (index == 0) {
+              return Text(
+                app.tuitionAndFeesPageHint,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              );
+            } else {
+              return _notificationItem(data[index - 1]);
+            }
           },
-          child: ListView.builder(
-            shrinkWrap: true,
-            padding: const EdgeInsets.all(8.0),
-            itemBuilder: (BuildContext context, int index) {
-              if (index == 0) {
-                return Text(
-                  app.tuitionAndFeesPageHint,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: ApTheme.of(context).grey),
-                );
-              } else {
-                return _notificationItem(items[index - 1]);
-              }
-            },
-            itemCount: items.length + 1,
-          ),
-        );
-    }
+          itemCount: data.length + 1,
+        ),
+      ),
+    );
   }
 
   Widget _notificationItem(TuitionAndFees item) {
@@ -138,7 +136,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
               case ApiError<Uint8List?>():
                 UiUtil.instance.showToast(
                   context,
-                  ApLocalizations.of(context).somethingError,
+                  ap.somethingError,
                 );
             }
           },
@@ -167,9 +165,9 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
       case ApiSuccess<GeneralResponse>():
         _getData();
       case ApiFailure<GeneralResponse>():
-        setState(() => state = _State.error);
+        setState(() => state = const DataError<List<TuitionAndFees>>());
       case ApiError<GeneralResponse>():
-        setState(() => state = _State.error);
+        setState(() => state = const DataError<List<TuitionAndFees>>());
     }
   }
 
@@ -179,18 +177,17 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<List<TuitionAndFees>>(:final List<TuitionAndFees> data):
-        items = data;
         setState(() {
-          if (items.isEmpty) {
-            state = _State.empty;
+          if (data.isEmpty) {
+            state = const DataEmpty<List<TuitionAndFees>>();
           } else {
-            state = _State.finish;
+            state = DataLoaded<List<TuitionAndFees>>(data);
           }
         });
       case ApiFailure<List<TuitionAndFees>>():
-        setState(() => state = _State.error);
+        setState(() => state = const DataError<List<TuitionAndFees>>());
       case ApiError<List<TuitionAndFees>>():
-        setState(() => state = _State.error);
+        setState(() => state = const DataError<List<TuitionAndFees>>());
     }
   }
 }

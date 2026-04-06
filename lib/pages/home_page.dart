@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:ap_common_firebase/ap_common_firebase.dart';
+import 'package:ap_common_plugin/ap_common_plugin.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -41,8 +42,6 @@ class HomePageState extends State<HomePage> {
 
   bool get isTablet => MediaQuery.of(context).size.shortestSide > 680;
 
-  late ApLocalizations ap;
-
   HomeState state = HomeState.loading;
 
   bool get isLogin => ShareDataWidget.of(context)?.data.isLogin ?? false;
@@ -53,11 +52,13 @@ class HomePageState extends State<HomePage> {
 
   List<Announcement> announcements = <Announcement>[];
 
+  CourseData? courseData;
+
   bool isStudyExpanded = false;
   bool isSchoolNavigationExpanded = false;
 
   String get drawerIcon {
-    switch (ApTheme.of(context).brightness) {
+    switch (Theme.of(context).brightness) {
       case Brightness.light:
         return ImageAssets.nsysu;
       case Brightness.dark:
@@ -79,6 +80,7 @@ class HomePageState extends State<HomePage> {
       );
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       _getAllAnnouncement();
+      _loadCourseData();
       if (PreferenceUtil.instance.getBool(Constants.prefAutoLogin, false)) {
         _login();
       } else {
@@ -116,7 +118,6 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
     return HomePageScaffold(
       key: _homeKey,
       isLogin: isLogin,
@@ -160,6 +161,7 @@ class HomePageState extends State<HomePage> {
         );
       },
       drawer: _buildDrawer(),
+      dashboardWidgets: _buildDashboardWidgets(),
       announcements: announcements,
       onTabTapped: onTabTapped,
       bottomNavigationBarItems: <NavigationDestination>[
@@ -171,47 +173,44 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> onTabTapped(int index) async {
-    setState(() {
-      switch (index) {
-        case 0:
-          ApUtils.pushCupertinoStyle(
+    switch (index) {
+      case 0:
+        ApUtils.pushCupertinoStyle(
+          context,
+          BusListPage(locale: Locale(Intl.defaultLocale!)),
+        );
+      case 1:
+        if (isLogin) {
+          await Navigator.of(
             context,
-            BusListPage(locale: Locale(Intl.defaultLocale!)),
-          );
-        case 1:
-          if (isLogin) {
-            ApUtils.pushCupertinoStyle(context, CoursePage());
-          } else {
-            UiUtil.instance.showToast(context, ap.notLoginHint);
-          }
-        case 2:
-          if (isLogin) {
-            ApUtils.pushCupertinoStyle(context, ScorePage());
-          } else {
-            UiUtil.instance.showToast(context, ap.notLoginHint);
-          }
-      }
-    });
+          ).push(MaterialPageRoute<void>(builder: (_) => CoursePage()));
+          _loadCourseData();
+        } else {
+          UiUtil.instance.showToast(context, ap.notLoginHint);
+        }
+      case 2:
+        if (isLogin) {
+          ApUtils.pushCupertinoStyle(context, ScorePage());
+        } else {
+          UiUtil.instance.showToast(context, ap.notLoginHint);
+        }
+    }
   }
 
   Future<void> _getAllAnnouncement() async {
-    try {
-      final List<Announcement>? data =
-          await AnnouncementHelper.instance.getAnnouncements(
-        tags: <String>['nsysu'],
-      );
-      announcements = data ?? <Announcement>[];
-      if (mounted) {
+    final result = await AnnouncementHelper.instance.getAnnouncements(
+      tags: <String>['nsysu'],
+    );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<List<Announcement>>(:final data):
+        announcements = data;
         setState(() {
-          if (announcements.isEmpty) {
-            state = HomeState.empty;
-          } else {
-            state = HomeState.finish;
-          }
+          state = announcements.isEmpty ? HomeState.empty : HomeState.finish;
         });
-      }
-    } catch (_) {
-      if (mounted) setState(() => state = HomeState.error);
+      case ApiError<List<Announcement>>():
+      case ApiFailure<List<Announcement>>():
+        setState(() => state = HomeState.error);
     }
   }
 
@@ -222,8 +221,8 @@ class HomePageState extends State<HomePage> {
     } else {
       _homeKey.currentState!
           .showSnackBar(
-            text: ApLocalizations.of(context).notLogin,
-            actionText: ApLocalizations.of(context).login,
+            text: ap.notLogin,
+            actionText: ap.login,
             onSnackBarTapped: openLoginPage,
           )
           ?.closed
@@ -253,19 +252,13 @@ class HomePageState extends State<HomePage> {
           ShareDataWidget.of(context)!.data.isLogin = true;
         });
         ShareDataWidget.of(context)!.data.getUserInfo();
+        _loadCourseData();
       case ApiError<GeneralResponse>(:final GeneralResponse response):
         if (response.statusCode == 400) {
           _homeKey.currentState!.showBasicHint(text: ap.loginFail);
         } else if (response.statusCode == 401) {
-          UiUtil.instance.showToast(
-            context,
-            app.pleaseConfirmForm,
-          );
-          Utils.openConfirmForm(
-            context,
-            mounted: mounted,
-            username: username,
-          );
+          UiUtil.instance.showToast(context, app.pleaseConfirmForm);
+          Utils.openConfirmForm(context, mounted: mounted, username: username);
         } else {
           _homeKey.currentState!.showBasicHint(text: ap.unknownError);
         }
@@ -287,8 +280,7 @@ class HomePageState extends State<HomePage> {
       final Map<String, dynamic>? map =
           rawData?[packageInfo.buildNumber] as Map<String, dynamic>?;
       if (map == null) return;
-      final String? updateNoteContent =
-          map[ap.locale] as String?;
+      final String? updateNoteContent = map[ap.locale] as String?;
       if (!mounted) return;
       DialogUtils.showUpdateContent(
         context,
@@ -346,7 +338,6 @@ class HomePageState extends State<HomePage> {
         Constants.prefDisplayPicture,
         true,
       ),
-      imageAsset: drawerIcon,
       onTapHeader: () {
         if (isLogin) {
           if (userInfo != null) {
@@ -378,20 +369,17 @@ class HomePageState extends State<HomePage> {
         DrawerMenuItem(
           icon: ApIcon.school,
           title: app.graduationCheckChecklist,
-          onTap: () =>
-              _openPage(const GraduationReportPage(), needLogin: true),
+          onTap: () => _openPage(const GraduationReportPage(), needLogin: true),
         ),
         DrawerMenuItem(
           icon: ApIcon.monetizationOn,
           title: app.tuitionAndFees,
-          onTap: () =>
-              _openPage(const TuitionAndFeesPage(), needLogin: true),
+          onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
         ),
         DrawerMenuItem(
           icon: ApIcon.info,
           title: ap.schoolInfo,
-          onTap: () =>
-              _openPage(SchoolInfoPage(), useCupertinoRoute: false),
+          onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
         ),
         DrawerMenuItem(
           icon: ApIcon.face,
@@ -428,9 +416,11 @@ class HomePageState extends State<HomePage> {
               SelcrsHelper.instance.logout();
               GraduationHelper.instance.logout();
               TuitionHelper.instance.logout();
+              await ApCommonPlugin.clearCourseWidget();
               setState(() {
                 ShareDataWidget.of(context)!.data.isLogin = false;
                 ShareDataWidget.of(context)!.data.userInfo = null;
+                courseData = null;
               });
               content = null;
               if (!isTablet) {
@@ -484,8 +474,7 @@ class HomePageState extends State<HomePage> {
         DrawerSubMenuItem(
           icon: ApIcon.map,
           title: ap.schoolMap,
-          onTap: () =>
-              _openPage(SchoolMapPage(), useCupertinoRoute: false),
+          onTap: () => _openPage(SchoolMapPage(), useCupertinoRoute: false),
         ),
         DrawerSubMenuItem(
           icon: ApIcon.accessibilityNew,
@@ -516,24 +505,99 @@ class HomePageState extends State<HomePage> {
   }) async {
     if (!isTablet) Navigator.of(context).pop();
     if (needLogin && !isLogin) {
-      UiUtil.instance.showToast(
-        context,
-        ApLocalizations.of(context).notLoginHint,
-      );
+      UiUtil.instance.showToast(context, ap.notLoginHint);
     } else {
       if (isTablet) {
         setState(() => content = page);
       } else {
         if (useCupertinoRoute) {
-          ApUtils.pushCupertinoStyle(context, page);
+          await Navigator.of(
+            context,
+          ).push(MaterialPageRoute<dynamic>(builder: (_) => page));
         } else {
           await Navigator.push(
             context,
             CupertinoPageRoute<dynamic>(builder: (_) => page),
           );
         }
+        _loadCourseData();
         _checkLoginState();
       }
+    }
+  }
+
+  List<Widget> _buildDashboardWidgets() {
+    return <Widget>[
+      const SizedBox(height: 16),
+      if (courseData != null)
+        TodayScheduleCard(
+          courseData: courseData!,
+          onTap: () async {
+            if (isLogin) {
+              await Navigator.of(
+                context,
+              ).push(MaterialPageRoute<void>(builder: (_) => CoursePage()));
+              _loadCourseData();
+            }
+          },
+        )
+      else
+        _buildEmptyScheduleCard(),
+    ];
+  }
+
+  Widget _buildEmptyScheduleCard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Card(
+        child: InkWell(
+          onTap: () {
+            if (isLogin) {
+              ApUtils.pushCupertinoStyle(context, CoursePage());
+            } else {
+              openLoginPage();
+            }
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.today_rounded,
+                  size: 32,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    isLogin ? ap.courseEmpty : ap.notLogin,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _loadCourseData() async {
+    final CourseData? cached = CourseData.load(
+      PreferenceUtil.instance.getString(
+        ApConstants.currentSemesterCode,
+        ApConstants.semesterLatest,
+      ),
+    );
+    if (cached != null && cached.courses.isNotEmpty) {
+      setState(() => courseData = cached);
     }
   }
 

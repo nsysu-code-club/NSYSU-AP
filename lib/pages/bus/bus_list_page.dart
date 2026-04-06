@@ -7,8 +7,6 @@ import 'package:nsysu_ap/api/bus_helper.dart';
 import 'package:nsysu_ap/models/bus_info.dart';
 import 'package:nsysu_ap/pages/bus/bus_time_page.dart';
 
-enum _State { loading, finish, error }
-
 class BusListPage extends StatefulWidget {
   final Locale locale;
 
@@ -22,9 +20,9 @@ class BusListPage extends StatefulWidget {
 }
 
 class _BusListPageState extends State<BusListPage> {
-  _State state = _State.loading;
+  DataState<List<BusInfo>> state = const DataLoading<List<BusInfo>>();
 
-  List<BusInfo> busList = <BusInfo>[];
+  List<BusInfo> get busList => state.dataOrNull ?? <BusInfo>[];
 
   @override
   void initState() {
@@ -38,7 +36,6 @@ class _BusListPageState extends State<BusListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ApLocalizations ap = ApLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(ap.bus),
@@ -48,49 +45,50 @@ class _BusListPageState extends State<BusListPage> {
   }
 
   Widget _body() {
-    switch (state) {
-      case _State.loading:
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      case _State.error:
-        return InkWell(
-          onTap: () {
-            _getData();
-          },
-          child: HintContent(
-            icon: ApIcon.error,
-            content: ap.clickToRetry,
-          ),
-        );
-      default:
-        return ListView.builder(
-          itemCount: busList.length,
-          itemBuilder: (_, int index) {
-            final BusInfo bus = busList[index];
-            return ListTile(
-              title: Text(bus.name),
-              trailing: Text(
-                bus.carId?.split(',').first ?? bus.carId ?? bus.stopName,
-                style: TextStyle(
-                  color: bus.carId == null ? Colors.red : Colors.green,
-                ),
+    return state.when(
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      error: (String? hint) => InkWell(
+        onTap: () {
+          _getData();
+        },
+        child: HintContent(
+          icon: ApIcon.error,
+          content: ap.clickToRetry,
+        ),
+      ),
+      empty: (String? hint) => HintContent(
+        icon: ApIcon.info,
+        content: ap.busEmpty,
+      ),
+      loaded: (List<BusInfo> data, String? hint) => ListView.builder(
+        itemCount: data.length,
+        itemBuilder: (_, int index) {
+          final BusInfo bus = data[index];
+          return ListTile(
+            title: Text(bus.name),
+            trailing: Text(
+              bus.carId?.split(',').first ?? bus.carId ?? bus.stopName,
+              style: TextStyle(
+                color: bus.carId == null ? Colors.red : Colors.green,
               ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute<dynamic>(
-                    builder: (_) => BusTimePage(
-                      busInfo: bus,
-                      locale: widget.locale,
-                    ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute<dynamic>(
+                  builder: (_) => BusTimePage(
+                    busInfo: bus,
+                    locale: widget.locale,
                   ),
-                );
-              },
-            );
-          },
-        );
-    }
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _getData() async {
@@ -99,12 +97,18 @@ class _BusListPageState extends State<BusListPage> {
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<List<BusInfo>?>(:final List<BusInfo>? data):
-        busList = data ?? <BusInfo>[];
-        setState(() => state = _State.finish);
+        final List<BusInfo> list = data ?? <BusInfo>[];
+        setState(() {
+          if (list.isEmpty) {
+            state = const DataEmpty<List<BusInfo>>();
+          } else {
+            state = DataLoaded<List<BusInfo>>(list);
+          }
+        });
       case ApiFailure<List<BusInfo>?>():
-        setState(() => state = _State.error);
+        setState(() => state = const DataError<List<BusInfo>>());
       case ApiError<List<BusInfo>?>():
-        setState(() => state = _State.error);
+        setState(() => state = const DataError<List<BusInfo>>());
     }
   }
 }

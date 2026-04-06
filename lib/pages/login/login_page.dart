@@ -15,8 +15,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  late ApLocalizations ap;
-
   final TextEditingController _username = TextEditingController();
   final TextEditingController _password = TextEditingController();
 
@@ -40,7 +38,6 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
     return LoginScaffold(
       logoSource: 'N',
       forms: <Widget>[
@@ -55,6 +52,7 @@ class LoginPageState extends State<LoginPage> {
           labelText: ap.studentId,
           autofillHints: const <String>[AutofillHints.username],
         ),
+        const SizedBox(height: 16.0),
         ApTextField(
           key: const Key('password'),
           obscureText: true,
@@ -77,6 +75,7 @@ class LoginPageState extends State<LoginPage> {
               value: isAutoLogin,
               onChanged: _onAutoLoginChanged,
             ),
+            const SizedBox(width: 16.0),
             TextCheckBox(
               text: ap.rememberPassword,
               value: isRememberPassword,
@@ -97,19 +96,14 @@ class LoginPageState extends State<LoginPage> {
           onPressed: () async {
             final dynamic username = await Navigator.push(
               context,
-              MaterialPageRoute<dynamic>(
-                builder: (_) => SearchStudentIdPage(),
-              ),
+              MaterialPageRoute<dynamic>(builder: (_) => SearchStudentIdPage()),
             );
             if (username != null && username is String) {
               setState(() {
                 _username.text = username;
               });
               if (!context.mounted) return;
-              UiUtil.instance.showToast(
-                context,
-                app.firstLoginHint,
-              );
+              UiUtil.instance.showToast(context, app.firstLoginHint);
             }
           },
           text: ap.searchUsername,
@@ -147,14 +141,20 @@ class LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _getPreference() async {
-    isRememberPassword =
-        PreferenceUtil.instance.getBool(Constants.prefRememberPassword, true);
-    final String username =
-        PreferenceUtil.instance.getString(Constants.prefUsername, '');
+    isRememberPassword = PreferenceUtil.instance.getBool(
+      Constants.prefRememberPassword,
+      true,
+    );
+    final String username = PreferenceUtil.instance.getString(
+      Constants.prefUsername,
+      '',
+    );
     String password = '';
     if (isRememberPassword) {
-      password =
-          PreferenceUtil.instance.getStringSecurity(Constants.prefPassword, '');
+      password = PreferenceUtil.instance.getStringSecurity(
+        Constants.prefPassword,
+        '',
+      );
     }
     setState(() {
       _username.text = username;
@@ -168,10 +168,8 @@ class LoginPageState extends State<LoginPage> {
     } else {
       showDialog(
         context: context,
-        builder: (BuildContext context) => PopScope(
-          canPop: false,
-          child: ProgressDialog(ap.logining),
-        ),
+        builder: (BuildContext context) =>
+            PopScope(canPop: false, child: ProgressDialog(ap.logining)),
         barrierDismissible: false,
       );
       if (_username.text.contains(' ')) {
@@ -182,11 +180,8 @@ class LoginPageState extends State<LoginPage> {
         Constants.prefUsername,
         username.toUpperCase(),
       );
-      final ApiResult<GeneralResponse> result =
-          await SelcrsHelper.instance.login(
-        username: username,
-        password: _password.text,
-      );
+      final ApiResult<GeneralResponse> result = await SelcrsHelper.instance
+          .login(username: username, password: _password.text);
       if (!mounted) return;
       switch (result) {
         case ApiSuccess<GeneralResponse>():
@@ -198,8 +193,7 @@ class LoginPageState extends State<LoginPage> {
               _password.text,
             );
           }
-          PreferenceUtil.instance
-              .setBool(Constants.prefIsOfflineLogin, false);
+          PreferenceUtil.instance.setBool(Constants.prefIsOfflineLogin, false);
           if (!mounted) return;
           Navigator.of(context).pop(true);
           TextInput.finishAutofillContext();
@@ -208,10 +202,7 @@ class LoginPageState extends State<LoginPage> {
           if (response.statusCode == 400) {
             UiUtil.instance.showToast(context, ap.loginFail);
           } else if (response.statusCode == 401) {
-            UiUtil.instance.showToast(
-              context,
-              app.pleaseConfirmForm,
-            );
+            UiUtil.instance.showToast(context, app.pleaseConfirmForm);
             Utils.openConfirmForm(
               context,
               mounted: mounted,

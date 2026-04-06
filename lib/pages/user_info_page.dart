@@ -51,7 +51,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
               context: context,
               builder: (_) {
                 return AlertDialog(
-                  title: Text(ApLocalizations.of(context).changeEmail),
+                  title: Text(ap.changeEmail),
                   content: TextField(
                     controller: newEmail,
                   ),
@@ -64,7 +64,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           builder: (BuildContext context) => PopScope(
                             canPop: false,
                             child: ProgressDialog(
-                              ApLocalizations.of(context).loading,
+                              ap.loading,
                             ),
                           ),
                           barrierDismissible: false,
@@ -79,7 +79,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           case ApiSuccess<UserInfo>(:final UserInfo data):
                             UiUtil.instance.showToast(
                               context,
-                              ApLocalizations.of(context).updateSuccess,
+                              ap.updateSuccess,
                             );
                             setState(() {
                               userInfo = data;
@@ -96,7 +96,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                 context, response.message);
                         }
                       },
-                      child: Text(ApLocalizations.of(context).confirm),
+                      child: Text(ap.confirm),
                     ),
                   ],
                 );

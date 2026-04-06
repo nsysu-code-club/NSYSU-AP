@@ -11,8 +11,6 @@ class SearchStudentIdPage extends StatefulWidget {
 }
 
 class SearchStudentIdPageState extends State<SearchStudentIdPage> {
-  late ApLocalizations ap;
-
   final TextEditingController _name = TextEditingController();
   final TextEditingController _id = TextEditingController();
   bool isAutoFill = true;
@@ -40,11 +38,10 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
     return OrientationBuilder(
       builder: (_, Orientation orientation) {
         return Scaffold(
-          backgroundColor: ApTheme.of(context).blue,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           resizeToAvoidBottomInset: orientation == Orientation.portrait,
           appBar: AppBar(
             elevation: 0.0,
@@ -140,7 +137,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                   ),
                   child: Checkbox(
                     activeColor: Colors.white,
-                    checkColor: ApTheme.of(context).blue,
+                    checkColor: Theme.of(context).colorScheme.primary,
                     value: isAutoFill,
                     onChanged: _onAutoFillChanged,
                   ),
@@ -213,7 +210,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                 contentWidget: RichText(
                   text: TextSpan(
                     style: TextStyle(
-                      color: ApTheme.of(context).grey,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       height: 1.3,
                       fontSize: 16.0,
                     ),

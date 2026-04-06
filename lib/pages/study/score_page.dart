@@ -1,7 +1,6 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
@@ -13,19 +12,14 @@ class ScorePage extends StatefulWidget {
 }
 
 class ScorePageState extends State<ScorePage> {
-  late ApLocalizations ap;
-
   ScoreState state = ScoreState.loading;
   bool isOffline = false;
 
   ScoreSemesterData? scoreSemesterData;
+  SemesterData? semesterData;
   ScoreData? scoreData;
 
-  List<String> years = <String>[];
-  List<String> semesters = <String>[];
-
-  int currentYearsIndex = 0;
-  int currentSemesterIndex = 0;
+  final SemesterPickerController _pickerController = SemesterPickerController();
 
   bool get hasPreScore {
     for (final Score score in scoreData?.scores ?? <Score>[]) {
@@ -50,50 +44,23 @@ class ScorePageState extends State<ScorePage> {
 
   @override
   void dispose() {
+    _pickerController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
     return ScoreScaffold(
       state: state,
       scoreData: scoreData,
+      semesterData: semesterData,
+      semesterPickerController: _pickerController,
+      onSelect: (int index) {
+        semesterData = semesterData!.copyWith(currentIndex: index);
+        _getSemesterScore();
+      },
       middleTitle: ap.credits,
-      customHint: hasPreScore
-          ? app.hasPreScoreHint
-          : null,
-      itemPicker: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Expanded(
-            child: ItemPicker(
-              dialogTitle: ap.pickSemester,
-              items: years,
-              currentIndex: currentYearsIndex,
-              onSelected: (int index) {
-                setState(() {
-                  currentYearsIndex = index;
-                });
-                _getSemesterScore();
-              },
-            ),
-          ),
-          Expanded(
-            child: ItemPicker(
-              dialogTitle: ap.pickSemester,
-              items: semesters,
-              currentIndex: currentSemesterIndex,
-              onSelected: (int index) {
-                setState(() {
-                  currentSemesterIndex = index;
-                });
-                _getSemesterScore();
-              },
-            ),
-          ),
-        ],
-      ),
+      customHint: hasPreScore ? app.hasPreScoreHint : null,
       onRefresh: () {
         _getSemesterScore();
       },
@@ -113,21 +80,40 @@ class ScorePageState extends State<ScorePage> {
     );
   }
 
+  SemesterData _toSemesterData(ScoreSemesterData data) {
+    final List<Semester> semesters = <Semester>[];
+    for (final yearOption in data.years) {
+      for (final semOption in data.semesters) {
+        semesters.add(
+          Semester(
+            year: yearOption.value,
+            value: semOption.value,
+            text: '${yearOption.text} ${semOption.text}',
+          ),
+        );
+      }
+    }
+    final int defaultIndex =
+        data.selectYearsIndex * data.semesters.length +
+        data.selectSemesterIndex;
+    final Semester defaultSemester = semesters[defaultIndex];
+    return SemesterData(
+      data: semesters,
+      defaultSemester: defaultSemester,
+      currentIndex: defaultIndex,
+    );
+  }
+
   Future<void> _getSemester() async {
-    final ApiResult<ScoreSemesterData> result =
-        await SelcrsHelper.instance.getScoreSemesterData();
+    final ApiResult<ScoreSemesterData> result = await SelcrsHelper.instance
+        .getScoreSemesterData();
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<ScoreSemesterData>(:final ScoreSemesterData data):
         scoreSemesterData = data;
-        years = <String>[];
-        semesters = <String>[];
-        for (final SemesterOptions option in scoreSemesterData!.years) {
-          years.add(option.text);
-        }
-        for (final SemesterOptions option in scoreSemesterData!.semesters) {
-          semesters.add(option.text);
-        }
+        setState(() {
+          semesterData = _toSemesterData(data);
+        });
         _getSemesterScore();
       case ApiFailure<ScoreSemesterData>():
         setState(() => state = ScoreState.error);
@@ -137,17 +123,18 @@ class ScorePageState extends State<ScorePage> {
   }
 
   Future<void> _getSemesterScore() async {
-    if (scoreSemesterData == null) {
+    if (semesterData == null) {
       _getSemester();
       return;
     }
+    final Semester current = semesterData!.currentSemester;
     final int month = DateTime.now().month;
-    final ApiResult<ScoreData> result =
-        await SelcrsHelper.instance.getScoreData(
-      year: scoreSemesterData!.years[currentYearsIndex].value,
-      semester: scoreSemesterData!.semesters[currentSemesterIndex].value,
-      searchPreScore: month == 6 || month == 7 || month == 1 || month == 2,
-    );
+    final ApiResult<ScoreData> result = await SelcrsHelper.instance
+        .getScoreData(
+          year: current.year,
+          semester: current.value,
+          searchPreScore: month == 6 || month == 7 || month == 1 || month == 2,
+        );
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<ScoreData>(:final ScoreData data):
@@ -155,13 +142,17 @@ class ScorePageState extends State<ScorePage> {
         setState(() {
           if (scoreData!.scores.isEmpty) {
             state = ScoreState.empty;
+            _pickerController.markSemesterEmpty(current);
           } else {
             state = ScoreState.finish;
+            _pickerController.markSemesterHasData(current);
           }
         });
       case ApiFailure<ScoreData>():
+        _pickerController.markSemesterHasData(current);
         setState(() => state = ScoreState.error);
       case ApiError<ScoreData>():
+        _pickerController.markSemesterHasData(current);
         setState(() => state = ScoreState.error);
     }
   }

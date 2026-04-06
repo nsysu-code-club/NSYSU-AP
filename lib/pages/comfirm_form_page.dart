@@ -23,8 +23,6 @@ class ConfirmFormPage extends StatefulWidget {
 }
 
 class _ConfirmFormPageState extends State<ConfirmFormPage> {
-  late ApLocalizations ap;
-
   InAppWebViewController? webViewController;
 
   String get url => sprintf(
@@ -42,7 +40,6 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(ap.confirm),
@@ -53,7 +50,7 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
               child: Text(
                 app.openBrowserToFill,
                 style: TextStyle(
-                  color: ApTheme.of(context).blueText,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),

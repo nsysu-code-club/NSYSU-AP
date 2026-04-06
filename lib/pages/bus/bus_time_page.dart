@@ -7,8 +7,6 @@ import 'package:nsysu_ap/models/bus_info.dart';
 import 'package:nsysu_ap/models/bus_time.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
-enum _State { loading, finish, error }
-
 class BusTimePage extends StatefulWidget {
   final Locale locale;
   final BusInfo busInfo;
@@ -21,10 +19,11 @@ class BusTimePage extends StatefulWidget {
 
 class _BusTimePageState extends State<BusTimePage>
     with SingleTickerProviderStateMixin {
-  _State state = _State.loading;
+  DataState<(List<BusTime>, List<BusTime>)> state =
+      const DataLoading<(List<BusTime>, List<BusTime>)>();
 
-  List<BusTime> startList = <BusTime>[];
-  List<BusTime> endList = <BusTime>[];
+  List<BusTime> get startList => state.dataOrNull?.$1 ?? <BusTime>[];
+  List<BusTime> get endList => state.dataOrNull?.$2 ?? <BusTime>[];
 
   TabController? _tabController;
 
@@ -70,50 +69,47 @@ class _BusTimePageState extends State<BusTimePage>
   }
 
   Widget _body() {
-    switch (state) {
-      case _State.loading:
-        return const Center(child: CircularProgressIndicator());
-      case _State.error:
-        return InkWell(
-          onTap: () {
-            _getData();
-          },
-          child: HintContent(
-            icon: ApIcon.error,
-            content: ap.clickToRetry,
+    return state.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (String? hint) => InkWell(
+        onTap: () {
+          _getData();
+        },
+        child: HintContent(
+          icon: ApIcon.error,
+          content: ap.clickToRetry,
+        ),
+      ),
+      empty: (String? hint) => InkWell(
+        onTap: () => _getData(),
+        child: HintContent(
+          icon: ApIcon.info,
+          content: ap.busEmpty,
+        ),
+      ),
+      loaded: ((List<BusTime>, List<BusTime>) data, String? hint) =>
+          TabBarView(
+        controller: _tabController,
+        children: <Widget>[
+          ListView.separated(
+            itemCount: data.$1.length,
+            separatorBuilder: (_, __) => const Divider(height: 1.0),
+            itemBuilder: (_, int index) => BusTimeItem(
+              busTime: data.$1[index],
+              locale: widget.locale,
+            ),
           ),
-        );
-      default:
-        return startList.isEmpty && endList.isEmpty
-            ? InkWell(
-                onTap: () => _getData(),
-                child: HintContent(
-                  icon: ApIcon.info,
-                  content: ApLocalizations.of(context).busEmpty,
-                ),
-              )
-            : TabBarView(
-                controller: _tabController,
-                children: <Widget>[
-                  ListView.separated(
-                    itemCount: startList.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1.0),
-                    itemBuilder: (_, int index) => BusTimeItem(
-                      busTime: startList[index],
-                      locale: widget.locale,
-                    ),
-                  ),
-                  ListView.separated(
-                    itemCount: endList.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1.0),
-                    itemBuilder: (_, int index) => BusTimeItem(
-                      busTime: endList[index],
-                      locale: widget.locale,
-                    ),
-                  ),
-                ],
-              );
-    }
+          ListView.separated(
+            itemCount: data.$2.length,
+            separatorBuilder: (_, __) => const Divider(height: 1.0),
+            itemBuilder: (_, int index) => BusTimeItem(
+              busTime: data.$2[index],
+              locale: widget.locale,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _getData() async {
@@ -125,20 +121,28 @@ class _BusTimePageState extends State<BusTimePage>
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<List<BusTime>?>(:final List<BusTime>? data):
-        startList.clear();
-        endList.clear();
+        final List<BusTime> starts = <BusTime>[];
+        final List<BusTime> ends = <BusTime>[];
         for (final BusTime element in data!) {
           if (element.isGoBack == 'Y') {
-            endList.add(element);
+            ends.add(element);
           } else {
-            startList.add(element);
+            starts.add(element);
           }
         }
-        setState(() => state = _State.finish);
+        setState(() {
+          if (starts.isEmpty && ends.isEmpty) {
+            state = const DataEmpty<(List<BusTime>, List<BusTime>)>();
+          } else {
+            state = DataLoaded<(List<BusTime>, List<BusTime>)>((starts, ends));
+          }
+        });
       case ApiFailure<List<BusTime>?>():
-        setState(() => state = _State.error);
+        setState(() =>
+            state = const DataError<(List<BusTime>, List<BusTime>)>());
       case ApiError<List<BusTime>?>():
-        setState(() => state = _State.error);
+        setState(() =>
+            state = const DataError<(List<BusTime>, List<BusTime>)>());
     }
   }
 }
@@ -157,7 +161,7 @@ class BusTimeItem extends StatelessWidget {
         : ' ${app.minute}';
     String arrivedTimeText = '';
     double? fontSize;
-    Color color = ApTheme.of(context).greyText;
+    Color color = Theme.of(context).colorScheme.onSurfaceVariant;
     if (busTime.arrivedTime != null) {
       arrivedTimeText = busTime.arrivedTime!;
       switch (busTime.arrivedTime) {
