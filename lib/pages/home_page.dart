@@ -173,27 +173,28 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> onTabTapped(int index) async {
-    setState(() {
-      switch (index) {
-        case 0:
-          ApUtils.pushCupertinoStyle(
+    switch (index) {
+      case 0:
+        ApUtils.pushCupertinoStyle(
+          context,
+          BusListPage(locale: Locale(Intl.defaultLocale!)),
+        );
+      case 1:
+        if (isLogin) {
+          await Navigator.of(
             context,
-            BusListPage(locale: Locale(Intl.defaultLocale!)),
-          );
-        case 1:
-          if (isLogin) {
-            ApUtils.pushCupertinoStyle(context, CoursePage());
-          } else {
-            UiUtil.instance.showToast(context, ap.notLoginHint);
-          }
-        case 2:
-          if (isLogin) {
-            ApUtils.pushCupertinoStyle(context, ScorePage());
-          } else {
-            UiUtil.instance.showToast(context, ap.notLoginHint);
-          }
-      }
-    });
+          ).push(MaterialPageRoute<void>(builder: (_) => CoursePage()));
+          _loadCourseData();
+        } else {
+          UiUtil.instance.showToast(context, ap.notLoginHint);
+        }
+      case 2:
+        if (isLogin) {
+          ApUtils.pushCupertinoStyle(context, ScorePage());
+        } else {
+          UiUtil.instance.showToast(context, ap.notLoginHint);
+        }
+    }
   }
 
   Future<void> _getAllAnnouncement() async {
@@ -510,13 +511,16 @@ class HomePageState extends State<HomePage> {
         setState(() => content = page);
       } else {
         if (useCupertinoRoute) {
-          ApUtils.pushCupertinoStyle(context, page);
+          await Navigator.of(
+            context,
+          ).push(MaterialPageRoute<dynamic>(builder: (_) => page));
         } else {
           await Navigator.push(
             context,
             CupertinoPageRoute<dynamic>(builder: (_) => page),
           );
         }
+        _loadCourseData();
         _checkLoginState();
       }
     }
@@ -524,28 +528,65 @@ class HomePageState extends State<HomePage> {
 
   List<Widget> _buildDashboardWidgets() {
     return <Widget>[
-      QuickInfoRow(
-        items: <QuickInfoItem>[
-          QuickInfoItem(
-            icon: Icons.newspaper_outlined,
-            label: '${announcements.length}',
-            subtitle: ap.news,
-            onTap: () {},
-          ),
-        ],
-      ),
-      if (courseData != null) ...<Widget>[
-        const SizedBox(height: 16),
+      const SizedBox(height: 16),
+      if (courseData != null)
         TodayScheduleCard(
           courseData: courseData!,
+          onTap: () async {
+            if (isLogin) {
+              await Navigator.of(
+                context,
+              ).push(MaterialPageRoute<void>(builder: (_) => CoursePage()));
+              _loadCourseData();
+            }
+          },
+        )
+      else
+        _buildEmptyScheduleCard(),
+    ];
+  }
+
+  Widget _buildEmptyScheduleCard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Card(
+        child: InkWell(
           onTap: () {
             if (isLogin) {
               ApUtils.pushCupertinoStyle(context, CoursePage());
+            } else {
+              openLoginPage();
             }
           },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.today_rounded,
+                  size: 32,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    isLogin ? ap.courseEmpty : ap.notLogin,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ],
+            ),
+          ),
         ),
-      ],
-    ];
+      ),
+    );
   }
 
   Future<void> _loadCourseData() async {
