@@ -93,9 +93,13 @@ class ScorePageState extends State<ScorePage> {
         );
       }
     }
+    final int defaultIndex =
+        data.selectYearsIndex * data.semesters.length + data.selectSemesterIndex;
+    final Semester defaultSemester = semesters[defaultIndex];
     return SemesterData(
       data: semesters,
-      defaultSemester: semesters.first,
+      defaultSemester: defaultSemester,
+      currentIndex: defaultIndex,
     );
   }
 

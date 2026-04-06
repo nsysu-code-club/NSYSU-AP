@@ -410,6 +410,9 @@ class SelcrsHelper {
               value: options[i].attributes['value']!,
             ),
           );
+          if (options[i].attributes['selected'] != null) {
+            scoreSemesterData.selectYearsIndex = i;
+          }
         }
         options = selectDoc[1].getElementsByTagName('option');
         for (int i = 0; i < options.length; i++) {

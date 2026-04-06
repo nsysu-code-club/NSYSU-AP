@@ -154,9 +154,9 @@ class CoursePageState extends State<CoursePage> {
                   option.copyWith(text: parser(option.text)),
             )
             .toList();
-        semesterData = data.copyWith(
-          data: parsedData,
-          currentIndex: data.defaultIndex,
+        semesterData = data.copyWith(data: parsedData);
+        semesterData = semesterData!.copyWith(
+          currentIndex: semesterData!.defaultIndex,
         );
         _getCourseTables();
       case ApiFailure<SemesterData>():
