@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:ap_common_firebase/ap_common_firebase.dart';
+import 'package:ap_common_plugin/ap_common_plugin.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -51,6 +52,8 @@ class HomePageState extends State<HomePage> {
 
   List<Announcement> announcements = <Announcement>[];
 
+  CourseData? courseData;
+
   bool isStudyExpanded = false;
   bool isSchoolNavigationExpanded = false;
 
@@ -77,6 +80,7 @@ class HomePageState extends State<HomePage> {
       );
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       _getAllAnnouncement();
+      _loadCourseData();
       if (PreferenceUtil.instance.getBool(Constants.prefAutoLogin, false)) {
         _login();
       } else {
@@ -158,6 +162,7 @@ class HomePageState extends State<HomePage> {
         );
       },
       drawer: _buildDrawer(),
+      dashboardWidgets: _buildDashboardWidgets(),
       announcements: announcements,
       onTabTapped: onTabTapped,
       bottomNavigationBarItems: <NavigationDestination>[
@@ -248,6 +253,7 @@ class HomePageState extends State<HomePage> {
           ShareDataWidget.of(context)!.data.isLogin = true;
         });
         ShareDataWidget.of(context)!.data.getUserInfo();
+        _loadCourseData();
       case ApiError<GeneralResponse>(:final GeneralResponse response):
         if (response.statusCode == 400) {
           _homeKey.currentState!.showBasicHint(text: ap.loginFail);
@@ -423,9 +429,11 @@ class HomePageState extends State<HomePage> {
               SelcrsHelper.instance.logout();
               GraduationHelper.instance.logout();
               TuitionHelper.instance.logout();
+              await ApCommonPlugin.clearCourseWidget();
               setState(() {
                 ShareDataWidget.of(context)!.data.isLogin = false;
                 ShareDataWidget.of(context)!.data.userInfo = null;
+                courseData = null;
               });
               content = null;
               if (!isTablet) {
@@ -529,6 +537,44 @@ class HomePageState extends State<HomePage> {
         }
         _checkLoginState();
       }
+    }
+  }
+
+  List<Widget> _buildDashboardWidgets() {
+    return <Widget>[
+      QuickInfoRow(
+        items: <QuickInfoItem>[
+          QuickInfoItem(
+            icon: Icons.newspaper_outlined,
+            label: '${announcements.length}',
+            subtitle: ap.news,
+            onTap: () {},
+          ),
+        ],
+      ),
+      if (courseData != null) ...<Widget>[
+        const SizedBox(height: 16),
+        TodayScheduleCard(
+          courseData: courseData!,
+          onTap: () {
+            if (isLogin) {
+              ApUtils.pushCupertinoStyle(context, CoursePage());
+            }
+          },
+        ),
+      ],
+    ];
+  }
+
+  Future<void> _loadCourseData() async {
+    final CourseData? cached = CourseData.load(
+      PreferenceUtil.instance.getString(
+        ApConstants.currentSemesterCode,
+        ApConstants.semesterLatest,
+      ),
+    );
+    if (cached != null && cached.courses.isNotEmpty) {
+      setState(() => courseData = cached);
     }
   }
 
