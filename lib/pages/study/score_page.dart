@@ -19,6 +19,8 @@ class ScorePageState extends State<ScorePage> {
   SemesterData? semesterData;
   ScoreData? scoreData;
 
+  final SemesterPickerController _pickerController = SemesterPickerController();
+
   bool get hasPreScore {
     for (final Score score in scoreData?.scores ?? <Score>[]) {
       if (score.isPreScore) return true;
@@ -42,6 +44,7 @@ class ScorePageState extends State<ScorePage> {
 
   @override
   void dispose() {
+    _pickerController.dispose();
     super.dispose();
   }
 
@@ -51,6 +54,7 @@ class ScorePageState extends State<ScorePage> {
       state: state,
       scoreData: scoreData,
       semesterData: semesterData,
+      semesterPickerController: _pickerController,
       onSelect: (int index) {
         semesterData = semesterData!.copyWith(currentIndex: index);
         _getSemesterScore();
@@ -133,13 +137,17 @@ class ScorePageState extends State<ScorePage> {
         setState(() {
           if (scoreData!.scores.isEmpty) {
             state = ScoreState.empty;
+            _pickerController.markSemesterEmpty(current);
           } else {
             state = ScoreState.finish;
+            _pickerController.markSemesterHasData(current);
           }
         });
       case ApiFailure<ScoreData>():
+        _pickerController.markSemesterHasData(current);
         setState(() => state = ScoreState.error);
       case ApiError<ScoreData>():
+        _pickerController.markSemesterHasData(current);
         setState(() => state = ScoreState.error);
     }
   }

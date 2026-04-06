@@ -1,6 +1,7 @@
 import 'package:ap_common/ap_common.dart'
     hide TranslationProvider, LocaleSettings, AppLocaleUtils, AppLocale;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
+import 'package:ap_common_plugin/ap_common_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -20,6 +21,12 @@ class CoursePageState extends State<CoursePage> {
 
   SemesterData? semesterData;
   CourseData courseData = CourseData.empty();
+
+  /// API-fetched course data (before merging custom courses).
+  CourseData? _apiCourseData;
+
+  CustomCourseData _customCourseData = CustomCourseData();
+
   CourseNotifyData? notifyData;
 
   String? customStateHint;
@@ -28,6 +35,8 @@ class CoursePageState extends State<CoursePage> {
   bool isOffline = false;
 
   String defaultSemesterCode = '';
+
+  final SemesterPickerController _pickerController = SemesterPickerController();
 
   String get courseNotifyCacheKey =>
       semesterData?.defaultSemester.code ?? '1091';
@@ -41,6 +50,7 @@ class CoursePageState extends State<CoursePage> {
 
   @override
   void dispose() {
+    _pickerController.dispose();
     super.dispose();
   }
 
@@ -51,6 +61,7 @@ class CoursePageState extends State<CoursePage> {
       courseData: courseData,
       notifyData: notifyData,
       semesterData: semesterData,
+      semesterPickerController: _pickerController,
       onSelect: (int index) {
         semesterData = semesterData!.copyWith(currentIndex: index);
         _getCourseTables();
@@ -64,8 +75,21 @@ class CoursePageState extends State<CoursePage> {
           semesterData?.currentSemester.code == defaultSemesterCode,
       courseNotifySaveKey: courseNotifyCacheKey,
       enableCaptureCourseTable: true,
+      enableCustomCourse: true,
+      customCourseData: _customCourseData,
+      onCustomCourseChanged: _onCustomCourseChanged,
       actions: const <Widget>[],
     );
+  }
+
+  void _onCustomCourseChanged(CustomCourseData data) {
+    _customCourseData = data;
+    _customCourseData.save(courseNotifyCacheKey);
+    if (_apiCourseData != null) {
+      setState(() {
+        courseData = _apiCourseData!.mergeCustom(_customCourseData.courses);
+      });
+    }
   }
 
   Future<void> _getSemester() async {
@@ -186,23 +210,33 @@ class CoursePageState extends State<CoursePage> {
       semester: semesterData!.currentSemester.code,
     );
     if (!mounted) return;
+    final Semester semester = semesterData!.currentSemester;
     switch (result) {
       case ApiSuccess<CourseData>(:final CourseData data):
-        courseData = data;
-        courseData.save(courseNotifyCacheKey);
+        _apiCourseData = data;
+        _apiCourseData!.save(courseNotifyCacheKey);
+        _customCourseData = CustomCourseData.load(courseNotifyCacheKey);
+        courseData = _apiCourseData!.mergeCustom(_customCourseData.courses);
         setState(() {
           if (courseData.courses.isEmpty) {
             state = CourseState.empty;
+            _pickerController.markSemesterEmpty(semester);
           } else {
             state = CourseState.finish;
+            _pickerController.markSemesterHasData(semester);
           }
         });
+        if (courseData.courses.isNotEmpty) {
+          await ApCommonPlugin.updateCourseWidget(courseData);
+        }
       case ApiFailure<CourseData>():
+        _pickerController.markSemesterHasData(semester);
         setState(() {
           customHint = ap.offlineCourse;
           state = CourseState.finish;
         });
       case ApiError<CourseData>():
+        _pickerController.markSemesterHasData(semester);
         setState(() => state = CourseState.error);
     }
   }
