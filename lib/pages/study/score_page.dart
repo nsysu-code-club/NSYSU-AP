@@ -64,19 +64,6 @@ class ScorePageState extends State<ScorePage> {
       onRefresh: () {
         _getSemesterScore();
       },
-      finalScoreBuilder: (int index) {
-        final ColorScheme colorScheme = Theme.of(context).colorScheme;
-        return Text(
-          scoreData!.scores[index].finalScore ?? '',
-          style: TextStyle(
-            fontSize: 24.0,
-            fontWeight: FontWeight.bold,
-            color: scoreData!.scores[index].isPreScore
-                ? colorScheme.tertiary
-                : null,
-          ),
-        );
-      },
     );
   }
 
