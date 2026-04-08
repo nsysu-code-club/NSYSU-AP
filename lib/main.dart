@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:ap_common_firebase/ap_common_firebase.dart';
+import 'package:ap_common_plugin/ap_common_plugin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,9 +15,7 @@ import 'package:nsysu_ap/firebase_options.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
 
 Future<void> main() async {
@@ -37,18 +36,25 @@ Future<void> main() async {
     iv: Constants.iv,
   );
 
+  ApIcon.code = PreferenceUtil.instance.getString(
+    Constants.prefIconStyleCode,
+    ApIcon.outlined,
+  );
+
+  await ApCommonPlugin.configure(appGroupId: 'group.com.nsysu.ap');
+
   timeago.setLocaleMessages('zh-TW', timeago.ZhMessages());
   timeago.setLocaleMessages('en-US', timeago.EnMessages());
   if (!kIsWeb && Platform.isAndroid) {
     //TODO: 改使用原生方式限制特定網域
     HttpOverrides.global = MyHttpOverrides();
   }
-  final String currentVersion =
-      PreferenceUtil.instance.getString(Constants.prefCurrentVersion, '0');
-  if (int.parse(currentVersion) < 700) _migrate700();
-  FirebaseMessaging.onBackgroundMessage(
-    _firebaseMessagingBackgroundHandler,
+  final String currentVersion = PreferenceUtil.instance.getString(
+    Constants.prefCurrentVersion,
+    '0',
   );
+  if (int.parse(currentVersion) < 700) _migrate700();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   if (FirebaseUtils.isSupportCore || Platform.isWindows || Platform.isLinux) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,

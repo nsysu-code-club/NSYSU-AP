@@ -2,17 +2,57 @@ name: Store CD
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - production
+      - develop
+  workflow_dispatch:
 
 env:
   flutter_version: '3.38.10'
   java_version: '17'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+  actions: write
+  pull-requests: read
 
 jobs:
-  # CD
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      version_code: ${{ steps.get_version_code.outputs.version_code }}
+      is_production: ${{ github.ref == 'refs/heads/production' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get version from pubspec.yaml
+        id: get_version
+        run: |
+          VERSION=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+      - name: Get version code from variable
+        id: get_version_code
+        run: |
+          echo "version_code=${{ vars.VERSION_CODE }}" >> $GITHUB_OUTPUT
+          echo "Using version code: ${{ vars.VERSION_CODE }}"
+      - name: Aggregate changelog from merged PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RELEASE_TYPE=${{ github.ref == 'refs/heads/production' && 'stable' || 'beta' }}
+          bash "$GITHUB_WORKSPACE/.github/scripts/aggregate_changelog.sh" "$RELEASE_TYPE" changelog_aggregated.json
+      - name: Upload aggregated changelog
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog-aggregated
+          path: changelog_aggregated.json
+
   deploy_android:
     name: Android Play Store
+    needs: prepare
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,40 +66,45 @@ jobs:
         run: sh ./.github/scripts/decrypt_android_keys.sh
         env:
           KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
-      - name: Use JD
-        uses: r26d/jq-action@master
+      - name: Download aggregated changelog
+        uses: actions/download-artifact@v4
         with:
-          cmd: jq -n env
-      - name: Generate changelog
-        run: bash ./.github/scripts/generate_android_changelog.sh
+          name: changelog-aggregated
+      - name: Format changelog for Android
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} android
+        working-directory: ./android/fastlane
+        env:
+          AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
           DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
       - name: Install Flutter dependencies
         run: flutter pub get
-      - run: flutter build appbundle --release
-      - name: Setup ruby
+      - run: flutter build appbundle --release --build-number=${{ needs.prepare.outputs.version_code }}
+      - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.7.2'
-      - name: Bundle update
-        run: bundle update --bundler
+          ruby-version: '3.3'
+      - name: Install Fastlane
+        run: gem install fastlane fastlane-plugin-flutter_version
         working-directory: ./android
       - name: Run Fastlane
-        uses: maierj/fastlane-action@v2.0.1
-        with:
-          lane: 'playstore'
-          subdirectory: 'android'
+        run: fastlane ${{ needs.prepare.outputs.is_production == 'true' && 'playstore' || 'beta' }}
+        working-directory: ./android
 
   deploy_ios:
     name: iOS Deploy TestFlight
+    needs: prepare
     runs-on: self-hosted
+    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -70,29 +115,37 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: ${{ env.java_version }}
-      - name: Generate changelog
-        run: bash ./.github/scripts/generate_ios_changelog.sh
-      - name: Run Flutter tasks
+      - name: Download aggregated changelog
+        uses: actions/download-artifact@v4
+        with:
+          name: changelog-aggregated
+      - name: Format changelog for iOS
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} ios
+        working-directory: ./ios/fastlane
+        env:
+          AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version:  ${{ env.flutter_version }}
+          flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
-      - name: Flutter Initiaize
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+      - name: Flutter Initialize
         run: |
-            flutter doctor -v
-            flutter clean
-            dart pub global activate flutterfire_cli 1.1.0
+          flutter doctor -v
+          flutter clean
+          dart pub global activate flutterfire_cli 1.1.0
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
           DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
-      - run: flutter build ipa --release
+      - run: flutter build ipa --release --build-number=${{ needs.prepare.outputs.version_code }}
       - name: Zip dSYM
         run: zip Runner.app.dSYM.zip -r ../archive/Runner.xcarchive/dSYMs/
         working-directory: ./build/ios/ipa
-      - name: Decode Keystore
+      - name: Decode API Key
         run: |
-            echo "${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}" | base64 --decode > ios/AuthKey.p8
+          echo "${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}" | base64 --decode > ios/AuthKey.p8
       - name: Deploy iOS Beta to TestFlight via Fastlane
         run: fastlane ios release key_id:"${{ env.KEY_ID }}" issuer_id:"${{ env.ISSUER_ID }}"
         working-directory: ./ios
@@ -104,66 +157,22 @@ jobs:
           KEY_ID: '${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}'
           ISSUER_ID: '${{ secrets.APP_STORE_CONNECT_API_API_ISSUER_ID }}'
 
-#  deploy_macos:
-#    name: macOS Deploy TestFlight
-#    runs-on: macOS-latest
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ github.ref }}
-#      - name: Decrypt macOS keys
-#        run: sh ./.github/scripts/decrypt_macos_keys.sh
-#        env:
-#          KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
-#      - name: Run Flutter tasks
-#        uses: subosito/flutter-action@v2
-#        with:
-#          channel: 'dev'
-#      - name: Decrypt dev configs
-#        run: sh ./scripts/decrypt_dev_configs.sh
-#        env:
-#          DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
-#      - name: Enable macOS
-#        run: flutter config --enable-macos-desktop
-#      - run: flutter pub get
-#      - run: cd ./macos && pod install
-##      - run: flutter build macos --release
-#      - uses: ruby/setup-ruby@v1
-#        with:
-#          ruby-version: '2.7.2'
-#      - name: Bundle update
-#        run: bundle update --bundler
-#        working-directory: ./ios
-#      - name: Deploy macOS Beta to TestFlight via Fastlane
-#        uses: maierj/fastlane-action@v2.0.1
-#        with:
-#          lane: 'release'
-#          subdirectory: 'macos'
-#        env:
-#          APP_STORE_CONNECT_TEAM_ID: '${{ secrets.APP_STORE_CONNECT_TEAM_ID }}'
-#          DEVELOPER_APP_ID: '${{ secrets.DEVELOPER_APP_ID }}'
-#          DEVELOPER_APP_IDENTIFIER: '${{ secrets.DEVELOPER_APP_IDENTIFIER }}'
-#          DEVELOPER_PORTAL_TEAM_ID: '${{ secrets.DEVELOPER_PORTAL_TEAM_ID }}'
-#          FASTLANE_APPLE_ID: '${{ secrets.FASTLANE_APPLE_ID }}'
-#          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: '${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}'
-#          MATCH_PASSWORD: '${{ secrets.MATCH_PASSWORD }}'
-#          GIT_AUTHORIZATION: '${{ secrets.GIT_AUTHORIZATION }}'
-#          PROVISIONING_PROFILE_SPECIFIER: '${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}'
-#          TEMP_KEYCHAIN_PASSWORD: '${{ secrets.TEMP_KEYCHAIN_PASSWORD }}'
-#          TEMP_KEYCHAIN_USER: '${{ secrets.TEMP_KEYCHAIN_USER }}'
-
   deploy_windows:
     name: Windows App
+    needs: prepare
     runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Run Flutter tasks
+        with:
+          ref: ${{ github.ref }}
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version:  ${{ env.flutter_version }}
+          flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
@@ -173,44 +182,58 @@ jobs:
       - run: flutter doctor -v
       - run: flutter pub get
       - name: Build windows
-        run: flutter build windows --release
-      - name: 'Zip files'
+        run: flutter build windows --release --build-number=${{ needs.prepare.outputs.version_code }}
+      - name: Zip files
         run: powershell Compress-Archive build\windows\x64\runner\Release\ windows.zip
-      - name: upload artifacts
-        uses: actions/upload-artifact@v2
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: windows-artifact
           path: windows.zip
 
   github_release:
     name: Create GitHub Release
-    needs: [deploy_android, deploy_ios, deploy_windows]
+    needs: [prepare, deploy_android, deploy_ios, deploy_windows]
+    if: always() && needs.prepare.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      - name: Download aggregated changelog
+        uses: actions/download-artifact@v4
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          body_path: RELEASE_NOTE.md
-          draft: false
-          prerelease: false
-      - name: Use Download Artifact v2
-        uses: actions/download-artifact@v2
+          name: changelog-aggregated
+      - name: Format changelog for GitHub Release
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} github
+        env:
+          AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
         with:
           name: windows-artifact
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./windows.zip
-          asset_name: nsysu_ap_windows.zip
-          asset_content_type: application/zip
+          tag_name: v${{ needs.prepare.outputs.version }}${{ github.ref != 'refs/heads/production' && '-beta' || '' }}+${{ needs.prepare.outputs.version_code }}
+          name: v${{ needs.prepare.outputs.version }}${{ github.ref != 'refs/heads/production' && '-beta' || '' }}+${{ needs.prepare.outputs.version_code }}
+          target_commitish: ${{ github.sha }}
+          body_path: RELEASE_NOTES_GENERATED.md
+          draft: false
+          prerelease: ${{ github.ref != 'refs/heads/production' }}
+          files: windows.zip
+
+  finalize:
+    name: Increment Version Code
+    needs: [prepare, deploy_android, deploy_ios, deploy_windows, github_release]
+    if: always() && needs.github_release.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Increment VERSION_CODE
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          CURRENT=${{ needs.prepare.outputs.version_code }}
+          NEXT=$((CURRENT + 1))
+          gh variable set VERSION_CODE --body "$NEXT" --repo "${{ github.repository }}"
+          echo "Version code incremented: $CURRENT -> $NEXT"

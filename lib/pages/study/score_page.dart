@@ -1,7 +1,6 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:nsysu_ap/models/options.dart';
 import 'package:nsysu_ap/models/score_semester_data.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
@@ -13,19 +12,14 @@ class ScorePage extends StatefulWidget {
 }
 
 class ScorePageState extends State<ScorePage> {
-  late ApLocalizations ap;
-
   ScoreState state = ScoreState.loading;
   bool isOffline = false;
 
   ScoreSemesterData? scoreSemesterData;
+  SemesterData? semesterData;
   ScoreData? scoreData;
 
-  List<String> years = <String>[];
-  List<String> semesters = <String>[];
-
-  int currentYearsIndex = 0;
-  int currentSemesterIndex = 0;
+  final SemesterPickerController _pickerController = SemesterPickerController();
 
   bool get hasPreScore {
     for (final Score score in scoreData?.scores ?? <Score>[]) {
@@ -50,145 +44,103 @@ class ScorePageState extends State<ScorePage> {
 
   @override
   void dispose() {
+    _pickerController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
     return ScoreScaffold(
       state: state,
       scoreData: scoreData,
+      semesterData: semesterData,
+      semesterPickerController: _pickerController,
+      onSelect: (int index) {
+        semesterData = semesterData!.copyWith(currentIndex: index);
+        _getSemesterScore();
+      },
       middleTitle: ap.credits,
-      customHint: hasPreScore
-          ? AppLocalizations.of(context).hasPreScoreHint
-          : null,
-      itemPicker: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Expanded(
-            child: ItemPicker(
-              dialogTitle: ap.pickSemester,
-              items: years,
-              currentIndex: currentYearsIndex,
-              onSelected: (int index) {
-                setState(() {
-                  currentYearsIndex = index;
-                });
-                _getSemesterScore();
-              },
-            ),
-          ),
-          Expanded(
-            child: ItemPicker(
-              dialogTitle: ap.pickSemester,
-              items: semesters,
-              currentIndex: currentSemesterIndex,
-              onSelected: (int index) {
-                setState(() {
-                  currentSemesterIndex = index;
-                });
-                _getSemesterScore();
-              },
-            ),
-          ),
-        ],
-      ),
+      customHint: hasPreScore ? app.hasPreScoreHint : null,
       onRefresh: () {
         _getSemesterScore();
       },
-      finalScoreBuilder: (int index) {
-        return ScoreTextBorder(
-          text: scoreData!.scores[index].finalScore,
-          style: TextStyle(
-            fontSize: 15.0,
-            color: scoreData!.scores[index].isPreScore
-                ? ApTheme.of(context).yellow
-                : null,
-          ),
-        );
-      },
-      details: (scoreData == null)
-          ? null
-          : <String>[
-              '${ap.creditsTakenEarned}：' +
-                  '${scoreData!.detail.creditTaken ?? ''}'
-                      '${scoreData!.detail.isCreditEmpty ? '' : ' / '}'
-                      '${scoreData!.detail.creditEarned ?? ''}',
-              '${ap.average}：${scoreData!.detail.average ?? ''}',
-              '${ap.rank}：${scoreData!.detail.classRank ?? ''}',
-              '${ap.percentage}：${scoreData!.detail.classPercentage ?? ''}',
-            ],
     );
   }
 
-  Function(DioException e) get _onFailure =>
-      (DioException e) => setState(() {
-        state = ScoreState.error;
-        switch (e.type) {
-          case DioExceptionType.connectionError:
-          case DioExceptionType.connectionTimeout:
-          case DioExceptionType.sendTimeout:
-          case DioExceptionType.receiveTimeout:
-          case DioExceptionType.badResponse:
-          case DioExceptionType.cancel:
-          case DioExceptionType.badCertificate:
-            break;
-          case DioExceptionType.unknown:
-            throw e;
-        }
-      });
-
-  Function(GeneralResponse e) get _onError =>
-      (_) => setState(() => state = ScoreState.error);
+  SemesterData _toSemesterData(ScoreSemesterData data) {
+    final List<Semester> semesters = <Semester>[];
+    for (final yearOption in data.years) {
+      for (final semOption in data.semesters) {
+        semesters.add(
+          Semester(
+            year: yearOption.value,
+            value: semOption.value,
+            text: '${yearOption.text} ${semOption.text}',
+          ),
+        );
+      }
+    }
+    final int defaultIndex =
+        data.selectYearsIndex * data.semesters.length +
+        data.selectSemesterIndex;
+    final Semester defaultSemester = semesters[defaultIndex];
+    return SemesterData(
+      data: semesters,
+      defaultSemester: defaultSemester,
+      currentIndex: defaultIndex,
+    );
+  }
 
   Future<void> _getSemester() async {
-    SelcrsHelper.instance.getScoreSemesterData(
-      callback: GeneralCallback<ScoreSemesterData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (ScoreSemesterData data) {
-          scoreSemesterData = data;
-          years = <String>[];
-          semesters = <String>[];
-          for (final SemesterOptions option in scoreSemesterData!.years) {
-            years.add(option.text);
-          }
-          for (final SemesterOptions option in scoreSemesterData!.semesters) {
-            semesters.add(option.text);
-          }
-          _getSemesterScore();
-        },
-      ),
-    );
+    final ApiResult<ScoreSemesterData> result = await SelcrsHelper.instance
+        .getScoreSemesterData();
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<ScoreSemesterData>(:final ScoreSemesterData data):
+        scoreSemesterData = data;
+        setState(() {
+          semesterData = _toSemesterData(data);
+        });
+        _getSemesterScore();
+      case ApiFailure<ScoreSemesterData>():
+        setState(() => state = ScoreState.error);
+      case ApiError<ScoreSemesterData>():
+        setState(() => state = ScoreState.error);
+    }
   }
 
   Future<void> _getSemesterScore() async {
-    if (scoreSemesterData == null) {
+    if (semesterData == null) {
       _getSemester();
       return;
     }
+    final Semester current = semesterData!.currentSemester;
     final int month = DateTime.now().month;
-    SelcrsHelper.instance.getScoreData(
-      year: scoreSemesterData!.years[currentYearsIndex].value,
-      semester: scoreSemesterData!.semesters[currentSemesterIndex].value,
-      searchPreScore: month == 6 || month == 7 || month == 1 || month == 2,
-      callback: GeneralCallback<ScoreData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (ScoreData data) {
-          scoreData = data;
-          if (mounted && scoreData != null) {
-            setState(() {
-              if (scoreData!.scores.isEmpty) {
-                state = ScoreState.empty;
-              } else {
-                state = ScoreState.finish;
-              }
-            });
+    final ApiResult<ScoreData> result = await SelcrsHelper.instance
+        .getScoreData(
+          year: current.year,
+          semester: current.value,
+          searchPreScore: month == 6 || month == 7 || month == 1 || month == 2,
+        );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<ScoreData>(:final ScoreData data):
+        scoreData = data;
+        setState(() {
+          if (scoreData!.scores.isEmpty) {
+            state = ScoreState.empty;
+            _pickerController.markSemesterEmpty(current);
+          } else {
+            state = ScoreState.finish;
+            _pickerController.markSemesterHasData(current);
           }
-        },
-      ),
-    );
+        });
+      case ApiFailure<ScoreData>():
+        _pickerController.markSemesterHasData(current);
+        setState(() => state = ScoreState.error);
+      case ApiError<ScoreData>():
+        _pickerController.markSemesterHasData(current);
+        setState(() => state = ScoreState.error);
+    }
   }
 }

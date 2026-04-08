@@ -11,7 +11,7 @@ class _SchoolMapPageState extends State<SchoolMapPage> {
   @override
   Widget build(BuildContext context) {
     return ImageViewerScaffold(
-      title: ApLocalizations.of(context).schoolMap,
+      title: ap.schoolMap,
       imageViewers: <ImageViewer>[
         ImageViewer(
           title: '',

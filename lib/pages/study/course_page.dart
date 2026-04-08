@@ -1,5 +1,7 @@
-import 'package:ap_common/ap_common.dart';
+import 'package:ap_common/ap_common.dart'
+    hide TranslationProvider, LocaleSettings, AppLocaleUtils, AppLocale;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
+import 'package:ap_common_plugin/ap_common_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/selcrs_helper.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -13,14 +15,18 @@ class CoursePage extends StatefulWidget {
 }
 
 class CoursePageState extends State<CoursePage> {
-  late ApLocalizations ap;
-
   CourseState state = CourseState.loading;
 
   late TimeCodeConfig timeCodeConfig;
 
   SemesterData? semesterData;
   CourseData courseData = CourseData.empty();
+
+  /// API-fetched course data (before merging custom courses).
+  CourseData? _apiCourseData;
+
+  CustomCourseData _customCourseData = CustomCourseData();
+
   CourseNotifyData? notifyData;
 
   String? customStateHint;
@@ -30,6 +36,8 @@ class CoursePageState extends State<CoursePage> {
 
   String defaultSemesterCode = '';
 
+  final SemesterPickerController _pickerController = SemesterPickerController();
+
   String get courseNotifyCacheKey =>
       semesterData?.defaultSemester.code ?? '1091';
 
@@ -37,62 +45,56 @@ class CoursePageState extends State<CoursePage> {
   void initState() {
     super.initState();
     AnalyticsUtil.instance.setCurrentScreen('CoursePage', 'course_page.dart');
-    //TODO: 確認是否需要
-    // CourseNotifyData.clearOldVersionNotification(
-    //   tag: '${SelcrsHelper.instance.username}_latest',
-    //   newTag: courseNotifyCacheKey,
-    // );
     Future<void>.microtask(() => _getSemester());
   }
 
   @override
   void dispose() {
+    _pickerController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    ap = ApLocalizations.of(context);
     return CourseScaffold(
       state: state,
       courseData: courseData,
       notifyData: notifyData,
       semesterData: semesterData,
+      semesterPickerController: _pickerController,
       onSelect: (int index) {
-        semesterData!.currentIndex = index;
+        semesterData = semesterData!.copyWith(currentIndex: index);
         _getCourseTables();
       },
-      onRefresh: _getCourseTables,
+      onRefresh: () async {
+        await _getCourseTables();
+      },
       customHint: isOffline ? ap.offlineCourse : null,
       enableNotifyControl:
           semesterData != null &&
           semesterData?.currentSemester.code == defaultSemesterCode,
       courseNotifySaveKey: courseNotifyCacheKey,
       enableCaptureCourseTable: true,
+      enableCustomCourse: true,
+      customCourseData: _customCourseData,
+      onCustomCourseChanged: _onCustomCourseChanged,
       actions: const <Widget>[],
     );
   }
 
-  Function(DioException) get _onFailure => (DioException e) {
-    setState(() {
-      //if (courseData != null) {
-      customHint = ap.offlineCourse;
-      state = CourseState.finish;
-      //}
-      // else {
-      //   customStateHint = e.i18nMessage;
-      //   state = CourseState.error;
-      // }
-    });
-  };
-
-  Function(GeneralResponse) get _onError =>
-      (_) => setState(() => state = CourseState.error);
+  void _onCustomCourseChanged(CustomCourseData data) {
+    _customCourseData = data;
+    _customCourseData.save(courseNotifyCacheKey);
+    if (_apiCourseData != null) {
+      setState(() {
+        courseData = _apiCourseData!.mergeCustom(_customCourseData.courses);
+      });
+    }
+  }
 
   Future<void> _getSemester() async {
     FirebaseRemoteConfig remoteConfig;
     try {
-      //TODO improve
       remoteConfig = FirebaseRemoteConfigUtils.instance.remoteConfig!;
       await remoteConfig.fetch();
       await remoteConfig.activate();
@@ -129,35 +131,45 @@ class CoursePageState extends State<CoursePage> {
       value: defaultSemesterCode.substring(3),
       text: parser(defaultSemesterCode),
     );
-    SelcrsHelper.instance.getCourseSemesterData(
+    final ApiResult<SemesterData> result =
+        await SelcrsHelper.instance.getCourseSemesterData(
       defaultSemester: defaultSemester,
-      callback: GeneralCallback<SemesterData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (SemesterData data) {
-          semesterData = data;
-          final String semester = PreferenceUtil.instance.getString(
-            ApConstants.currentSemesterCode,
-            ApConstants.semesterLatest,
-          );
-          if (semester != defaultSemesterCode) {
-            PreferenceUtil.instance.setString(
-              ApConstants.currentSemesterCode,
-              defaultSemesterCode,
-            );
-          }
-          for (final Semester option in semesterData!.data) {
-            option.text = parser(option.text);
-          }
-          semesterData!.currentIndex = semesterData!.defaultIndex;
-          _getCourseTables();
-        },
-      ),
     );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<SemesterData>(:final SemesterData data):
+        final String semester = PreferenceUtil.instance.getString(
+          ApConstants.currentSemesterCode,
+          ApConstants.semesterLatest,
+        );
+        if (semester != defaultSemesterCode) {
+          PreferenceUtil.instance.setString(
+            ApConstants.currentSemesterCode,
+            defaultSemesterCode,
+          );
+        }
+        final List<Semester> parsedData = data.data
+            .map(
+              (Semester option) =>
+                  option.copyWith(text: parser(option.text)),
+            )
+            .toList();
+        semesterData = data.copyWith(data: parsedData);
+        semesterData = semesterData!.copyWith(
+          currentIndex: semesterData!.defaultIndex,
+        );
+        _getCourseTables();
+      case ApiFailure<SemesterData>():
+        setState(() {
+          customHint = ap.offlineCourse;
+          state = CourseState.finish;
+        });
+      case ApiError<SemesterData>():
+        setState(() => state = CourseState.error);
+    }
   }
 
   String parser(String text) {
-    final AppLocalizations app = AppLocalizations.of(context);
     if (text.length == 4) {
       final String lastCode = text.substring(3);
       String last = '';
@@ -172,7 +184,7 @@ class CoursePageState extends State<CoursePage> {
           last = app.summerSemester;
       }
       String first;
-      if (Intl.defaultLocale!.contains('en')) {
+      if (LocaleSettings.currentLocale == AppLocale.en) {
         int year = int.parse(text.substring(0, 3));
         year += 1911;
         first = '$year~${year + 1}';
@@ -191,27 +203,41 @@ class CoursePageState extends State<CoursePage> {
       return;
     }
     notifyData = CourseNotifyData.load(courseNotifyCacheKey);
-    SelcrsHelper.instance.getCourseData(
+    final ApiResult<CourseData> result =
+        await SelcrsHelper.instance.getCourseData(
       username: SelcrsHelper.instance.username,
       timeCodeConfig: timeCodeConfig,
       semester: semesterData!.currentSemester.code,
-      callback: GeneralCallback<CourseData>(
-        onFailure: _onFailure,
-        onError: _onError,
-        onSuccess: (CourseData data) {
-          courseData = data;
-          courseData.save(courseNotifyCacheKey);
-          if (mounted) {
-            setState(() {
-              if (courseData.courses.isEmpty) {
-                state = CourseState.empty;
-              } else {
-                state = CourseState.finish;
-              }
-            });
-          }
-        },
-      ),
     );
+    if (!mounted) return;
+    final Semester semester = semesterData!.currentSemester;
+    switch (result) {
+      case ApiSuccess<CourseData>(:final CourseData data):
+        _apiCourseData = data;
+        _apiCourseData!.save(courseNotifyCacheKey);
+        _customCourseData = CustomCourseData.load(courseNotifyCacheKey);
+        courseData = _apiCourseData!.mergeCustom(_customCourseData.courses);
+        setState(() {
+          if (courseData.courses.isEmpty) {
+            state = CourseState.empty;
+            _pickerController.markSemesterEmpty(semester);
+          } else {
+            state = CourseState.finish;
+            _pickerController.markSemesterHasData(semester);
+          }
+        });
+        if (courseData.courses.isNotEmpty) {
+          await ApCommonPlugin.updateCourseWidget(courseData);
+        }
+      case ApiFailure<CourseData>():
+        _pickerController.markSemesterHasData(semester);
+        setState(() {
+          customHint = ap.offlineCourse;
+          state = CourseState.finish;
+        });
+      case ApiError<CourseData>():
+        _pickerController.markSemesterHasData(semester);
+        setState(() => state = CourseState.error);
+    }
   }
 }

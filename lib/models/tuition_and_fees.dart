@@ -1,4 +1,4 @@
-import 'package:intl/intl.dart';
+import 'package:ap_common/ap_common.dart';
 
 class TuitionAndFees {
   final String titleZH;
@@ -20,7 +20,7 @@ class TuitionAndFees {
   });
 
   String get title {
-    if (Intl.defaultLocale!.contains('zh')) {
+    if (LocaleSettings.currentLocale == AppLocale.zhHantTw) {
       return titleZH;
     } else {
       return titleEN;
@@ -28,7 +28,7 @@ class TuitionAndFees {
   }
 
   String get paymentStatus {
-    if (Intl.defaultLocale!.contains('zh')) {
+    if (LocaleSettings.currentLocale == AppLocale.zhHantTw) {
       return paymentStatusZH;
     } else {
       return paymentStatusEN;

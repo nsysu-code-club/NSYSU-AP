@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
@@ -43,10 +44,9 @@ class TuitionHelper {
     initCookiesJar();
   }
 
-  Future<void> login({
+  Future<ApiResult<GeneralResponse>> login({
     required String username,
     required String password,
-    required GeneralCallback<GeneralResponse> callback,
   }) async {
     try {
       final Response<Int8List> response = await dio.post<Int8List>(
@@ -61,27 +61,22 @@ class TuitionHelper {
         },
       );
       final String _ = const Utf8Decoder().convert(response.data!);
-      // debugPrint('Request =  ${response.request.data}');
-      // debugPrint('Response =  $text');
-      //    debugPrint('response.statusCode = ${response.statusCode}');
+      return ApiError<GeneralResponse>(GeneralResponse.unknownError());
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
           e.response!.statusCode == 302) {
         isLogin = true;
-        return callback.onSuccess(GeneralResponse.success());
+        return ApiSuccess<GeneralResponse>(GeneralResponse.success());
       } else {
-        callback.onFailure(e);
-        // debugPrint(big5.decode(e.response.data));
+        return ApiFailure<GeneralResponse>(e);
       }
     } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
-      rethrow;
+      if (kDebugMode) rethrow;
+      return ApiError<GeneralResponse>(GeneralResponse.unknownError());
     }
   }
 
-  Future<void> getData({
-    required GeneralCallback<List<TuitionAndFees>> callback,
-  }) async {
+  Future<ApiResult<List<TuitionAndFees>>> getData() async {
     const String url = '$basePATH/tfstu/tfstudata.asp?act=11';
     try {
       final Response<Uint8List> response = await dio.get<Uint8List>(
@@ -89,9 +84,8 @@ class TuitionHelper {
         options: _tfOption,
       );
       final String text = const Utf8Decoder().convert(response.data!);
-      // debugPrint('text =  ${text}');
       if (text.contains('沒有合乎查詢條件的資料')) {
-        callback.onSuccess(<TuitionAndFees>[]);
+        return const ApiSuccess<List<TuitionAndFees>>(<TuitionAndFees>[]);
       }
       final Document document = parse(text, encoding: 'BIG-5');
       final List<Element> tbody = document.getElementsByTagName('tbody');
@@ -135,38 +129,29 @@ class TuitionHelper {
         );
       }
       list = list.reversed.toList();
-      callback.onSuccess(list);
+      return ApiSuccess<List<TuitionAndFees>>(list);
     } on DioException catch (e) {
-      callback.onFailure(e);
+      return ApiFailure<List<TuitionAndFees>>(e);
     } on Exception catch (_) {
-      callback.onError(GeneralResponse.unknownError());
-      rethrow;
+      if (kDebugMode) rethrow;
+      return ApiError<List<TuitionAndFees>>(GeneralResponse.unknownError());
     }
   }
 
-  Future<void> downloadFdf({
+  Future<ApiResult<Uint8List?>> downloadFdf({
     required String serialNumber,
-    required GeneralCallback<Uint8List?> callback,
   }) async {
     try {
       final Response<Uint8List> response = await dio.get<Uint8List>(
         '$basePATH/tfstu/$serialNumber',
         options: _tfOption,
       );
-      //    var bytes = response.bodyBytes;
-      //    await Printing.sharePdf(bytes: bytes, filename: filename);
-      //    await Printing.layoutPdf(
-      //      onLayout: (format) async => response.bodyBytes,
-      //    );
-      //    String dir = (await getApplicationDocumentsDirectory()).path;
-      //    File file = new File('$dir/$filename');
-      //    await file.writeAsBytes(bytes);
-      return callback.onSuccess(response.data) ?? response.data;
+      return ApiSuccess<Uint8List?>(response.data);
     } on DioException catch (e) {
-      callback.onFailure(e);
-    } on Exception {
-      callback.onError(GeneralResponse.unknownError());
-      rethrow;
+      return ApiFailure<Uint8List?>(e);
+    } on Exception catch (_) {
+      if (kDebugMode) rethrow;
+      return ApiError<Uint8List?>(GeneralResponse.unknownError());
     }
   }
 }

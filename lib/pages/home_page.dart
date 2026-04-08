@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:ap_common_firebase/ap_common_firebase.dart';
+import 'package:ap_common_plugin/ap_common_plugin.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -39,10 +40,7 @@ class HomePageState extends State<HomePage> {
   final GlobalKey<HomePageScaffoldState> _homeKey =
       GlobalKey<HomePageScaffoldState>();
 
-  bool get isMobile => MediaQuery.of(context).size.shortestSide < 680;
-
-  late AppLocalizations app;
-  late ApLocalizations ap;
+  bool get isTablet => MediaQuery.of(context).size.shortestSide > 680;
 
   HomeState state = HomeState.loading;
 
@@ -54,11 +52,20 @@ class HomePageState extends State<HomePage> {
 
   List<Announcement> announcements = <Announcement>[];
 
+  CourseData? courseData;
+
   bool isStudyExpanded = false;
   bool isSchoolNavigationExpanded = false;
 
-  TextStyle get _defaultStyle =>
-      TextStyle(color: ApTheme.of(context).grey, fontSize: 16.0);
+  String get drawerIcon {
+    switch (Theme.of(context).brightness) {
+      case Brightness.light:
+        return ImageAssets.nsysu;
+      case Brightness.dark:
+      default:
+        return ImageAssets.nsysu;
+    }
+  }
 
   @override
   void initState() {
@@ -73,6 +80,7 @@ class HomePageState extends State<HomePage> {
       );
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       _getAllAnnouncement();
+      _loadCourseData();
       if (PreferenceUtil.instance.getBool(Constants.prefAutoLogin, false)) {
         _login();
       } else {
@@ -88,10 +96,12 @@ class HomePageState extends State<HomePage> {
         AppTrackingUtils.show(context: context);
       }
     });
-    AnalyticsUtil.instance.setUserProperty(
-      AnalyticsConstants.language,
-      Locale(Intl.defaultLocale!).languageCode,
-    );
+    if (Intl.defaultLocale != null) {
+      AnalyticsUtil.instance.setUserProperty(
+        AnalyticsConstants.language,
+        Locale(Intl.defaultLocale!).languageCode,
+      );
+    }
     FirebaseMessagingUtils.instance.init(
       onClick: (RemoteMessage message) {
         if (kDebugMode) {
@@ -108,8 +118,6 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    app = AppLocalizations.of(context);
-    ap = ApLocalizations.of(context);
     return HomePageScaffold(
       key: _homeKey,
       isLogin: isLogin,
@@ -152,177 +160,11 @@ class HomePageState extends State<HomePage> {
           AnnouncementContentPage(announcement: announcement),
         );
       },
-      drawer: ApDrawer(
-        userInfo: userInfo,
-        widgets: <Widget>[
-          if (!isMobile)
-            DrawerItem(
-              icon: ApIcon.home,
-              title: ap.home,
-              onTap: () {
-                setState(() => content = null);
-              },
-            ),
-          ExpansionTile(
-            initiallyExpanded: isStudyExpanded,
-            onExpansionChanged: (bool bool) {
-              setState(() => isStudyExpanded = bool);
-            },
-            leading: Icon(
-              ApIcon.collectionsBookmark,
-              color: isStudyExpanded
-                  ? ApTheme.of(context).blueAccent
-                  : ApTheme.of(context).grey,
-            ),
-            title: Text(ap.courseInfo, style: _defaultStyle),
-            children: <Widget>[
-              DrawerSubItem(
-                icon: ApIcon.classIcon,
-                title: ap.course,
-                onTap: () => _openPage(CoursePage(), needLogin: true),
-              ),
-              DrawerSubItem(
-                icon: ApIcon.assignment,
-                title: ap.score,
-                onTap: () => _openPage(ScorePage(), needLogin: true),
-              ),
-            ],
-          ),
-          DrawerItem(
-            icon: ApIcon.directionsBus,
-            title: ap.bus,
-            onTap: () =>
-                _openPage(BusListPage(locale: Locale(Intl.defaultLocale!))),
-          ),
-          ExpansionTile(
-            initiallyExpanded: isSchoolNavigationExpanded,
-            onExpansionChanged: (bool bool) {
-              setState(() => isSchoolNavigationExpanded = bool);
-            },
-            leading: Icon(
-              ApIcon.navigation,
-              color: isSchoolNavigationExpanded
-                  ? ApTheme.of(context).blueAccent
-                  : ApTheme.of(context).grey,
-            ),
-            title: Text(ap.schoolNavigation, style: _defaultStyle),
-            children: <Widget>[
-              DrawerSubItem(
-                icon: ApIcon.map,
-                title: ap.schoolMap,
-                onTap: () =>
-                    _openPage(SchoolMapPage(), useCupertinoRoute: false),
-              ),
-              DrawerSubItem(
-                icon: ApIcon.accessibilityNew,
-                title: ap.admissionGuide,
-                onTap: () {
-                  if (kIsWeb ||
-                      Platform.isAndroid ||
-                      Platform.isIOS ||
-                      Platform.isMacOS ||
-                      Platform.isWindows) {
-                    _openPage(AdmissionGuidePage(), useCupertinoRoute: false);
-                  } else {
-                    openDesktopWebViewPage(
-                      Constants.admissionGuideUrl,
-                      title: ap.admissionGuide,
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-          DrawerItem(
-            icon: ApIcon.school,
-            title: app.graduationCheckChecklist,
-            onTap: () =>
-                _openPage(const GraduationReportPage(), needLogin: true),
-          ),
-          DrawerItem(
-            icon: ApIcon.monetizationOn,
-            title: app.tuitionAndFees,
-            onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
-          ),
-          // DrawerItem(
-          //   icon: Icons.car_repair,
-          //   title: app.towCarHelper,
-          //   onTap: () => _openPage(
-          //     TowCarHomePage(),
-          //     useCupertinoRoute: false,
-          //   ),
-          // ),
-          DrawerItem(
-            icon: ApIcon.info,
-            title: ap.schoolInfo,
-            onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
-          ),
-          DrawerItem(
-            icon: ApIcon.face,
-            title: ap.about,
-            onTap: () => _openPage(
-              AboutUsPage(
-                assetImage: ImageAssets.nsysu,
-                githubName: 'nsysu-code-club',
-                email: 'nsysu.gdsc@gmail.com',
-                appLicense: app.aboutOpenSourceContent,
-                fbFanPageId: '100906232372556',
-                instagramUsername: 'gdsc_nsysu',
-                fbFanPageUrl: 'https://www.facebook.com/NSYSUGDSC',
-                githubUrl: 'https://github.com/nsysu-code-club',
-              ),
-            ),
-          ),
-          DrawerItem(
-            icon: ApIcon.settings,
-            title: ap.settings,
-            onTap: () => _openPage(SettingPage()),
-          ),
-          if (isLogin)
-            ListTile(
-              leading: Icon(
-                ApIcon.powerSettingsNew,
-                color: ApTheme.of(context).grey,
-              ),
-              onTap: () async {
-                PreferenceUtil.instance.setBool(Constants.prefAutoLogin, false);
-                await PreferenceUtil.instance.setBool(
-                  Constants.prefAutoLogin,
-                  false,
-                );
-                SelcrsHelper.instance.logout();
-                GraduationHelper.instance.logout();
-                TuitionHelper.instance.logout();
-                setState(() {
-                  ShareDataWidget.of(context)!.data.isLogin = false;
-                  ShareDataWidget.of(context)!.data.userInfo = null;
-                });
-                if (isMobile) {
-                  if (!context.mounted) return;
-                  Navigator.of(context).pop();
-                }
-                _checkLoginState();
-              },
-              title: Text(ap.logout, style: _defaultStyle),
-            ),
-        ],
-        onTapHeader: () {
-          if (isLogin) {
-            if (userInfo != null && isLogin) {
-              ApUtils.pushCupertinoStyle(
-                context,
-                UserInfoPage(userInfo: userInfo!),
-              );
-            }
-          } else {
-            if (isMobile) Navigator.of(context).pop();
-            openLoginPage();
-          }
-        },
-      ),
+      drawer: _buildDrawer(),
+      dashboardWidgets: _buildDashboardWidgets(),
       announcements: announcements,
       onTabTapped: onTabTapped,
-      bottomNavigationBarItems: <Widget>[
+      bottomNavigationBarItems: <NavigationDestination>[
         NavigationDestination(icon: Icon(ApIcon.directionsBus), label: ap.bus),
         NavigationDestination(icon: Icon(ApIcon.classIcon), label: ap.course),
         NavigationDestination(icon: Icon(ApIcon.assignment), label: ap.score),
@@ -331,59 +173,56 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> onTabTapped(int index) async {
-    setState(() {
-      switch (index) {
-        case 0:
-          ApUtils.pushCupertinoStyle(
+    switch (index) {
+      case 0:
+        ApUtils.pushCupertinoStyle(
+          context,
+          BusListPage(locale: Locale(Intl.defaultLocale!)),
+        );
+      case 1:
+        if (isLogin) {
+          await Navigator.of(
             context,
-            BusListPage(locale: Locale(Intl.defaultLocale!)),
-          );
-        case 1:
-          if (isLogin) {
-            ApUtils.pushCupertinoStyle(context, CoursePage());
-          } else {
-            UiUtil.instance.showToast(context, ap.notLoginHint);
-          }
-        case 2:
-          if (isLogin) {
-            ApUtils.pushCupertinoStyle(context, ScorePage());
-          } else {
-            UiUtil.instance.showToast(context, ap.notLoginHint);
-          }
-      }
-    });
+          ).push(MaterialPageRoute<void>(builder: (_) => CoursePage()));
+          _loadCourseData();
+        } else {
+          UiUtil.instance.showToast(context, ap.notLoginHint);
+        }
+      case 2:
+        if (isLogin) {
+          ApUtils.pushCupertinoStyle(context, ScorePage());
+        } else {
+          UiUtil.instance.showToast(context, ap.notLoginHint);
+        }
+    }
   }
 
   Future<void> _getAllAnnouncement() async {
-    AnnouncementHelper.instance.getAnnouncements(
+    final result = await AnnouncementHelper.instance.getAnnouncements(
       tags: <String>['nsysu'],
-      callback: GeneralCallback<List<Announcement>>(
-        onFailure: (_) => setState(() => state = HomeState.error),
-        onError: (_) => setState(() => state = HomeState.error),
-        onSuccess: (List<Announcement>? data) {
-          announcements = data ?? <Announcement>[];
-          if (mounted) {
-            setState(() {
-              if (announcements.isEmpty) {
-                state = HomeState.empty;
-              } else {
-                state = HomeState.finish;
-              }
-            });
-          }
-        },
-      ),
     );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<List<Announcement>>(:final data):
+        announcements = data;
+        setState(() {
+          state = announcements.isEmpty ? HomeState.empty : HomeState.finish;
+        });
+      case ApiError<List<Announcement>>():
+      case ApiFailure<List<Announcement>>():
+        setState(() => state = HomeState.error);
+    }
   }
 
   Future<void> _checkLoginState() async {
+    if (!mounted) return;
     if (isLogin) {
       _homeKey.currentState!.hideSnackBar();
     } else {
       _homeKey.currentState!
           .showSnackBar(
-            text: ApLocalizations.of(context).notLogin,
-            actionText: ApLocalizations.of(context).login,
+            text: ap.notLogin,
+            actionText: ap.login,
             onSnackBarTapped: openLoginPage,
           )
           ?.closed
@@ -401,39 +240,31 @@ class HomePageState extends State<HomePage> {
       Constants.prefPassword,
       '',
     );
-    SelcrsHelper.instance.login(
+    final ApiResult<GeneralResponse> result = await SelcrsHelper.instance.login(
       username: username,
       password: password,
-      callback: GeneralCallback<GeneralResponse>(
-        onError: (GeneralResponse e) {
-          if (e.statusCode == 400) {
-            _homeKey.currentState!.showBasicHint(text: ap.loginFail);
-          } else if (e.statusCode == 401) {
-            UiUtil.instance.showToast(
-              context,
-              AppLocalizations.of(context).pleaseConfirmForm,
-            );
-            Utils.openConfirmForm(
-              context,
-              mounted: mounted,
-              username: username,
-            );
-          } else {
-            _homeKey.currentState!.showBasicHint(text: ap.unknownError);
-          }
-        },
-        onFailure: (DioException e) {
-          _homeKey.currentState!.showBasicHint(text: e.i18nMessage!);
-        },
-        onSuccess: (GeneralResponse data) {
-          _homeKey.currentState!.showBasicHint(text: ap.loginSuccess);
-          setState(() {
-            ShareDataWidget.of(context)!.data.isLogin = true;
-          });
-          ShareDataWidget.of(context)!.data.getUserInfo();
-        },
-      ),
     );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<GeneralResponse>():
+        _homeKey.currentState!.showBasicHint(text: ap.loginSuccess);
+        setState(() {
+          ShareDataWidget.of(context)!.data.isLogin = true;
+        });
+        ShareDataWidget.of(context)!.data.getUserInfo();
+        _loadCourseData();
+      case ApiError<GeneralResponse>(:final GeneralResponse response):
+        if (response.statusCode == 400) {
+          _homeKey.currentState!.showBasicHint(text: ap.loginFail);
+        } else if (response.statusCode == 401) {
+          UiUtil.instance.showToast(context, app.pleaseConfirmForm);
+          Utils.openConfirmForm(context, mounted: mounted, username: username);
+        } else {
+          _homeKey.currentState!.showBasicHint(text: ap.unknownError);
+        }
+      case ApiFailure<GeneralResponse>(:final DioException exception):
+        _homeKey.currentState!.showBasicHint(text: exception.i18nMessage!);
+    }
   }
 
   Future<void> _checkUpdate() async {
@@ -446,10 +277,16 @@ class HomePageState extends State<HomePage> {
     if (currentVersion != packageInfo.buildNumber) {
       final Map<String, dynamic>? rawData = await FileAssets.changelogData;
       //TODO: improve by object
-      final Map<String, dynamic> map =
-          rawData![packageInfo.buildNumber] as Map<String, dynamic>;
-      final String updateNoteContent =
-          map[ApLocalizations.current.locale] as String;
+      final Map<String, dynamic>? map =
+          rawData?[packageInfo.buildNumber] as Map<String, dynamic>?;
+      if (map == null) return;
+      final dynamic rawContent = map[ap.locale];
+      final String? updateNoteContent = switch (rawContent) {
+        final String s => s,
+        final List<dynamic> l =>
+          l.map((dynamic e) => '* $e').join('\n'),
+        _ => null,
+      };
       if (!mounted) return;
       DialogUtils.showUpdateContent(
         context,
@@ -498,31 +335,275 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  Widget _buildDrawer() {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return ApDrawer(
+      userInfo: userInfo,
+      displayPicture: PreferenceUtil.instance.getBool(
+        Constants.prefDisplayPicture,
+        true,
+      ),
+      onTapHeader: () {
+        if (isLogin) {
+          if (userInfo != null) {
+            ApUtils.pushCupertinoStyle(
+              context,
+              UserInfoPage(userInfo: userInfo!),
+            );
+          }
+        } else {
+          if (!isTablet) Navigator.of(context).pop();
+          openLoginPage();
+        }
+      },
+      widgets: <Widget>[
+        if (isTablet)
+          DrawerMenuItem(
+            icon: ApIcon.home,
+            title: ap.home,
+            onTap: () => setState(() => content = null),
+          ),
+        _buildStudySection(),
+        DrawerMenuItem(
+          icon: ApIcon.directionsBus,
+          title: ap.bus,
+          onTap: () =>
+              _openPage(BusListPage(locale: Locale(Intl.defaultLocale!))),
+        ),
+        _buildSchoolNavigationSection(),
+        DrawerMenuItem(
+          icon: ApIcon.school,
+          title: app.graduationCheckChecklist,
+          onTap: () => _openPage(const GraduationReportPage(), needLogin: true),
+        ),
+        DrawerMenuItem(
+          icon: ApIcon.monetizationOn,
+          title: app.tuitionAndFees,
+          onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
+        ),
+        DrawerMenuItem(
+          icon: ApIcon.info,
+          title: ap.schoolInfo,
+          onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
+        ),
+        DrawerMenuItem(
+          icon: ApIcon.face,
+          title: ap.about,
+          onTap: () => _openPage(
+            AboutUsPage(
+              assetImage: ImageAssets.nsysu,
+              githubName: 'nsysu-code-club',
+              email: 'nsysu.gdsc@gmail.com',
+              appLicense: app.aboutOpenSourceContent,
+              fbFanPageId: '100906232372556',
+              instagramUsername: 'gdsc_nsysu',
+              fbFanPageUrl: 'https://www.facebook.com/NSYSUGDSC',
+              githubUrl: 'https://github.com/nsysu-code-club',
+            ),
+          ),
+        ),
+        DrawerMenuItem(
+          icon: ApIcon.settings,
+          title: ap.settings,
+          onTap: () => _openPage(SettingPage()),
+        ),
+        if (isLogin) ...<Widget>[
+          const DrawerDivider(),
+          DrawerMenuItem(
+            icon: ApIcon.powerSettingsNew,
+            title: ap.logout,
+            iconColor: colorScheme.error,
+            onTap: () async {
+              await PreferenceUtil.instance.setBool(
+                Constants.prefAutoLogin,
+                false,
+              );
+              SelcrsHelper.instance.logout();
+              GraduationHelper.instance.logout();
+              TuitionHelper.instance.logout();
+              await ApCommonPlugin.clearCourseWidget();
+              setState(() {
+                ShareDataWidget.of(context)!.data.isLogin = false;
+                ShareDataWidget.of(context)!.data.userInfo = null;
+                courseData = null;
+              });
+              content = null;
+              if (!isTablet) {
+                if (!context.mounted) return;
+                Navigator.of(context).pop();
+              }
+              _checkLoginState();
+            },
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildStudySection() {
+    return DrawerMenuSection(
+      icon: ApIcon.school,
+      title: ap.courseInfo,
+      initiallyExpanded: isStudyExpanded,
+      onExpansionChanged: (bool value) {
+        setState(() {
+          isStudyExpanded = value;
+        });
+      },
+      children: <DrawerSubMenuItem>[
+        DrawerSubMenuItem(
+          icon: ApIcon.classIcon,
+          title: ap.course,
+          onTap: () => _openPage(CoursePage(), needLogin: true),
+        ),
+        DrawerSubMenuItem(
+          icon: ApIcon.assignment,
+          title: ap.score,
+          onTap: () => _openPage(ScorePage(), needLogin: true),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSchoolNavigationSection() {
+    return DrawerMenuSection(
+      icon: ApIcon.navigation,
+      title: ap.schoolNavigation,
+      initiallyExpanded: isSchoolNavigationExpanded,
+      onExpansionChanged: (bool value) {
+        setState(() {
+          isSchoolNavigationExpanded = value;
+        });
+      },
+      children: <DrawerSubMenuItem>[
+        DrawerSubMenuItem(
+          icon: ApIcon.map,
+          title: ap.schoolMap,
+          onTap: () => _openPage(SchoolMapPage(), useCupertinoRoute: false),
+        ),
+        DrawerSubMenuItem(
+          icon: ApIcon.accessibilityNew,
+          title: ap.admissionGuide,
+          onTap: () {
+            if (kIsWeb ||
+                Platform.isAndroid ||
+                Platform.isIOS ||
+                Platform.isMacOS ||
+                Platform.isWindows) {
+              _openPage(AdmissionGuidePage(), useCupertinoRoute: false);
+            } else {
+              openDesktopWebViewPage(
+                Constants.admissionGuideUrl,
+                title: ap.admissionGuide,
+              );
+            }
+          },
+        ),
+      ],
+    );
+  }
+
   Future<void> _openPage(
     Widget page, {
     bool needLogin = false,
     bool useCupertinoRoute = true,
   }) async {
-    if (isMobile) Navigator.of(context).pop();
+    if (!isTablet) Navigator.of(context).pop();
     if (needLogin && !isLogin) {
-      UiUtil.instance.showToast(
-        context,
-        ApLocalizations.of(context).notLoginHint,
-      );
+      UiUtil.instance.showToast(context, ap.notLoginHint);
     } else {
-      if (isMobile) {
+      if (isTablet) {
+        setState(() => content = page);
+      } else {
         if (useCupertinoRoute) {
-          ApUtils.pushCupertinoStyle(context, page);
+          await Navigator.of(
+            context,
+          ).push(MaterialPageRoute<dynamic>(builder: (_) => page));
         } else {
           await Navigator.push(
             context,
             CupertinoPageRoute<dynamic>(builder: (_) => page),
           );
         }
+        _loadCourseData();
         _checkLoginState();
-      } else {
-        setState(() => content = page);
       }
+    }
+  }
+
+  List<Widget> _buildDashboardWidgets() {
+    return <Widget>[
+      const SizedBox(height: 16),
+      if (courseData != null)
+        TodayScheduleCard(
+          courseData: courseData!,
+          onTap: () async {
+            if (isLogin) {
+              await Navigator.of(
+                context,
+              ).push(MaterialPageRoute<void>(builder: (_) => CoursePage()));
+              _loadCourseData();
+            }
+          },
+        )
+      else
+        _buildEmptyScheduleCard(),
+    ];
+  }
+
+  Widget _buildEmptyScheduleCard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Card(
+        child: InkWell(
+          onTap: () {
+            if (isLogin) {
+              ApUtils.pushCupertinoStyle(context, CoursePage());
+            } else {
+              openLoginPage();
+            }
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.today_rounded,
+                  size: 32,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    isLogin ? ap.courseEmpty : ap.notLogin,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _loadCourseData() async {
+    final CourseData? cached = CourseData.load(
+      PreferenceUtil.instance.getString(
+        ApConstants.currentSemesterCode,
+        ApConstants.semesterLatest,
+      ),
+    );
+    if (cached != null && cached.courses.isNotEmpty) {
+      setState(() => courseData = cached);
     }
   }
 

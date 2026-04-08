@@ -1,7 +1,7 @@
 name: nsysu_ap
 description: NSYSU AP
 
-version: 1.4.3+10403
+version: 1.5.2+10502
 
 environment:
   sdk: '>=3.10.0 <4.0.0'
@@ -11,13 +11,13 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.20.2
-  multiple_localization: ^0.6.0
+  slang: ^4.5.0
+  slang_flutter: ^4.5.0
 
-  ap_common: ^0.26.0+3
-  ap_common_firebase: ^0.17.0+1
-  ap_common_plugin: ^0.5.0+1
-  #     path: ../ap_common_plugin
+  ap_common: ^1.0.1-dev.9
+  ap_common_flutter_core: ^1.1.0-dev.10
+  ap_common_firebase: ^1.0.1-dev.10
+  ap_common_plugin: ^1.0.1-dev.9
 
   #official plugin
   http: ^1.2.2
@@ -46,14 +46,9 @@ dev_dependencies:
   lint: ^2.1.2
   build_runner: ^2.1.5
   json_serializable: ^6.0.1
+  slang_build_runner: ^4.5.0
 
 dependency_overrides:
-#  ap_common:
-#    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common
-#  ap_common_firebase:
-#    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_firebase
-#  ap_common_plugin:
-#    path: ../../GitHub-NKUST-ITC/ap_common/packages/ap_common_plugin
   web: 0.5.1
   google_sign_in: 6.2.1
   google_sign_in_ios: 5.7.6
@@ -67,10 +62,3 @@ flutter:
     - assets/car_park_area.json
     - assets/ca/
 
-flutter_intl:
-  enabled: true
-  class_name: AppLocalizations
-  main_locale: 'zh_TW'
-  arb_dir: lib/l10n
-  output_dir: lib/l10n
-  use_deferred_loading: true
