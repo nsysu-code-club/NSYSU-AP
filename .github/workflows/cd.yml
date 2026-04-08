@@ -2,8 +2,9 @@ name: Store CD
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - production
+      - develop
   workflow_dispatch:
 
 env:
@@ -23,6 +24,7 @@ jobs:
     outputs:
       version: ${{ steps.get_version.outputs.version }}
       version_code: ${{ steps.get_version_code.outputs.version_code }}
+      is_production: ${{ github.ref == 'refs/heads/production' }}
     steps:
       - uses: actions/checkout@v4
       - name: Get version from pubspec.yaml
@@ -31,17 +33,17 @@ jobs:
           VERSION=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
-      - name: Get version code from pubspec.yaml
+      - name: Get version code from variable
         id: get_version_code
         run: |
-          VERSION_CODE=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | cut -d'+' -f2)
-          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
-          echo "Version code: $VERSION_CODE"
+          echo "version_code=${{ vars.VERSION_CODE }}" >> $GITHUB_OUTPUT
+          echo "Using version code: ${{ vars.VERSION_CODE }}"
       - name: Aggregate changelog from merged PRs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          bash "$GITHUB_WORKSPACE/.github/scripts/aggregate_changelog.sh" changelog_aggregated.json
+          RELEASE_TYPE=${{ github.ref == 'refs/heads/production' && 'stable' || 'beta' }}
+          bash "$GITHUB_WORKSPACE/.github/scripts/aggregate_changelog.sh" "$RELEASE_TYPE" changelog_aggregated.json
       - name: Upload aggregated changelog
         uses: actions/upload-artifact@v4
         with:
@@ -95,7 +97,7 @@ jobs:
         run: gem install fastlane fastlane-plugin-flutter_version
         working-directory: ./android
       - name: Run Fastlane
-        run: fastlane playstore
+        run: fastlane ${{ needs.prepare.outputs.is_production == 'true' && 'playstore' || 'beta' }}
         working-directory: ./android
 
   deploy_ios:
@@ -213,9 +215,25 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: v${{ needs.prepare.outputs.version }}
+          tag_name: v${{ needs.prepare.outputs.version }}${{ github.ref != 'refs/heads/production' && '-beta' || '' }}+${{ needs.prepare.outputs.version_code }}
+          name: v${{ needs.prepare.outputs.version }}${{ github.ref != 'refs/heads/production' && '-beta' || '' }}+${{ needs.prepare.outputs.version_code }}
+          target_commitish: ${{ github.sha }}
           body_path: RELEASE_NOTES_GENERATED.md
           draft: false
-          prerelease: false
+          prerelease: ${{ github.ref != 'refs/heads/production' }}
           files: windows.zip
+
+  finalize:
+    name: Increment Version Code
+    needs: [prepare, deploy_android, deploy_ios, deploy_windows, github_release]
+    if: always() && needs.github_release.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Increment VERSION_CODE
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          CURRENT=${{ needs.prepare.outputs.version_code }}
+          NEXT=$((CURRENT + 1))
+          gh variable set VERSION_CODE --body "$NEXT" --repo "${{ github.repository }}"
+          echo "Version code incremented: $CURRENT -> $NEXT"
