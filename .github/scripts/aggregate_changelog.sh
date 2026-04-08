@@ -1,5 +1,5 @@
 #!/bin/bash
-# aggregate_changelog.sh <output_file>
+# aggregate_changelog.sh <beta|stable> <output_file>
 #
 # Queries GitHub API for merged PRs since last release and aggregates
 # bilingual changelog entries from PR comments.
@@ -8,10 +8,15 @@
 
 set -euo pipefail
 
-OUTPUT_FILE="${1:-changelog_aggregated.json}"
+RELEASE_TYPE="${1:-beta}"
+OUTPUT_FILE="${2:-changelog_aggregated.json}"
 
-# Find last release tag
-LAST_TAG=$(gh release list --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName // ""')
+# Find last release tag by type
+if [ "$RELEASE_TYPE" = "stable" ]; then
+  LAST_TAG=$(gh release list --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName // ""')
+else
+  LAST_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName // ""')
+fi
 
 if [ -n "$LAST_TAG" ]; then
   LAST_DATE=$(gh release view "$LAST_TAG" --json publishedAt --jq '.publishedAt')
@@ -21,9 +26,9 @@ else
   echo "No previous release found, aggregating all entries"
 fi
 
-# Get merged PRs to master since last release (newest first)
+# Get merged PRs to develop since last release (newest first)
 PRS=$(gh pr list \
-  --base master \
+  --base develop \
   --state merged \
   --limit 100 \
   --json number,mergedAt \
