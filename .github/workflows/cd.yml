@@ -14,6 +14,7 @@ env:
 permissions:
   contents: write
   actions: write
+  pull-requests: read
 
 jobs:
   prepare:
@@ -36,6 +37,16 @@ jobs:
           VERSION_CODE=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | cut -d'+' -f2)
           echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
           echo "Version code: $VERSION_CODE"
+      - name: Aggregate changelog from merged PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          bash "$GITHUB_WORKSPACE/.github/scripts/aggregate_changelog.sh" changelog_aggregated.json
+      - name: Upload aggregated changelog
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog-aggregated
+          path: changelog_aggregated.json
 
   deploy_android:
     name: Android Play Store
@@ -53,9 +64,15 @@ jobs:
         run: sh ./.github/scripts/decrypt_android_keys.sh
         env:
           KEYS_SECRET_PASSPHRASE: ${{ secrets.KEYS_SECRET_PASSPHRASE }}
+      - name: Download aggregated changelog
+        uses: actions/download-artifact@v4
+        with:
+          name: changelog-aggregated
       - name: Format changelog for Android
         run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} android
         working-directory: ./android/fastlane
+        env:
+          AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -96,9 +113,15 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: ${{ env.java_version }}
+      - name: Download aggregated changelog
+        uses: actions/download-artifact@v4
+        with:
+          name: changelog-aggregated
       - name: Format changelog for iOS
         run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} ios
         working-directory: ./ios/fastlane
+        env:
+          AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -174,8 +197,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Download aggregated changelog
+        uses: actions/download-artifact@v4
+        with:
+          name: changelog-aggregated
       - name: Format changelog for GitHub Release
         run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} github
+        env:
+          AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
@@ -185,7 +215,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: v${{ needs.prepare.outputs.version }}
-          body_path: RELEASE_NOTE.md
+          body_path: RELEASE_NOTES_GENERATED.md
           draft: false
           prerelease: false
           files: windows.zip
