@@ -534,7 +534,17 @@ class SelcrsHelper {
           (endTime - startTime) / 1000.0,
         );
       }
-      final ScoreData scoreData = ScoreData(scores: list, detail: detail);
+      final bool hasLetterGrades = list.any((Score score) {
+        final String? s = score.finalScore;
+        if (s == null || s.isEmpty || s == '--') return false;
+        return double.tryParse(s) == null;
+      });
+      final ScoreData scoreData = ScoreData(
+        scores: list,
+        detail: detail,
+        scoreType:
+            hasLetterGrades ? ScoreType.gradePoint : ScoreType.numeric,
+      );
       return ApiSuccess<ScoreData>(scoreData);
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
