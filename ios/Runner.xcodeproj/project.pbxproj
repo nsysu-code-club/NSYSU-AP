@@ -24,6 +24,7 @@
 		A4E3F6192525B59800343570 /* CourseAppWidget.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = A4E3F6142525B59600343570 /* CourseAppWidget.intentdefinition */; };
 		A4E3F61C2525B59800343570 /* CourseAppWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A4E3F60C2525B59600343570 /* CourseAppWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A4E3F6242525B5C300343570 /* CourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E3F6232525B5C300343570 /* CourseData.swift */; };
+		A4E3F62A0000000000343570 /* CourseAppWidget.strings in Resources */ = {isa = PBXBuildFile; fileRef = A4E3F6290000000000343570 /* CourseAppWidget.strings */; };
 		AD25CACD5C4E83CD51716E94 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 365FBA24D7FECAB3188F547B /* Pods_Runner.framework */; };
 		EB6B149754392BEFE8D12B1A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 92CD18BE6B8BD93FBE74FEE2 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
@@ -93,6 +94,8 @@
 		A4E3F6172525B59800343570 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A4E3F6232525B5C300343570 /* CourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseData.swift; sourceTree = "<group>"; };
 		A4E3F6262525B6A900343570 /* CourseAppWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CourseAppWidgetExtension.entitlements; sourceTree = "<group>"; };
+		A4E3F6270000000000343570 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/CourseAppWidget.strings; sourceTree = "<group>"; };
+		A4E3F6280000000000343570 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/CourseAppWidget.strings"; sourceTree = "<group>"; };
 		B807DFCB4C09300BC750327F /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -182,6 +185,7 @@
 			children = (
 				A4E3F6122525B59600343570 /* CourseAppWidget.swift */,
 				A4E3F6142525B59600343570 /* CourseAppWidget.intentdefinition */,
+				A4E3F6290000000000343570 /* CourseAppWidget.strings */,
 				A4E3F6152525B59800343570 /* Assets.xcassets */,
 				A4E3F6172525B59800343570 /* Info.plist */,
 				A4E3F6232525B5C300343570 /* CourseData.swift */,
@@ -323,6 +327,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A4E3F6162525B59800343570 /* Assets.xcassets in Resources */,
+				A4E3F62A0000000000343570 /* CourseAppWidget.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -606,6 +611,15 @@
 				A47A35CB254121950070DC6B /* zh-Hant */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		A4E3F6290000000000343570 /* CourseAppWidget.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A4E3F6270000000000343570 /* en */,
+				A4E3F6280000000000343570 /* zh-Hant */,
+			);
+			name = CourseAppWidget.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
