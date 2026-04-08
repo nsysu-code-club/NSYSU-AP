@@ -280,7 +280,13 @@ class HomePageState extends State<HomePage> {
       final Map<String, dynamic>? map =
           rawData?[packageInfo.buildNumber] as Map<String, dynamic>?;
       if (map == null) return;
-      final String? updateNoteContent = map[ap.locale] as String?;
+      final dynamic rawContent = map[ap.locale];
+      final String? updateNoteContent = switch (rawContent) {
+        final String s => s,
+        final List<dynamic> l =>
+          l.map((dynamic e) => '* $e').join('\n'),
+        _ => null,
+      };
       if (!mounted) return;
       DialogUtils.showUpdateContent(
         context,
