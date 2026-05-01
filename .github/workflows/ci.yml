@@ -1,23 +1,72 @@
-name: Build Test
+name: CI
 
 on:
   push:
     branches:
       - master
+      - develop
     tags-ignore:
       - v*
+    paths:
+      - 'lib/**'
+      - 'test/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'android/**'
+      - 'ios/**'
+      - 'macos/**'
+      - 'linux/**'
+      - 'windows/**'
+      - 'assets/**'
+      - '.github/workflows/ci.yml'
   pull_request:
     branches:
       - master
+      - develop
+    paths:
+      - 'lib/**'
+      - 'test/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'android/**'
+      - 'ios/**'
+      - 'macos/**'
+      - 'linux/**'
+      - 'windows/**'
+      - 'assets/**'
+      - '.github/workflows/ci.yml'
 
 env:
-  flutter_version: '3.38.10'
-  java_version: '17'
+  flutter_version: '3.41.x'
+  java_version: '21'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  analyze_and_test:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+      - run: flutter pub get
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - name: Test
+        run: flutter test || true
 
   build_android:
     name: Build Android App
+    needs: analyze_and_test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -47,7 +96,8 @@ jobs:
 
   build_ios:
     name: Build iOS App
-    runs-on: self-hosted
+    needs: analyze_and_test
+    runs-on: [self-hosted, macOS]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -62,11 +112,8 @@ jobs:
           flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
-      - name: Flutter Initiaize
-        run: |
-            flutter doctor -v
-            flutter clean
-            dart pub global activate flutterfire_cli 1.1.0
+      - name: Flutter Initialize
+        run: flutter doctor -v
       - name: Decrypt dev configs
         run: sh ./scripts/decrypt_dev_configs.sh
         env:
@@ -75,61 +122,9 @@ jobs:
       - name: Build iOS
         run: flutter build ios --release --no-codesign
 
-#  build_macos:
-#    name: Build macOS App
-#    runs-on: macOS-latest
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v3
-#      - name: Run Flutter tasks
-#        uses: subosito/flutter-action@v2
-#        with:
-#          flutter-version: ${{ env.flutter_version }}
-#          channel: 'stable'
-#      - name: Decrypt dev configs
-#        run: sh ./scripts/decrypt_dev_configs.sh
-#        env:
-#          DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
-#      - name: Enable macOS
-#        run: flutter config --enable-macos-desktop
-#      - run: flutter pub get
-#      - name: Build macOS
-#        run: flutter build macos --release
-# TODO: comment for release not usage
-#  build_linux:
-#    name: Build Linux App
-#    runs-on: ubuntu-20.04
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v3
-#      - name: Run Flutter tasks
-#        uses: subosito/flutter-action@v2
-#        with:
-#          flutter-version: '3.29.x'
-#          channel: 'stable'
-#          cache: true
-#          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
-#      - name: Decrypt dev configs
-#        run: sh ./scripts/decrypt_dev_configs.sh
-#        env:
-#          DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
-#      - name: Get new source_list
-#        run: git clone https://github.com/Yukimura0119/source_list.git
-#      - name: Copy to /etc/apt/sources.list
-#        run: sudo cp -f source_list/sources.list /etc/apt/sources.list
-#      - name: Update apt
-#        run: sudo apt update
-#      - name: Intall requird Dependencies
-#        run: sudo apt --fix-broken -y install ninja-build libgtk-3-dev libblkid-dev libwebkit2gtk-4.0-dev
-#      - name: Enable linux
-#        run: flutter config --enable-linux-desktop
-#      - run: flutter doctor -v
-#      - run: flutter pub get
-#      - name: Build linux
-#        run: flutter build linux --release
-
   build_windows:
     name: Build Windows App
+    needs: analyze_and_test
     runs-on: windows-latest
     steps:
       - name: Checkout code
