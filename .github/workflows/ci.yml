@@ -60,7 +60,7 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - run: flutter pub get
       - name: Analyze
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings || true
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
       - name: Test
         run: flutter test || true
 
@@ -86,10 +86,6 @@ jobs:
           channel: 'stable'
           cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
-      - name: Decrypt dev configs
-        run: sh ./scripts/decrypt_dev_configs.sh
-        env:
-          DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
       - run: flutter pub get
       - name: Build Android app bundle
         run: flutter build appbundle --release
@@ -114,10 +110,6 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Flutter Initialize
         run: flutter doctor -v
-      - name: Decrypt dev configs
-        run: sh ./scripts/decrypt_dev_configs.sh
-        env:
-          DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
       - run: flutter pub get
       - name: Build iOS
         run: flutter build ios --release --no-codesign
@@ -136,10 +128,6 @@ jobs:
           channel: 'stable'
           cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
-      - name: Decrypt dev configs
-        run: sh ./scripts/decrypt_dev_configs.sh
-        env:
-          DEV_CONFIGS_PASSPHRASE: ${{ secrets.DEV_CONFIGS_PASSPHRASE }}
       - name: Enable windows
         run: flutter config --enable-windows-desktop
       - run: flutter doctor -v
