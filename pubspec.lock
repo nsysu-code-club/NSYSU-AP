@@ -37,66 +37,66 @@ packages:
     dependency: "direct main"
     description:
       name: ap_common
-      sha256: "4708a45e5293cf027bf2c481657ebc95e417bd103d180ec242583b934971a861"
+      sha256: "5e6cf9d29275969495741ec3d9acc058467bed632f532ccd249f441692fecf1d"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1-dev.9"
+    version: "1.0.1-dev.12"
   ap_common_announcement_ui:
     dependency: transitive
     description:
       name: ap_common_announcement_ui
-      sha256: "062faa304971f64a077af534d02b121bdb4ea01ea2632cd650d48fb0ce86053f"
+      sha256: "22dd6fd1b5ee9544e86bf1bdcda6bcc6324b9abf4c86839fe839835f8f9a7469"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1-dev.10"
+    version: "1.0.1-dev.13"
   ap_common_core:
     dependency: transitive
     description:
       name: ap_common_core
-      sha256: b0518d5fed8a85d49d062cf889d05a806ac3eaf3941b30c63deaa94fa7f197a0
+      sha256: "3ddea8040e454cc5be04fbeaa1660fa68afb88f0ac4317122f5c0a585a5d6540"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1-dev.7"
+    version: "1.0.1-dev.10"
   ap_common_firebase:
     dependency: "direct main"
     description:
       name: ap_common_firebase
-      sha256: "50e2057f515ed495566dbb7c2b294c1cda57d2590fa6a8b794a3ea555b84e444"
+      sha256: bfb6adf3556e1beb0d680007fac4ee72c5e52e1a36239550f98eda322cec5b67
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1-dev.10"
+    version: "1.0.1-dev.13"
   ap_common_flutter_core:
     dependency: "direct main"
     description:
       name: ap_common_flutter_core
-      sha256: de53cb459cd41127cac4d0015ee7297b76a9eb4166e1b06f630b989de771ddb6
+      sha256: "3f6d6fe2c6cb6c17ed5cfeefab50f9f596030f08cc0e0a3925674f869f5d5295"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0-dev.10"
+    version: "1.1.0-dev.13"
   ap_common_flutter_platform:
     dependency: transitive
     description:
       name: ap_common_flutter_platform
-      sha256: eeb33ef8f3920e33beb42c96a42bf81dfad5f0e260f972cc4eabe699ddc2678a
+      sha256: "7cb7b7ff27bb1039b1b0799899a793eac166a082414cdf650f9a685f3662a1a2"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1-dev.10"
+    version: "1.0.1-dev.13"
   ap_common_flutter_ui:
     dependency: transitive
     description:
       name: ap_common_flutter_ui
-      sha256: "639d6ced42aee6cbf8e9caa1786e5fa163d0939f1196c5440190001b5a9ddcbd"
+      sha256: "69b210a1e2250ab72356dcd89c1b1a9abcd567f3d931a0785794225a3cf6a26f"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0-dev.10"
+    version: "1.1.0-dev.13"
   ap_common_plugin:
     dependency: "direct main"
     description:
       name: ap_common_plugin
-      sha256: "2bd24bd5873736c48c27df024e859362ca8e8ec0701b05189f5d633509bbca73"
+      sha256: "5ad4e44fa833ddc7411cea55b2bd806c0b78bf643870e3d03b0953a06cdf4bf7"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1-dev.9"
+    version: "1.0.1-dev.12"
   app_tracking_transparency:
     dependency: transitive
     description:
@@ -253,10 +253,10 @@ packages:
     dependency: transitive
     description:
       name: characters
-      sha256: f71061c654a3380576a52b451dd5532377954cf9dbd272a78fc8479606670803
+      sha256: faf38497bda5ead2a8c7615f4f7939df04333478bf32e4173fcb06d428b5716b
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.0"
+    version: "1.4.1"
   checked_yaml:
     dependency: transitive
     description:
@@ -797,6 +797,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0"
+  gal:
+    dependency: transitive
+    description:
+      name: gal
+      sha256: "969598f986789127fd407a750413249e1352116d4c2be66e81837ffeeaafdfee"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.2"
   glob:
     dependency: transitive
     description:
@@ -1113,18 +1121,18 @@ packages:
     dependency: transitive
     description:
       name: matcher
-      sha256: dc58c723c3c24bf8d3e2d3ad3f2f9d7bd9cf43ec6feaa64181775e60190153f2
+      sha256: dc0b7dc7651697ea4ff3e69ef44b0407ea32c487a39fff6a4004fa585e901861
       url: "https://pub.dev"
     source: hosted
-    version: "0.12.17"
+    version: "0.12.19"
   material_color_utilities:
     dependency: transitive
     description:
       name: material_color_utilities
-      sha256: f7142bb1154231d7ea5f96bc7bde4bda2a0945d2806bb11670e30b850d56bdec
+      sha256: "9c337007e82b1889149c82ed242ed1cb24a66044e30979c44912381e9be4c48b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.11.1"
+    version: "0.13.0"
   meta:
     dependency: transitive
     description:
@@ -1277,14 +1285,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.2"
-  photo_manager:
-    dependency: transitive
-    description:
-      name: photo_manager
-      sha256: "807688e3221e90fb02a4466746edd9cb9a0de025f8754c819f96604c00f6f1f5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.8.3"
   photo_view:
     dependency: transitive
     description:
@@ -1646,10 +1646,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: ab2726c1a94d3176a45960b6234466ec367179b87dd74f1611adb1f3b5fb9d55
+      sha256: "8161c84903fd860b26bfdefb7963b3f0b68fee7adea0f59ef805ecca346f0c7a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.7"
+    version: "0.7.10"
   timeago:
     dependency: "direct main"
     description:
