@@ -1,33 +1,15 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:ap_common_firebase/ap_common_firebase.dart';
-import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/comfirm_form_page.dart';
-import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Utils {
-  static String base64md5(String text) {
-    final List<int> bytes = utf8.encode(text);
-    final Digest digest = md5.convert(bytes);
-    return base64.encode(digest.bytes);
-  }
-
-  static String uriEncodeBig5(String text) {
-    final List<int> list = big5.encode(text);
-    final StringBuffer buffer = StringBuffer();
-    for (final int value in list) {
-      buffer.write('%${value.toRadixString(16)}');
-    }
-    return buffer.toString();
-  }
-
   static Future<void> openConfirmForm(
     BuildContext context, {
     required bool mounted,

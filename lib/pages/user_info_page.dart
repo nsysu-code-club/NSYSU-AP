@@ -1,6 +1,6 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/api/selcrs_helper.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class UserInfoPage extends StatefulWidget {
   final UserInfo userInfo;

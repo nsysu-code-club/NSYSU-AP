@@ -4,11 +4,9 @@ import 'dart:typed_data';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:nsysu_ap/api/tuition_helper.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/extensions/tuition_and_fees_ui_extension.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class TuitionAndFeesPage extends StatefulWidget {
   const TuitionAndFeesPage({super.key});

@@ -3,7 +3,7 @@ import 'package:ap_common/ap_common.dart'
 import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:ap_common_plugin/ap_common_plugin.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/api/selcrs_helper.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 

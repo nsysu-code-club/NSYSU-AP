@@ -6,7 +6,7 @@ import 'package:ap_common_flutter_core/ap_common_flutter_core.dart' as ap_l10n
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:nsysu_ap/api/selcrs_helper.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/home_page.dart';

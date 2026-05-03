@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/api/bus_helper.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
@@ -114,7 +113,7 @@ class _BusTimePageState extends State<BusTimePage>
   Future<void> _getData() async {
     final ApiResult<List<BusTime>?> result =
         await BusHelper.instance.getBusTime(
-      locale: widget.locale,
+      languageCode: widget.locale.languageCode.contains('zh') ? 'zh' : 'en',
       busInfo: widget.busInfo,
     );
     if (!mounted) return;
