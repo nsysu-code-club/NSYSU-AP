@@ -1,0 +1,120 @@
+name: Crawler Monitor
+
+# Runs the nsysu_crawler live integration tests against the real NSYSU
+# servers on a schedule. Two modes of failure are detected:
+#
+#   - Health check fails → school server is down / unreachable
+#   - Parser test fails  → server is up but HTML structure has drifted
+#
+# The Discord notification message labels which one fired so on-call can
+# triage faster.
+#
+# Required secrets (set in repo Settings → Secrets and variables → Actions):
+#   NSYSU_USERNAME      — student id used for credentialed live tests
+#   NSYSU_PASSWORD      — corresponding password
+#   DISCORD_WEBHOOK_URL — webhook posted to on failure
+#
+# Until the secrets are populated, credentialed tests will skip silently
+# (their `skip:` clause checks for env vars) and only health checks +
+# the no-creds bus tests run. That's enough to verify the workflow is
+# wired correctly.
+
+on:
+  schedule:
+    # 00:00 UTC = 08:00 Asia/Taipei
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    name: Crawler Structure Monitor
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Pub get (nsysu_crawler)
+        working-directory: packages/nsysu_crawler
+        run: dart pub get
+
+      - name: Run authenticated live tests (selcrs / graduation / tuition)
+        id: test_live
+        working-directory: packages/nsysu_crawler
+        env:
+          NSYSU_USER: ${{ secrets.NSYSU_USERNAME }}
+          NSYSU_PASS: ${{ secrets.NSYSU_PASSWORD }}
+        run: |
+          set +e
+          dart test -P live -r expanded 2>&1 | tee ../../live_output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Run anonymous live tests (bus + health checks)
+        id: test_anon
+        working-directory: packages/nsysu_crawler
+        run: |
+          set +e
+          dart test -P live-anonymous -r expanded 2>&1 | tee ../../anon_output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Classify failures
+        if: steps.test_live.outputs.exit_code != '0' || steps.test_anon.outputs.exit_code != '0'
+        id: msg
+        run: |
+          # Combine outputs from both presets
+          cat live_output.txt anon_output.txt > combined_output.txt 2>/dev/null || true
+
+          # Extract failed test names. dart test's expanded reporter marks
+          # failures as `+N -M: <test name> [E]`.
+          FAILED=$(grep -E '\[E\]' combined_output.txt \
+            | sed 's/.*+[0-9]* -[0-9]*: //' \
+            | sed 's/ \[E\]//' \
+            | sort -u | head -20 || true)
+
+          # Classify: health check vs parser/structure
+          HEALTH_FAIL=$(echo "$FAILED" | grep -i 'Health Check' || true)
+          CRAWLER_FAIL=$(echo "$FAILED" | grep -iv 'Health Check' || true)
+
+          if [ -n "$HEALTH_FAIL" ] && [ -n "$CRAWLER_FAIL" ]; then
+            CATEGORY="🔴 NSYSU 網站連線異常 + 爬蟲結構異常"
+          elif [ -n "$HEALTH_FAIL" ]; then
+            CATEGORY="🔴 NSYSU 網站連線異常（可能掛掉）"
+          else
+            CATEGORY="🟡 NSYSU 爬蟲結構異常（網站正常但 HTML 結構可能已變更）"
+          fi
+
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "category=$CATEGORY" >> "$GITHUB_OUTPUT"
+          echo "failures<<$EOF" >> "$GITHUB_OUTPUT"
+          echo "$FAILED" >> "$GITHUB_OUTPUT"
+          echo "$EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Notify Discord
+        if: steps.test_live.outputs.exit_code != '0' || steps.test_anon.outputs.exit_code != '0'
+        run: |
+          jq -n \
+            --arg content "🚨 **NSYSU 爬蟲監控異常**
+
+          ${{ steps.msg.outputs.category }}
+
+          **失敗項目：**
+          \`\`\`
+          ${{ steps.msg.outputs.failures }}
+          \`\`\`
+
+          [查看執行紀錄](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" \
+            '{content: $content}' | \
+          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d @-
+
+      - name: Fail workflow on test failure
+        if: steps.test_live.outputs.exit_code != '0' || steps.test_anon.outputs.exit_code != '0'
+        run: exit 1
