@@ -103,26 +103,17 @@ void main() {
     );
 
     test(
-      'getCourseData returns a CourseData for the latest semester',
+      'getCourseData returns a CourseData for the current semester',
       () async {
-        // ignore: avoid_print
-        print('[live] resolve latest semester → POST stu_slt_data.asp');
-        final ApiResult<SemesterData> semesterResult = await SelcrsHelper
-            .instance
-            .getCourseSemesterData(
-              defaultSemester: const Semester(
-                year: '113',
-                value: '1',
-                text: '113 上學期',
-              ),
-            );
-        final SemesterData semesterData =
-            (semesterResult as ApiSuccess<SemesterData>).data;
-        final Semester semester = semesterData.data.first;
+        // Skip getCourseSemesterData() for picking the term — its first /
+        // selected entry is often last term's (the most recent one with
+        // any data), not the one the student is actually attending.
+        // Derive from wall-clock instead.
+        final Semester semester = currentAcademicSemester();
         // ignore: avoid_print
         print(
-          '[live]   semester: ${semester.year}/${semester.value} '
-          '"${semester.text}"',
+          '[live] POST stu_slt_data.asp for ${semester.year}/${semester.value} '
+          '"${semester.text}" (wall-clock)',
         );
         final ApiResult<CourseData> result = await SelcrsHelper.instance
             .getCourseData(
@@ -182,26 +173,21 @@ void main() {
     );
 
     test(
-      'getScoreData returns ScoreData for the currently-selected semester',
+      'getScoreData returns ScoreData for the current semester',
       () async {
+        // Same wall-clock override as getCourseData — selcrs's
+        // `selectYearsIndex` / `selectSemesterIndex` track the most recent
+        // graded term, which routinely points at last semester.
+        final Semester semester = currentAcademicSemester();
         // ignore: avoid_print
         print(
-          '[live] resolve latest score semester → POST sco_query.asp ACTION=804',
-        );
-        final ApiResult<ScoreSemesterData> semResult = await SelcrsHelper
-            .instance
-            .getScoreSemesterData();
-        final ScoreSemesterData semData =
-            (semResult as ApiSuccess<ScoreSemesterData>).data;
-        // ignore: avoid_print
-        print(
-          '[live]   semester: ${semData.year.value}/${semData.semester.value} '
-          '"${semData.year.text} ${semData.semester.text}"',
+          '[live] POST sco_query.asp ACTION=804 for '
+          '${semester.year}/${semester.value} "${semester.text}" (wall-clock)',
         );
         final ApiResult<ScoreData> result = await SelcrsHelper.instance
             .getScoreData(
-              year: semData.year.value,
-              semester: semData.semester.value,
+              year: semester.year,
+              semester: semester.value,
             );
         expect(result, isA<ApiSuccess<ScoreData>>());
         final ScoreData data = (result as ApiSuccess<ScoreData>).data;
