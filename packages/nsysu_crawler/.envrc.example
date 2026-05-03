@@ -1,0 +1,6 @@
+# Copy to .envrc and fill in real creds. NEVER commit .envrc.
+# With direnv installed, `direnv allow` inside this directory will load these
+# automatically into your shell when running `dart test -P live`.
+
+export NSYSU_USER=B12345678
+export NSYSU_PASS=your-password-here
