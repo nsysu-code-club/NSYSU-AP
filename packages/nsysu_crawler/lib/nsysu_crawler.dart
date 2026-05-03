@@ -9,3 +9,4 @@ export 'src/models/options.dart';
 export 'src/models/pre_score.dart';
 export 'src/models/score_semester_data.dart';
 export 'src/models/tuition_and_fees.dart';
+export 'src/utils/big5/big5.dart';

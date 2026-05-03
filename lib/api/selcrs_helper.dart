@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
-import 'package:nsysu_ap/utils/big5/big5.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:sprintf/sprintf.dart';
 

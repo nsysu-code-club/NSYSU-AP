@@ -8,7 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/comfirm_form_page.dart';
-import 'package:nsysu_ap/utils/big5/big5.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:url_launcher/url_launcher.dart';
 
