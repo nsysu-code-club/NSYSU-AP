@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:typed_data';
 
 import 'package:ap_common_core/ap_common_core.dart';
@@ -189,15 +190,17 @@ class GraduationHelper {
                 tdDoc[i].text.replaceAll(RegExp(r'[※\n]'), '');
           }
         }
-        if (kCrawlerDebugMode) {
-          print(DateTime.now());
-        }
       } else {
         return const ApiSuccess<GraduationReportData?>(null);
       }
       final int endTime = DateTime.now().millisecondsSinceEpoch;
-      // ignore: avoid_print
-      if (kCrawlerDebugMode) print((endTime - startTime) / 1000.0);
+      if (kCrawlerDebugMode) {
+        final double seconds = (endTime - startTime) / 1000.0;
+        developer.log(
+          'parsed graduation report in ${seconds}s',
+          name: 'nsysu_crawler.graduation',
+        );
+      }
       return ApiSuccess<GraduationReportData?>(graduationReportData);
     } on DioException catch (e) {
       return ApiFailure<GraduationReportData?>(e);

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:typed_data';
 
 import 'package:ap_common_core/ap_common_core.dart';
@@ -82,7 +83,7 @@ class SelcrsHelper {
     index++;
     if (index == 5) index = 1;
     if (kCrawlerDebugMode) {
-      print(selcrsUrl);
+      developer.log('selcrsUrl=$selcrsUrl', name: 'nsysu_crawler.selcrs');
     }
     cookieJar.loadForRequest(Uri.parse('$selcrsUrl'));
   }
