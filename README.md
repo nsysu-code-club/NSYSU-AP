@@ -48,6 +48,56 @@
 - [ap_common_firebase](https://pub.dev/packages/ap_common_firebase)：串接 Firebase 中校務通會使用到的功能
 - [ap_common_plugin](https://pub.dev/packages/ap_common_plugin)：校務通系列的原生套件，目前支援 Android 的 課堂桌面小工具
 
+## 文件索引
+
+第一次接觸專案的人從這裡開始：
+
+| 文件 | 內容 |
+|---|---|
+| [`packages/nsysu_crawler/README.md`](packages/nsysu_crawler/README.md) | 純 Dart 爬蟲 package 的公開 API、bootstrap 範例、測試方式 |
+| [`packages/nsysu_crawler/docs/endpoint-catalog.md`](packages/nsysu_crawler/docs/endpoint-catalog.md) | 所有 NSYSU endpoint 的 method / encoding / 成功 sentinel / 已知坑 |
+
+## 測試
+
+### Flutter app 測試
+
+```bash
+flutter test test/
+```
+
+目前 app 端的 widget test 還少（見 #97），歡迎補。
+
+### 爬蟲測試（純 Dart，不需 flutter）
+
+爬蟲已抽成獨立 package `packages/nsysu_crawler/`，分三層測試：
+
+```bash
+cd packages/nsysu_crawler
+
+# 1. Hermetic — 單元測試 + JSON 序列化 + 工具函式，預設、不打網路
+dart test
+
+# 2. live-anonymous — 連到真站做連線檢查 + 校車（不需帳密）
+dart test -P live-anonymous -r expanded
+
+# 3. live — 含 selcrs / 畢業審查 / 學雜費，需要學生帳密
+NSYSU_USER=B12345678 NSYSU_PASS=xxx dart test -P live -r expanded
+```
+
+完整命令、PII redact、`NSYSU_HTTP_LOG=1` 等選項見 [package README 的 Tests 段](packages/nsysu_crawler/README.md#tests)。
+
+### CI 自動化
+
+| Workflow | 觸發 | 功能 |
+|---|---|---|
+| [`Build Test`](.github/workflows/workflow.yml) | PR / push to master | Android / iOS / Windows 建置驗證 |
+| [`Crawler Tests`](.github/workflows/test.yml) | PR / push to master | 跑 nsysu_crawler 的 hermetic dart test，亞秒級 |
+| [`Crawler Monitor`](.github/workflows/crawler-monitor.yml) | 每天 08:00 TPE + 手動觸發 | 打真站跑 live tests，失敗發 Discord 通知並分類「網站異常」🔴 / 「結構異常」🟡 |
+
+設 secrets：repo Settings → Secrets and variables → Actions
+- `NSYSU_USERNAME` / `NSYSU_PASSWORD`：跑 cron 的測試帳號（**用 alt account，不要日常帳號**）
+- `DISCORD_WEBHOOK_URL`：失敗通知用
+
 ## 爬蟲
 
 邏輯以需要登入做系統區隔，若有功能有問題可向 [中山大學軟體工程組執掌查詢](https://lis.nsysu.edu.tw/p/405-1001-180580,c1173.php) 聯絡
