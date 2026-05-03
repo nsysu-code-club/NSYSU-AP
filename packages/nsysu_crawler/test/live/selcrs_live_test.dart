@@ -8,11 +8,16 @@ import 'package:ap_common_core/ap_common_core.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:test/test.dart';
 
-import '_dio_logging.dart';
+import '_helpers.dart';
 
-/// Hits the real selcrs.nsysu.edu.tw. Excluded by default.
+/// Hits the real selcrs.nsysu.edu.tw with a real student account.
+/// Reads creds from env so they never live in the repo:
 ///
-/// Run with: `NSYSU_USER=... NSYSU_PASS=... dart test -P live -r expanded`
+///     NSYSU_USER=...   # student id
+///     NSYSU_PASS=...   # password
+///     dart test -P live -r expanded
+///
+/// Set `NSYSU_HTTP_LOG=1` to also see every dio request URL.
 void main() {
   final String username = Platform.environment['NSYSU_USER'] ?? '';
   final String password = Platform.environment['NSYSU_PASS'] ?? '';
@@ -23,15 +28,23 @@ void main() {
 
   group('SelcrsHelper', () {
     setUpAll(() async {
-      enableRequestLogging(SelcrsHelper.instance.dio);
-      if (!hasCreds) return;
+      enableHttpLogging(SelcrsHelper.instance.dio);
+      if (!hasCreds) {
+        // ignore: avoid_print
+        print('[live] no credentials in env — selcrs tests will skip');
+        return;
+      }
+      // ignore: avoid_print
+      print('[live] login as ${redact(username)} (score + course endpoints)');
       final ApiResult<GeneralResponse> result = await SelcrsHelper.instance
           .login(username: username, password: password);
-      expect(
-        result,
-        isA<ApiSuccess<GeneralResponse>>(),
-        reason: 'login pre-condition for selcrs flow',
+      // ignore: avoid_print
+      print(
+        '[live]   ← isLogin=${SelcrsHelper.instance.isLogin} '
+        'result=${result.runtimeType}',
       );
+      expect(result, isA<ApiSuccess<GeneralResponse>>(),
+          reason: 'login pre-condition for selcrs flow');
     });
 
     test(
@@ -45,10 +58,17 @@ void main() {
     test(
       'getUserInfo returns a UserInfo whose id matches NSYSU_USER',
       () async {
+        // ignore: avoid_print
+        print('[live] GET /menu4/tools/changedat.asp (user info)');
         final ApiResult<UserInfo> result = await SelcrsHelper.instance
             .getUserInfo();
         expect(result, isA<ApiSuccess<UserInfo>>());
         final UserInfo data = (result as ApiSuccess<UserInfo>).data;
+        // ignore: avoid_print
+        print(
+          '[live]   ← id=${redact(data.id)} name=${redact(data.name)} '
+          'dept=${redact(data.department)} class=${redact(data.className)}',
+        );
         expect(data.id, equals(username));
         expect(data.name, isNotEmpty);
       },
@@ -59,6 +79,8 @@ void main() {
     test(
       'getCourseSemesterData returns at least one semester option',
       () async {
+        // ignore: avoid_print
+        print('[live] POST /menu4/query/stu_slt_up.asp (course semesters)');
         final ApiResult<SemesterData> result = await SelcrsHelper.instance
             .getCourseSemesterData(
               defaultSemester: const Semester(
@@ -69,6 +91,11 @@ void main() {
             );
         expect(result, isA<ApiSuccess<SemesterData>>());
         final SemesterData data = (result as ApiSuccess<SemesterData>).data;
+        // ignore: avoid_print
+        print(
+          '[live]   ← ${data.data.length} semesters; '
+          'first="${data.data.first.text}"',
+        );
         expect(data.data, isNotEmpty);
       },
       skip: skipReason,
@@ -78,6 +105,8 @@ void main() {
     test(
       'getCourseData returns a CourseData for the latest semester',
       () async {
+        // ignore: avoid_print
+        print('[live] resolve latest semester → POST stu_slt_data.asp');
         final ApiResult<SemesterData> semesterResult = await SelcrsHelper
             .instance
             .getCourseSemesterData(
@@ -90,6 +119,11 @@ void main() {
         final SemesterData semesterData =
             (semesterResult as ApiSuccess<SemesterData>).data;
         final Semester semester = semesterData.data.first;
+        // ignore: avoid_print
+        print(
+          '[live]   semester: ${semester.year}/${semester.value} '
+          '"${semester.text}"',
+        );
         final ApiResult<CourseData> result = await SelcrsHelper.instance
             .getCourseData(
               username: username,
@@ -114,6 +148,13 @@ void main() {
               semester: '${semester.year}${semester.value}',
             );
         expect(result, isA<ApiSuccess<CourseData>>());
+        final CourseData data = (result as ApiSuccess<CourseData>).data;
+        // ignore: avoid_print
+        print(
+          '[live]   ← ${data.courses.length} courses, '
+          '${data.timeCodes.length} time codes'
+          '${data.courses.isEmpty ? '' : '; e.g. "${redact(data.courses.first.title)}"'}',
+        );
       },
       skip: skipReason,
       timeout: const Timeout(Duration(seconds: 60)),
@@ -122,11 +163,17 @@ void main() {
     test(
       'getScoreSemesterData returns at least one year/semester option',
       () async {
+        // ignore: avoid_print
+        print('[live] POST /scoreqry/sco_query.asp ACTION=702 (score semesters)');
         final ApiResult<ScoreSemesterData> result = await SelcrsHelper.instance
             .getScoreSemesterData();
         expect(result, isA<ApiSuccess<ScoreSemesterData>>());
         final ScoreSemesterData data =
             (result as ApiSuccess<ScoreSemesterData>).data;
+        // ignore: avoid_print
+        print(
+          '[live]   ← ${data.years.length} years × ${data.semesters.length} semesters',
+        );
         expect(data.years, isNotEmpty);
         expect(data.semesters, isNotEmpty);
       },
@@ -137,17 +184,32 @@ void main() {
     test(
       'getScoreData returns ScoreData for the currently-selected semester',
       () async {
+        // ignore: avoid_print
+        print(
+          '[live] resolve latest score semester → POST sco_query.asp ACTION=804',
+        );
         final ApiResult<ScoreSemesterData> semResult = await SelcrsHelper
             .instance
             .getScoreSemesterData();
         final ScoreSemesterData semData =
             (semResult as ApiSuccess<ScoreSemesterData>).data;
+        // ignore: avoid_print
+        print(
+          '[live]   semester: ${semData.year.value}/${semData.semester.value} '
+          '"${semData.year.text} ${semData.semester.text}"',
+        );
         final ApiResult<ScoreData> result = await SelcrsHelper.instance
             .getScoreData(
               year: semData.year.value,
               semester: semData.semester.value,
             );
         expect(result, isA<ApiSuccess<ScoreData>>());
+        final ScoreData data = (result as ApiSuccess<ScoreData>).data;
+        // ignore: avoid_print
+        print(
+          '[live]   ← ${data.scores.length} score rows '
+          '(individual scores redacted)',
+        );
       },
       skip: skipReason,
       timeout: const Timeout(Duration(seconds: 30)),

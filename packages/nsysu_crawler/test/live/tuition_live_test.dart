@@ -8,7 +8,7 @@ import 'package:ap_common_core/ap_common_core.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:test/test.dart';
 
-import '_dio_logging.dart';
+import '_helpers.dart';
 
 void main() {
   final String username = Platform.environment['NSYSU_USER'] ?? '';
@@ -20,15 +20,23 @@ void main() {
 
   group('TuitionHelper', () {
     setUpAll(() async {
-      enableRequestLogging(TuitionHelper.instance.dio);
-      if (!hasCreds) return;
+      enableHttpLogging(TuitionHelper.instance.dio);
+      if (!hasCreds) {
+        // ignore: avoid_print
+        print('[live] no credentials in env — tuition tests will skip');
+        return;
+      }
+      // ignore: avoid_print
+      print('[live] login as ${redact(username)} (tfstu tuition system)');
       final ApiResult<GeneralResponse> result = await TuitionHelper.instance
           .login(username: username, password: password);
-      expect(
-        result,
-        isA<ApiSuccess<GeneralResponse>>(),
-        reason: 'login pre-condition for tuition flow',
+      // ignore: avoid_print
+      print(
+        '[live]   ← isLogin=${TuitionHelper.instance.isLogin} '
+        'result=${result.runtimeType}',
       );
+      expect(result, isA<ApiSuccess<GeneralResponse>>(),
+          reason: 'login pre-condition for tuition flow');
     });
 
     test(
@@ -42,10 +50,19 @@ void main() {
     test(
       'getData returns a list (possibly empty)',
       () async {
+        // ignore: avoid_print
+        print('[live] GET /tfstu/tfstudata.asp?act=11 (tuition list)');
         final ApiResult<List<TuitionAndFees>> result = await TuitionHelper
             .instance
             .getData();
         expect(result, isA<ApiSuccess<List<TuitionAndFees>>>());
+        final List<TuitionAndFees> data =
+            (result as ApiSuccess<List<TuitionAndFees>>).data;
+        // ignore: avoid_print
+        print(
+          '[live]   ← ${data.length} tuition entries '
+          '(amounts/serials redacted)',
+        );
       },
       skip: skipReason,
       timeout: const Timeout(Duration(seconds: 30)),
