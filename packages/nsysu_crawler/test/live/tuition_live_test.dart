@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 @Tags(<String>['live'])
 @TestOn('vm')
 library;
@@ -22,35 +23,30 @@ void main() {
     setUpAll(() async {
       enableHttpLogging(TuitionHelper.instance.dio);
       if (!hasCreds) {
-        // ignore: avoid_print
         print('[live] no credentials in env — tuition tests will skip');
         return;
       }
-      // ignore: avoid_print
       print('[live] login as ${redact(username)} (tfstu tuition system)');
       final ApiResult<GeneralResponse> result = await TuitionHelper.instance
           .login(username: username, password: password);
-      // ignore: avoid_print
       print(
         '[live]   ← isLogin=${TuitionHelper.instance.isLogin} '
         'result=${result.runtimeType}',
       );
-      expect(result, isA<ApiSuccess<GeneralResponse>>(),
-          reason: 'login pre-condition for tuition flow');
+      expect(
+        result,
+        isA<ApiSuccess<GeneralResponse>>(),
+        reason: 'login pre-condition for tuition flow',
+      );
     });
 
-    test(
-      'login → success and isLogin flag flips',
-      () {
-        expect(TuitionHelper.instance.isLogin, isTrue);
-      },
-      skip: skipReason,
-    );
+    test('login → success and isLogin flag flips', () {
+      expect(TuitionHelper.instance.isLogin, isTrue);
+    }, skip: skipReason);
 
     test(
       'getData returns a list (possibly empty)',
       () async {
-        // ignore: avoid_print
         print('[live] GET /tfstu/tfstudata.asp?act=11 (tuition list)');
         final ApiResult<List<TuitionAndFees>> result = await TuitionHelper
             .instance
@@ -58,7 +54,6 @@ void main() {
         expect(result, isA<ApiSuccess<List<TuitionAndFees>>>());
         final List<TuitionAndFees> data =
             (result as ApiSuccess<List<TuitionAndFees>>).data;
-        // ignore: avoid_print
         print(
           '[live]   ← ${data.length} tuition entries '
           '(amounts/serials redacted)',

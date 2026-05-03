@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 @Tags(<String>['live', 'live-anonymous'])
 @TestOn('vm')
 library;
@@ -45,11 +46,10 @@ void main() {
     test(
       'Health Check ${entry.key} is reachable',
       () async {
-        // ignore: avoid_print
         print('[live] GET ${entry.value}');
-        final Response<dynamic> response =
-            await healthDio.get<dynamic>(entry.value);
-        // ignore: avoid_print
+        final Response<dynamic> response = await healthDio.get<dynamic>(
+          entry.value,
+        );
         print('[live]   ← HTTP ${response.statusCode}');
         expect(
           response.statusCode,

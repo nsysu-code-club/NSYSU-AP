@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 @Tags(<String>['live'])
 @TestOn('vm')
 library;
@@ -30,41 +31,35 @@ void main() {
     setUpAll(() async {
       enableHttpLogging(SelcrsHelper.instance.dio);
       if (!hasCreds) {
-        // ignore: avoid_print
         print('[live] no credentials in env — selcrs tests will skip');
         return;
       }
-      // ignore: avoid_print
       print('[live] login as ${redact(username)} (score + course endpoints)');
       final ApiResult<GeneralResponse> result = await SelcrsHelper.instance
           .login(username: username, password: password);
-      // ignore: avoid_print
       print(
         '[live]   ← isLogin=${SelcrsHelper.instance.isLogin} '
         'result=${result.runtimeType}',
       );
-      expect(result, isA<ApiSuccess<GeneralResponse>>(),
-          reason: 'login pre-condition for selcrs flow');
+      expect(
+        result,
+        isA<ApiSuccess<GeneralResponse>>(),
+        reason: 'login pre-condition for selcrs flow',
+      );
     });
 
-    test(
-      'login → success and isLogin flag flips',
-      () {
-        expect(SelcrsHelper.instance.isLogin, isTrue);
-      },
-      skip: skipReason,
-    );
+    test('login → success and isLogin flag flips', () {
+      expect(SelcrsHelper.instance.isLogin, isTrue);
+    }, skip: skipReason);
 
     test(
       'getUserInfo returns a UserInfo whose id matches NSYSU_USER',
       () async {
-        // ignore: avoid_print
         print('[live] GET /menu4/tools/changedat.asp (user info)');
         final ApiResult<UserInfo> result = await SelcrsHelper.instance
             .getUserInfo();
         expect(result, isA<ApiSuccess<UserInfo>>());
         final UserInfo data = (result as ApiSuccess<UserInfo>).data;
-        // ignore: avoid_print
         print(
           '[live]   ← id=${redact(data.id)} name=${redact(data.name)} '
           'dept=${redact(data.department)} class=${redact(data.className)}',
@@ -79,7 +74,6 @@ void main() {
     test(
       'getCourseSemesterData returns at least one semester option',
       () async {
-        // ignore: avoid_print
         print('[live] POST /menu4/query/stu_slt_up.asp (course semesters)');
         final ApiResult<SemesterData> result = await SelcrsHelper.instance
             .getCourseSemesterData(
@@ -91,7 +85,6 @@ void main() {
             );
         expect(result, isA<ApiSuccess<SemesterData>>());
         final SemesterData data = (result as ApiSuccess<SemesterData>).data;
-        // ignore: avoid_print
         print(
           '[live]   ← ${data.data.length} semesters; '
           'first="${data.data.first.text}"',
@@ -110,7 +103,6 @@ void main() {
         // any data), not the one the student is actually attending.
         // Derive from wall-clock instead.
         final Semester semester = currentAcademicSemester();
-        // ignore: avoid_print
         print(
           '[live] POST stu_slt_data.asp for ${semester.year}/${semester.value} '
           '"${semester.text}" (wall-clock)',
@@ -140,7 +132,6 @@ void main() {
             );
         expect(result, isA<ApiSuccess<CourseData>>());
         final CourseData data = (result as ApiSuccess<CourseData>).data;
-        // ignore: avoid_print
         print(
           '[live]   ← ${data.courses.length} courses, '
           '${data.timeCodes.length} time codes'
@@ -154,14 +145,14 @@ void main() {
     test(
       'getScoreSemesterData returns at least one year/semester option',
       () async {
-        // ignore: avoid_print
-        print('[live] POST /scoreqry/sco_query.asp ACTION=702 (score semesters)');
+        print(
+          '[live] POST /scoreqry/sco_query.asp ACTION=702 (score semesters)',
+        );
         final ApiResult<ScoreSemesterData> result = await SelcrsHelper.instance
             .getScoreSemesterData();
         expect(result, isA<ApiSuccess<ScoreSemesterData>>());
         final ScoreSemesterData data =
             (result as ApiSuccess<ScoreSemesterData>).data;
-        // ignore: avoid_print
         print(
           '[live]   ← ${data.years.length} years × ${data.semesters.length} semesters',
         );
@@ -179,19 +170,14 @@ void main() {
         // `selectYearsIndex` / `selectSemesterIndex` track the most recent
         // graded term, which routinely points at last semester.
         final Semester semester = currentAcademicSemester();
-        // ignore: avoid_print
         print(
           '[live] POST sco_query.asp ACTION=804 for '
           '${semester.year}/${semester.value} "${semester.text}" (wall-clock)',
         );
         final ApiResult<ScoreData> result = await SelcrsHelper.instance
-            .getScoreData(
-              year: semester.year,
-              semester: semester.value,
-            );
+            .getScoreData(year: semester.year, semester: semester.value);
         expect(result, isA<ApiSuccess<ScoreData>>());
         final ScoreData data = (result as ApiSuccess<ScoreData>).data;
-        // ignore: avoid_print
         print(
           '[live]   ← ${data.scores.length} score rows '
           '(individual scores redacted)',

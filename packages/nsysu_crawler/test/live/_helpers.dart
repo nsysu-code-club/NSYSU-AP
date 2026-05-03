@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'dart:io';
 
 import 'package:ap_common_core/ap_common_core.dart';
@@ -58,7 +59,6 @@ String redact(String? value) {
 class _RequestLogInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    // ignore: avoid_print
     print('[http] → ${options.method} ${options.uri}');
     handler.next(options);
   }
@@ -68,7 +68,6 @@ class _RequestLogInterceptor extends Interceptor {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
-    // ignore: avoid_print
     print(
       '[http] ← ${response.statusCode} ${response.requestOptions.uri.path}',
     );
@@ -78,9 +77,7 @@ class _RequestLogInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final int? code = err.response?.statusCode;
-    final String location =
-        err.response?.headers.value('location') ?? '';
-    // ignore: avoid_print
+    final String location = err.response?.headers.value('location') ?? '';
     print(
       '[http] ✗ ${code ?? err.type.name} '
       '${err.requestOptions.uri.path}'
@@ -97,7 +94,6 @@ class _RequestLogInterceptor extends Interceptor {
 /// contain cookies and URL-embedded student ids, so don't paste publicly).
 void enableHttpLogging(Dio dio) {
   if (Platform.environment['NSYSU_HTTP_LOG'] != '1') return;
-  // ignore: avoid_print
   print(
     '[live] !! NSYSU_HTTP_LOG=1: dumping every request URL '
     '(may include student id / cookies — do not paste publicly) !!',
