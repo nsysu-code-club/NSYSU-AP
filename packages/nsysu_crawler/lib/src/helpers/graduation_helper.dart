@@ -6,11 +6,10 @@ import 'package:ap_common_core/ap_common_core.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:html/dom.dart';
-import 'package:html/parser.dart';
 import 'package:nsysu_crawler/src/build_mode.dart';
 import 'package:nsysu_crawler/src/helpers/selcrs_helper.dart';
 import 'package:nsysu_crawler/src/models/graduation_report_data.dart';
+import 'package:nsysu_crawler/src/parsers/html_parser.dart';
 import 'package:nsysu_crawler/src/utils/codec_utils.dart';
 
 class GraduationHelper {
@@ -99,100 +98,9 @@ class GraduationHelper {
           responseType: ResponseType.bytes,
         ),
       );
-      final GraduationReportData graduationReportData = GraduationReportData(
-        missingRequiredCourse: <MissingRequiredCourse>[],
-        generalEducationCourse: <GeneralEducationCourse>[],
-        otherEducationsCourse: <OtherEducationsCourse>[],
-      );
       final String text = const Utf8Decoder().convert(response.data!);
       final int startTime = DateTime.now().millisecondsSinceEpoch;
-      final Document document = parse(text);
-      final List<Element> tableDoc = document.getElementsByTagName('tbody');
-      if (tableDoc.length >= 2) {
-        for (int i = 0; i < tableDoc.length; i++) {
-          final List<Element> trDoc = tableDoc[i].getElementsByTagName('tr');
-          if (i == 4) {
-            if (trDoc.length > 3) {
-              for (int j = 2; j < trDoc.length; j++) {
-                final List<Element> tdDoc = trDoc[j].getElementsByTagName('td');
-                if (tdDoc.length == 3) {
-                  graduationReportData.missingRequiredCourse.add(
-                    MissingRequiredCourse(
-                      name: tdDoc[0].text,
-                      credit: tdDoc[1].text,
-                      description: tdDoc[2].text,
-                    ),
-                  );
-                }
-              }
-            }
-            if (trDoc.isNotEmpty) {
-              graduationReportData.missingRequiredCoursesCredit =
-                  trDoc.last.text.replaceAll(RegExp(r'[※\n]'), '');
-            }
-          } else if (i == 5) {
-            for (int j = 2; j < trDoc.length; j++) {
-              final List<Element> tdDoc = trDoc[j].getElementsByTagName('td');
-              int base = 0;
-              if (tdDoc.length == 7) {
-                base = 1;
-                graduationReportData.generalEducationCourse.add(
-                  GeneralEducationCourse(
-                    type: tdDoc[0].text,
-                    generalEducationItem: <GeneralEducationItem>[],
-                  ),
-                );
-              }
-              if (tdDoc.length > 5) {
-                graduationReportData
-                    .generalEducationCourse.last.generalEducationItem!
-                    .add(
-                  GeneralEducationItem(
-                    name: tdDoc[base + 0].text,
-                    credit: tdDoc[base + 1].text,
-                    check: tdDoc[base + 2].text,
-                    actualCredits: tdDoc[base + 3].text,
-                    totalCredits: tdDoc[base + 4].text,
-                    practiceSituation: tdDoc[base + 5].text,
-                  ),
-                );
-              }
-            }
-            if (graduationReportData.generalEducationCourse.isNotEmpty) {
-              graduationReportData.generalEducationCourseDescription =
-                  trDoc.last.text.replaceAll(RegExp(r'[※\n]'), '');
-            }
-          } else if (i == 6) {
-            if (trDoc.length > 3) {
-              for (int j = 2; j < trDoc.length; j++) {
-                final List<Element> tdDoc = trDoc[j].getElementsByTagName('td');
-                if (tdDoc.length == 3) {
-                  graduationReportData.otherEducationsCourse.add(
-                    OtherEducationsCourse(
-                      name: tdDoc[0].text,
-                      semester: tdDoc[1].text,
-                      credit: tdDoc[2].text,
-                    ),
-                  );
-                }
-              }
-            }
-            if (trDoc.isNotEmpty) {
-              graduationReportData.otherEducationsCourseCredit =
-                  trDoc.last.text.replaceAll(RegExp(r'[※\n]'), '');
-            }
-          }
-        }
-        final List<Element> tdDoc = document.getElementsByTagName('td');
-        for (int i = 0; i < tdDoc.length; i++) {
-          if (tdDoc[i].text.contains('目前累計學分數')) {
-            graduationReportData.totalDescription =
-                tdDoc[i].text.replaceAll(RegExp(r'[※\n]'), '');
-          }
-        }
-      } else {
-        return const ApiSuccess<GraduationReportData?>(null);
-      }
+      final GraduationReportData? data = parseGraduationReport(text);
       final int endTime = DateTime.now().millisecondsSinceEpoch;
       if (kCrawlerDebugMode) {
         final double seconds = (endTime - startTime) / 1000.0;
@@ -201,7 +109,7 @@ class GraduationHelper {
           name: 'nsysu_crawler.graduation',
         );
       }
-      return ApiSuccess<GraduationReportData?>(graduationReportData);
+      return ApiSuccess<GraduationReportData?>(data);
     } on DioException catch (e) {
       return ApiFailure<GraduationReportData?>(e);
     } catch (_) {
