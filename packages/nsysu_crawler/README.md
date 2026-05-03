@@ -21,7 +21,7 @@ import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 | Helper | 主要方法 | 是否需登入 |
 |---|---|---|
-| `SelcrsHelper` | `login`, `getUserInfo`, `getCourseSemesterData`, `getCourseData`, `getScoreSemesterData`, `getScoreData`, `changeMail`, `getUsername` | ✅ |
+| `SelcrsHelper` | `login`, `getUserInfo`, `getCourseSemesterData`, `getCourseData`, `getScoreSemesterData`, `getScoreData`, `changeMail`, `getUsername`,`getPreScoreData` | ✅ |
 | `GraduationHelper` | `login`, `getGraduationReport` | ✅（獨立 session）|
 | `TuitionHelper` | `login`, `getData`, `downloadFdf` | ✅（明文密碼，學校系統限制）|
 | `BusHelper` | `getBusInfoList(languageCode:)`, `getBusTime(languageCode:, busInfo:)` | ❌ |
