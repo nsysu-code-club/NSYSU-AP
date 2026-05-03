@@ -1,0 +1,22 @@
+[
+  {
+    "CarID": "1",
+    "StopName": "西子灣站",
+    "RouteID": 100,
+    "Name": "紅1",
+    "isOpenData": "true",
+    "Departure": "西子灣站",
+    "Destination": "高雄車站",
+    "UpdateTime": "2024-01-01T00:00:00"
+  },
+  {
+    "CarID": "2",
+    "StopName": "中山大學站",
+    "RouteID": 200,
+    "Name": "紅2",
+    "isOpenData": "false",
+    "Departure": "中山大學站",
+    "Destination": "左營站",
+    "UpdateTime": "2024-01-02T00:00:00"
+  }
+]
