@@ -3,8 +3,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/widgets.dart';
-import 'package:nsysu_ap/models/bus_info.dart';
-import 'package:nsysu_ap/models/bus_time.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class BusHelper {
   static const String basePath = 'https://ibus.nsysu.edu.tw';

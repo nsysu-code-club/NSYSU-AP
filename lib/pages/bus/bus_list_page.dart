@@ -4,7 +4,7 @@ import 'package:ap_common/ap_common.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/api/bus_helper.dart';
-import 'package:nsysu_ap/models/bus_info.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/pages/bus/bus_time_page.dart';
 
 class BusListPage extends StatefulWidget {

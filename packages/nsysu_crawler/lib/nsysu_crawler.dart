@@ -1,3 +1,11 @@
 export 'src/abstractions/analytics_logger.dart';
 export 'src/abstractions/crash_reporter.dart';
 export 'src/build_mode.dart';
+export 'src/models/bus_info.dart';
+export 'src/models/bus_time.dart';
+export 'src/models/graduation_report_data.dart';
+export 'src/models/login_response.dart';
+export 'src/models/options.dart';
+export 'src/models/pre_score.dart';
+export 'src/models/score_semester_data.dart';
+export 'src/models/tuition_and_fees.dart';
