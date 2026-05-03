@@ -8,6 +8,8 @@ import 'package:ap_common_core/ap_common_core.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:test/test.dart';
 
+import '_dio_logging.dart';
+
 /// Hits the real selcrs.nsysu.edu.tw. Excluded by default.
 ///
 /// Run with: `NSYSU_USER=... NSYSU_PASS=... dart test -P live -r expanded`
@@ -21,6 +23,7 @@ void main() {
 
   group('SelcrsHelper', () {
     setUpAll(() async {
+      enableRequestLogging(SelcrsHelper.instance.dio);
       if (!hasCreds) return;
       final ApiResult<GeneralResponse> result = await SelcrsHelper.instance
           .login(username: username, password: password);

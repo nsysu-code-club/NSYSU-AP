@@ -8,6 +8,8 @@ import 'package:ap_common_core/ap_common_core.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:test/test.dart';
 
+import '_dio_logging.dart';
+
 void main() {
   final String username = Platform.environment['NSYSU_USER'] ?? '';
   final String password = Platform.environment['NSYSU_PASS'] ?? '';
@@ -18,6 +20,7 @@ void main() {
 
   group('TuitionHelper', () {
     setUpAll(() async {
+      enableRequestLogging(TuitionHelper.instance.dio);
       if (!hasCreds) return;
       final ApiResult<GeneralResponse> result = await TuitionHelper.instance
           .login(username: username, password: password);

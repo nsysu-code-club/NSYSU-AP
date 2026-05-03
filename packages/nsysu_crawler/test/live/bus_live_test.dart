@@ -6,11 +6,17 @@ import 'package:ap_common_core/ap_common_core.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:test/test.dart';
 
+import '_dio_logging.dart';
+
 /// Bus endpoints don't need credentials. Run with:
 ///
 ///     dart test -P live-anonymous -r expanded
 void main() {
   group('BusHelper', () {
+    setUpAll(() {
+      enableRequestLogging(BusHelper.instance.dio);
+    });
+
     test(
       'getBusInfoList(zh) returns a non-empty list of routes',
       () async {

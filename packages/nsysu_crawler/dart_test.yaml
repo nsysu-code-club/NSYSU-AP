@@ -4,9 +4,11 @@ presets:
   live:
     exclude_tags: '__never__'
     include_tags: 'live'
+    reporter: expanded
   live-anonymous:
     exclude_tags: '__never__'
     include_tags: 'live-anonymous'
+    reporter: expanded
 
 tags:
   live:
