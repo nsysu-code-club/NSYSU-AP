@@ -19,6 +19,9 @@ dependencies:
   ap_common_firebase: ^1.0.1-dev.10
   ap_common_plugin: ^1.0.1-dev.9
 
+  nsysu_crawler:
+    path: packages/nsysu_crawler
+
   #official plugin
   http: ^1.2.2
   html: ^0.15.0
