@@ -1,4 +1,4 @@
-import 'package:nsysu_ap/models/options.dart';
+import 'package:nsysu_crawler/src/models/options.dart';
 
 class ScoreSemesterData {
   List<SemesterOptions> years;

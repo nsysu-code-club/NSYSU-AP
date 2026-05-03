@@ -1,8 +1,6 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/api/graduation_helper.dart';
-import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:nsysu_ap/models/graduation_report_data.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
 class GraduationReportPage extends StatefulWidget {

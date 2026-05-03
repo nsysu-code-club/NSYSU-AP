@@ -1,18 +1,21 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
+import 'dart:typed_data';
 
-import 'package:ap_common/ap_common.dart';
-import 'package:ap_common_firebase/ap_common_firebase.dart';
+import 'package:ap_common_core/ap_common_core.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
-import 'package:nsysu_ap/models/options.dart';
-import 'package:nsysu_ap/models/pre_score.dart';
-import 'package:nsysu_ap/models/score_semester_data.dart';
-import 'package:nsysu_ap/utils/big5/big5.dart';
-import 'package:nsysu_ap/utils/utils.dart';
+import 'package:nsysu_crawler/src/abstractions/analytics_logger.dart';
+import 'package:nsysu_crawler/src/abstractions/crash_reporter.dart';
+import 'package:nsysu_crawler/src/build_mode.dart';
+import 'package:nsysu_crawler/src/models/options.dart';
+import 'package:nsysu_crawler/src/models/pre_score.dart';
+import 'package:nsysu_crawler/src/models/score_semester_data.dart';
+import 'package:nsysu_crawler/src/utils/big5/big5.dart';
+import 'package:nsysu_crawler/src/utils/codec_utils.dart';
 import 'package:sprintf/sprintf.dart';
 
 class SelcrsHelper {
@@ -48,6 +51,15 @@ class SelcrsHelper {
 
   int reLoginCount = 0;
 
+  CrashReporter crashReporter = const NoOpCrashReporter();
+  AnalyticsLogger analyticsLogger = const NoOpAnalyticsLogger();
+
+  /// Returns the active locale language code (e.g. `'zh'` or `'en'`).
+  /// Defaults to `'zh'`; host app should override at bootstrap.
+  String Function() languageProvider = _defaultLanguageProvider;
+
+  static String _defaultLanguageProvider() => 'zh';
+
   bool get canReLogin => reLoginCount < 5;
 
   String? get selcrsUrl => sprintf(baseUrl, <int>[index]);
@@ -55,15 +67,7 @@ class SelcrsHelper {
   int index = 1;
   int error = 0;
 
-  String get language {
-    switch (Locale(Intl.defaultLocale!).languageCode) {
-      case 'en':
-        return 'eng';
-      case 'zh':
-      default:
-        return 'cht';
-    }
-  }
+  String get language => languageProvider() == 'en' ? 'eng' : 'cht';
 
   Options get _courseOption => Options(
     responseType: ResponseType.bytes,
@@ -78,8 +82,8 @@ class SelcrsHelper {
   void changeSelcrsUrl() {
     index++;
     if (index == 5) index = 1;
-    if (kDebugMode) {
-      print(selcrsUrl);
+    if (kCrawlerDebugMode) {
+      developer.log('selcrsUrl=$selcrsUrl', name: 'nsysu_crawler.selcrs');
     }
     cookieJar.loadForRequest(Uri.parse('$selcrsUrl'));
   }
@@ -110,7 +114,7 @@ class SelcrsHelper {
     required String username,
     required String password,
   }) async {
-    final String base64md5Password = Utils.base64md5(password);
+    final String base64md5Password = base64md5(password);
     dio.options.contentType = Headers.formUrlEncodedContentType;
     try {
       final Response<Uint8List> scoreResponse = await dio.post(
@@ -219,7 +223,7 @@ class SelcrsHelper {
     } on DioException catch (e) {
       return ApiFailure<UserInfo>(e);
     } on Exception {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<UserInfo>(GeneralResponse.unknownError());
     }
   }
@@ -277,7 +281,7 @@ class SelcrsHelper {
     } on DioException catch (e) {
       return ApiFailure<SemesterData>(e);
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<SemesterData>(GeneralResponse.unknownError());
     }
   }
@@ -326,13 +330,7 @@ class SelcrsHelper {
         final List<String> titles = titleElement.innerHtml.split('<br>');
         String title = titleElement.text;
         if (titles.length >= 2) {
-          switch (Locale(Intl.defaultLocale!).languageCode) {
-            case 'en':
-              title = titles[1];
-            case 'zh':
-            default:
-              title = titles[0];
-          }
+          title = languageProvider() == 'en' ? titles[1] : titles[0];
         }
         final String instructors = tdDoc[8].text;
         final Location location = Location(building: '', room: tdDoc[9].text);
@@ -366,7 +364,7 @@ class SelcrsHelper {
       }
       if (trDoc.isNotEmpty) {
         final int endTime = DateTime.now().millisecondsSinceEpoch;
-        AnalyticsUtil.instance.logTimeEvent(
+        analyticsLogger.logTimeEvent(
           'course_html_parser',
           (endTime - startTime) / 1000.0,
         );
@@ -379,7 +377,7 @@ class SelcrsHelper {
     } on DioException catch (e) {
       return ApiFailure<CourseData>(e);
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<CourseData>(GeneralResponse.unknownError());
     }
   }
@@ -446,7 +444,7 @@ class SelcrsHelper {
       }
       return ApiFailure<ScoreSemesterData>(e);
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<ScoreSemesterData>(GeneralResponse.unknownError());
     }
   }
@@ -529,7 +527,7 @@ class SelcrsHelper {
           }
         }
         final int endTime = DateTime.now().millisecondsSinceEpoch;
-        AnalyticsUtil.instance.logTimeEvent(
+        analyticsLogger.logTimeEvent(
           'score_html_parser',
           (endTime - startTime) / 1000.0,
         );
@@ -568,7 +566,7 @@ class SelcrsHelper {
       }
       return ApiFailure<ScoreData>(e);
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<ScoreData>(GeneralResponse.unknownError());
     }
   }
@@ -611,7 +609,7 @@ class SelcrsHelper {
   }) async {
     final String url = '$selcrsUrl/newstu/stu_new.asp?action=16';
     try {
-      final String encoded = Utils.uriEncodeBig5(name);
+      final String encoded = uriEncodeBig5(name);
       final Response<Uint8List> response = await dio.post(
         url,
         options: Options(
@@ -631,7 +629,7 @@ class SelcrsHelper {
     } on DioException catch (e) {
       return ApiFailure<String>(e);
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<String>(GeneralResponse.unknownError());
     }
   }
@@ -657,15 +655,13 @@ class SelcrsHelper {
     } on DioException catch (e) {
       return ApiFailure<UserInfo>(e);
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<UserInfo>(GeneralResponse.unknownError());
     }
   }
 
   void _dumpError(String feature, String text) {
     reLoginCount = 0;
-    if (FirebaseCrashlyticsUtils.isSupported) {
-      FirebaseCrashlytics.instance.setCustomKey('crawler_error_$feature', text);
-    }
+    crashReporter.setCustomKey('crawler_error_$feature', text);
   }
 }

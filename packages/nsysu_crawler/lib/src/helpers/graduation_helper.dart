@@ -1,14 +1,17 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
+import 'dart:typed_data';
 
-import 'package:ap_common/ap_common.dart';
+import 'package:ap_common_core/ap_common_core.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-import 'package:nsysu_ap/api/selcrs_helper.dart';
-import 'package:nsysu_ap/models/graduation_report_data.dart';
-import 'package:nsysu_ap/utils/utils.dart';
+import 'package:nsysu_crawler/src/build_mode.dart';
+import 'package:nsysu_crawler/src/helpers/selcrs_helper.dart';
+import 'package:nsysu_crawler/src/models/graduation_report_data.dart';
+import 'package:nsysu_crawler/src/utils/codec_utils.dart';
 
 class GraduationHelper {
   static GraduationHelper? _instance;
@@ -47,7 +50,7 @@ class GraduationHelper {
     required String password,
   }) async {
     try {
-      final String base64md5Password = Utils.base64md5(password);
+      final String base64md5Password = base64md5(password);
       final Response<Uint8List> response = await dio.post<Uint8List>(
         '${SelcrsHelper.instance.selcrsUrl}/gadchk/gad_chk_login_prs_sso2.asp',
         options: Options(
@@ -78,7 +81,7 @@ class GraduationHelper {
         return ApiFailure<GeneralResponse>(e);
       }
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<GeneralResponse>(GeneralResponse.unknownError());
     }
   }
@@ -187,19 +190,22 @@ class GraduationHelper {
                 tdDoc[i].text.replaceAll(RegExp(r'[※\n]'), '');
           }
         }
-        if (kDebugMode) {
-          print(DateTime.now());
-        }
       } else {
         return const ApiSuccess<GraduationReportData?>(null);
       }
       final int endTime = DateTime.now().millisecondsSinceEpoch;
-      debugPrint(((endTime - startTime) / 1000.0).toString());
+      if (kCrawlerDebugMode) {
+        final double seconds = (endTime - startTime) / 1000.0;
+        developer.log(
+          'parsed graduation report in ${seconds}s',
+          name: 'nsysu_crawler.graduation',
+        );
+      }
       return ApiSuccess<GraduationReportData?>(graduationReportData);
     } on DioException catch (e) {
       return ApiFailure<GraduationReportData?>(e);
     } catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<GraduationReportData?>(GeneralResponse.unknownError());
     }
   }

@@ -7,6 +7,7 @@ analyzer:
     - lib/firebase_options.dart
     - lib/l10n/*.dart
     - lib/**/*.g.dart
+    - packages/**
 
 linter:
   rules:

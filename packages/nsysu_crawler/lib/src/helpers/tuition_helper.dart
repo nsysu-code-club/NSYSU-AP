@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:ap_common/ap_common.dart';
+import 'package:ap_common_core/ap_common_core.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-import 'package:nsysu_ap/models/tuition_and_fees.dart';
+import 'package:nsysu_crawler/src/build_mode.dart';
+import 'package:nsysu_crawler/src/models/tuition_and_fees.dart';
 
 class TuitionHelper {
   static const String basePATH = 'https://tfstu.nsysu.edu.tw';
@@ -71,7 +72,7 @@ class TuitionHelper {
         return ApiFailure<GeneralResponse>(e);
       }
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<GeneralResponse>(GeneralResponse.unknownError());
     }
   }
@@ -133,7 +134,7 @@ class TuitionHelper {
     } on DioException catch (e) {
       return ApiFailure<List<TuitionAndFees>>(e);
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<List<TuitionAndFees>>(GeneralResponse.unknownError());
     }
   }
@@ -150,7 +151,7 @@ class TuitionHelper {
     } on DioException catch (e) {
       return ApiFailure<Uint8List?>(e);
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<Uint8List?>(GeneralResponse.unknownError());
     }
   }

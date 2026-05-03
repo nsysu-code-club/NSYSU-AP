@@ -1,10 +1,10 @@
-import 'package:ap_common/ap_common.dart';
+import 'package:ap_common_core/ap_common_core.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:flutter/widgets.dart';
-import 'package:nsysu_ap/models/bus_info.dart';
-import 'package:nsysu_ap/models/bus_time.dart';
+import 'package:nsysu_crawler/src/build_mode.dart';
+import 'package:nsysu_crawler/src/models/bus_info.dart';
+import 'package:nsysu_crawler/src/models/bus_time.dart';
 
 class BusHelper {
   static const String basePath = 'https://ibus.nsysu.edu.tw';
@@ -31,15 +31,9 @@ class BusHelper {
   }
 
   Future<ApiResult<List<BusInfo>?>> getBusInfoList({
-    required Locale locale,
+    required String languageCode,
   }) async {
     try {
-      String languageCode;
-      if (locale.languageCode.contains('zh')) {
-        languageCode = 'zh';
-      } else {
-        languageCode = 'en';
-      }
       final String path =
           'https://nsysu-code-club.github.io/nsysu-bus/bus_info_data_$languageCode.json';
       final Response<String> response = await dio.get<String>(
@@ -57,22 +51,16 @@ class BusHelper {
     } on DioException catch (e) {
       return ApiFailure<List<BusInfo>?>(e);
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<List<BusInfo>?>(GeneralResponse.unknownError());
     }
   }
 
   Future<ApiResult<List<BusTime>?>> getBusTime({
-    required Locale locale,
+    required String languageCode,
     required BusInfo busInfo,
   }) async {
     try {
-      String languageCode;
-      if (locale.languageCode.contains('zh')) {
-        languageCode = 'zh';
-      } else {
-        languageCode = 'en';
-      }
       final Response<String> response = await dio.post<String>(
         '$basePath/API/RoutePathStop.aspx?${DateTime.now().millisecondsSinceEpoch}',
         options: Options(
@@ -95,7 +83,7 @@ class BusHelper {
     } on DioException catch (e) {
       return ApiFailure<List<BusTime>?>(e);
     } on Exception catch (_) {
-      if (kDebugMode) rethrow;
+      if (kCrawlerDebugMode) rethrow;
       return ApiError<List<BusTime>?>(GeneralResponse.unknownError());
     }
   }
