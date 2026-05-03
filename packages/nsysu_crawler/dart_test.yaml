@@ -1,10 +1,14 @@
-exclude_tags: 'live'
+exclude_tags: 'live || live-anonymous'
 
 presets:
   live:
     exclude_tags: '__never__'
     include_tags: 'live'
+  live-anonymous:
+    exclude_tags: '__never__'
+    include_tags: 'live-anonymous'
 
 tags:
   live:
+  live-anonymous:
   __never__:
