@@ -1,0 +1,10 @@
+exclude_tags: 'live'
+
+presets:
+  live:
+    exclude_tags: '__never__'
+    include_tags: 'live'
+
+tags:
+  live:
+  __never__:
