@@ -1,0 +1,20 @@
+[
+  {
+    "RouteID": 100,
+    "StopID": "1001",
+    "Name": "西子灣站",
+    "ArrivedTime": "08:30",
+    "RealArrivedTime": "08:32",
+    "isGoBack": "false",
+    "SeqNo": 1
+  },
+  {
+    "RouteID": 100,
+    "StopID": "1002",
+    "Name": "鼓山站",
+    "ArrivedTime": "08:35",
+    "RealArrivedTime": "08:37",
+    "isGoBack": "false",
+    "SeqNo": 2
+  }
+]

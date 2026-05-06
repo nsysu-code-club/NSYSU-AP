@@ -4,7 +4,7 @@ import 'package:ap_common/ap_common.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:nsysu_ap/api/selcrs_helper.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:sprintf/sprintf.dart';
 

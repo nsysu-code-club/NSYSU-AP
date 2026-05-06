@@ -61,3 +61,8 @@ pubspec_overrides.yaml
 
 # Android Builds Related
 .cxx/
+
+# Local env files (NSYSU creds for live tests, etc.)
+.envrc
+.env
+.env.local

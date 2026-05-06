@@ -12,6 +12,7 @@ import 'package:nsysu_ap/app.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/config/sdk_constants.dart';
 import 'package:nsysu_ap/firebase_options.dart';
+import 'package:nsysu_ap/utils/crawler_bootstrap.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -83,6 +84,9 @@ Future<void> main() async {
       return true;
     };
   }
+
+  bootstrapCrawler();
+
   runApp(MyApp());
 }
 

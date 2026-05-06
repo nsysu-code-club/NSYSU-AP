@@ -1,0 +1,44 @@
+name: Crawler Tests
+
+# Hermetic dart tests for the nsysu_crawler package — runs on every PR
+# and on master pushes. Pure Dart, no flutter required, sub-second
+# runtime; cheap protection against parser regressions.
+#
+# Live integration tests (those tagged `live` / `live-anonymous`) are NOT
+# run here — the daily `crawler-monitor.yml` cron handles those.
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    name: nsysu_crawler hermetic tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Pub get
+        working-directory: packages/nsysu_crawler
+        run: dart pub get
+
+      - name: Analyze
+        working-directory: packages/nsysu_crawler
+        # Default behaviour: fails on errors and warnings; info-level lints
+        # do not fail the build.
+        run: dart analyze
+
+      - name: Test
+        working-directory: packages/nsysu_crawler
+        run: dart test -r expanded
