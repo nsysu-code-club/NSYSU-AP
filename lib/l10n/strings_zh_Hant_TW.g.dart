@@ -110,6 +110,9 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '學年度'
 	String get courseYear => '學年度';
 
+	/// zh-Hant-TW: '選課小助手'
+	String get courseSelector => '選課小助手';
+
 	/// zh-Hant-TW: '碩專署'
 	String get continuingSummerEducationProgram => '碩專署';
 
@@ -229,6 +232,7 @@ extension on AppLocalizations {
 			'tuitionAndFeesPageHint' => '點擊可查看收據或繳費單',
 			'tuitionAndFeesPageDialogTitle' => '請選擇匯出方式',
 			'courseYear' => '學年度',
+			'courseSelector' => '選課系統',
 			'continuingSummerEducationProgram' => '碩專署',
 			'fallSemester' => '上學期',
 			'springSemester' => '下學期',

@@ -62,6 +62,7 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get tuitionAndFeesPageHint => 'Click to view the receipt or fees bill';
 	@override String get tuitionAndFeesPageDialogTitle => 'Pick method of export.';
 	@override String get courseYear => 'Year';
+	@override String get courseSelector => 'Course Selector Helper';
 	@override String get continuingSummerEducationProgram => 'Continuing Summer Education Program';
 	@override String get fallSemester => 'Fall Semester';
 	@override String get springSemester => 'Spring Semester';
@@ -124,6 +125,7 @@ extension on AppLocalizationsEn {
 			'tuitionAndFeesPageHint' => 'Click to view the receipt or fees bill',
 			'tuitionAndFeesPageDialogTitle' => 'Pick method of export.',
 			'courseYear' => 'Year',
+			'courseSelector' => 'Course Selector',
 			'continuingSummerEducationProgram' => 'Continuing Summer Education Program',
 			'fallSemester' => 'Fall Semester',
 			'springSemester' => 'Spring Semester',
