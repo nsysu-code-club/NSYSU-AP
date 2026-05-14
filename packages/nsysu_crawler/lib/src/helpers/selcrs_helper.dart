@@ -127,8 +127,22 @@ class SelcrsHelper {
         },
       );
       final String text = const Utf8Decoder().convert(scoreResponse.data!);
-      if (text.contains('資料錯誤請重新輸入')) {
-        return ApiError<GeneralResponse>(
+      if (text.contains('學生身分確認')) {
+        if (error < 5) {
+          await cookieJar.delete(Uri.parse('$selcrsUrl/scoreqry/sco_query_prs_sso2.asp'));
+          await Future.delayed(const Duration(seconds: 3));
+          error++;
+          return login(
+            username: username,
+            password: password,
+          );
+        }else {
+          return const ApiError<GeneralResponse>(
+            GeneralResponse(statusCode: 400, message: 'score error'),
+          );
+        }
+      }else if (text.contains('資料錯誤請重新輸入')) {
+        return const ApiError<GeneralResponse>(
           GeneralResponse(statusCode: 400, message: 'score error'),
         );
       } else {
@@ -157,11 +171,11 @@ class SelcrsHelper {
       );
       final String text = const Utf8Decoder().convert(courseResponse.data!);
       if (text.contains('學號碼密碼不符')) {
-        return ApiError<GeneralResponse>(
+        return const ApiError<GeneralResponse>(
           GeneralResponse(statusCode: 400, message: 'course error'),
         );
       } else if (text.contains('請先填寫')) {
-        return ApiError<GeneralResponse>(
+        return const ApiError<GeneralResponse>(
           GeneralResponse(statusCode: 401, message: 'need to fill out form'),
         );
       } else {
