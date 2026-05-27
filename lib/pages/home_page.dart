@@ -467,7 +467,33 @@ class HomePageState extends State<HomePage> {
         DrawerSubMenuItem(
           icon: ApIcon.exitToApp,
           title: app.courseSelector,
-          onTap: () => PlatformUtil.instance.launchUrl(Constants.courseSelectorUrl),
+          onTap: () async {
+            final Uri uri = Uri.parse(Constants.courseSelectorUrl);
+            if (uri.scheme == 'https') {
+              final bool? shouldLaunch = await showDialog<bool>(
+                context: context,
+                builder: (BuildContext dialogContext) => AlertDialog(
+                  title: const Text('開啟外部網站'),
+                  content: const Text('將使用瀏覽器開啟課程選課小助手，是否繼續？'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                      child: const Text('取消'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(true),
+                      child: const Text('繼續'),
+                    ),
+                  ],
+                ),
+              );
+              if (!mounted || shouldLaunch != true) return;
+              PlatformUtil.instance.launchUrl(uri.toString());
+            } else {
+              UiUtil.instance.showToast(context, '不安全的連結，請確認網址是否正確');
+              debugPrint('Attempted to launch an insecure URL: ${Constants.courseSelectorUrl}');
+            }
+          },
         ),
       ],
     );
