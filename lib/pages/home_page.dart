@@ -342,9 +342,9 @@ class HomePageState extends State<HomePage> {
       child: ApDrawer(
         userInfo: userInfo,
         displayPicture: PreferenceUtil.instance.getBool(
-        Constants.prefDisplayPicture,
-        true,
-      ),
+          Constants.prefDisplayPicture,
+          true,
+        ),
       onTapHeader: () {
         if (isLogin) {
           if (userInfo != null) {

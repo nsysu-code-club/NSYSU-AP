@@ -125,7 +125,7 @@ extension on AppLocalizationsEn {
 			'tuitionAndFeesPageHint' => 'Click to view the receipt or fees bill',
 			'tuitionAndFeesPageDialogTitle' => 'Pick method of export.',
 			'courseYear' => 'Year',
-			'courseSelector' => 'Course Selector',
+			'courseSelector' => 'Course Selector Helper',
 			'continuingSummerEducationProgram' => 'Continuing Summer Education Program',
 			'fallSemester' => 'Fall Semester',
 			'springSemester' => 'Spring Semester',
