@@ -16,8 +16,6 @@ class Constants {
   static const String defaultSemester = '1';
 
   static const String courseSelectorUrl = 'https://nsysu-opendev.github.io/NSYSUCourseSelectorV6/';
-  static const String admissionGuideUrl =
-      'https://leslietsai1.wixsite.com/nsysufreshman';
 
   static const String prefFirstEnterApp = 'pref_first_enter_app';
   static const String prefCurrentVersion = 'pref_current_version';

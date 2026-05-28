@@ -15,11 +15,11 @@ class SchoolInfoPage extends StatefulWidget {
 class SchoolInfoPageState extends State<SchoolInfoPage>
     with SingleTickerProviderStateMixin {
   final List<PhoneModel> phoneModelList = <PhoneModel>[
-    PhoneModel('總機', '(07)5252-000#2350'),
-    PhoneModel('校安專線', ''),
-    PhoneModel('生輔組', '0911-705-999'),
-    PhoneModel('值班室1', '(07)525-6666#6666'),
-    PhoneModel('值班室2', '(07)525-6666#6667'),
+    const PhoneModel('總機', '(07)5252-000#2350'),
+    const PhoneModel('校安專線', ''),
+    const PhoneModel('生輔組', '0911-705-999'),
+    const PhoneModel('值班室1', '(07)525-6666#6666'),
+    const PhoneModel('值班室2', '(07)525-6666#6667'),
   ];
 
   NotificationState notificationState = NotificationState.loading;
