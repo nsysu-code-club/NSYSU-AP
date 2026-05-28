@@ -473,16 +473,19 @@ class HomePageState extends State<HomePage> {
               final bool? shouldLaunch = await showDialog<bool>(
                 context: context,
                 builder: (BuildContext dialogContext) => AlertDialog(
-                  title: const Text('開啟外部網站'),
-                  content: const Text('將使用瀏覽器開啟課程選課小助手，是否繼續？'),
+                  title: Text(app.openingBrowserTitle),
+                  content: Text(
+                    '${app.openingBrowserContent}:\n'
+                    '${Constants.courseSelectorUrl}'
+                    ),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () => Navigator.of(dialogContext).pop(false),
-                      child: const Text('取消'),
+                      child: Text(app.optionCancel),
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(dialogContext).pop(true),
-                      child: const Text('繼續'),
+                      child: Text(app.optionComfirm),
                     ),
                   ],
                 ),
@@ -490,7 +493,7 @@ class HomePageState extends State<HomePage> {
               if (!mounted || shouldLaunch != true) return;
               PlatformUtil.instance.launchUrl(uri.toString());
             } else {
-              UiUtil.instance.showToast(context, '不安全的連結，請確認網址是否正確');
+              UiUtil.instance.showToast(context, app.visitingUnSafeLink);
               debugPrint('Attempted to launch an insecure URL: ${Constants.courseSelectorUrl}');
             }
           },

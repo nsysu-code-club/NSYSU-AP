@@ -51,5 +51,10 @@
   "notLocationPermissionHint": "Not Location Permission",
   "locationNotNearSchool": "Your location not in school, can't publish.",
   "unknownTime": "Unknown Time",
-  "success": "Success"
+  "success": "Success",
+  "optionComfirm": "Confirm",
+  "optionCancel": "Cancel",
+  "openingBrowserContent": "This will open an external website in your browser. Continue?",
+  "openingBrowserTitle": "Open External Website",
+  "visitingUnSafeLink": "Unsafe link. Please confirm the URL is correct."
 }

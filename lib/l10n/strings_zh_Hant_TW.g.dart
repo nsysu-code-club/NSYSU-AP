@@ -199,6 +199,21 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 
 	/// zh-Hant-TW: '成功'
 	String get success => '成功';
+
+	/// zh-Hant-TW: '確認'
+	String get optionComfirm => '確認';
+
+	/// zh-Hant-TW: '取消'
+	String get optionCancel => '取消';
+
+	/// zh-Hant-TW: '將使用瀏覽器開啟外部網站，是否繼續？'
+	String get openingBrowserContent => '將使用瀏覽器開啟外部網站，是否繼續？';
+
+	/// zh-Hant-TW: '開啟外部網站'
+	String get openingBrowserTitle => '開啟外部網站';
+
+	/// zh-Hant-TW: '不安全的連結，請確認網址是否正確'
+	String get visitingUnSafeLink => '不安全的連結，請確認網址是否正確';
 }
 
 /// The flat map containing all translations for locale <zh-Hant-TW>.
@@ -262,6 +277,11 @@ extension on AppLocalizations {
 			'locationNotNearSchool' => '您的位置尚未在學校附近，無法發布',
 			'unknownTime' => '未知時間',
 			'success' => '成功',
+			'optionComfirm' => '確認',
+			'optionCancel' => '取消',
+			'openingBrowserContent' => '將使用瀏覽器開啟外部網站，是否繼續？',
+			'openingBrowserTitle' => '開啟外部網站',
+			'visitingUnSafeLink' => '不安全的連結，請確認網址是否正確',
 			_ => null,
 		};
 	}

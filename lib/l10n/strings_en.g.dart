@@ -92,6 +92,11 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get locationNotNearSchool => 'Your location not in school, can\'t publish.';
 	@override String get unknownTime => 'Unknown Time';
 	@override String get success => 'Success';
+	@override String get optionComfirm => 'Confirm';
+	@override String get optionCancel => 'Cancel';
+	@override String get openingBrowserContent => 'This will open an external website in your browser. Continue?';
+	@override String get openingBrowserTitle => 'Open External Website';
+	@override String get visitingUnSafeLink => 'Unsafe link. Please confirm the URL is correct.';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -155,6 +160,11 @@ extension on AppLocalizationsEn {
 			'locationNotNearSchool' => 'Your location not in school, can\'t publish.',
 			'unknownTime' => 'Unknown Time',
 			'success' => 'Success',
+			'optionComfirm' => 'Confirm',
+			'optionCancel' => 'Cancel',
+			'openingBrowserContent' => 'This will open an external website in your browser. Continue?',
+			'openingBrowserTitle' => 'Open External Website',
+			'visitingUnSafeLink' => 'Unsafe link. Please confirm the URL is correct.',
 			_ => null,
 		};
 	}
