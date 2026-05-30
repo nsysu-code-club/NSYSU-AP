@@ -113,8 +113,8 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '選課小助手'
 	String get courseSelector => '選課小助手';
 
-	/// zh-Hant-TW: '碩專署'
-	String get continuingSummerEducationProgram => '碩專署';
+	/// zh-Hant-TW: '碩專暑'
+	String get continuingSummerEducationProgram => '碩專暑';
 
 	/// zh-Hant-TW: '上學期'
 	String get fallSemester => '上學期';
@@ -124,6 +124,18 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 
 	/// zh-Hant-TW: '暑假'
 	String get summerSemester => '暑假';
+
+	/// zh-Hant-TW: '碩專暑'
+	String get continuingSummerEducationProgramShort => '碩專暑';
+
+	/// zh-Hant-TW: '上'
+	String get fallSemesterShort => '上';
+
+	/// zh-Hant-TW: '下'
+	String get springSemesterShort => '下';
+
+	/// zh-Hant-TW: '暑'
+	String get summerSemesterShort => '暑';
 
 	/// zh-Hant-TW: 'Oops！查無任何學雜費資料哦～😋'
 	String get tuitionAndFeesEmpty => 'Oops！查無任何學雜費資料哦～😋';
@@ -248,10 +260,14 @@ extension on AppLocalizations {
 			'tuitionAndFeesPageDialogTitle' => '請選擇匯出方式',
 			'courseYear' => '學年度',
 			'courseSelector' => '選課小助手',
-			'continuingSummerEducationProgram' => '碩專署',
+			'continuingSummerEducationProgram' => '碩專暑',
 			'fallSemester' => '上學期',
 			'springSemester' => '下學期',
 			'summerSemester' => '暑假',
+			'continuingSummerEducationProgramShort' => '碩專暑',
+			'fallSemesterShort' => '上',
+			'springSemesterShort' => '下',
+			'summerSemesterShort' => '暑',
 			'tuitionAndFeesEmpty' => 'Oops！查無任何學雜費資料哦～😋',
 			'hasPreScoreHint' => '黃字為授課老師開放成績查詢 並非最終成績',
 			'pleaseConfirmForm' => '請先填寫確認表單再進行登入\n若填寫完畢仍無法登入 點擊右上角透過其他瀏覽器填寫(ex. Chrome)',
