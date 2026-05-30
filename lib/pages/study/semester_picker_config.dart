@@ -2,7 +2,7 @@ import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 
-SemesterUIConfig get semesterPickerUiConfig => SemesterUIConfig(
+final SemesterUIConfig semesterPickerUiConfig = SemesterUIConfig(
   getName: (String value) {
     switch (value) {
       case '0':
