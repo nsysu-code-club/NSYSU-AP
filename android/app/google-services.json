@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "183269888565",
+    "firebase_url": "https://nsysu-ap.firebaseio.com",
+    "project_id": "nsysu-ap",
+    "storage_bucket": "nsysu-ap.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183269888565:android:b4a03bfcd6375025",
+        "android_client_info": {
+          "package_name": "com.nsysu.ap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183269888565-dvh4kqtcmgp33g6h33mo3fktei25ckkj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nsysu.ap",
+            "certificate_hash": "90dba8e0db0463bc01fe43e4383180880ffbda87"
+          }
+        },
+        {
+          "client_id": "183269888565-m570oslr25attb46hrolhrjhrhm4t2th.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nsysu.ap",
+            "certificate_hash": "20eb3f900c2eeb218019a63cc2d8f6e6ff984c05"
+          }
+        },
+        {
+          "client_id": "183269888565-mmvdqr0rjbbsnr766bdlqcei1popc8g6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOmXUc5FHsF21XdAnAp638LWSs9eBy4OM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183269888565-mmvdqr0rjbbsnr766bdlqcei1popc8g6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "183269888565-70pb0kkietf205lp5h45eicn50u0u641.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nsysu.ap"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
