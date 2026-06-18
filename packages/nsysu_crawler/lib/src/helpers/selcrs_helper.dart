@@ -361,7 +361,9 @@ class SelcrsHelper {
       if (searchPreScore) {
         for (int i = 0; i < list.length; i++) {
           final Score score = list[i];
-          if (score.finalScore == null || (score.finalScore ?? '') == '--') {
+          if (score.finalScore == null ||
+              (score.finalScore ?? '') == '--' ||
+              (score.finalScore ?? '') == '') {
             final PreScore? preScore = await getPreScoreData(
               score.courseNumber,
             );
