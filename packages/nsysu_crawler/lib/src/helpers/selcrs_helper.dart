@@ -65,7 +65,6 @@ class SelcrsHelper {
   String? get selcrsUrl => sprintf(baseUrl, <int>[index]);
 
   int index = 1;
-  int error = 0;
 
   String get language => languageProvider() == 'en' ? 'eng' : 'cht';
 
@@ -97,7 +96,6 @@ class SelcrsHelper {
     username = '';
     password = '';
     index = 1;
-    error = 0;
     isLogin = false;
     cookieJar = CookieJar();
     initCookiesJar();
@@ -113,6 +111,7 @@ class SelcrsHelper {
   Future<ApiResult<GeneralResponse>> login({
     required String username,
     required String password,
+    int errorCount = 0,
   }) async {
     final String base64md5Password = base64md5(password);
     dio.options.contentType = Headers.formUrlEncodedContentType;
@@ -127,8 +126,26 @@ class SelcrsHelper {
         },
       );
       final String text = const Utf8Decoder().convert(scoreResponse.data!);
-      if (text.contains('資料錯誤請重新輸入')) {
-        return ApiError<GeneralResponse>(
+      if (text.contains('學生身分確認')) {
+        if (errorCount < 5) {
+          await cookieJar.delete(
+            Uri.parse('$selcrsUrl/scoreqry/sco_query_prs_sso2.asp'),
+          );
+          await Future.delayed(
+            Duration(seconds: (1 << errorCount).clamp(1, 4)),
+          );
+          return login(
+            username: username,
+            password: password,
+            errorCount: errorCount + 1,
+          );
+        } else {
+          return const ApiError<GeneralResponse>(
+            GeneralResponse(statusCode: 400, message: 'score error'),
+          );
+        }
+      } else if (text.contains('資料錯誤請重新輸入')) {
+        return const ApiError<GeneralResponse>(
           GeneralResponse(statusCode: 400, message: 'score error'),
         );
       } else {
@@ -138,12 +155,15 @@ class SelcrsHelper {
       if (e.type == DioExceptionType.badResponse &&
           e.response!.statusCode == 302) {
       } else {
-        error++;
-        if (error > 5) {
+        if (errorCount >= 5) {
           return ApiFailure<GeneralResponse>(e);
         } else {
           changeSelcrsUrl();
-          return login(username: username, password: password);
+          return login(
+            username: username,
+            password: password,
+            errorCount: errorCount + 1,
+          );
         }
       }
     }
@@ -157,11 +177,11 @@ class SelcrsHelper {
       );
       final String text = const Utf8Decoder().convert(courseResponse.data!);
       if (text.contains('學號碼密碼不符')) {
-        return ApiError<GeneralResponse>(
+        return const ApiError<GeneralResponse>(
           GeneralResponse(statusCode: 400, message: 'course error'),
         );
       } else if (text.contains('請先填寫')) {
-        return ApiError<GeneralResponse>(
+        return const ApiError<GeneralResponse>(
           GeneralResponse(statusCode: 401, message: 'need to fill out form'),
         );
       } else {
@@ -176,12 +196,15 @@ class SelcrsHelper {
         isLogin = true;
         return ApiSuccess<GeneralResponse>(GeneralResponse.success());
       } else {
-        error++;
-        if (error > 5) {
+        if (errorCount >= 5) {
           return ApiFailure<GeneralResponse>(e);
         } else {
           changeSelcrsUrl();
-          return login(username: username, password: password);
+          return login(
+            username: username,
+            password: password,
+            errorCount: errorCount + 1,
+          );
         }
       }
     }
