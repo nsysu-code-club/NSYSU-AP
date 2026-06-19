@@ -22,10 +22,15 @@
   "tuitionAndFeesPageHint": "Click to view the receipt or fees bill",
   "tuitionAndFeesPageDialogTitle": "Pick method of export.",
   "courseYear": "Year",
+  "courseSelector": "Course Selector Helper",
   "continuingSummerEducationProgram": "Continuing Summer Education Program",
   "fallSemester": "Fall Semester",
   "springSemester": "Spring Semester",
   "summerSemester": "Summer Semester",
+  "continuingSummerEducationProgramShort": "Continuing Summer",
+  "fallSemesterShort": "Fall",
+  "springSemesterShort": "Spring",
+  "summerSemesterShort": "Summer",
   "tuitionAndFeesEmpty": "Oops！No tuition and fees data～😋",
   "hasPreScoreHint": "Yellow Text not final score, proved by instructor.",
   "pleaseConfirmForm": "Please fill out confirm form before login.\nIf you still can't log in after filling in, please click on the upper right corner to fill in through other browsers (ex. Chrome)",
@@ -50,5 +55,10 @@
   "notLocationPermissionHint": "Not Location Permission",
   "locationNotNearSchool": "Your location not in school, can't publish.",
   "unknownTime": "Unknown Time",
-  "success": "Success"
+  "success": "Success",
+  "optionComfirm": "Confirm",
+  "optionCancel": "Cancel",
+  "openingBrowserContent": "This will open an external website in your browser. Continue?",
+  "openingBrowserTitle": "Open External Website",
+  "visitingUnSafeLink": "Unsafe link. Please confirm the URL is correct."
 }

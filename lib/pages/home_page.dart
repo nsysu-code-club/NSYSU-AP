@@ -12,7 +12,6 @@ import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/bus/bus_list_page.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
-import 'package:nsysu_ap/pages/guide/admission_guide_page.dart';
 import 'package:nsysu_ap/pages/guide/school_map_page.dart';
 import 'package:nsysu_ap/pages/info/shcool_info_page.dart';
 import 'package:nsysu_ap/pages/login/login_page.dart';
@@ -336,12 +335,16 @@ class HomePageState extends State<HomePage> {
   Widget _buildDrawer() {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    return ApDrawer(
-      userInfo: userInfo,
-      displayPicture: PreferenceUtil.instance.getBool(
-        Constants.prefDisplayPicture,
-        true,
-      ),
+    return MediaQuery.removePadding(
+      context: context,
+      removeLeft: true,
+      removeRight: true,
+      child: ApDrawer(
+        userInfo: userInfo,
+        displayPicture: PreferenceUtil.instance.getBool(
+          Constants.prefDisplayPicture,
+          true,
+        ),
       onTapHeader: () {
         if (isLogin) {
           if (userInfo != null) {
@@ -436,6 +439,7 @@ class HomePageState extends State<HomePage> {
           ),
         ],
       ],
+    ),
     );
   }
 
@@ -460,6 +464,40 @@ class HomePageState extends State<HomePage> {
           title: ap.score,
           onTap: () => _openPage(ScorePage(), needLogin: true),
         ),
+        DrawerSubMenuItem(
+          icon: ApIcon.exitToApp,
+          title: app.courseSelector,
+          onTap: () async {
+            final Uri uri = Uri.parse(Constants.courseSelectorUrl);
+            if (uri.scheme == 'https') {
+              final bool? shouldLaunch = await showDialog<bool>(
+                context: context,
+                builder: (BuildContext dialogContext) => AlertDialog(
+                  title: Text(app.openingBrowserTitle),
+                  content: Text(
+                    '${app.openingBrowserContent}:\n'
+                    '${Constants.courseSelectorUrl}'
+                    ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                      child: Text(app.optionCancel),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(true),
+                      child: Text(app.optionComfirm),
+                    ),
+                  ],
+                ),
+              );
+              if (!mounted || shouldLaunch != true) return;
+              PlatformUtil.instance.launchUrl(uri.toString());
+            } else {
+              UiUtil.instance.showToast(context, app.visitingUnSafeLink);
+              debugPrint('Attempted to launch an insecure URL: ${Constants.courseSelectorUrl}');
+            }
+          },
+        ),
       ],
     );
   }
@@ -479,24 +517,6 @@ class HomePageState extends State<HomePage> {
           icon: ApIcon.map,
           title: ap.schoolMap,
           onTap: () => _openPage(SchoolMapPage(), useCupertinoRoute: false),
-        ),
-        DrawerSubMenuItem(
-          icon: ApIcon.accessibilityNew,
-          title: ap.admissionGuide,
-          onTap: () {
-            if (kIsWeb ||
-                Platform.isAndroid ||
-                Platform.isIOS ||
-                Platform.isMacOS ||
-                Platform.isWindows) {
-              _openPage(AdmissionGuidePage(), useCupertinoRoute: false);
-            } else {
-              openDesktopWebViewPage(
-                Constants.admissionGuideUrl,
-                title: ap.admissionGuide,
-              );
-            }
-          },
         ),
       ],
     );

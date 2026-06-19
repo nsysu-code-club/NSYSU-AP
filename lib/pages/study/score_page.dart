@@ -1,7 +1,8 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_crawler/nsysu_crawler.dart';
+import 'package:nsysu_ap/pages/study/semester_picker_config.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class ScorePage extends StatefulWidget {
   static const String routerName = '/score';
@@ -54,6 +55,7 @@ class ScorePageState extends State<ScorePage> {
       scoreData: scoreData,
       semesterData: semesterData,
       semesterPickerController: _pickerController,
+      semesterPickerUiConfig: semesterPickerUiConfig,
       onSelect: (int index) {
         semesterData = semesterData!.copyWith(currentIndex: index);
         _getSemesterScore();
@@ -63,6 +65,7 @@ class ScorePageState extends State<ScorePage> {
       onRefresh: () {
         _getSemesterScore();
       },
+      showPRCard: false,
     );
   }
 

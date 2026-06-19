@@ -62,10 +62,15 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get tuitionAndFeesPageHint => 'Click to view the receipt or fees bill';
 	@override String get tuitionAndFeesPageDialogTitle => 'Pick method of export.';
 	@override String get courseYear => 'Year';
+	@override String get courseSelector => 'Course Selector Helper';
 	@override String get continuingSummerEducationProgram => 'Continuing Summer Education Program';
 	@override String get fallSemester => 'Fall Semester';
 	@override String get springSemester => 'Spring Semester';
 	@override String get summerSemester => 'Summer Semester';
+	@override String get continuingSummerEducationProgramShort => 'Continuing Summer';
+	@override String get fallSemesterShort => 'Fall';
+	@override String get springSemesterShort => 'Spring';
+	@override String get summerSemesterShort => 'Summer';
 	@override String get tuitionAndFeesEmpty => 'Oops！No tuition and fees data～😋';
 	@override String get hasPreScoreHint => 'Yellow Text not final score, proved by instructor.';
 	@override String get pleaseConfirmForm => 'Please fill out confirm form before login.\nIf you still can\'t log in after filling in, please click on the upper right corner to fill in through other browsers (ex. Chrome)';
@@ -91,6 +96,11 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get locationNotNearSchool => 'Your location not in school, can\'t publish.';
 	@override String get unknownTime => 'Unknown Time';
 	@override String get success => 'Success';
+	@override String get optionComfirm => 'Confirm';
+	@override String get optionCancel => 'Cancel';
+	@override String get openingBrowserContent => 'This will open an external website in your browser. Continue?';
+	@override String get openingBrowserTitle => 'Open External Website';
+	@override String get visitingUnSafeLink => 'Unsafe link. Please confirm the URL is correct.';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -124,10 +134,15 @@ extension on AppLocalizationsEn {
 			'tuitionAndFeesPageHint' => 'Click to view the receipt or fees bill',
 			'tuitionAndFeesPageDialogTitle' => 'Pick method of export.',
 			'courseYear' => 'Year',
+			'courseSelector' => 'Course Selector Helper',
 			'continuingSummerEducationProgram' => 'Continuing Summer Education Program',
 			'fallSemester' => 'Fall Semester',
 			'springSemester' => 'Spring Semester',
 			'summerSemester' => 'Summer Semester',
+			'continuingSummerEducationProgramShort' => 'Continuing Summer',
+			'fallSemesterShort' => 'Fall',
+			'springSemesterShort' => 'Spring',
+			'summerSemesterShort' => 'Summer',
 			'tuitionAndFeesEmpty' => 'Oops！No tuition and fees data～😋',
 			'hasPreScoreHint' => 'Yellow Text not final score, proved by instructor.',
 			'pleaseConfirmForm' => 'Please fill out confirm form before login.\nIf you still can\'t log in after filling in, please click on the upper right corner to fill in through other browsers (ex. Chrome)',
@@ -153,6 +168,11 @@ extension on AppLocalizationsEn {
 			'locationNotNearSchool' => 'Your location not in school, can\'t publish.',
 			'unknownTime' => 'Unknown Time',
 			'success' => 'Success',
+			'optionComfirm' => 'Confirm',
+			'optionCancel' => 'Cancel',
+			'openingBrowserContent' => 'This will open an external website in your browser. Continue?',
+			'openingBrowserTitle' => 'Open External Website',
+			'visitingUnSafeLink' => 'Unsafe link. Please confirm the URL is correct.',
 			_ => null,
 		};
 	}
