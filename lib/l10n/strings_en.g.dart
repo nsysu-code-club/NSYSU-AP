@@ -72,7 +72,7 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get springSemesterShort => 'Spring';
 	@override String get summerSemesterShort => 'Summer';
 	@override String get tuitionAndFeesEmpty => 'Oops！No tuition and fees data～😋';
-	@override String get hasPreScoreHint => 'Yellow Text not final score, proved by instructor.';
+	@override String get hasPreScoreHint => 'Some subjects have scores available for preview, but are not final.';
 	@override String get pleaseConfirmForm => 'Please fill out confirm form before login.\nIf you still can\'t log in after filling in, please click on the upper right corner to fill in through other browsers (ex. Chrome)';
 	@override String get openBrowserToFill => 'Open browser to fill';
 	@override String get minute => 'Min';
@@ -144,7 +144,7 @@ extension on AppLocalizationsEn {
 			'springSemesterShort' => 'Spring',
 			'summerSemesterShort' => 'Summer',
 			'tuitionAndFeesEmpty' => 'Oops！No tuition and fees data～😋',
-			'hasPreScoreHint' => 'Yellow Text not final score, proved by instructor.',
+			'hasPreScoreHint' => 'Some subjects have scores available for preview, but are not final.',
 			'pleaseConfirmForm' => 'Please fill out confirm form before login.\nIf you still can\'t log in after filling in, please click on the upper right corner to fill in through other browsers (ex. Chrome)',
 			'openBrowserToFill' => 'Open browser to fill',
 			'minute' => 'Min',
