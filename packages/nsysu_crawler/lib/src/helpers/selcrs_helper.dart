@@ -131,7 +131,9 @@ class SelcrsHelper {
           await cookieJar.delete(
             Uri.parse('$selcrsUrl/scoreqry/sco_query_prs_sso2.asp'),
           );
-          await Future.delayed(Duration(seconds: 1 << errorCount));
+          await Future.delayed(
+            Duration(seconds: (1 << errorCount).clamp(1, 4)),
+          );
           return login(
             username: username,
             password: password,
