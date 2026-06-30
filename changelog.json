@@ -1,4 +1,17 @@
 {
+  "20000": {
+    "version": "2.0.0",
+    "visible": true,
+    "date": "2026/06/22",
+    "zh-TW": [
+      "介面全面升級至 Material 3",
+      "爬蟲功能優化"
+    ],
+    "en-US": [
+      "UI upgraded to Material 3.",
+      "Crawler function optimized."
+    ]
+  },
   "10403": {
     "version": "1.4.3",
     "visible": true,
