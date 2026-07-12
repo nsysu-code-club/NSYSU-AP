@@ -1,20 +1,22 @@
 import 'package:ap_common/ap_common.dart'
-    hide TranslationProvider, LocaleSettings, AppLocaleUtils, AppLocale;
+    hide AppLocale, AppLocaleUtils, LocaleSettings, TranslationProvider;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
-import 'package:ap_common_flutter_core/ap_common_flutter_core.dart' as ap_l10n
+import 'package:ap_common_flutter_core/ap_common_flutter_core.dart'
+    as ap_l10n
     show TranslationProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/home_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
+import 'package:nsysu_ap/pages/student_leave_page.dart';
 import 'package:nsysu_ap/pages/study/course_page.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -46,12 +48,19 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     _analytics = FirebaseUtils.init();
-    themeMode = ThemeMode.values[
-        PreferenceUtil.instance.getInt(Constants.prefThemeModeIndex, 0)];
-    currentColorIndex =
-        PreferenceUtil.instance.getInt(ApTheme.PREF_COLOR_INDEX, 0);
-    final int customColorValue =
-        PreferenceUtil.instance.getInt(ApTheme.PREF_CUSTOM_COLOR, 0);
+    themeMode =
+        ThemeMode.values[PreferenceUtil.instance.getInt(
+          Constants.prefThemeModeIndex,
+          0,
+        )];
+    currentColorIndex = PreferenceUtil.instance.getInt(
+      ApTheme.PREF_COLOR_INDEX,
+      0,
+    );
+    final int customColorValue = PreferenceUtil.instance.getInt(
+      ApTheme.PREF_CUSTOM_COLOR,
+      0,
+    );
     if (currentColorIndex == ApTheme.customColorIndex &&
         customColorValue != 0) {
       customColor = Color(customColorValue);
@@ -140,6 +149,8 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         GraduationReportPage.routerName:
                             (BuildContext context) =>
                                 const GraduationReportPage(),
+                        StudentLeavePage.routerName: (BuildContext context) =>
+                            const StudentLeavePage(),
                         SettingPage.routerName: (BuildContext context) =>
                             SettingPage(),
                       },
@@ -154,10 +165,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       ],
                       localizationsDelegates:
                           const <LocalizationsDelegate<dynamic>>[
-                        GlobalMaterialLocalizations.delegate,
-                        GlobalWidgetsLocalizations.delegate,
-                        GlobalCupertinoLocalizations.delegate,
-                      ],
+                            GlobalMaterialLocalizations.delegate,
+                            GlobalWidgetsLocalizations.delegate,
+                            GlobalCupertinoLocalizations.delegate,
+                          ],
                       supportedLocales: AppLocaleUtils.supportedLocales,
                     );
                   },
@@ -200,8 +211,8 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Future<void> getUserInfo() async {
-    final ApiResult<UserInfo> result =
-        await SelcrsHelper.instance.getUserInfo();
+    final ApiResult<UserInfo> result = await SelcrsHelper.instance
+        .getUserInfo();
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<UserInfo>(:final UserInfo data):
