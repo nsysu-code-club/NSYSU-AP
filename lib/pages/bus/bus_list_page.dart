@@ -4,6 +4,7 @@ import 'package:ap_common/ap_common.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/pages/bus/bus_time_page.dart';
+import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class BusListPage extends StatefulWidget {
@@ -56,7 +57,7 @@ class _BusListPageState extends State<BusListPage> {
           return ListTile(
             title: Text(bus.name),
             trailing: Text(
-              bus.isOperating ? bus.busIds.first : bus.stopName,
+              bus.isOperating ? bus.busIds.first : app.busNotOperating,
               style: TextStyle(
                 color: bus.isOperating ? Colors.green : Colors.red,
               ),
