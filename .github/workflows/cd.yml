@@ -15,12 +15,13 @@ on:
       - 'linux/**'
       - 'windows/**'
       - 'assets/**'
+      - '.fvmrc'
       - '.github/workflows/cd.yml'
       - '.github/scripts/**'
   workflow_dispatch:
 
 env:
-  flutter_version: '3.41.x'
+  flutter_version_file: '.fvmrc'
   java_version: '21'
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -95,7 +96,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter_version }}
+          flutter-version-file: ${{ env.flutter_version_file }}
           channel: 'stable'
           cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
@@ -140,7 +141,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter_version }}
+          flutter-version-file: ${{ env.flutter_version_file }}
           channel: 'stable'
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Flutter Initialize
@@ -181,7 +182,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter_version }}
+          flutter-version-file: ${{ env.flutter_version_file }}
           channel: 'stable'
           cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
