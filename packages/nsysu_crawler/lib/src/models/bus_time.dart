@@ -158,5 +158,5 @@ BusArrivalStatus _legacyArrivalStatus(
   if (arrivedTime != null || realArrivedTime != null) {
     return BusArrivalStatus.scheduled;
   }
-  return BusArrivalStatus.departed;
+  return BusArrivalStatus.notOperating;
 }

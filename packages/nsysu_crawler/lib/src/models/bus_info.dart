@@ -7,8 +7,6 @@ import 'dart:convert';
 import 'package:ap_common_core/ap_common_core.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'package:nsysu_crawler/src/models/bus_time.dart';
-
 part 'bus_info.g.dart';
 
 @JsonSerializable(explicitToJson: true)
@@ -135,11 +133,11 @@ List<String> _busIdsFromCarId(String? carId) =>
         .toList(growable: false) ??
     <String>[];
 
-extension BusInfoExtension on List<BusTime> {
+extension BusInfoExtension on List<BusInfo> {
   void save() {
     PreferenceUtil.instance.setStringList(
       BusInfo._prefBusInfoData,
-      List<String>.from(map((BusTime x) => x.toRawJson())),
+      List<String>.from(map((BusInfo x) => x.toRawJson())),
     );
   }
 }

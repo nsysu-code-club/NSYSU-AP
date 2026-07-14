@@ -93,26 +93,57 @@ void main() {
       expect(times[5].arrivalStatus, BusArrivalStatus.notOperating);
     });
 
-    test('rejects malformed station data', () {
-      expect(
-        () => parseIbusRouteTimes(<String, dynamic>{
-          'data': <String, dynamic>{
-            'route': <String, dynamic>{
-              'estimateTimes': <String, dynamic>{'edges': <dynamic>[]},
-              'stations': <String, dynamic>{
-                'edges': <dynamic>[
-                  <String, dynamic>{
-                    'goBack': 3,
-                    'orderNo': 1,
-                    'node': <String, dynamic>{'id': 'x', 'name': 'bad'},
-                  },
-                ],
-              },
+    test('skips malformed station data', () {
+      final List<BusTime> parsed = parseIbusRouteTimes(<String, dynamic>{
+        'data': <String, dynamic>{
+          'route': <String, dynamic>{
+            'estimateTimes': <String, dynamic>{'edges': <dynamic>[]},
+            'stations': <String, dynamic>{
+              'edges': <dynamic>[
+                <String, dynamic>{
+                  'goBack': 3,
+                  'orderNo': 1,
+                  'node': <String, dynamic>{'id': 'x', 'name': 'bad'},
+                },
+              ],
             },
           },
-        }, routeId: 901),
-        throwsFormatException,
-      );
+        },
+      }, routeId: 901);
+
+      expect(parsed, isEmpty);
+    });
+
+    test('degrades malformed comeTime to notOperating', () {
+      final List<BusTime> parsed = parseIbusRouteTimes(<String, dynamic>{
+        'data': <String, dynamic>{
+          'route': <String, dynamic>{
+            'estimateTimes': <String, dynamic>{
+              'edges': <dynamic>[
+                <String, dynamic>{
+                  'node': <String, dynamic>{
+                    'id': 'bad-time',
+                    'goBack': 1,
+                    'comeTime': '24:00',
+                    'etas': <dynamic>[],
+                  },
+                },
+              ],
+            },
+            'stations': <String, dynamic>{
+              'edges': <dynamic>[
+                <String, dynamic>{
+                  'goBack': 1,
+                  'orderNo': 1,
+                  'node': <String, dynamic>{'id': 'bad-time', 'name': '錯誤時間站'},
+                },
+              ],
+            },
+          },
+        },
+      }, routeId: 901);
+
+      expect(parsed.single.arrivalStatus, BusArrivalStatus.notOperating);
     });
   });
 }

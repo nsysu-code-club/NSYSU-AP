@@ -93,7 +93,7 @@ List<BusTime> parseIbusRouteTimes(
         goBack == null ||
         orderNo == null ||
         (goBack != 1 && goBack != 2)) {
-      throw const FormatException('Invalid iBus station');
+      continue;
     }
 
     final _EstimateTime estimate =
@@ -191,12 +191,12 @@ BusArrivalStatus _resolveStatus({
     r'^(\d{1,2}):(\d{2})$',
   ).firstMatch(comeTime.trim());
   if (match == null) {
-    throw const FormatException('Invalid iBus comeTime');
+    return BusArrivalStatus.notOperating;
   }
   final int hour = int.parse(match.group(1)!);
   final int minute = int.parse(match.group(2)!);
   if (hour > 23 || minute > 59) {
-    throw const FormatException('Invalid iBus comeTime');
+    return BusArrivalStatus.notOperating;
   }
   return hour * 60 + minute > currentMinutes
       ? BusArrivalStatus.scheduled
