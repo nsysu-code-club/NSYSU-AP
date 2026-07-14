@@ -5,9 +5,75 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:nsysu_crawler/src/build_mode.dart';
 import 'package:nsysu_crawler/src/models/bus_info.dart';
 import 'package:nsysu_crawler/src/models/bus_time.dart';
+import 'package:nsysu_crawler/src/parsers/bus_parser.dart';
 
 class BusHelper {
-  static const String basePath = 'https://ibus.nsysu.edu.tw';
+  static const String basePath = 'https://ibus.tbkc.gov.tw/ibus/graphql';
+
+  static const String _routeListQuery = r'''
+    query QUERY_NSYSU_ROUTES($lang: String!) {
+      route901: route(xno: 901, lang: $lang) {
+        name
+        departure
+        destination
+        buses { edges { node { id } } }
+      }
+      route9011: route(xno: 9011, lang: $lang) {
+        name
+        departure
+        destination
+        buses { edges { node { id } } }
+      }
+      route50: route(xno: 50, lang: $lang) {
+        name
+        departure
+        destination
+        buses { edges { node { id } } }
+      }
+      route219: route(xno: 219, lang: $lang) {
+        name
+        departure
+        destination
+        buses { edges { node { id } } }
+      }
+      route2192: route(xno: 2192, lang: $lang) {
+        name
+        departure
+        destination
+        buses { edges { node { id } } }
+      }
+    }
+  ''';
+
+  static const String _routeTimesQuery = r'''
+    query QUERY_ROUTE_TIMES($routeId: Int!, $lang: String!) {
+      route(xno: $routeId, lang: $lang) {
+        estimateTimes {
+          edges {
+            node {
+              id
+              goBack
+              comeTime
+              etas {
+                busId
+                etaTime
+              }
+            }
+          }
+        }
+        stations {
+          edges {
+            goBack
+            orderNo
+            node {
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  ''';
 
   static BusHelper? _instance;
 
@@ -34,16 +100,23 @@ class BusHelper {
     required String languageCode,
   }) async {
     try {
-      final String path =
-          'https://nsysu-code-club.github.io/nsysu-bus/bus_info_data_$languageCode.json';
-      final Response<String> response = await dio.get<String>(
-        path,
+      final String language = _normalizeLanguage(languageCode);
+      final Response<dynamic> response = await dio.post<dynamic>(
+        basePath,
         options: Options(
-          responseType: ResponseType.plain,
+          contentType: Headers.jsonContentType,
+          responseType: ResponseType.json,
         ),
+        data: <String, dynamic>{
+          'query': _routeListQuery,
+          'variables': <String, dynamic>{'lang': language},
+        },
       );
       if (response.data != null) {
-        final List<BusInfo>? list = BusInfo.fromRawList(response.data!);
+        final List<BusInfo> list = parseIbusRouteList(
+          _asJsonMap(response.data),
+          languageCode: language,
+        );
         return ApiSuccess<List<BusInfo>?>(list);
       } else {
         return ApiError<List<BusInfo>?>(GeneralResponse.unknownError());
@@ -61,21 +134,25 @@ class BusHelper {
     required BusInfo busInfo,
   }) async {
     try {
-      final Response<String> response = await dio.post<String>(
-        '$basePath/API/RoutePathStop.aspx?${DateTime.now().millisecondsSinceEpoch}',
+      final Response<dynamic> response = await dio.post<dynamic>(
+        basePath,
         options: Options(
-          responseType: ResponseType.plain,
+          contentType: Headers.jsonContentType,
+          responseType: ResponseType.json,
         ),
-        data: FormData.fromMap(
-          <String, dynamic>{
-            'RID': busInfo.routeId,
-            'C': languageCode,
-            'CID': busInfo.carId,
+        data: <String, dynamic>{
+          'query': _routeTimesQuery,
+          'variables': <String, dynamic>{
+            'routeId': busInfo.routeId,
+            'lang': _normalizeLanguage(languageCode),
           },
-        ),
+        },
       );
       if (response.data != null) {
-        final List<BusTime>? list = BusTime.fromRawList(response.data!);
+        final List<BusTime> list = parseIbusRouteTimes(
+          _asJsonMap(response.data),
+          routeId: busInfo.routeId,
+        );
         return ApiSuccess<List<BusTime>?>(list);
       } else {
         return ApiError<List<BusTime>?>(GeneralResponse.unknownError());
@@ -86,5 +163,15 @@ class BusHelper {
       if (kCrawlerDebugMode) rethrow;
       return ApiError<List<BusTime>?>(GeneralResponse.unknownError());
     }
+  }
+
+  static String _normalizeLanguage(String languageCode) =>
+      languageCode.startsWith('en') ? 'en' : 'zh';
+
+  static Map<String, dynamic> _asJsonMap(dynamic data) {
+    if (data is! Map) {
+      throw const FormatException('iBus response is not a JSON object');
+    }
+    return Map<String, dynamic>.from(data);
   }
 }

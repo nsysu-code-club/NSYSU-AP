@@ -1,0 +1,121 @@
+{
+  "data": {
+    "route": {
+      "estimateTimes": {
+        "edges": [
+          {
+            "node": {
+              "id": "go-arriving",
+              "goBack": 1,
+              "comeTime": "",
+              "etas": [
+                {
+                  "busId": "BUS-1",
+                  "etaTime": 0
+                }
+              ]
+            }
+          },
+          {
+            "node": {
+              "id": "shared",
+              "goBack": 1,
+              "comeTime": "",
+              "etas": [
+                {
+                  "busId": "BUS-2",
+                  "etaTime": 1
+                }
+              ]
+            }
+          },
+          {
+            "node": {
+              "id": "go-minutes",
+              "goBack": 1,
+              "comeTime": "",
+              "etas": [
+                {
+                  "busId": "BUS-3",
+                  "etaTime": 5
+                },
+                {
+                  "busId": "BUS-4",
+                  "etaTime": 3
+                }
+              ]
+            }
+          },
+          {
+            "node": {
+              "id": "go-scheduled",
+              "goBack": 1,
+              "comeTime": "13:00",
+              "etas": []
+            }
+          },
+          {
+            "node": {
+              "id": "shared",
+              "goBack": 2,
+              "comeTime": "11:30",
+              "etas": []
+            }
+          }
+        ]
+      },
+      "stations": {
+        "edges": [
+          {
+            "goBack": 1,
+            "orderNo": 3,
+            "node": {
+              "id": "go-minutes",
+              "name": "三分鐘站"
+            }
+          },
+          {
+            "goBack": 2,
+            "orderNo": 2,
+            "node": {
+              "id": "back-not-operating",
+              "name": "未行駛站"
+            }
+          },
+          {
+            "goBack": 1,
+            "orderNo": 1,
+            "node": {
+              "id": "go-arriving",
+              "name": "進站中站"
+            }
+          },
+          {
+            "goBack": 2,
+            "orderNo": 1,
+            "node": {
+              "id": "shared",
+              "name": "返程共用站"
+            }
+          },
+          {
+            "goBack": 1,
+            "orderNo": 4,
+            "node": {
+              "id": "go-scheduled",
+              "name": "表定站"
+            }
+          },
+          {
+            "goBack": 1,
+            "orderNo": 2,
+            "node": {
+              "id": "shared",
+              "name": "去程共用站"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
