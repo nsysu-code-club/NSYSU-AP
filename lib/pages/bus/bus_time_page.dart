@@ -26,6 +26,7 @@ class _BusTimePageState extends State<BusTimePage>
   TabController? _tabController;
 
   Timer? timer;
+  bool _isFetching = false;
 
   @override
   void initState() {
@@ -98,38 +99,49 @@ class _BusTimePageState extends State<BusTimePage>
   }
 
   Future<void> _getData() async {
-    final ApiResult<List<BusTime>?> result = await BusHelper.instance
-        .getBusTime(
-          languageCode: widget.locale.languageCode.contains('zh') ? 'zh' : 'en',
-          busInfo: widget.busInfo,
-        );
-    if (!mounted) return;
-    switch (result) {
-      case ApiSuccess<List<BusTime>?>(:final List<BusTime>? data):
-        final List<BusTime> starts = <BusTime>[];
-        final List<BusTime> ends = <BusTime>[];
-        for (final BusTime element in data ?? <BusTime>[]) {
-          if (element.direction == BusDirection.back) {
-            ends.add(element);
-          } else {
-            starts.add(element);
+    if (_isFetching) return;
+    _isFetching = true;
+    try {
+      final ApiResult<List<BusTime>?> result = await BusHelper.instance
+          .getBusTime(
+            languageCode: widget.locale.languageCode.contains('zh')
+                ? 'zh'
+                : 'en',
+            busInfo: widget.busInfo,
+          );
+      if (!mounted) return;
+      switch (result) {
+        case ApiSuccess<List<BusTime>?>(:final List<BusTime>? data):
+          final List<BusTime> starts = <BusTime>[];
+          final List<BusTime> ends = <BusTime>[];
+          for (final BusTime element in data ?? <BusTime>[]) {
+            if (element.direction == BusDirection.back) {
+              ends.add(element);
+            } else {
+              starts.add(element);
+            }
           }
-        }
-        setState(() {
-          if (starts.isEmpty && ends.isEmpty) {
-            state = const DataEmpty<(List<BusTime>, List<BusTime>)>();
-          } else {
-            state = DataLoaded<(List<BusTime>, List<BusTime>)>((starts, ends));
-          }
-        });
-      case ApiFailure<List<BusTime>?>():
-        setState(
-          () => state = const DataError<(List<BusTime>, List<BusTime>)>(),
-        );
-      case ApiError<List<BusTime>?>():
-        setState(
-          () => state = const DataError<(List<BusTime>, List<BusTime>)>(),
-        );
+          setState(() {
+            if (starts.isEmpty && ends.isEmpty) {
+              state = const DataEmpty<(List<BusTime>, List<BusTime>)>();
+            } else {
+              state = DataLoaded<(List<BusTime>, List<BusTime>)>((
+                starts,
+                ends,
+              ));
+            }
+          });
+        case ApiFailure<List<BusTime>?>():
+          setState(
+            () => state = const DataError<(List<BusTime>, List<BusTime>)>(),
+          );
+        case ApiError<List<BusTime>?>():
+          setState(
+            () => state = const DataError<(List<BusTime>, List<BusTime>)>(),
+          );
+      }
+    } finally {
+      _isFetching = false;
     }
   }
 }
