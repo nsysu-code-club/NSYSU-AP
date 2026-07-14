@@ -1,5 +1,48 @@
 import 'dart:typed_data';
 
+class StudentLeaveSemester {
+  const StudentLeaveSemester({required this.schoolYear, required this.semester})
+    : assert(semester == 1 || semester == 2);
+
+  final int schoolYear;
+  final int semester;
+
+  String get code => '$schoolYear$semester';
+
+  StudentLeaveSemester get previous => semester == 2
+      ? StudentLeaveSemester(schoolYear: schoolYear, semester: 1)
+      : StudentLeaveSemester(schoolYear: schoolYear - 1, semester: 2);
+
+  factory StudentLeaveSemester.current({DateTime? now}) {
+    final DateTime date = now ?? DateTime.now();
+    final int rocYear = date.year - 1911;
+    return date.month >= 8
+        ? StudentLeaveSemester(schoolYear: rocYear, semester: 1)
+        : StudentLeaveSemester(schoolYear: rocYear - 1, semester: 2);
+  }
+
+  static List<StudentLeaveSemester> recent({int count = 8, DateTime? now}) {
+    assert(count > 0);
+    final List<StudentLeaveSemester> semesters = <StudentLeaveSemester>[];
+    StudentLeaveSemester semester = StudentLeaveSemester.current(now: now);
+    for (int index = 0; index < count; index++) {
+      semesters.add(semester);
+      semester = semester.previous;
+    }
+    return semesters;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StudentLeaveSemester &&
+          schoolYear == other.schoolYear &&
+          semester == other.semester;
+
+  @override
+  int get hashCode => Object.hash(schoolYear, semester);
+}
+
 class StudentLeaveType {
   const StudentLeaveType({required this.code, required this.name});
 

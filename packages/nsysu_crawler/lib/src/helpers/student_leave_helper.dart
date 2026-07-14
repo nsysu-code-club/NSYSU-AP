@@ -168,6 +168,7 @@ class StudentLeaveHelper {
   Future<ApiResult<List<StudentLeaveRecord>>> getLeaveRecords({
     required String username,
     required String password,
+    StudentLeaveSemester? semester,
   }) async {
     try {
       final ApiResult<GeneralResponse> loginResult = await _ensureLogin(
@@ -182,12 +183,13 @@ class StudentLeaveHelper {
         case ApiError<GeneralResponse>(:final GeneralResponse response):
           return ApiError<List<StudentLeaveRecord>>(response);
       }
-      final ({String semester, String year}) currentSemester =
-          _currentAcademicSemester();
+      final StudentLeaveSemester selectedSemester =
+          semester ?? StudentLeaveSemester.current();
       final Response<Uint8List> response = await dio.get<Uint8List>(
         '$baseUrl/SLAMS/SLAMS_student_view.php?'
         'ID=$username&GPID=07&APFLAG=49&search_type=year&'
-        'school_year=${currentSemester.year}&sem=${currentSemester.semester}',
+        'school_year=${selectedSemester.schoolYear}&'
+        'sem=${selectedSemester.semester}',
         options: _bytesOption,
       );
       final String text = big5.decode(response.data!);
@@ -250,13 +252,13 @@ class StudentLeaveHelper {
   }
 
   Future<void> _prepareLeaveSession(String username) async {
-    final ({String semester, String year}) currentSemester =
-        _currentAcademicSemester();
+    final StudentLeaveSemester currentSemester = StudentLeaveSemester.current();
     final String encodedId = base64.encode(utf8.encode(username));
     await dio.get<Uint8List>(
       '$baseUrl/SLAMS/SLAMS_student_view.php?'
       'ID=$encodedId&GPID=07&APFLAG=49&search_type=year&'
-      'school_year=${currentSemester.year}&sem=${currentSemester.semester}',
+      'school_year=${currentSemester.schoolYear}&'
+      'sem=${currentSemester.semester}',
       options: _bytesOption,
     );
     await dio.get<Uint8List>(
@@ -306,15 +308,6 @@ class StudentLeaveHelper {
   String _resolveUrl(String action, String base) {
     if (action.startsWith('http')) return action;
     return Uri.parse(base).resolve(action).toString();
-  }
-
-  ({String semester, String year}) _currentAcademicSemester() {
-    final DateTime now = DateTime.now();
-    final int rocYear = now.year - 1911;
-    if (now.month >= 8) {
-      return (year: '$rocYear', semester: '1');
-    }
-    return (year: '${rocYear - 1}', semester: '2');
   }
 
   String _formatDate(DateTime dateTime) {

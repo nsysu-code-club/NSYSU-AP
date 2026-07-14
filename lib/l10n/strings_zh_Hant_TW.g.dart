@@ -98,14 +98,23 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '學生請假'
 	String get studentLeave => '學生請假';
 
-	/// zh-Hant-TW: '假單查詢'
-	String get studentLeaveRecords => '假單查詢';
+	/// zh-Hant-TW: '請假紀錄'
+	String get studentLeaveRecords => '請假紀錄';
+
+	/// zh-Hant-TW: '共 ${count} 張'
+	String studentLeaveRecordsCount({required Object count}) => '共 ${count} 張';
+
+	/// zh-Hant-TW: '查詢學期'
+	String get studentLeaveSelectSemester => '查詢學期';
+
+	/// zh-Hant-TW: '重新整理假單'
+	String get studentLeaveRefresh => '重新整理假單';
 
 	/// zh-Hant-TW: '新增假單'
 	String get studentLeaveAdd => '新增假單';
 
-	/// zh-Hant-TW: '本學期尚無假單資料'
-	String get studentLeaveEmpty => '本學期尚無假單資料';
+	/// zh-Hant-TW: '這學期還沒有請假紀錄'
+	String get studentLeaveEmpty => '這學期還沒有請假紀錄';
 
 	/// zh-Hant-TW: '假單編號'
 	String get studentLeaveNumber => '假單編號';
@@ -125,6 +134,15 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '假別'
 	String get studentLeaveType => '假別';
 
+	/// zh-Hant-TW: '假單資料'
+	String get studentLeaveRequestDetails => '假單資料';
+
+	/// zh-Hant-TW: '請假期間'
+	String get studentLeavePeriod => '請假期間';
+
+	/// zh-Hant-TW: '共 ${duration}'
+	String studentLeaveDuration({required Object duration}) => '共 ${duration}';
+
 	/// zh-Hant-TW: '開始時間'
 	String get studentLeaveStart => '開始時間';
 
@@ -137,8 +155,8 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '請輸入請假事由'
 	String get studentLeaveReasonHint => '請輸入請假事由';
 
-	/// zh-Hant-TW: '證明檔案'
-	String get studentLeaveAttachment => '證明檔案';
+	/// zh-Hant-TW: '證明文件'
+	String get studentLeaveAttachment => '證明文件';
 
 	/// zh-Hant-TW: '限一份，可不附加'
 	String get studentLeaveAttachmentHint => '限一份，可不附加';
@@ -149,11 +167,59 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '移除檔案'
 	String get studentLeaveRemoveAttachment => '移除檔案';
 
-	/// zh-Hant-TW: '請假確認頁面'
-	String get studentLeaveResult => '請假確認頁面';
+	/// zh-Hant-TW: '開啟證明檔案'
+	String get studentLeaveOpenAttachment => '開啟證明檔案';
 
-	/// zh-Hant-TW: '送出假單'
-	String get studentLeaveSubmit => '送出假單';
+	/// zh-Hant-TW: '審核進度'
+	String get studentLeaveReviewProgress => '審核進度';
+
+	/// zh-Hant-TW: '已通過'
+	String get studentLeaveStatusApproved => '已通過';
+
+	/// zh-Hant-TW: '審核中'
+	String get studentLeaveStatusPending => '審核中';
+
+	/// zh-Hant-TW: '未通過'
+	String get studentLeaveStatusRejected => '未通過';
+
+	/// zh-Hant-TW: '免審核'
+	String get studentLeaveStatusNoReview => '免審核';
+
+	/// zh-Hant-TW: '確認假單'
+	String get studentLeaveResult => '確認假單';
+
+	/// zh-Hant-TW: '送出前確認'
+	String get studentLeaveFinalCheck => '送出前確認';
+
+	/// zh-Hant-TW: '請假注意事項'
+	String get studentLeaveNoticeTitle => '請假注意事項';
+
+	/// zh-Hant-TW: '請假期限'
+	String get studentLeaveNoticePeriodTitle => '請假期限';
+
+	/// zh-Hant-TW: '本學期可請假期間：2026-02-01 至 2026-09-01。 不需課程請假期間：2026-06-15 至 2026-09-01。'
+	String get studentLeaveNoticePeriodContent => '本學期可請假期間：2026-02-01 至 2026-09-01。\n不需課程請假期間：2026-06-15 至 2026-09-01。';
+
+	/// zh-Hant-TW: '證明文件'
+	String get studentLeaveNoticeAttachmentTitle => '證明文件';
+
+	/// zh-Hant-TW: '以下情形請上傳證明文件： 1. 請假天數三日（含）以上。 2. 申請公假。 3. 申請考試請假。'
+	String get studentLeaveNoticeAttachmentContent => '以下情形請上傳證明文件：\n1. 請假天數三日（含）以上。\n2. 申請公假。\n3. 申請考試請假。';
+
+	/// zh-Hant-TW: '考試請假'
+	String get studentLeaveNoticeExamTitle => '考試請假';
+
+	/// zh-Hant-TW: '1. 請先在線上完成請假申請，並上傳證明文件。 2. 欲申請「心理不適假」者，請檢附就醫證明，並改選「病假」類別。 3. 填寫「國立中山大學學生請假補考科目表」。 4. 將補考科目表、學生請假申請單及證明文件一併送交教務處申請。'
+	String get studentLeaveNoticeExamContent => '1. 請先在線上完成請假申請，並上傳證明文件。\n2. 欲申請「心理不適假」者，請檢附就醫證明，並改選「病假」類別。\n3. 填寫「國立中山大學學生請假補考科目表」。\n4. 將補考科目表、學生請假申請單及證明文件一併送交教務處申請。';
+
+	/// zh-Hant-TW: '送出與通知'
+	String get studentLeaveNoticeSubmitTitle => '送出與通知';
+
+	/// zh-Hant-TW: '送出前請確認假單內容正確；如有錯誤，請返回上一頁修改。 系所導生名冊完成安排前，系統將由系所主任代替導師。 假單確定送出後，系統會自動以 Email 通知系所主任、導師及任課教師。'
+	String get studentLeaveNoticeSubmitContent => '送出前請確認假單內容正確；如有錯誤，請返回上一頁修改。\n系所導生名冊完成安排前，系統將由系所主任代替導師。\n假單確定送出後，系統會自動以 Email 通知系所主任、導師及任課教師。';
+
+	/// zh-Hant-TW: '預覽假單'
+	String get studentLeaveSubmit => '預覽假單';
 
 	/// zh-Hant-TW: '確認送出'
 	String get studentLeaveFinalSubmit => '確認送出';
@@ -339,25 +405,47 @@ extension on AppLocalizations {
 			'firstLoginHint' => '首次登入密碼預設為身分證末六碼',
 			'tuitionAndFees' => '學雜費繳費狀況查詢',
 			'studentLeave' => '學生請假',
-			'studentLeaveRecords' => '假單查詢',
+			'studentLeaveRecords' => '請假紀錄',
+			'studentLeaveRecordsCount' => ({required Object count}) => '共 ${count} 張',
+			'studentLeaveSelectSemester' => '查詢學期',
+			'studentLeaveRefresh' => '重新整理假單',
 			'studentLeaveAdd' => '新增假單',
-			'studentLeaveEmpty' => '本學期尚無假單資料',
+			'studentLeaveEmpty' => '這學期還沒有請假紀錄',
 			'studentLeaveNumber' => '假單編號',
 			'studentLeaveYearSemester' => ({required Object year, required Object semester}) => '${year}學年度第${semester}學期',
 			'studentLeaveTutorStatus' => '導師確認',
 			'studentLeaveChairStatus' => '主任確認',
 			'studentLeaveInstructorStatus' => '課程審核',
 			'studentLeaveType' => '假別',
+			'studentLeaveRequestDetails' => '假單資料',
+			'studentLeavePeriod' => '請假期間',
+			'studentLeaveDuration' => ({required Object duration}) => '共 ${duration}',
 			'studentLeaveStart' => '開始時間',
 			'studentLeaveEnd' => '結束時間',
 			'studentLeaveReason' => '請假事由',
 			'studentLeaveReasonHint' => '請輸入請假事由',
-			'studentLeaveAttachment' => '證明檔案',
+			'studentLeaveAttachment' => '證明文件',
 			'studentLeaveAttachmentHint' => '限一份，可不附加',
 			'studentLeavePickAttachment' => '選擇檔案',
 			'studentLeaveRemoveAttachment' => '移除檔案',
-			'studentLeaveResult' => '請假確認頁面',
-			'studentLeaveSubmit' => '送出假單',
+			'studentLeaveOpenAttachment' => '開啟證明檔案',
+			'studentLeaveReviewProgress' => '審核進度',
+			'studentLeaveStatusApproved' => '已通過',
+			'studentLeaveStatusPending' => '審核中',
+			'studentLeaveStatusRejected' => '未通過',
+			'studentLeaveStatusNoReview' => '免審核',
+			'studentLeaveResult' => '確認假單',
+			'studentLeaveFinalCheck' => '送出前確認',
+			'studentLeaveNoticeTitle' => '請假注意事項',
+			'studentLeaveNoticePeriodTitle' => '請假期限',
+			'studentLeaveNoticePeriodContent' => '本學期可請假期間：2026-02-01 至 2026-09-01。\n不需課程請假期間：2026-06-15 至 2026-09-01。',
+			'studentLeaveNoticeAttachmentTitle' => '證明文件',
+			'studentLeaveNoticeAttachmentContent' => '以下情形請上傳證明文件：\n1. 請假天數三日（含）以上。\n2. 申請公假。\n3. 申請考試請假。',
+			'studentLeaveNoticeExamTitle' => '考試請假',
+			'studentLeaveNoticeExamContent' => '1. 請先在線上完成請假申請，並上傳證明文件。\n2. 欲申請「心理不適假」者，請檢附就醫證明，並改選「病假」類別。\n3. 填寫「國立中山大學學生請假補考科目表」。\n4. 將補考科目表、學生請假申請單及證明文件一併送交教務處申請。',
+			'studentLeaveNoticeSubmitTitle' => '送出與通知',
+			'studentLeaveNoticeSubmitContent' => '送出前請確認假單內容正確；如有錯誤，請返回上一頁修改。\n系所導生名冊完成安排前，系統將由系所主任代替導師。\n假單確定送出後，系統會自動以 Email 通知系所主任、導師及任課教師。',
+			'studentLeaveSubmit' => '預覽假單',
 			'studentLeaveFinalSubmit' => '確認送出',
 			'studentLeaveSubmitConfirmTitle' => '確認送出假單',
 			'studentLeaveSubmitConfirmContent' => '送出後會直接送到校務系統，請確認內容正確。',

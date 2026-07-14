@@ -21,9 +21,10 @@ void main() {
       expect(restored.destination, info.destination);
     });
 
-    test('falls back to NameEn / DepartureEn / DestinationEn when zh missing',
-        () {
-      const String raw = '''
+    test(
+      'falls back to NameEn / DepartureEn / DestinationEn when zh missing',
+      () {
+        const String raw = '''
       {
         "CarID": "A1",
         "StopName": "Gate",
@@ -35,11 +36,12 @@ void main() {
         "UpdateTime": null
       }
       ''';
-      final BusInfo info = BusInfo.fromRawJson(raw);
-      expect(info.name, 'Campus Bus');
-      expect(info.departure, 'Gate');
-      expect(info.destination, 'Marine');
-    });
+        final BusInfo info = BusInfo.fromRawJson(raw);
+        expect(info.name, 'Campus Bus');
+        expect(info.departure, 'Gate');
+        expect(info.destination, 'Marine');
+      },
+    );
   });
 
   group('TuitionAndFees', () {
@@ -68,6 +70,27 @@ void main() {
       );
       expect(data.year.value, '107');
       expect(data.semester.value, '1');
+    });
+  });
+
+  group('StudentLeaveSemester', () {
+    test('calculates the current academic semester', () {
+      expect(
+        StudentLeaveSemester.current(now: DateTime(2026, 7, 14)).code,
+        '1142',
+      );
+      expect(StudentLeaveSemester.current(now: DateTime(2026, 8)).code, '1151');
+    });
+
+    test('builds recent semesters in descending order', () {
+      final List<StudentLeaveSemester> semesters = StudentLeaveSemester.recent(
+        count: 4,
+        now: DateTime(2026, 7, 14),
+      );
+      expect(
+        semesters.map((StudentLeaveSemester value) => value.code),
+        <String>['1142', '1141', '1132', '1131'],
+      );
     });
   });
 }

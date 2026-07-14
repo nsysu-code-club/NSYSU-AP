@@ -17,10 +17,15 @@ class StudentLeavePage extends StatefulWidget {
 class _StudentLeavePageState extends State<StudentLeavePage> {
   DataState<List<StudentLeaveRecord>> state =
       const DataLoading<List<StudentLeaveRecord>>();
+  late final List<StudentLeaveSemester> _semesterOptions;
+  late StudentLeaveSemester _selectedSemester;
+  int _recordsRequestId = 0;
 
   @override
   void initState() {
     super.initState();
+    _semesterOptions = StudentLeaveSemester.recent();
+    _selectedSemester = _semesterOptions.first;
     AnalyticsUtil.instance.setCurrentScreen(
       'StudentLeavePage',
       'student_leave_page.dart',
@@ -31,18 +36,51 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(app.studentLeave)),
+      appBar: AppBar(
+        title: Text(app.studentLeave),
+        actions: <Widget>[
+          IconButton(
+            tooltip: app.studentLeaveRefresh,
+            onPressed: _getRecords,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
       body: Column(
         children: <Widget>[
-          Expanded(child: _body()),
-          SafeArea(
-            minimum: const EdgeInsets.all(16.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: _openAddPage,
-                icon: const Icon(Icons.add),
-                label: Text(app.studentLeaveAdd),
+          Expanded(
+            child: Column(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
+                  child: StudentLeaveSemesterSelector(
+                    options: _semesterOptions,
+                    selected: _selectedSemester,
+                    onSelected: _selectSemester,
+                  ),
+                ),
+                Expanded(child: _body()),
+              ],
+            ),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
+            ),
+            child: SafeArea(
+              minimum: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _openAddPage,
+                  icon: const Icon(Icons.add),
+                  label: Text(app.studentLeaveAdd),
+                ),
               ),
             ),
           ),
@@ -71,12 +109,18 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
       loaded: (List<StudentLeaveRecord> records, String? hint) =>
           RefreshIndicator(
             onRefresh: _getRecords,
-            child: ListView.builder(
+            child: ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(8.0),
-              itemCount: records.length,
-              itemBuilder: (BuildContext context, int index) =>
-                  _LeaveRecordCard(record: records[index]),
+              padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 20.0),
+              itemCount: records.length + 1,
+              separatorBuilder: (_, int index) =>
+                  SizedBox(height: index == 0 ? 12.0 : 10.0),
+              itemBuilder: (BuildContext context, int index) {
+                if (index == 0) {
+                  return _RecordListHeader(recordCount: records.length);
+                }
+                return _LeaveRecordCard(record: records[index - 1]);
+              },
             ),
           ),
     );
@@ -92,14 +136,16 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
   }
 
   Future<void> _getRecords() async {
+    final int requestId = ++_recordsRequestId;
     setState(() => state = const DataLoading<List<StudentLeaveRecord>>());
     final ApiResult<List<StudentLeaveRecord>> result = await StudentLeaveHelper
         .instance
         .getLeaveRecords(
           username: SelcrsHelper.instance.username,
           password: SelcrsHelper.instance.password,
+          semester: _selectedSemester,
         );
-    if (!mounted) return;
+    if (!mounted || requestId != _recordsRequestId) return;
     switch (result) {
       case ApiSuccess<List<StudentLeaveRecord>>(
         :final List<StudentLeaveRecord> data,
@@ -118,6 +164,55 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
         setState(() => state = const DataError<List<StudentLeaveRecord>>());
     }
   }
+
+  void _selectSemester(StudentLeaveSemester? semester) {
+    if (semester == null || semester == _selectedSemester) return;
+    setState(() => _selectedSemester = semester);
+    _getRecords();
+  }
+}
+
+@visibleForTesting
+class StudentLeaveSemesterSelector extends StatelessWidget {
+  const StudentLeaveSemesterSelector({
+    required this.options,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final List<StudentLeaveSemester> options;
+  final StudentLeaveSemester selected;
+  final ValueChanged<StudentLeaveSemester?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<StudentLeaveSemester>(
+      key: ValueKey<String>(selected.code),
+      initialValue: selected,
+      isExpanded: true,
+      decoration: InputDecoration(
+        border: const OutlineInputBorder(),
+        labelText: app.studentLeaveSelectSemester,
+        prefixIcon: const Icon(Icons.school_outlined),
+      ),
+      items: options
+          .map(
+            (StudentLeaveSemester option) =>
+                DropdownMenuItem<StudentLeaveSemester>(
+                  value: option,
+                  child: Text(
+                    app.studentLeaveYearSemester(
+                      year: option.schoolYear,
+                      semester: option.semester,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+          )
+          .toList(),
+      onChanged: onSelected,
+    );
+  }
 }
 
 class StudentLeaveAddPage extends StatefulWidget {
@@ -128,9 +223,7 @@ class StudentLeaveAddPage extends StatefulWidget {
 }
 
 class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
-  final TextEditingController _reasonController = TextEditingController(
-    text: '身體不適',
-  );
+  final TextEditingController _reasonController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   StudentLeaveType _type = StudentLeaveType.values[1];
@@ -157,72 +250,121 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(app.studentLeaveAdd)),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: <Widget>[
-            DropdownButtonFormField<StudentLeaveType>(
-              initialValue: _type,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: app.studentLeaveType,
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 24.0),
+                children: <Widget>[
+                  _FormSectionHeader(
+                    icon: Icons.description_outlined,
+                    title: app.studentLeaveRequestDetails,
+                  ),
+                  DropdownButtonFormField<StudentLeaveType>(
+                    initialValue: _type,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      labelText: app.studentLeaveType,
+                      prefixIcon: const Icon(Icons.category_outlined),
+                    ),
+                    items: StudentLeaveType.values
+                        .map(
+                          (StudentLeaveType type) =>
+                              DropdownMenuItem<StudentLeaveType>(
+                                value: type,
+                                child: Text(
+                                  _localizedLeaveType(type),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                        )
+                        .toList(),
+                    onChanged: (StudentLeaveType? value) {
+                      if (value == null) return;
+                      setState(() => _type = value);
+                    },
+                  ),
+                  const SizedBox(height: 20.0),
+                  _FormSectionHeader(
+                    icon: Icons.date_range_outlined,
+                    title: app.studentLeavePeriod,
+                  ),
+                  LayoutBuilder(
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                          final bool useRow = constraints.maxWidth >= 560;
+                          final Widget startTile = _DateTimeTile(
+                            title: app.studentLeaveStart,
+                            dateTime: _startDateTime,
+                            onTap: () => _pickDateTime(isStart: true),
+                          );
+                          final Widget endTile = _DateTimeTile(
+                            title: app.studentLeaveEnd,
+                            dateTime: _endDateTime,
+                            onTap: () => _pickDateTime(isStart: false),
+                          );
+                          if (useRow) {
+                            return Row(
+                              children: <Widget>[
+                                Expanded(child: startTile),
+                                const SizedBox(width: 12.0),
+                                Expanded(child: endTile),
+                              ],
+                            );
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              startTile,
+                              const SizedBox(height: 10.0),
+                              endTile,
+                            ],
+                          );
+                        },
+                  ),
+                  const SizedBox(height: 20.0),
+                  _FormSectionHeader(
+                    icon: Icons.edit_note_outlined,
+                    title: app.studentLeaveReason,
+                  ),
+                  TextFormField(
+                    controller: _reasonController,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      hintText: app.studentLeaveReasonHint,
+                      alignLabelWithHint: true,
+                    ),
+                    textInputAction: TextInputAction.newline,
+                    minLines: 3,
+                    maxLines: 5,
+                    validator: (String? value) {
+                      if ((value ?? '').trim().isEmpty) return ap.doNotEmpty;
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20.0),
+                  _FormSectionHeader(
+                    icon: Icons.attach_file,
+                    title: app.studentLeaveAttachment,
+                  ),
+                  _AttachmentTile(
+                    file: _attachmentFile,
+                    onPick: _pickAttachment,
+                    onRemove: () => setState(() => _attachmentFile = null),
+                  ),
+                ],
               ),
-              items: StudentLeaveType.values
-                  .map(
-                    (StudentLeaveType type) =>
-                        DropdownMenuItem<StudentLeaveType>(
-                          value: type,
-                          child: Text(type.name),
-                        ),
-                  )
-                  .toList(),
-              onChanged: (StudentLeaveType? value) {
-                if (value == null) return;
-                setState(() => _type = value);
-              },
             ),
-            const SizedBox(height: 16.0),
-            _DateTimeTile(
-              title: app.studentLeaveStart,
-              dateTime: _startDateTime,
-              onTap: () => _pickDateTime(isStart: true),
-            ),
-            const SizedBox(height: 12.0),
-            _DateTimeTile(
-              title: app.studentLeaveEnd,
-              dateTime: _endDateTime,
-              onTap: () => _pickDateTime(isStart: false),
-            ),
-            const SizedBox(height: 16.0),
-            TextFormField(
-              controller: _reasonController,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: app.studentLeaveReason,
-                hintText: app.studentLeaveReasonHint,
-              ),
-              minLines: 3,
-              maxLines: 5,
-              validator: (String? value) {
-                if ((value ?? '').trim().isEmpty) return ap.doNotEmpty;
-                return null;
-              },
-            ),
-            const SizedBox(height: 16.0),
-            _AttachmentTile(
-              file: _attachmentFile,
-              onPick: _pickAttachment,
-              onRemove: () => setState(() => _attachmentFile = null),
-            ),
-            const SizedBox(height: 24.0),
-            FilledButton.icon(
-              onPressed: _submit,
-              icon: const Icon(Icons.send),
-              label: Text(app.studentLeaveSubmit),
-            ),
-          ],
-        ),
+          ),
+          _SubmitBar(
+            duration: _endDateTime.difference(_startDateTime),
+            onSubmit: _submit,
+          ),
+        ],
       ),
     );
   }
@@ -272,25 +414,6 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
       UiUtil.instance.showToast(context, app.studentLeaveTimeInvalid);
       return;
     }
-    final bool? shouldSubmit = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext dialogContext) => AlertDialog(
-        title: Text(app.studentLeaveSubmitConfirmTitle),
-        content: Text(app.studentLeaveSubmitConfirmContent),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(app.optionCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(app.optionComfirm),
-          ),
-        ],
-      ),
-    );
-    if (shouldSubmit != true || !mounted) return;
-
     showDialog(
       context: context,
       builder: (BuildContext context) => PopScope(
@@ -356,6 +479,34 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
   }
 }
 
+class _RecordListHeader extends StatelessWidget {
+  const _RecordListHeader({required this.recordCount});
+
+  final int recordCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            app.studentLeaveRecords,
+            style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ),
+        Text(
+          app.studentLeaveRecordsCount(count: recordCount),
+          style: textTheme.labelLarge?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _LeaveRecordCard extends StatelessWidget {
   const _LeaveRecordCard({required this.record});
 
@@ -363,44 +514,126 @@ class _LeaveRecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final _LeaveStatusTone overallTone = _overallStatusTone(record);
+    final String? proofUrl = record.proofUrl;
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        _localizedConfirmationText(record.category),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        app.studentLeaveYearSemester(
+                          year: record.schoolYear,
+                          semester: record.semester,
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12.0),
+                _StatusBadge(tone: overallTone),
+              ],
+            ),
+            const SizedBox(height: 16.0),
+            _RecordHighlight(
+              icon: Icons.calendar_month_outlined,
+              label: app.studentLeavePeriod,
+              value: record.dateRange,
+            ),
+            const SizedBox(height: 16.0),
+            Divider(height: 1.0, color: theme.colorScheme.outlineVariant),
+            const SizedBox(height: 14.0),
             Text(
-              _localizedConfirmationText(record.category),
-              style: Theme.of(context).textTheme.titleMedium,
+              app.studentLeaveReviewProgress,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 8.0),
-            Text(
-              app.studentLeaveYearSemester(
-                year: record.schoolYear,
-                semester: record.semester,
-              ),
-              style: TextStyle(color: Theme.of(context).colorScheme.outline),
-            ),
-            const SizedBox(height: 12.0),
-            _RecordRow(label: app.studentLeaveNumber, value: record.number),
-            _RecordRow(label: app.studentLeaveStart, value: record.dateRange),
-            _RecordRow(
+            _ReviewStatusRow(
               label: app.studentLeaveTutorStatus,
               value: _localizedConfirmationText(record.tutorStatus),
             ),
-            _RecordRow(
+            _ReviewStatusRow(
               label: app.studentLeaveChairStatus,
               value: _localizedConfirmationText(record.chairStatus),
             ),
-            _RecordRow(
+            _ReviewStatusRow(
               label: app.studentLeaveInstructorStatus,
               value: _localizedConfirmationText(record.instructorStatus),
             ),
-            _RecordRow(
-              label: app.studentLeaveAttachment,
-              value: _localizedConfirmationText(record.proofText),
-              url: record.proofUrl,
+            const SizedBox(height: 8.0),
+            Row(
+              children: <Widget>[
+                Icon(
+                  Icons.tag,
+                  size: 16.0,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6.0),
+                Expanded(
+                  child: Text(
+                    record.number.isEmpty ? '-' : record.number,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                if (record.proofText.isNotEmpty ||
+                    proofUrl != null) ...<Widget>[
+                  Icon(
+                    Icons.attach_file,
+                    size: 16.0,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 4.0),
+                  Flexible(
+                    child: Text(
+                      _localizedConfirmationText(record.proofText),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  if (proofUrl != null)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: app.studentLeaveOpenAttachment,
+                      onPressed: () =>
+                          PlatformUtil.instance.launchUrl(proofUrl),
+                      icon: const Icon(Icons.open_in_new, size: 20.0),
+                    ),
+                ],
+              ],
             ),
           ],
         ),
@@ -409,52 +642,225 @@ class _LeaveRecordCard extends StatelessWidget {
   }
 }
 
-class _RecordRow extends StatelessWidget {
-  const _RecordRow({
+class _RecordHighlight extends StatelessWidget {
+  const _RecordHighlight({
+    required this.icon,
     required this.label,
     required this.value,
-    this.url,
   });
 
+  final IconData icon;
   final String label;
   final String value;
-  final String? url;
 
   @override
   Widget build(BuildContext context) {
-    final String? url = this.url;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(
-            width: 96,
-            child: Text(
-              label,
-              style: TextStyle(color: Theme.of(context).colorScheme.outline),
-            ),
+    final ThemeData theme = Theme.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          width: 40.0,
+          height: 40.0,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(8.0),
           ),
+          child: Icon(icon, size: 21.0, color: theme.colorScheme.primary),
+        ),
+        const SizedBox(width: 12.0),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 2.0),
+              Text(
+                value.isEmpty ? '-' : value,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReviewStatusRow extends StatelessWidget {
+  const _ReviewStatusRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final _LeaveStatusTone tone = _statusTone(value);
+    final _ToneStyle style = _toneStyle(context, tone);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 28.0,
+            height: 28.0,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: style.background,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(style.icon, size: 16.0, color: style.foreground),
+          ),
+          const SizedBox(width: 10.0),
+          Expanded(child: Text(label)),
           const SizedBox(width: 12.0),
-          Expanded(
-            child: url == null
-                ? Text(value.isEmpty ? '-' : value)
-                : Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
-                      onPressed: () => PlatformUtil.instance.launchUrl(url),
-                      icon: const Icon(Icons.open_in_new),
-                      label: Text(
-                        value.isEmpty ? app.studentLeaveAttachment : value,
-                      ),
-                    ),
-                  ),
+          Flexible(
+            child: Text(
+              value.isEmpty ? '-' : value,
+              textAlign: TextAlign.end,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: style.foreground,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 }
+
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.tone});
+
+  final _LeaveStatusTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final _ToneStyle style = _toneStyle(context, tone);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+      decoration: BoxDecoration(
+        color: style.background,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(style.icon, size: 16.0, color: style.foreground),
+          const SizedBox(width: 6.0),
+          Text(
+            _statusLabel(tone),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: style.foreground,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+enum _LeaveStatusTone { approved, pending, rejected, neutral }
+
+class _ToneStyle {
+  const _ToneStyle({
+    required this.background,
+    required this.foreground,
+    required this.icon,
+  });
+
+  final Color background;
+  final Color foreground;
+  final IconData icon;
+}
+
+_LeaveStatusTone _statusTone(String value) {
+  final String status = value.toLowerCase().replaceAll(' ', '');
+  if (status.contains('退') ||
+      status.contains('拒') ||
+      status.contains('不通過') ||
+      status.contains('失敗') ||
+      status.contains('reject') ||
+      status.contains('denied')) {
+    return _LeaveStatusTone.rejected;
+  }
+  if (status.contains('未確認') ||
+      status.contains('待') ||
+      status.contains('pending') ||
+      status.contains('unconfirmed')) {
+    return _LeaveStatusTone.pending;
+  }
+  if (status.contains('已確認') ||
+      status.contains('通過') ||
+      status.contains('核准') ||
+      status.contains('完成') ||
+      status.contains('approved') ||
+      status.contains('confirmed')) {
+    return _LeaveStatusTone.approved;
+  }
+  return _LeaveStatusTone.neutral;
+}
+
+_LeaveStatusTone _overallStatusTone(StudentLeaveRecord record) {
+  final List<_LeaveStatusTone> tones = <_LeaveStatusTone>[
+    _statusTone(record.tutorStatus),
+    _statusTone(record.chairStatus),
+    _statusTone(record.instructorStatus),
+  ];
+  if (tones.contains(_LeaveStatusTone.rejected)) {
+    return _LeaveStatusTone.rejected;
+  }
+  if (tones.contains(_LeaveStatusTone.pending)) {
+    return _LeaveStatusTone.pending;
+  }
+  if (tones.contains(_LeaveStatusTone.approved)) {
+    return _LeaveStatusTone.approved;
+  }
+  return _LeaveStatusTone.neutral;
+}
+
+_ToneStyle _toneStyle(BuildContext context, _LeaveStatusTone tone) {
+  final ColorScheme colors = Theme.of(context).colorScheme;
+  return switch (tone) {
+    _LeaveStatusTone.approved => _ToneStyle(
+      background: colors.primaryContainer,
+      foreground: colors.onPrimaryContainer,
+      icon: Icons.check_circle_outline,
+    ),
+    _LeaveStatusTone.pending => _ToneStyle(
+      background: colors.tertiaryContainer,
+      foreground: colors.onTertiaryContainer,
+      icon: Icons.schedule,
+    ),
+    _LeaveStatusTone.rejected => _ToneStyle(
+      background: colors.errorContainer,
+      foreground: colors.onErrorContainer,
+      icon: Icons.error_outline,
+    ),
+    _LeaveStatusTone.neutral => _ToneStyle(
+      background: colors.surfaceContainerHighest,
+      foreground: colors.onSurfaceVariant,
+      icon: Icons.remove_circle_outline,
+    ),
+  };
+}
+
+String _statusLabel(_LeaveStatusTone tone) => switch (tone) {
+  _LeaveStatusTone.approved => app.studentLeaveStatusApproved,
+  _LeaveStatusTone.pending => app.studentLeaveStatusPending,
+  _LeaveStatusTone.rejected => app.studentLeaveStatusRejected,
+  _LeaveStatusTone.neutral => app.studentLeaveStatusNoReview,
+};
 
 class _AttachmentTile extends StatelessWidget {
   const _AttachmentTile({
@@ -470,27 +876,72 @@ class _AttachmentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final PlatformFile? file = this.file;
-    return Card(
-      child: ListTile(
-        title: Text(app.studentLeaveAttachment),
-        subtitle: Text(
-          file == null
-              ? app.studentLeaveAttachmentHint
-              : '${file.name}\n${_formatBytes(file.size)}',
-        ),
-        isThreeLine: file != null,
-        trailing: file == null
-            ? TextButton.icon(
-                onPressed: onPick,
-                icon: const Icon(Icons.attach_file),
-                label: Text(app.studentLeavePickAttachment),
-              )
-            : IconButton(
-                tooltip: app.studentLeaveRemoveAttachment,
-                onPressed: onRemove,
-                icon: const Icon(Icons.close),
-              ),
+    final ThemeData theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: onPick,
+        child: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 44.0,
+                height: 44.0,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondaryContainer,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Icon(
+                  file == null
+                      ? Icons.upload_file_outlined
+                      : Icons.description_outlined,
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      file?.name ?? app.studentLeavePickAttachment,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      file == null
+                          ? app.studentLeaveAttachmentHint
+                          : _formatBytes(file.size),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8.0),
+              if (file == null)
+                const Icon(Icons.chevron_right)
+              else
+                IconButton(
+                  tooltip: app.studentLeaveRemoveAttachment,
+                  onPressed: onRemove,
+                  icon: const Icon(Icons.close),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -500,6 +951,80 @@ class _AttachmentTile extends StatelessWidget {
     final double kb = bytes / 1024;
     if (kb < 1024) return '${kb.toStringAsFixed(1)} KB';
     return '${(kb / 1024).toStringAsFixed(1)} MB';
+  }
+}
+
+class _FormSectionHeader extends StatelessWidget {
+  const _FormSectionHeader({required this.icon, required this.title});
+
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10.0),
+      child: Row(
+        children: <Widget>[
+          Icon(icon, size: 20.0, color: theme.colorScheme.primary),
+          const SizedBox(width: 8.0),
+          Text(
+            title,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SubmitBar extends StatelessWidget {
+  const _SubmitBar({required this.duration, required this.onSubmit});
+
+  final Duration duration;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(
+          top: BorderSide(color: theme.colorScheme.outlineVariant),
+        ),
+      ),
+      child: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              Icons.schedule,
+              size: 20.0,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: Text(
+                app.studentLeaveDuration(duration: _formatDuration(duration)),
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12.0),
+            FilledButton.icon(
+              onPressed: onSubmit,
+              icon: const Icon(Icons.arrow_forward),
+              label: Text(app.studentLeaveSubmit),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -541,50 +1066,44 @@ class _StudentLeaveResultPageState extends State<StudentLeaveResultPage> {
     final StudentLeaveConfirmForm? confirmForm = this.confirmForm;
     return Scaffold(
       appBar: AppBar(title: Text(app.studentLeaveResult)),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
+      body: Column(
         children: <Widget>[
-          if (confirmation.messages.isNotEmpty)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    for (final String message in confirmation.messages)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Text(
-                          _localizedConfirmationText(message),
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 24.0),
+              children: <Widget>[
+                _ConfirmationHeader(isPreview: confirmForm != null),
+                if (confirmForm != null) ...<Widget>[
+                  const SizedBox(height: 12.0),
+                  const _StudentLeaveNotice(),
+                ] else if (confirmation.messages.isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 12.0),
+                  _ConfirmationMessages(messages: confirmation.messages),
+                ],
+                const SizedBox(height: 20.0),
+                for (final StudentLeaveConfirmationSection section
+                    in confirmation.sections)
+                  _ConfirmationSectionCard(section: section),
+                if (!confirmation.hasStructuredData)
+                  Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
                       ),
-                  ],
-                ),
-              ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: SelectableText(
+                      confirmation.rawText.isEmpty
+                          ? ap.noData
+                          : confirmation.rawText,
+                    ),
+                  ),
+              ],
             ),
-          for (final StudentLeaveConfirmationSection section
-              in confirmation.sections)
-            _ConfirmationSectionCard(section: section),
-          if (!confirmation.hasStructuredData)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SelectableText(
-                  confirmation.rawText.isEmpty
-                      ? ap.noData
-                      : confirmation.rawText,
-                ),
-              ),
-            ),
-          if (confirmForm != null) ...<Widget>[
-            const SizedBox(height: 16.0),
-            FilledButton.icon(
-              onPressed: () => _confirm(confirmForm),
-              icon: const Icon(Icons.check),
-              label: Text(app.studentLeaveFinalSubmit),
-            ),
-          ],
+          ),
+          if (confirmForm != null)
+            _ConfirmationSubmitBar(onConfirm: () => _confirm(confirmForm)),
         ],
       ),
     );
@@ -634,19 +1153,284 @@ class _ConfirmationSectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String title = _localizedConfirmationText(section.title);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            if (title.isNotEmpty) ...<Widget>[
-              Text(title, style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 12.0),
-            ],
-            for (final StudentLeaveConfirmationField field in section.fields)
-              _ConfirmationFieldRow(field: field),
+    final ThemeData theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          if (title.isNotEmpty) ...<Widget>[
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 10.0),
           ],
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14.0,
+              vertical: 8.0,
+            ),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerLow,
+              border: Border.all(color: theme.colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Column(
+              children: <Widget>[
+                for (final StudentLeaveConfirmationField field
+                    in section.fields)
+                  _ConfirmationFieldRow(field: field),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConfirmationHeader extends StatelessWidget {
+  const _ConfirmationHeader({required this.isPreview});
+
+  final bool isPreview;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: isPreview
+            ? theme.colorScheme.primaryContainer
+            : theme.colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            isPreview ? Icons.fact_check_outlined : Icons.check_circle_outline,
+            size: 28.0,
+            color: isPreview
+                ? theme.colorScheme.onPrimaryContainer
+                : theme.colorScheme.onSecondaryContainer,
+          ),
+          const SizedBox(width: 12.0),
+          Expanded(
+            child: Text(
+              isPreview
+                  ? app.studentLeaveFinalCheck
+                  : app.studentLeaveSubmitSuccess,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: isPreview
+                    ? theme.colorScheme.onPrimaryContainer
+                    : theme.colorScheme.onSecondaryContainer,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConfirmationMessages extends StatelessWidget {
+  const _ConfirmationMessages({required this.messages});
+
+  final List<String> messages;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(14.0),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Icon(
+            Icons.info_outline,
+            size: 20.0,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(width: 10.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                for (
+                  int index = 0;
+                  index < messages.length;
+                  index++
+                ) ...<Widget>[
+                  if (index > 0) const SizedBox(height: 6.0),
+                  Text(_localizedConfirmationText(messages[index])),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StudentLeaveNotice extends StatelessWidget {
+  const _StudentLeaveNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        data: theme.copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: true,
+          tilePadding: const EdgeInsets.symmetric(
+            horizontal: 14.0,
+            vertical: 2.0,
+          ),
+          childrenPadding: const EdgeInsets.fromLTRB(14.0, 0, 14.0, 14.0),
+          leading: Icon(Icons.info_outline, color: theme.colorScheme.primary),
+          title: Text(
+            app.studentLeaveNoticeTitle,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          children: <Widget>[
+            _NoticeSection(
+              icon: Icons.date_range_outlined,
+              title: app.studentLeaveNoticePeriodTitle,
+              content: app.studentLeaveNoticePeriodContent,
+            ),
+            _NoticeSection(
+              icon: Icons.upload_file_outlined,
+              title: app.studentLeaveNoticeAttachmentTitle,
+              content: app.studentLeaveNoticeAttachmentContent,
+            ),
+            _NoticeSection(
+              icon: Icons.school_outlined,
+              title: app.studentLeaveNoticeExamTitle,
+              content: app.studentLeaveNoticeExamContent,
+            ),
+            _NoticeSection(
+              icon: Icons.mark_email_read_outlined,
+              title: app.studentLeaveNoticeSubmitTitle,
+              content: app.studentLeaveNoticeSubmitContent,
+              showDivider: false,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NoticeSection extends StatelessWidget {
+  const _NoticeSection({
+    required this.icon,
+    required this.title,
+    required this.content,
+    this.showDivider = true,
+  });
+
+  final IconData icon;
+  final String title;
+  final String content;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: 32.0,
+                height: 32.0,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Icon(
+                  icon,
+                  size: 18.0,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
+              const SizedBox(width: 10.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6.0),
+                    Text(
+                      content,
+                      style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (showDivider)
+          Divider(height: 1.0, color: theme.colorScheme.outlineVariant),
+      ],
+    );
+  }
+}
+
+class _ConfirmationSubmitBar extends StatelessWidget {
+  const _ConfirmationSubmitBar({required this.onConfirm});
+
+  final VoidCallback onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(
+          top: BorderSide(color: theme.colorScheme.outlineVariant),
+        ),
+      ),
+      child: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
+        child: SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: onConfirm,
+            icon: const Icon(Icons.check),
+            label: Text(app.studentLeaveFinalSubmit),
+          ),
         ),
       ),
     );
@@ -737,21 +1521,107 @@ class _DateTimeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        title: Text(title),
-        subtitle: Text(_formatDateTime(dateTime)),
-        trailing: const Icon(Icons.edit_calendar),
+    final ThemeData theme = Theme.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
+    return Material(
+      color: theme.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 42.0,
+                height: 42.0,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Icon(
+                  Icons.calendar_today_outlined,
+                  size: 20.0,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 3.0),
+                    Text(
+                      localizations.formatMediumDate(dateTime),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8.0),
+              Text(
+                localizations.formatTimeOfDay(
+                  TimeOfDay.fromDateTime(dateTime),
+                  alwaysUse24HourFormat: true,
+                ),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
+}
 
-  static String _formatDateTime(DateTime dateTime) {
-    final String month = dateTime.month.toString().padLeft(2, '0');
-    final String day = dateTime.day.toString().padLeft(2, '0');
-    final String hour = dateTime.hour.toString().padLeft(2, '0');
-    final String minute = dateTime.minute.toString().padLeft(2, '0');
-    return '${dateTime.year}-$month-$day $hour:$minute';
-  }
+String _formatDuration(Duration duration) {
+  final Duration safeDuration = duration.isNegative ? Duration.zero : duration;
+  final int hours = safeDuration.inHours;
+  final int minutes = safeDuration.inMinutes.remainder(60);
+  final bool isEnglish =
+      nsysu_l10n.LocaleSettings.currentLocale == nsysu_l10n.AppLocale.en;
+  if (hours == 0) return isEnglish ? '${minutes}m' : '$minutes 分鐘';
+  if (minutes == 0) return isEnglish ? '${hours}h' : '$hours 小時';
+  return isEnglish ? '${hours}h ${minutes}m' : '$hours 小時 $minutes 分鐘';
+}
+
+String _localizedLeaveType(StudentLeaveType type) {
+  final bool isEnglish =
+      nsysu_l10n.LocaleSettings.currentLocale == nsysu_l10n.AppLocale.en;
+  if (!isEnglish) return type.name;
+  return switch (type.code) {
+    '11' => 'Official leave',
+    '12' => 'Personal leave',
+    '13' => 'Sick leave',
+    '14' => 'Bereavement leave',
+    '15' => 'Menstrual leave',
+    '16' => 'Marriage leave',
+    '17' => 'Maternity leave',
+    '18' => 'Family care leave',
+    '19' => 'Other',
+    '20' => 'Mental health leave',
+    '21' => 'COVID-19 related',
+    '22' => 'Indigenous ceremonial leave',
+    _ => type.name,
+  };
 }
