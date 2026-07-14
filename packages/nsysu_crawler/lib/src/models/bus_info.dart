@@ -15,6 +15,7 @@ part 'bus_info.g.dart';
 class BusInfo {
   BusInfo({
     this.carId,
+    List<String>? busIds,
     required this.stopName,
     required this.routeId,
     required this.name,
@@ -22,10 +23,12 @@ class BusInfo {
     required this.departure,
     required this.destination,
     required this.updateTime,
-  });
+  }) : busIds = busIds ?? _busIdsFromCarId(carId);
 
   @JsonKey(name: 'CarID')
   String? carId;
+  @JsonKey(name: 'BusIDs')
+  List<String> busIds;
   @JsonKey(name: 'StopName')
   String stopName;
   @JsonKey(name: 'RouteID')
@@ -41,8 +44,11 @@ class BusInfo {
   @JsonKey(name: 'UpdateTime')
   String? updateTime;
 
+  bool get isOperating => busIds.isNotEmpty;
+
   BusInfo copyWith({
     String? carId,
+    List<String>? busIds,
     String? stopName,
     int? routeId,
     String? name,
@@ -50,26 +56,25 @@ class BusInfo {
     String? departure,
     String? destination,
     String? updateTime,
-  }) =>
-      BusInfo(
-        carId: carId ?? this.carId,
-        stopName: stopName ?? this.stopName,
-        routeId: routeId ?? this.routeId,
-        name: name ?? this.name,
-        isOpenData: isOpenData ?? this.isOpenData,
-        departure: departure ?? this.departure,
-        destination: destination ?? this.destination,
-        updateTime: updateTime ?? this.updateTime,
-      );
+  }) => BusInfo(
+    carId: carId ?? this.carId,
+    busIds: busIds ?? this.busIds,
+    stopName: stopName ?? this.stopName,
+    routeId: routeId ?? this.routeId,
+    name: name ?? this.name,
+    isOpenData: isOpenData ?? this.isOpenData,
+    departure: departure ?? this.departure,
+    destination: destination ?? this.destination,
+    updateTime: updateTime ?? this.updateTime,
+  );
 
   factory BusInfo.fromJson(Map<String, dynamic> json) =>
       _$CustomBusInfoFromJson(json);
 
   Map<String, dynamic> toJson() => _$BusInfoToJson(this);
 
-  factory BusInfo.fromRawJson(String str) => BusInfo.fromJson(
-        json.decode(str) as Map<String, dynamic>,
-      );
+  factory BusInfo.fromRawJson(String str) =>
+      BusInfo.fromJson(json.decode(str) as Map<String, dynamic>);
 
   String toRawJson() => jsonEncode(toJson());
 
@@ -98,40 +103,43 @@ class BusInfo {
       return null;
     } else {
       return List<BusInfo>.from(
-        rawStringList.map(
-          (String x) => BusInfo.fromRawJson(x),
-        ),
+        rawStringList.map((String x) => BusInfo.fromRawJson(x)),
       );
     }
   }
 }
 
 BusInfo _$CustomBusInfoFromJson(Map<String, dynamic> json) => BusInfo(
-      carId: json['CarID'] as String?,
-      stopName: json['StopName'] as String,
-      routeId: json['RouteID'] as int,
-      name: json['Name'] == null
-          ? json['NameEn'] as String
-          : json['Name'] as String,
-      isOpenData: json['isOpenData'] as String,
-      departure: json['Departure'] == null
-          ? json['DepartureEn'] as String
-          : json['Departure'] as String,
-      destination: json['Destination'] == null
-          ? json['DestinationEn'] as String
-          : json['Destination'] as String,
-      updateTime: json['UpdateTime'] as String?,
-    );
+  carId: json['CarID'] as String?,
+  busIds: (json['BusIDs'] as List<dynamic>?)?.cast<String>(),
+  stopName: json['StopName'] as String,
+  routeId: json['RouteID'] as int,
+  name: json['Name'] == null
+      ? json['NameEn'] as String
+      : json['Name'] as String,
+  isOpenData: json['isOpenData'] as String,
+  departure: json['Departure'] == null
+      ? json['DepartureEn'] as String
+      : json['Departure'] as String,
+  destination: json['Destination'] == null
+      ? json['DestinationEn'] as String
+      : json['Destination'] as String,
+  updateTime: json['UpdateTime'] as String?,
+);
+
+List<String> _busIdsFromCarId(String? carId) =>
+    carId
+        ?.split(',')
+        .map((String id) => id.trim())
+        .where((String id) => id.isNotEmpty)
+        .toList(growable: false) ??
+    <String>[];
 
 extension BusInfoExtension on List<BusTime> {
   void save() {
     PreferenceUtil.instance.setStringList(
       BusInfo._prefBusInfoData,
-      List<String>.from(
-        map(
-          (BusTime x) => x.toRawJson(),
-        ),
-      ),
+      List<String>.from(map((BusTime x) => x.toRawJson())),
     );
   }
 }
