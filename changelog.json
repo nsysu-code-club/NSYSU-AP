@@ -1,4 +1,15 @@
 {
+  "20001": {
+    "version": "2.0.1",
+    "visible": true,
+    "date": "2026/07/15",
+    "zh-TW": [
+      "修正校車功能"
+    ],
+    "en-US": [
+      "Fix bus function."
+    ]
+  },
   "20000": {
     "version": "2.0.0",
     "visible": true,
