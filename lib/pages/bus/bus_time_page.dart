@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class BusTimePage extends StatefulWidget {
   final Locale locale;
@@ -73,37 +73,24 @@ class _BusTimePageState extends State<BusTimePage>
         onTap: () {
           _getData();
         },
-        child: HintContent(
-          icon: ApIcon.error,
-          content: ap.clickToRetry,
-        ),
+        child: HintContent(icon: ApIcon.error, content: ap.clickToRetry),
       ),
       empty: (String? hint) => InkWell(
         onTap: () => _getData(),
-        child: HintContent(
-          icon: ApIcon.info,
-          content: ap.busEmpty,
-        ),
+        child: HintContent(icon: ApIcon.info, content: ap.busEmpty),
       ),
-      loaded: ((List<BusTime>, List<BusTime>) data, String? hint) =>
-          TabBarView(
+      loaded: ((List<BusTime>, List<BusTime>) data, String? hint) => TabBarView(
         controller: _tabController,
         children: <Widget>[
           ListView.separated(
             itemCount: data.$1.length,
-            separatorBuilder: (_, __) => const Divider(height: 1.0),
-            itemBuilder: (_, int index) => BusTimeItem(
-              busTime: data.$1[index],
-              locale: widget.locale,
-            ),
+            separatorBuilder: (_, _) => const Divider(height: 1.0),
+            itemBuilder: (_, int index) => BusTimeItem(busTime: data.$1[index]),
           ),
           ListView.separated(
             itemCount: data.$2.length,
-            separatorBuilder: (_, __) => const Divider(height: 1.0),
-            itemBuilder: (_, int index) => BusTimeItem(
-              busTime: data.$2[index],
-              locale: widget.locale,
-            ),
+            separatorBuilder: (_, _) => const Divider(height: 1.0),
+            itemBuilder: (_, int index) => BusTimeItem(busTime: data.$2[index]),
           ),
         ],
       ),
@@ -111,18 +98,18 @@ class _BusTimePageState extends State<BusTimePage>
   }
 
   Future<void> _getData() async {
-    final ApiResult<List<BusTime>?> result =
-        await BusHelper.instance.getBusTime(
-      languageCode: widget.locale.languageCode.contains('zh') ? 'zh' : 'en',
-      busInfo: widget.busInfo,
-    );
+    final ApiResult<List<BusTime>?> result = await BusHelper.instance
+        .getBusTime(
+          languageCode: widget.locale.languageCode.contains('zh') ? 'zh' : 'en',
+          busInfo: widget.busInfo,
+        );
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<List<BusTime>?>(:final List<BusTime>? data):
         final List<BusTime> starts = <BusTime>[];
         final List<BusTime> ends = <BusTime>[];
-        for (final BusTime element in data!) {
-          if (element.isGoBack == 'Y') {
+        for (final BusTime element in data ?? <BusTime>[]) {
+          if (element.direction == BusDirection.back) {
             ends.add(element);
           } else {
             starts.add(element);
@@ -136,54 +123,49 @@ class _BusTimePageState extends State<BusTimePage>
           }
         });
       case ApiFailure<List<BusTime>?>():
-        setState(() =>
-            state = const DataError<(List<BusTime>, List<BusTime>)>());
+        setState(
+          () => state = const DataError<(List<BusTime>, List<BusTime>)>(),
+        );
       case ApiError<List<BusTime>?>():
-        setState(() =>
-            state = const DataError<(List<BusTime>, List<BusTime>)>());
+        setState(
+          () => state = const DataError<(List<BusTime>, List<BusTime>)>(),
+        );
     }
   }
 }
 
 class BusTimeItem extends StatelessWidget {
   final BusTime busTime;
-  final Locale locale;
 
-  const BusTimeItem({super.key, required this.busTime, required this.locale});
+  const BusTimeItem({super.key, required this.busTime});
 
   @override
   Widget build(BuildContext context) {
-    final bool isEnglish = locale.languageCode.contains('en');
-    final String postfix = int.tryParse(busTime.arrivedTime ?? '') == null
-        ? ''
-        : ' ${app.minute}';
-    String arrivedTimeText = '';
+    String arrivedTimeText;
     double? fontSize;
     Color color = Theme.of(context).colorScheme.onSurfaceVariant;
-    if (busTime.arrivedTime != null) {
-      arrivedTimeText = busTime.arrivedTime!;
-      switch (busTime.arrivedTime) {
-        case '進站中':
-          if (isEnglish) {
-            arrivedTimeText = 'Arriving';
-          }
-          color = Colors.red;
-        case '將到站':
-          if (isEnglish) {
-            arrivedTimeText = 'Coming\nSoon';
-            fontSize = 12.0;
-          }
-          color = Colors.green;
-        default:
-          break;
-      }
-    } else {
-      if (isEnglish) {
-        arrivedTimeText = 'Departed';
+    switch (busTime.arrivalStatus) {
+      case BusArrivalStatus.arriving:
+        arrivedTimeText = app.busArriving;
+        color = Colors.red;
+      case BusArrivalStatus.comingSoon:
+        arrivedTimeText = app.busComingSoon;
+        color = Colors.green;
+      case BusArrivalStatus.minutes:
+        arrivedTimeText = '${busTime.etaMinutes ?? 0} ${app.minute}';
+      case BusArrivalStatus.scheduled:
+        arrivedTimeText = app.busScheduledTime(
+          time: busTime.scheduledTime ?? '',
+        );
+        color = Theme.of(context).colorScheme.primary;
         fontSize = 12.0;
-      } else {
-        arrivedTimeText = '已離站';
-      }
+      case BusArrivalStatus.departed:
+        arrivedTimeText = app.busDeparted;
+        fontSize = 12.0;
+      case BusArrivalStatus.notOperating:
+        arrivedTimeText = app.busNotOperating;
+        color = Theme.of(context).colorScheme.outline;
+        fontSize = 12.0;
     }
     return ListTile(
       leading: Container(
@@ -196,7 +178,7 @@ class BusTimeItem extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Text(
-          '$arrivedTimeText$postfix',
+          arrivedTimeText,
           style: TextStyle(fontSize: fontSize, color: color),
           textAlign: TextAlign.center,
         ),

@@ -3,16 +3,13 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/pages/bus/bus_time_page.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class BusListPage extends StatefulWidget {
   final Locale locale;
 
-  const BusListPage({
-    super.key,
-    required this.locale,
-  });
+  const BusListPage({super.key, required this.locale});
 
   @override
   _BusListPageState createState() => _BusListPageState();
@@ -36,31 +33,22 @@ class _BusListPageState extends State<BusListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(ap.bus),
-      ),
+      appBar: AppBar(title: Text(ap.bus)),
       body: _body(),
     );
   }
 
   Widget _body() {
     return state.when(
-      loading: () => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
       error: (String? hint) => InkWell(
         onTap: () {
           _getData();
         },
-        child: HintContent(
-          icon: ApIcon.error,
-          content: ap.clickToRetry,
-        ),
+        child: HintContent(icon: ApIcon.error, content: ap.clickToRetry),
       ),
-      empty: (String? hint) => HintContent(
-        icon: ApIcon.info,
-        content: ap.busEmpty,
-      ),
+      empty: (String? hint) =>
+          HintContent(icon: ApIcon.info, content: ap.busEmpty),
       loaded: (List<BusInfo> data, String? hint) => ListView.builder(
         itemCount: data.length,
         itemBuilder: (_, int index) {
@@ -68,19 +56,17 @@ class _BusListPageState extends State<BusListPage> {
           return ListTile(
             title: Text(bus.name),
             trailing: Text(
-              bus.carId?.split(',').first ?? bus.carId ?? bus.stopName,
+              bus.isOperating ? bus.busIds.first : bus.stopName,
               style: TextStyle(
-                color: bus.carId == null ? Colors.red : Colors.green,
+                color: bus.isOperating ? Colors.green : Colors.red,
               ),
             ),
             onTap: () {
               Navigator.push(
                 context,
                 CupertinoPageRoute<dynamic>(
-                  builder: (_) => BusTimePage(
-                    busInfo: bus,
-                    locale: widget.locale,
-                  ),
+                  builder: (_) =>
+                      BusTimePage(busInfo: bus, locale: widget.locale),
                 ),
               );
             },
@@ -91,10 +77,10 @@ class _BusListPageState extends State<BusListPage> {
   }
 
   Future<void> _getData() async {
-    final ApiResult<List<BusInfo>?> result =
-        await BusHelper.instance.getBusInfoList(
-      languageCode: widget.locale.languageCode.contains('zh') ? 'zh' : 'en',
-    );
+    final ApiResult<List<BusInfo>?> result = await BusHelper.instance
+        .getBusInfoList(
+          languageCode: widget.locale.languageCode.contains('zh') ? 'zh' : 'en',
+        );
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<List<BusInfo>?>(:final List<BusInfo>? data):
