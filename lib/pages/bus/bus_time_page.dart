@@ -179,23 +179,42 @@ class BusTimeItem extends StatelessWidget {
         color = Theme.of(context).colorScheme.outline;
         fontSize = 12.0;
     }
-    return ListTile(
-      leading: Container(
-        height: 40.0,
-        width: 72.0,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          border: Border.all(color: color),
-          borderRadius: const BorderRadius.all(Radius.circular(32.0)),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Text(
-          arrivedTimeText,
-          style: TextStyle(fontSize: fontSize, color: color),
-          textAlign: TextAlign.center,
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Row(
+        children: <Widget>[
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: 40.0,
+              minWidth: 72.0,
+              maxWidth: 100.0,
+            ),
+            child: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                border: Border.all(color: color),
+                borderRadius: const BorderRadius.all(Radius.circular(32.0)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Text(
+                arrivedTimeText,
+                style: TextStyle(fontSize: fontSize, color: color),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                softWrap: false,
+                overflow: TextOverflow.fade,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16.0),
+          Expanded(
+            child: Text(
+              busTime.name,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+        ],
       ),
-      title: Text(busTime.name),
     );
   }
 }
