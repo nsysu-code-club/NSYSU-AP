@@ -55,11 +55,11 @@ struct Provider: IntentTimelineProvider {
         var nextLocation = ""
         var shortNext = ""
         
-        if let json = myUserDefaults?.string(forKey: "course_notify") {
-            let courseData = try? JSONDecoder().decode(CourseData.self, from: Data(json.utf8))
+        if let json = myUserDefaults?.string(forKey: "course_notify"),
+           let courseData = try? JSONDecoder().decode(CourseData.self, from: Data(json.utf8)) {
             let today = Date()
             let dateComponents = Calendar.current.dateComponents(in: TimeZone.current, from: today)
-            let courses = courseData?.courses
+            let courses = courseData.courses
             let weekday = dateComponents.weekday == 1 ? 7 : (dateComponents.weekday ?? 1) - 1
             
             struct TempCourseItem {
@@ -71,12 +71,12 @@ struct Provider: IntentTimelineProvider {
             var futureCourses: [TempCourseItem] = []
             var todayCount = 0
             
-            courses?.forEach({ (course) in
+            courses.forEach({ (course) in
                 course.sectionTimes.forEach { (sectionTime) in
                     if weekday == sectionTime.weekday {
                         todayCount += 1
-                        if sectionTime.index < (courseData?.timeCodes.count ?? 0) {
-                            let timeCode = courseData!.timeCodes[sectionTime.index]
+                        if sectionTime.index >= 0 && sectionTime.index < courseData.timeCodes.count {
+                            let timeCode = courseData.timeCodes[sectionTime.index]
                             let time = time2Date(timeText: timeCode.startTime)
                             let diff = time.timeIntervalSince1970 - today.timeIntervalSince1970
                             if diff > 0.0 {
@@ -88,17 +88,17 @@ struct Provider: IntentTimelineProvider {
                     }
                 }
             })
-            futureCourses.sort { $0.diff < $1.diff }
             
-            if !futureCourses.isEmpty {
-                let first = futureCourses[0]
+            let topTwoCourses = Array(futureCourses.sorted { $0.diff < $1.diff }.prefix(2))
+            
+            if let first = topTwoCourses.first {
                 classTime = "\(first.timeCode.startTime) - \(first.timeCode.endTime)"
                 location = "\(first.course.location.building ?? "")\(first.course.location.room ?? "")"
                 title = first.course.title
                 shortText = "\(first.course.title): \(location) \(first.timeCode.startTime)"
                 
-                if futureCourses.count > 1 {
-                    let second = futureCourses[1]
+                if topTwoCourses.count > 1 {
+                    let second = topTwoCourses[1]
                     nextTime = "\(second.timeCode.startTime) - \(second.timeCode.endTime)"
                     nextLocation = "\(second.course.location.building ?? "")\(second.course.location.room ?? "")"
                     nextTitle = second.course.title
@@ -161,7 +161,6 @@ struct SimpleEntry: TimelineEntry {
     let configuration: ConfigurationIntent
 }
 
-// TODO: make this look better
 struct CourseAppWidgetEntryView: View {
     var entry: Provider.Entry
     @Environment(\.colorScheme) var colorScheme
@@ -177,31 +176,47 @@ struct CourseAppWidgetEntryView: View {
         return colorScheme == .dark ? Color.white : Color.black
     }
     
-    var weekdayText: String {
+    private static let weekdayFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "EEE" // "Mon", "Tue", "Wed", etc.
+        formatter.dateFormat = "EEE"
         formatter.locale = Locale(identifier: "en_US")
-        return formatter.string(from: entry.date).uppercased()
+        return formatter
+    }()
+    
+    private static let fullWeekdayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE"
+        formatter.locale = Locale(identifier: "en_US")
+        return formatter
+    }()
+    
+    private static let dayOfMonthFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d"
+        return formatter
+    }()
+    
+    private static let monthFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM"
+        formatter.locale = Locale(identifier: "en_US")
+        return formatter
+    }()
+
+    var weekdayText: String {
+        Self.weekdayFormatter.string(from: entry.date).uppercased()
     }
     
     var fullWeekdayText: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE" // "Monday", "Tuesday", etc.
-        formatter.locale = Locale(identifier: "en_US")
-        return formatter.string(from: entry.date).uppercased()
+        Self.fullWeekdayFormatter.string(from: entry.date).uppercased()
     }
     
     var dayOfMonthText: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d" // "13", "1"
-        return formatter.string(from: entry.date)
+        Self.dayOfMonthFormatter.string(from: entry.date)
     }
     
     var monthText: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM" // "June", "January"
-        formatter.locale = Locale(identifier: "en_US")
-        return formatter.string(from: entry.date).uppercased()
+        Self.monthFormatter.string(from: entry.date).uppercased()
     }
     
     var body: some View {
@@ -357,7 +372,6 @@ struct InlineWidgetView: View {
 }
 
 @available(iOSApplicationExtension 16.0, *)
-// TODO: make this look better
 struct CourseTextWidgetEntryView: View {
     var entry: Provider.Entry
     
