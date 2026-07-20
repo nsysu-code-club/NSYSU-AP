@@ -21,6 +21,7 @@ struct Provider: IntentTimelineProvider {
             nextLocation: "",
             nextTitle: "",
             shortNext: "",
+            compactNext: "",
             configuration: ConfigurationIntent()
         )
     }
@@ -35,6 +36,7 @@ struct Provider: IntentTimelineProvider {
             nextLocation: "",
             nextTitle: "",
             shortNext: "",
+            compactNext: "",
             configuration: configuration
         )
         completion(entry)
@@ -54,6 +56,7 @@ struct Provider: IntentTimelineProvider {
         var nextTime = ""
         var nextLocation = ""
         var shortNext = ""
+        var compactNext = ""
         
         if let json = myUserDefaults?.string(forKey: "course_notify"),
            let courseData = try? JSONDecoder().decode(CourseData.self, from: Data(json.utf8)) {
@@ -64,11 +67,14 @@ struct Provider: IntentTimelineProvider {
             
             struct TempCourseItem {
                 let course: Course
-                let timeCode: TimeCode
-                let diff: TimeInterval
+                let startTime: String
+                var endTime: String
+                var endSectionIndex: Int
+                let startDate: Date
+                var endDate: Date
             }
             
-            var futureCourses: [TempCourseItem] = []
+            var todayCourses: [TempCourseItem] = []
             var todayCount = 0
             
             courses.forEach({ (course) in
@@ -77,32 +83,56 @@ struct Provider: IntentTimelineProvider {
                         todayCount += 1
                         if sectionTime.index >= 0 && sectionTime.index < courseData.timeCodes.count {
                             let timeCode = courseData.timeCodes[sectionTime.index]
-                            let time = time2Date(timeText: timeCode.startTime)
-                            let diff = time.timeIntervalSince1970 - today.timeIntervalSince1970
-                            if diff > 0.0 {
-                                futureCourses.append(
-                                    TempCourseItem(course: course, timeCode: timeCode, diff: diff)
+                            todayCourses.append(
+                                TempCourseItem(
+                                    course: course,
+                                    startTime: timeCode.startTime,
+                                    endTime: timeCode.endTime,
+                                    endSectionIndex: sectionTime.index,
+                                    startDate: time2Date(timeText: timeCode.startTime),
+                                    endDate: time2Date(timeText: timeCode.endTime)
                                 )
-                            }
+                            )
                         }
                     }
                 }
             })
             
-            let topTwoCourses = Array(futureCourses.sorted { $0.diff < $1.diff }.prefix(2))
+            let sortedCourses = todayCourses.sorted { $0.startDate < $1.startDate }
+            var mergedCourses: [TempCourseItem] = []
+
+            for item in sortedCourses {
+                if let last = mergedCourses.last,
+                   last.course === item.course,
+                   item.endSectionIndex == last.endSectionIndex + 1 {
+                    mergedCourses[mergedCourses.count - 1].endTime = item.endTime
+                    mergedCourses[mergedCourses.count - 1].endSectionIndex = item.endSectionIndex
+                    mergedCourses[mergedCourses.count - 1].endDate = item.endDate
+                } else {
+                    mergedCourses.append(item)
+                }
+            }
+
+            let activeAndFutureCourses = mergedCourses.filter { $0.endDate > today }
+            let topTwoCourses = Array(activeAndFutureCourses.prefix(2))
             
             if let first = topTwoCourses.first {
-                classTime = "\(first.timeCode.startTime) - \(first.timeCode.endTime)"
-                location = "\(first.course.location.building ?? "")\(first.course.location.room ?? "")"
+                classTime = "\(first.startTime) - \(first.endTime)"
+                location = cleanLocation(
+                    "\(first.course.location.building ?? "")\(first.course.location.room ?? "")"
+                )
                 title = first.course.title
-                shortText = "\(first.course.title): \(location) \(first.timeCode.startTime)"
+                shortText = "\(first.course.title): \(location) \(first.startTime)"
                 
                 if topTwoCourses.count > 1 {
                     let second = topTwoCourses[1]
-                    nextTime = "\(second.timeCode.startTime) - \(second.timeCode.endTime)"
-                    nextLocation = "\(second.course.location.building ?? "")\(second.course.location.room ?? "")"
+                    nextTime = "\(second.startTime) - \(second.endTime)"
+                    nextLocation = cleanLocation(
+                        "\(second.course.location.building ?? "")\(second.course.location.room ?? "")"
+                    )
                     nextTitle = second.course.title
-                    shortNext = "\(second.course.title): \(nextLocation) \(second.timeCode.startTime)"
+                    shortNext = "\(second.course.title) \(nextLocation) \(second.startTime) - \(second.endTime)"
+                    compactNext = "\(second.course.title) · \(second.startTime)"
                 }
             } else {
                 if todayCount == 0 {
@@ -124,12 +154,24 @@ struct Provider: IntentTimelineProvider {
             nextLocation: nextLocation,
             nextTitle: nextTitle,
             shortNext: shortNext,
+            compactNext: compactNext,
             configuration: configuration
         )
         entries.append(entry)
         
         let timeline = Timeline(entries: entries, policy: .atEnd)
         completion(timeline)
+    }
+
+    func cleanLocation(_ location: String) -> String {
+        guard let range = location.range(
+            of: #"\([^()]*\)"#,
+            options: .regularExpression
+        ) else {
+            return location
+        }
+
+        return String(location[range].dropFirst().dropLast())
     }
     
     func time2Date(timeText:String) -> Date {
@@ -157,6 +199,7 @@ struct SimpleEntry: TimelineEntry {
     let nextLocation: String
     let nextTitle: String
     let shortNext: String
+    let compactNext: String
 
     let configuration: ConfigurationIntent
 }
@@ -218,7 +261,7 @@ struct CourseAppWidgetEntryView: View {
     var monthText: String {
         Self.monthFormatter.string(from: entry.date).uppercased()
     }
-    
+
     var body: some View {
         if family == .systemLarge {
             VStack(spacing: 0) {
@@ -344,7 +387,11 @@ struct CourseAppWidgetEntryView: View {
                         Capsule()
                             .fill(titleBackgroundColor)
                             .frame(width: 4, height: 16)
-                        Text("\(entry.shortNext)")
+                        Text(
+                            family == .systemSmall
+                                ? entry.compactNext
+                                : entry.shortNext
+                        )
                             .font(.caption)
                             .foregroundColor(getContentTextColor())
                             .lineLimit(1)
@@ -497,6 +544,7 @@ extension WidgetConfiguration {
         nextLocation: "EC5012",
         nextTitle: "演算法",
         shortNext: "演算法 13:00 - 16:00",
+        compactNext: "演算法 · 13:00",
         configuration: ConfigurationIntent()
     )
 }
@@ -514,6 +562,7 @@ extension WidgetConfiguration {
         nextLocation: "",
         nextTitle: "",
         shortNext: "",
+        compactNext: "",
         configuration: ConfigurationIntent()
     )
 }
@@ -531,6 +580,7 @@ extension WidgetConfiguration {
         nextLocation: "",
         nextTitle: "",
         shortNext: "",
+        compactNext: "",
         configuration: ConfigurationIntent()
     )
 }
@@ -548,6 +598,7 @@ extension WidgetConfiguration {
         nextLocation: "",
         nextTitle: "",
         shortNext: "",
+        compactNext: "",
         configuration: ConfigurationIntent()
     )
 }
