@@ -139,7 +139,7 @@ struct Provider: IntentTimelineProvider {
                     title = "太好了今天沒有任何課"
                     shortText = "今天沒有任何課"
                 } else {
-                    title = "太好了今天沒有任何課"
+                    title = "太好了今天已經沒有任何課"
                     shortText = "今天已經沒有任何課"
                 }
             }
