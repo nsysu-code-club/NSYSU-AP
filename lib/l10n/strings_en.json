@@ -42,6 +42,7 @@
   "studentLeavePickAttachment": "Choose File",
   "studentLeaveRemoveAttachment": "Remove File",
   "studentLeaveOpenAttachment": "Open proof attachment",
+  "studentLeaveAttachmentTooLarge": "Attachment size must not exceed ${maxSize}",
   "studentLeaveReviewProgress": "Review Progress",
   "studentLeaveStatusApproved": "Approved",
   "studentLeaveStatusPending": "In review",

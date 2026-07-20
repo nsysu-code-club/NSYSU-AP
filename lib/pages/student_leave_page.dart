@@ -130,6 +130,7 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
     final bool? shouldRefresh = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(builder: (_) => const StudentLeaveAddPage()),
     );
+    if (!mounted) return;
     if (shouldRefresh == true) {
       await _getRecords();
     }
@@ -223,6 +224,8 @@ class StudentLeaveAddPage extends StatefulWidget {
 }
 
 class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
+  static const int _maxAttachmentBytes = 10 * 1024 * 1024;
+
   final TextEditingController _reasonController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -371,18 +374,27 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
 
   Future<void> _pickDateTime({required bool isStart}) async {
     final DateTime current = isStart ? _startDateTime : _endDateTime;
+    final DateTime now = DateTime.now();
+    final DateTime computedFirstDate = now.subtract(const Duration(days: 30));
+    final DateTime computedLastDate = now.add(const Duration(days: 365));
+    final DateTime firstDate = current.isBefore(computedFirstDate)
+        ? current
+        : computedFirstDate;
+    final DateTime lastDate = current.isAfter(computedLastDate)
+        ? current
+        : computedLastDate;
     final DateTime? date = await showDatePicker(
       context: context,
       initialDate: current,
-      firstDate: DateTime.now().subtract(const Duration(days: 30)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
     if (date == null || !mounted) return;
     final TimeOfDay? time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(current),
     );
-    if (time == null) return;
+    if (time == null || !mounted) return;
     final DateTime value = DateTime(
       date.year,
       date.month,
@@ -403,9 +415,20 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
   }
 
   Future<void> _pickAttachment() async {
-    final FilePickerResult? result = await FilePicker.pickFiles(withData: true);
+    final FilePickerResult? result = await FilePicker.pickFiles(
+      withData: false,
+    );
+    if (!mounted) return;
     if (result == null || result.files.isEmpty) return;
-    setState(() => _attachmentFile = result.files.first);
+    final PlatformFile file = result.files.first;
+    if (file.size > _maxAttachmentBytes) {
+      UiUtil.instance.showToast(
+        context,
+        app.studentLeaveAttachmentTooLarge(maxSize: '10 MB'),
+      );
+      return;
+    }
+    setState(() => _attachmentFile = file);
   }
 
   Future<void> _submit() async {
@@ -1031,7 +1054,7 @@ class _SubmitBar extends StatelessWidget {
 class StudentLeaveResultPage extends StatefulWidget {
   const StudentLeaveResultPage({
     super.key,
-    required this.previewResult,
+    this.previewResult,
     this.submitResult,
   }) : assert(
          previewResult != null || submitResult != null,
@@ -1046,23 +1069,11 @@ class StudentLeaveResultPage extends StatefulWidget {
 }
 
 class _StudentLeaveResultPageState extends State<StudentLeaveResultPage> {
-  StudentLeaveSubmitResult? submitResult;
-
   StudentLeaveConfirmation get confirmation =>
-      submitResult?.confirmation ??
-      widget.submitResult?.confirmation ??
-      widget.previewResult!.confirmation;
+      widget.submitResult?.confirmation ?? widget.previewResult!.confirmation;
 
   StudentLeaveConfirmForm? get confirmForm =>
-      submitResult == null && widget.submitResult == null
-      ? widget.previewResult?.confirmForm
-      : null;
-
-  @override
-  void initState() {
-    super.initState();
-    submitResult = widget.submitResult;
-  }
+      widget.submitResult == null ? widget.previewResult?.confirmForm : null;
 
   @override
   Widget build(BuildContext context) {

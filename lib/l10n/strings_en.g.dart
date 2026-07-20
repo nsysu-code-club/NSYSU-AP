@@ -82,6 +82,7 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get studentLeavePickAttachment => 'Choose File';
 	@override String get studentLeaveRemoveAttachment => 'Remove File';
 	@override String get studentLeaveOpenAttachment => 'Open proof attachment';
+	@override String studentLeaveAttachmentTooLarge({required Object maxSize}) => 'Attachment size must not exceed ${maxSize}';
 	@override String get studentLeaveReviewProgress => 'Review Progress';
 	@override String get studentLeaveStatusApproved => 'Approved';
 	@override String get studentLeaveStatusPending => 'In review';
@@ -196,6 +197,7 @@ extension on AppLocalizationsEn {
 			'studentLeavePickAttachment' => 'Choose File',
 			'studentLeaveRemoveAttachment' => 'Remove File',
 			'studentLeaveOpenAttachment' => 'Open proof attachment',
+			'studentLeaveAttachmentTooLarge' => ({required Object maxSize}) => 'Attachment size must not exceed ${maxSize}',
 			'studentLeaveReviewProgress' => 'Review Progress',
 			'studentLeaveStatusApproved' => 'Approved',
 			'studentLeaveStatusPending' => 'In review',

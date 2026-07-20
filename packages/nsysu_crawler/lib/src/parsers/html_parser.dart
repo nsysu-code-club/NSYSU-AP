@@ -426,10 +426,16 @@ List<String> _extractTextLines(String text) {
 }
 
 List<String> _extractLeaveNoticeLines(dom.Document document) {
-  final List<dom.Element> candidates = document
-      .querySelectorAll('*')
+  List<dom.Element> candidates = document
+      .querySelectorAll('td, div, font, span, p')
       .where((dom.Element element) => element.text.contains('請同學注意以下說明'))
       .toList();
+  if (candidates.isEmpty) {
+    candidates = document
+        .querySelectorAll('*')
+        .where((dom.Element element) => element.text.contains('請同學注意以下說明'))
+        .toList();
+  }
   if (candidates.isEmpty) return const <String>[];
 
   candidates.sort(

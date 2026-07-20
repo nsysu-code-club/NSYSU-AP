@@ -170,6 +170,9 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '開啟證明檔案'
 	String get studentLeaveOpenAttachment => '開啟證明檔案';
 
+	/// zh-Hant-TW: '附件大小不能超過 {maxSize}'
+	String studentLeaveAttachmentTooLarge({required Object maxSize}) => '附件大小不能超過 ${maxSize}';
+
 	/// zh-Hant-TW: '審核進度'
 	String get studentLeaveReviewProgress => '審核進度';
 
@@ -405,6 +408,7 @@ extension on AppLocalizations {
 			'studentLeavePickAttachment' => '選擇檔案',
 			'studentLeaveRemoveAttachment' => '移除檔案',
 			'studentLeaveOpenAttachment' => '開啟證明檔案',
+			'studentLeaveAttachmentTooLarge' => ({required Object maxSize}) => '附件大小不能超過 ${maxSize}',
 			'studentLeaveReviewProgress' => '審核進度',
 			'studentLeaveStatusApproved' => '已通過',
 			'studentLeaveStatusPending' => '審核中',

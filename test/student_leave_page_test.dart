@@ -156,9 +156,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      _testApp(
-        const StudentLeaveResultPage(previewResult: null, submitResult: result),
-      ),
+      _testApp(const StudentLeaveResultPage(submitResult: result)),
     );
     await tester.pumpAndSettle();
 

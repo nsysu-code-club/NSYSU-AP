@@ -311,6 +311,28 @@ void main() {
       expect(confirmation.noticeLines[3], contains('系所主任代替導師'));
       expect(confirmation.noticeLines[4], contains('自動mail通知'));
     });
+
+    test('falls back to broad notice search when structure is unknown', () {
+      const String html = '''
+      <html>
+        <body>
+          <section>
+            請同學注意以下說明：<br>
+            (1)不需課程請假期間：YYYY/MM/DD至YYYY/MM/DD。<br>
+            (2)請同學檢查請假單內容是否正確。
+          </section>
+        </body>
+      </html>
+      ''';
+
+      final StudentLeaveConfirmation confirmation =
+          parseStudentLeaveConfirmation(html);
+
+      expect(confirmation.noticeLines, hasLength(3));
+      expect(confirmation.noticeLines[0], '請同學注意以下說明：');
+      expect(confirmation.noticeLines[1], startsWith('(1)不需課程請假期間：'));
+      expect(confirmation.noticeLines[2], contains('檢查請假單內容是否正確'));
+    });
   });
 
   group('BusInfo JSON parsing', () {

@@ -93,4 +93,41 @@ void main() {
       );
     });
   });
+
+  group('StudentLeaveSubmitResult', () {
+    const StudentLeaveConfirmation confirmation = StudentLeaveConfirmation(
+      sections: <StudentLeaveConfirmationSection>[],
+      messages: <String>[],
+      rawText: '',
+    );
+
+    test('detects successful submit responses', () {
+      const StudentLeaveSubmitResult result = StudentLeaveSubmitResult(
+        statusCode: 200,
+        body: '假單新增成功',
+        confirmation: confirmation,
+      );
+
+      expect(result.looksSuccessful, isTrue);
+    });
+
+    test('does not treat negative success words as successful', () {
+      const List<String> bodies = <String>[
+        '儲存不成功',
+        '交易未完成',
+        '假單送出失敗',
+        '系統錯誤',
+        '處理異常',
+      ];
+
+      for (final String body in bodies) {
+        final StudentLeaveSubmitResult result = StudentLeaveSubmitResult(
+          statusCode: 200,
+          body: body,
+          confirmation: confirmation,
+        );
+        expect(result.looksSuccessful, isFalse);
+      }
+    });
+  });
 }
