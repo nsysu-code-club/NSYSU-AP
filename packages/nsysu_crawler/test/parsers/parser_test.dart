@@ -225,8 +225,9 @@ void main() {
     });
 
     test('returns null for invalid HTML', () {
-      final GraduationReportData? result =
-          parseGraduationReport('<html><body></body></html>');
+      final GraduationReportData? result = parseGraduationReport(
+        '<html><body></body></html>',
+      );
       expect(result, isNull);
     });
   });
@@ -250,6 +251,65 @@ void main() {
       final String html = _readFixture('tuition_empty.html');
       final List<TuitionAndFees>? result = parseTuitionData(html);
       expect(result, isNull);
+    });
+  });
+
+  group('parseStudentLeaveRecords', () {
+    test('parses leave records and related links from HTML', () {
+      final String html = _readFixture('student_leave_records.html');
+      final List<StudentLeaveRecord> result = parseStudentLeaveRecords(html);
+
+      expect(result.length, 2);
+      expect(result[0].number, 'SL1130001');
+      expect(result[0].schoolYear, '113');
+      expect(result[0].semester, '1');
+      expect(result[0].category, '病假');
+      expect(result[0].dateRange, '2025-01-06 09:00 ~ 2025-01-06 12:00');
+      expect(result[0].tutorStatus, '已通過');
+      expect(result[0].chairStatus, '審核中');
+      expect(result[0].instructorStatus, '免審核');
+      expect(result[0].proofText, '病假證明.pdf');
+      expect(
+        result[0].proofUrl,
+        'https://sis.nsysu.edu.tw/SLAMS/download.php?id=SL1130001',
+      );
+      expect(
+        result[0].printUrl,
+        'https://sis.nsysu.edu.tw/SLAMS/SLAMS_stuLeave_print.php?id=SL1130001',
+      );
+      expect(result[1].number, 'SL1130002');
+      expect(result[1].proofText, '無');
+      expect(result[1].proofUrl, isNull);
+      expect(result[1].printUrl, isNull);
+    });
+  });
+
+  group('parseStudentLeaveConfirmForm', () {
+    test('parses preview confirmation form fields from HTML', () {
+      final String html = _readFixture('student_leave_confirm_form.html');
+      final StudentLeaveConfirmForm? result = parseStudentLeaveConfirmForm(
+        html,
+      );
+
+      expect(result, isNotNull);
+      expect(result!.action, 'SLAMS_stuLeave_add_act.php');
+      expect(result.fields['Lclass'], 'stu');
+      expect(result.fields['sub_Lclass'], 'student');
+      expect(result.fields['s_date'], '2025-01-06');
+      expect(result.fields['s_time'], '09:00');
+      expect(result.fields['e_date'], '2025-01-06');
+      expect(result.fields['e_time'], '12:00');
+      expect(result.fields['sla_cont'], '身體不適');
+      expect(result.fields['class_name'], '02');
+
+      final StudentLeaveConfirmation confirmation =
+          parseStudentLeaveConfirmation(html);
+      expect(confirmation.noticeLines, hasLength(5));
+      expect(confirmation.noticeLines[0], '請同學注意以下說明：');
+      expect(confirmation.noticeLines[1], startsWith('(1)不需課程請假期間：'));
+      expect(confirmation.noticeLines[2], contains('請同學檢查請假單內容是否正確'));
+      expect(confirmation.noticeLines[3], contains('系所主任代替導師'));
+      expect(confirmation.noticeLines[4], contains('自動mail通知'));
     });
   });
 

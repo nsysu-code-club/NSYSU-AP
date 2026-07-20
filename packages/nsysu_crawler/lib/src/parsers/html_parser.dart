@@ -121,6 +121,7 @@ StudentLeaveConfirmation parseStudentLeaveConfirmation(String html) {
     sections: sections,
     messages: messages,
     rawText: lines.join('\n'),
+    noticeLines: _extractLeaveNoticeLines(document),
   );
 }
 
@@ -422,6 +423,35 @@ List<String> _extractTextLines(String text) {
     for (final String line in lines)
       if (seen.add(line)) line,
   ];
+}
+
+List<String> _extractLeaveNoticeLines(dom.Document document) {
+  final List<dom.Element> candidates = document
+      .querySelectorAll('*')
+      .where((dom.Element element) => element.text.contains('請同學注意以下說明'))
+      .toList();
+  if (candidates.isEmpty) return const <String>[];
+
+  candidates.sort(
+    (dom.Element a, dom.Element b) =>
+        _cleanText(a.text).length.compareTo(_cleanText(b.text).length),
+  );
+  final String html = candidates.first.innerHtml.replaceAll(
+    RegExp(r'<br\s*/?>', caseSensitive: false),
+    '\n',
+  );
+  final List<String> lines = _extractTextLines(parseFragment(html).text ?? '');
+  final int startIndex = lines.indexWhere(
+    (String line) => line.contains('請同學注意以下說明'),
+  );
+  if (startIndex == -1) return const <String>[];
+
+  final List<String> noticeLines = <String>[lines[startIndex]];
+  for (final String line in lines.skip(startIndex + 1)) {
+    if (!RegExp(r'^\(\d+\)').hasMatch(line)) break;
+    noticeLines.add(line);
+  }
+  return noticeLines;
 }
 
 Map<String, String> _extractFormFields(dom.Element form) {

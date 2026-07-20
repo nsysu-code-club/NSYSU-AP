@@ -1033,7 +1033,10 @@ class StudentLeaveResultPage extends StatefulWidget {
     super.key,
     required this.previewResult,
     this.submitResult,
-  });
+  }) : assert(
+         previewResult != null || submitResult != null,
+         'Either previewResult or submitResult must be provided.',
+       );
 
   final StudentLeavePreviewResult? previewResult;
   final StudentLeaveSubmitResult? submitResult;
@@ -1075,7 +1078,7 @@ class _StudentLeaveResultPageState extends State<StudentLeaveResultPage> {
                 _ConfirmationHeader(isPreview: confirmForm != null),
                 if (confirmForm != null) ...<Widget>[
                   const SizedBox(height: 12.0),
-                  const _StudentLeaveNotice(),
+                  _StudentLeaveNotice(lines: confirmation.noticeLines),
                 ] else if (confirmation.messages.isNotEmpty) ...<Widget>[
                   const SizedBox(height: 12.0),
                   _ConfirmationMessages(messages: confirmation.messages),
@@ -1284,10 +1287,13 @@ class _ConfirmationMessages extends StatelessWidget {
 }
 
 class _StudentLeaveNotice extends StatelessWidget {
-  const _StudentLeaveNotice();
+  const _StudentLeaveNotice({required this.lines});
+
+  final List<String> lines;
 
   @override
   Widget build(BuildContext context) {
+    if (lines.isEmpty) return const SizedBox.shrink();
     final ThemeData theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
@@ -1313,27 +1319,8 @@ class _StudentLeaveNotice extends StatelessWidget {
             ),
           ),
           children: <Widget>[
-            _NoticeSection(
-              icon: Icons.date_range_outlined,
-              title: app.studentLeaveNoticePeriodTitle,
-              content: app.studentLeaveNoticePeriodContent,
-            ),
-            _NoticeSection(
-              icon: Icons.upload_file_outlined,
-              title: app.studentLeaveNoticeAttachmentTitle,
-              content: app.studentLeaveNoticeAttachmentContent,
-            ),
-            _NoticeSection(
-              icon: Icons.school_outlined,
-              title: app.studentLeaveNoticeExamTitle,
-              content: app.studentLeaveNoticeExamContent,
-            ),
-            _NoticeSection(
-              icon: Icons.mark_email_read_outlined,
-              title: app.studentLeaveNoticeSubmitTitle,
-              content: app.studentLeaveNoticeSubmitContent,
-              showDivider: false,
-            ),
+            for (int i = 0; i < lines.length; i++)
+              _NoticeLine(text: lines[i], showDivider: i != lines.length - 1),
           ],
         ),
       ),
@@ -1341,17 +1328,10 @@ class _StudentLeaveNotice extends StatelessWidget {
   }
 }
 
-class _NoticeSection extends StatelessWidget {
-  const _NoticeSection({
-    required this.icon,
-    required this.title,
-    required this.content,
-    this.showDivider = true,
-  });
+class _NoticeLine extends StatelessWidget {
+  const _NoticeLine({required this.text, required this.showDivider});
 
-  final IconData icon;
-  final String title;
-  final String content;
+  final String text;
   final bool showDivider;
 
   @override
@@ -1373,7 +1353,7 @@ class _NoticeSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Icon(
-                  icon,
+                  Icons.info_outline,
                   size: 18.0,
                   color: theme.colorScheme.onPrimaryContainer,
                 ),
@@ -1384,14 +1364,7 @@ class _NoticeSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      title,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 6.0),
-                    Text(
-                      content,
+                      text,
                       style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                     ),
                   ],

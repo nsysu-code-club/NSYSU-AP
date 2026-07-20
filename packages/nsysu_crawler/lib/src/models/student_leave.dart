@@ -169,11 +169,13 @@ class StudentLeaveConfirmation {
     required this.sections,
     required this.messages,
     required this.rawText,
+    this.noticeLines = const <String>[],
   });
 
   final List<StudentLeaveConfirmationSection> sections;
   final List<String> messages;
   final String rawText;
+  final List<String> noticeLines;
 
   bool get hasStructuredData =>
       sections.any(

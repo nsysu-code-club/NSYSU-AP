@@ -93,6 +93,11 @@ void main() {
     const StudentLeaveConfirmation confirmation = StudentLeaveConfirmation(
       messages: <String>['請確認假單資料'],
       rawText: '',
+      noticeLines: <String>[
+        '請同學注意以下說明：',
+        '(1)不需課程請假期間：依校務系統顯示為準。',
+        '(2)請同學檢查請假單內容是否正確，如有錯誤請回上一頁修改。',
+      ],
       sections: <StudentLeaveConfirmationSection>[
         StudentLeaveConfirmationSection(
           title: '假單資料',
@@ -123,10 +128,9 @@ void main() {
 
     expect(find.text(app.studentLeaveFinalCheck), findsOneWidget);
     expect(find.text(app.studentLeaveNoticeTitle), findsOneWidget);
-    expect(find.text(app.studentLeaveNoticePeriodContent), findsOneWidget);
-    expect(find.text(app.studentLeaveNoticeAttachmentContent), findsOneWidget);
-    expect(find.text(app.studentLeaveNoticeExamContent), findsOneWidget);
-    expect(find.text(app.studentLeaveNoticeSubmitContent), findsOneWidget);
+    expect(find.text('請同學注意以下說明：'), findsOneWidget);
+    expect(find.text('(1)不需課程請假期間：依校務系統顯示為準。'), findsOneWidget);
+    expect(find.text('(2)請同學檢查請假單內容是否正確，如有錯誤請回上一頁修改。'), findsOneWidget);
     expect(find.text('請確認假單資料'), findsNothing);
 
     await tester.tap(find.text(app.studentLeaveNoticeTitle));

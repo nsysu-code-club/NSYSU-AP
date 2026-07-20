@@ -275,7 +275,7 @@ class StudentLeaveHelper {
       'start_time': _formatTime(request.startDateTime),
       'end_date': _formatDate(request.endDateTime),
       'end_time': _formatTime(request.endDateTime),
-      'sla_cont': Uri.encodeComponent(request.reason),
+      'sla_cont': request.reason,
     };
     final StudentLeaveAttachment? attachment = request.attachment;
     if (attachment == null || !attachment.hasData) {
