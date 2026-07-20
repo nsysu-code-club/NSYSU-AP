@@ -13,8 +13,7 @@ void main() {
     helper.dio.httpClientAdapter = adapter;
     helper
       ..isLogin = true
-      ..username = 'student'
-      ..password = 'password';
+      ..username = 'student';
     addTearDown(helper.dio.close);
 
     final ApiResult<List<StudentLeaveRecord>> result = await helper

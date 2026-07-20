@@ -35,7 +35,6 @@ class StudentLeaveHelper {
 
   bool isLogin = false;
   String username = '';
-  String password = '';
 
   Options get _bytesOption => Options(responseType: ResponseType.bytes);
 
@@ -54,7 +53,6 @@ class StudentLeaveHelper {
   void logout() {
     isLogin = false;
     username = '';
-    password = '';
     initCookiesJar();
   }
 
@@ -95,7 +93,6 @@ class StudentLeaveHelper {
       }
 
       this.username = username;
-      this.password = password;
       isLogin = true;
       return ApiSuccess<GeneralResponse>(GeneralResponse.success());
     } on DioException catch (e) {
@@ -245,7 +242,7 @@ class StudentLeaveHelper {
     required String username,
     required String password,
   }) async {
-    if (isLogin && this.username == username && this.password == password) {
+    if (isLogin && this.username == username) {
       return ApiSuccess<GeneralResponse>(GeneralResponse.success());
     }
     return login(username: username, password: password);
