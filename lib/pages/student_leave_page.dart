@@ -421,6 +421,10 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
     if (!mounted) return;
     if (result == null || result.files.isEmpty) return;
     final PlatformFile file = result.files.first;
+    if (file.path == null && file.bytes == null) {
+      UiUtil.instance.showToast(context, app.studentLeaveAttachmentUnavailable);
+      return;
+    }
     if (file.size > _maxAttachmentBytes) {
       UiUtil.instance.showToast(
         context,
@@ -471,8 +475,8 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
         );
         if (!mounted) return;
         if (submitted == true) Navigator.of(context).pop(true);
-      case ApiError<StudentLeavePreviewResult>():
-        UiUtil.instance.showToast(context, app.studentLeaveLoginFailed);
+      case ApiError<StudentLeavePreviewResult>(:final GeneralResponse response):
+        _showStudentLeaveApiError(context, response);
       case ApiFailure<StudentLeavePreviewResult>(:final DioException exception):
         UiUtil.instance.showToast(
           context,
@@ -1148,8 +1152,8 @@ class _StudentLeaveResultPageState extends State<StudentLeaveResultPage> {
               : app.studentLeaveSubmitUnknownResult,
         );
         Navigator.of(context).pop(true);
-      case ApiError<StudentLeaveSubmitResult>():
-        UiUtil.instance.showToast(context, app.studentLeaveLoginFailed);
+      case ApiError<StudentLeaveSubmitResult>(:final GeneralResponse response):
+        _showStudentLeaveApiError(context, response);
       case ApiFailure<StudentLeaveSubmitResult>(:final DioException exception):
         UiUtil.instance.showToast(
           context,
@@ -1157,6 +1161,15 @@ class _StudentLeaveResultPageState extends State<StudentLeaveResultPage> {
         );
     }
   }
+}
+
+void _showStudentLeaveApiError(BuildContext context, GeneralResponse response) {
+  final String message = response.statusCode == 401
+      ? app.studentLeaveLoginFailed
+      : response.message.isNotEmpty
+      ? response.message
+      : ap.somethingError;
+  UiUtil.instance.showToast(context, message);
 }
 
 class _ConfirmationSectionCard extends StatelessWidget {

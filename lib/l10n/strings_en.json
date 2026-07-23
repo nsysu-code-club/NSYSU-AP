@@ -43,6 +43,7 @@
   "studentLeaveRemoveAttachment": "Remove File",
   "studentLeaveOpenAttachment": "Open proof attachment",
   "studentLeaveAttachmentTooLarge": "Attachment size must not exceed ${maxSize}",
+  "studentLeaveAttachmentUnavailable": "Could not read this attachment. Please choose another file.",
   "studentLeaveReviewProgress": "Review Progress",
   "studentLeaveStatusApproved": "Approved",
   "studentLeaveStatusPending": "In review",
