@@ -183,10 +183,7 @@ class StudentLeaveHelper {
       final StudentLeaveSemester selectedSemester =
           semester ?? StudentLeaveSemester.current();
       final Response<Uint8List> response = await dio.get<Uint8List>(
-        '$baseUrl/SLAMS/SLAMS_student_view.php?'
-        'ID=$username&GPID=07&APFLAG=49&search_type=year&'
-        'school_year=${selectedSemester.schoolYear}&'
-        'sem=${selectedSemester.semester}',
+        _studentViewUrl(username: username, semester: selectedSemester),
         options: _bytesOption,
       );
       final String text = big5.decode(response.data!);
@@ -250,18 +247,26 @@ class StudentLeaveHelper {
 
   Future<void> _prepareLeaveSession(String username) async {
     final StudentLeaveSemester currentSemester = StudentLeaveSemester.current();
-    final String encodedId = base64.encode(utf8.encode(username));
     await dio.get<Uint8List>(
-      '$baseUrl/SLAMS/SLAMS_student_view.php?'
-      'ID=$encodedId&GPID=07&APFLAG=49&search_type=year&'
-      'school_year=${currentSemester.schoolYear}&'
-      'sem=${currentSemester.semester}',
+      _studentViewUrl(username: username, semester: currentSemester),
       options: _bytesOption,
     );
     await dio.get<Uint8List>(
       '$baseUrl/SLAMS/SLAMS_stuLeave_add.php',
       options: _bytesOption,
     );
+  }
+
+  String _studentViewUrl({
+    required String username,
+    required StudentLeaveSemester semester,
+  }) {
+    final String encodedId = Uri.encodeQueryComponent(
+      base64.encode(utf8.encode(username)),
+    );
+    return '$baseUrl/SLAMS/SLAMS_student_view.php?'
+        'ID=$encodedId&GPID=07&APFLAG=49&search_type=year&'
+        'school_year=${semester.schoolYear}&sem=${semester.semester}';
   }
 
   Future<Object> _submitData(StudentLeaveRequest request) async {

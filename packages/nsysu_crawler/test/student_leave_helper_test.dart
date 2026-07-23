@@ -24,6 +24,10 @@ void main() {
         );
 
     expect(result, isA<ApiSuccess<List<StudentLeaveRecord>>>());
+    expect(
+      adapter.requestUri?.queryParameters['ID'],
+      base64.encode(utf8.encode('student')),
+    );
     expect(adapter.requestUri?.queryParameters['school_year'], '113');
     expect(adapter.requestUri?.queryParameters['sem'], '1');
   });
