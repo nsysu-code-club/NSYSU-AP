@@ -26,29 +26,27 @@ flutter pub get
 
 ## 3. 分支策略與發版流程
 
-本專案目前以 `master` 作為所有開發工作的基準分支與主要合併目標，並使用 `develop` 與 `production` 進行 beta 與正式版發布。
+本專案目前以 `master` 作為所有開發工作的基準分支與主要合併目標。
+在master上經驗證後，帶下一個測試週期合併進入 `develop`並開始進行公開測試階段 （beta）
+在 `develop` 上測試期滿並驗證後，併入 `production`，正式進入穩定正式版發布。
 
 ### 分支角色
 
-| 分支 | 職責與用途 | CI / CD 行為 |
+| 分支 | 職責與用途  | CI / CD 行為 |
 | ------ | ----------- | ------------ |
 | **`master`** | 所有功能、Bug fix、重構、文件與維護工作的 base branch。一般開發分支都從 `master` 切出，完成後也合併回 `master`。 | 執行 CI，用於確認主要分支的程式碼品質與可建置性。 |
-| **`develop`** | Beta 測試分支。當 commit 或 merge 進入 `develop`，會直接推送到 App Store / Google Play 的 beta 測試流程。 | 執行 CI/CD，自動打包並發布 beta 測試版本。 |
-| **`production`** | 正式版發布分支。確認要對外正式發布時，才將已驗證內容推進此分支。 | 執行正式版 CD，自動打包並發布正式版本。 |
+| **`develop`** | 在 `master` 上經驗證後，待下一個測試週期合併進入 `develop` 並開始進行公開測試階段 （beta），會直接推送到 App Store / Google Play 的 beta 測試流程。 | 執行 CI/CD，自動打包並發布 beta 測試版本。 |
+| **`production`** | 在 `develop` 上測試期滿並驗證後，併入 `production`，正式進入穩定正式版發布。 | 執行正式版 CD，自動打包並發布正式版本。 |
 
 ### 開發與發布流程圖
 
 ```mermaid
 flowchart TD
-    A[建立或確認 Issue] --> B[自 master 建立開發分支]
+    A[建立或確認 Issue] --> B[Fork repo並從 master 建立開發分支]
     B --> C[本機開發、測試與自我驗證]
     C --> D[提交 Pull Request]
     D -->|Target: master| E[CI 與 Code Review]
     E -->|合併| F[master]
-    F -->|需要 beta 測試時合併或 cherry-pick| G[develop]
-    G --> H[自動發布 beta 測試版\nApp Store / Google Play]
-    F -->|確認正式發布時合併或 cherry-pick| I[production]
-    I --> J[自動發布正式版\nApp Store / Google Play / GitHub Release]
 ```
 
 ## 4. 貢獻工作流
@@ -75,6 +73,10 @@ git checkout -b <type>/<issue-name>
 - `fix/xxx`：修正 Bug
 - `refactor/xxx`：重構程式碼
 - `chore/xxx`：工具設定、依賴更新或不影響原始碼的維護
+- `docs/xxx`：文件更新
+- `test/xxx`：測試程式碼更新
+- `style/xxx`：程式碼格式或排版調整
+- `ci/xxx`：CI/CD 設定或流程調整
 
 ### Step 3: 開發與提交
 
@@ -128,8 +130,9 @@ git checkout -b <type>/<issue-name>
 在發送 PR 或將 Draft 轉換為 Ready for review 前，請快速核對以下項目：
 
 - [ ] 是否已建立或關聯對應 Issue？
+- [ ] 是否已經 fork repo `NSYSU_AP`?
 - [ ] 開發分支是否基於 `master` 建立？PR 目標分支是否為 `master`？
-- [ ] 分支命名是否符合既有格式，例如 `feature/xxx`、`fix/xxx`、`refactor/xxx`、`chore/xxx`？
+- [ ] 分支命名是否符合既有格式，例如 `feature/xxx`、`fix/xxx`、`refactor/xxx`、`chore/xxx`...？
 - [ ] 是否已在本機執行 `flutter analyze` 且無錯誤？
 - [ ] 是否已視需要執行 `flutter test` 或 `dart test`？
 - [ ] 若修改 l10n 翻譯檔，是否已執行 `dart run slang`？
