@@ -113,8 +113,8 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '選課小助手'
 	String get courseSelector => '選課小助手';
 
-	/// zh-Hant-TW: '碩專署'
-	String get continuingSummerEducationProgram => '碩專署';
+	/// zh-Hant-TW: '碩專暑'
+	String get continuingSummerEducationProgram => '碩專暑';
 
 	/// zh-Hant-TW: '上學期'
 	String get fallSemester => '上學期';
@@ -125,11 +125,23 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '暑假'
 	String get summerSemester => '暑假';
 
+	/// zh-Hant-TW: '碩專暑'
+	String get continuingSummerEducationProgramShort => '碩專暑';
+
+	/// zh-Hant-TW: '上'
+	String get fallSemesterShort => '上';
+
+	/// zh-Hant-TW: '下'
+	String get springSemesterShort => '下';
+
+	/// zh-Hant-TW: '暑'
+	String get summerSemesterShort => '暑';
+
 	/// zh-Hant-TW: 'Oops！查無任何學雜費資料哦～😋'
 	String get tuitionAndFeesEmpty => 'Oops！查無任何學雜費資料哦～😋';
 
-	/// zh-Hant-TW: '黃字為授課老師開放成績查詢 並非最終成績'
-	String get hasPreScoreHint => '黃字為授課老師開放成績查詢 並非最終成績';
+	/// zh-Hant-TW: '部分科目為授課老師開放成績查詢 並非最終成績'
+	String get hasPreScoreHint => '部分科目為授課老師開放成績查詢 並非最終成績';
 
 	/// zh-Hant-TW: '請先填寫確認表單再進行登入 若填寫完畢仍無法登入 點擊右上角透過其他瀏覽器填寫(ex. Chrome)'
 	String get pleaseConfirmForm => '請先填寫確認表單再進行登入\n若填寫完畢仍無法登入 點擊右上角透過其他瀏覽器填寫(ex. Chrome)';
@@ -139,6 +151,21 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 
 	/// zh-Hant-TW: '分'
 	String get minute => '分';
+
+	/// zh-Hant-TW: '進站中'
+	String get busArriving => '進站中';
+
+	/// zh-Hant-TW: '將到站'
+	String get busComingSoon => '將到站';
+
+	/// zh-Hant-TW: '表定 ${time}'
+	String busScheduledTime({required Object time}) => '表定\n${time}';
+
+	/// zh-Hant-TW: '已離站'
+	String get busDeparted => '已離站';
+
+	/// zh-Hant-TW: '未行駛'
+	String get busNotOperating => '未行駛';
 
 	/// zh-Hant-TW: '拖車小幫手'
 	String get towCarHelper => '拖車小幫手';
@@ -248,15 +275,24 @@ extension on AppLocalizations {
 			'tuitionAndFeesPageDialogTitle' => '請選擇匯出方式',
 			'courseYear' => '學年度',
 			'courseSelector' => '選課小助手',
-			'continuingSummerEducationProgram' => '碩專署',
+			'continuingSummerEducationProgram' => '碩專暑',
 			'fallSemester' => '上學期',
 			'springSemester' => '下學期',
 			'summerSemester' => '暑假',
+			'continuingSummerEducationProgramShort' => '碩專暑',
+			'fallSemesterShort' => '上',
+			'springSemesterShort' => '下',
+			'summerSemesterShort' => '暑',
 			'tuitionAndFeesEmpty' => 'Oops！查無任何學雜費資料哦～😋',
-			'hasPreScoreHint' => '黃字為授課老師開放成績查詢 並非最終成績',
+			'hasPreScoreHint' => '部分科目為授課老師開放成績查詢 並非最終成績',
 			'pleaseConfirmForm' => '請先填寫確認表單再進行登入\n若填寫完畢仍無法登入 點擊右上角透過其他瀏覽器填寫(ex. Chrome)',
 			'openBrowserToFill' => '開啟瀏覽器填寫',
 			'minute' => '分',
+			'busArriving' => '進站中',
+			'busComingSoon' => '將到站',
+			'busScheduledTime' => ({required Object time}) => '表定\n${time}',
+			'busDeparted' => '已離站',
+			'busNotOperating' => '未行駛',
 			'towCarHelper' => '拖車小幫手',
 			'subscriptionArea' => '訂閱區域',
 			'towCarNews' => '最新消息',

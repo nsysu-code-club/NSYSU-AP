@@ -1,0 +1,31 @@
+{
+  "data": {
+    "route901": {
+      "name": "橘1A",
+      "departure": "哈瑪星",
+      "destination": "中山大學行政大樓",
+      "buses": {
+        "edges": [
+          {
+            "node": {
+              "id": "BUS-2"
+            }
+          },
+          {
+            "node": {
+              "id": "BUS-1"
+            }
+          }
+        ]
+      }
+    },
+    "route9011": {
+      "name": "橘1B",
+      "departure": "中山大學行政大樓",
+      "destination": "哈瑪星",
+      "buses": {
+        "edges": []
+      }
+    }
+  }
+}

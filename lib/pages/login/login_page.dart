@@ -87,7 +87,6 @@ class LoginPageState extends State<LoginPage> {
         ApButton(
           text: ap.login,
           onPressed: () {
-            SelcrsHelper.instance.error = 0;
             _login();
             AnalyticsUtil.instance.logEvent('login_click');
           },

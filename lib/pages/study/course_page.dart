@@ -3,9 +3,10 @@ import 'package:ap_common/ap_common.dart'
 import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:ap_common_plugin/ap_common_plugin.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/pages/study/semester_picker_config.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class CoursePage extends StatefulWidget {
   static const String routerName = '/course';
@@ -61,6 +62,7 @@ class CoursePageState extends State<CoursePage> {
       courseData: courseData,
       notifyData: notifyData,
       semesterData: semesterData,
+      semesterPickerUiConfig: semesterPickerUiConfig,
       semesterPickerController: _pickerController,
       onSelect: (int index) {
         semesterData = semesterData!.copyWith(currentIndex: index);
@@ -131,10 +133,8 @@ class CoursePageState extends State<CoursePage> {
       value: defaultSemesterCode.substring(3),
       text: parser(defaultSemesterCode),
     );
-    final ApiResult<SemesterData> result =
-        await SelcrsHelper.instance.getCourseSemesterData(
-      defaultSemester: defaultSemester,
-    );
+    final ApiResult<SemesterData> result = await SelcrsHelper.instance
+        .getCourseSemesterData(defaultSemester: defaultSemester);
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<SemesterData>(:final SemesterData data):
@@ -150,8 +150,7 @@ class CoursePageState extends State<CoursePage> {
         }
         final List<Semester> parsedData = data.data
             .map(
-              (Semester option) =>
-                  option.copyWith(text: parser(option.text)),
+              (Semester option) => option.copyWith(text: parser(option.text)),
             )
             .toList();
         semesterData = data.copyWith(data: parsedData);
@@ -203,12 +202,12 @@ class CoursePageState extends State<CoursePage> {
       return;
     }
     notifyData = CourseNotifyData.load(courseNotifyCacheKey);
-    final ApiResult<CourseData> result =
-        await SelcrsHelper.instance.getCourseData(
-      username: SelcrsHelper.instance.username,
-      timeCodeConfig: timeCodeConfig,
-      semester: semesterData!.currentSemester.code,
-    );
+    final ApiResult<CourseData> result = await SelcrsHelper.instance
+        .getCourseData(
+          username: SelcrsHelper.instance.username,
+          timeCodeConfig: timeCodeConfig,
+          semester: semesterData!.currentSemester.code,
+        );
     if (!mounted) return;
     final Semester semester = semesterData!.currentSemester;
     switch (result) {

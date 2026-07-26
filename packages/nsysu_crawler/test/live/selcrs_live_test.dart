@@ -175,7 +175,11 @@ void main() {
           '${semester.year}/${semester.value} "${semester.text}" (wall-clock)',
         );
         final ApiResult<ScoreData> result = await SelcrsHelper.instance
-            .getScoreData(year: semester.year, semester: semester.value);
+            .getScoreData(
+              year: semester.year,
+              semester: semester.value,
+              searchPreScore: true,
+            );
         expect(result, isA<ApiSuccess<ScoreData>>());
         final ScoreData data = (result as ApiSuccess<ScoreData>).data;
         print(

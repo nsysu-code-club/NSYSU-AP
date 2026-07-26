@@ -134,3 +134,8 @@ jobs:
       - run: flutter pub get
       - name: Build windows
         run: flutter build windows --release
+        env:
+          # 新版 MSVC (VS18 / 14.51) 把 <experimental/coroutine> 從 warning 升成硬 error (STL1011)，
+          # flutter_inappwebview_windows、gal 等 plugin 仍在使用。透過 CL 環境變數注入 silence macro，
+          # 確保涵蓋所有 plugin 的編譯單元（在 windows/CMakeLists.txt 設 define 無法傳到 plugin sub-project）。
+          CL: /D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS
