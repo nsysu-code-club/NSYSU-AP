@@ -152,6 +152,21 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '分'
 	String get minute => '分';
 
+	/// zh-Hant-TW: '進站中'
+	String get busArriving => '進站中';
+
+	/// zh-Hant-TW: '將到站'
+	String get busComingSoon => '將到站';
+
+	/// zh-Hant-TW: '表定 ${time}'
+	String busScheduledTime({required Object time}) => '表定\n${time}';
+
+	/// zh-Hant-TW: '已離站'
+	String get busDeparted => '已離站';
+
+	/// zh-Hant-TW: '未行駛'
+	String get busNotOperating => '未行駛';
+
 	/// zh-Hant-TW: '拖車小幫手'
 	String get towCarHelper => '拖車小幫手';
 
@@ -273,6 +288,11 @@ extension on AppLocalizations {
 			'pleaseConfirmForm' => '請先填寫確認表單再進行登入\n若填寫完畢仍無法登入 點擊右上角透過其他瀏覽器填寫(ex. Chrome)',
 			'openBrowserToFill' => '開啟瀏覽器填寫',
 			'minute' => '分',
+			'busArriving' => '進站中',
+			'busComingSoon' => '將到站',
+			'busScheduledTime' => ({required Object time}) => '表定\n${time}',
+			'busDeparted' => '已離站',
+			'busNotOperating' => '未行駛',
 			'towCarHelper' => '拖車小幫手',
 			'subscriptionArea' => '訂閱區域',
 			'towCarNews' => '最新消息',

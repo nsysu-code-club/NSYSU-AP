@@ -39,7 +39,6 @@ void main() {
   const Map<String, String> endpoints = <String, String>{
     'Selcrs (course/score/graduation)': 'https://selcrs.nsysu.edu.tw/',
     'Tfstu (tuition)': 'https://tfstu.nsysu.edu.tw/',
-    'iBus (campus bus realtime)': 'https://ibus.nsysu.edu.tw/',
   };
 
   for (final MapEntry<String, String> entry in endpoints.entries) {
@@ -67,4 +66,22 @@ void main() {
       timeout: const Timeout(Duration(seconds: 30)),
     );
   }
+
+  test(
+    'Health Check iBus (campus bus realtime) is reachable',
+    () async {
+      const String endpoint = 'https://ibus.tbkc.gov.tw/ibus/graphql';
+      print('[live] POST $endpoint');
+      final Response<dynamic> response = await healthDio.post<dynamic>(
+        endpoint,
+        data: <String, dynamic>{
+          'query': 'query { route(xno: 901, lang: "zh") { name } }',
+        },
+      );
+      print('[live]   ← HTTP ${response.statusCode}');
+      expect(response.statusCode, 200);
+      expect(response.data, isA<Map<String, dynamic>>());
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
 }
