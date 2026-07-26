@@ -1,4 +1,4 @@
-[![CI](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/ci.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/ci.yml)[![Store CD](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/cd.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/cd.yml)[![Crawler Monitor](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/crawler-monitor.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/crawler-monitor.yml)
+[![CI](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/ci.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/ci.yml) [![Store CD](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/cd.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/cd.yml) [![Crawler Monitor](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/crawler-monitor.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/crawler-monitor.yml)
 # 中山校務通
 
  提供中山學生更方便的校務系統查詢入口，由 Google 開源跨平台框架 [Flutter](https://flutter.dev) 開發

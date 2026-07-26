@@ -27,7 +27,7 @@ flutter pub get
 ## 3. 分支策略與發版流程
 
 本專案目前以 `master` 作為所有開發工作的基準分支與主要合併目標。
-在master上經驗證後，帶下一個測試週期合併進入 `develop`並開始進行公開測試階段 （beta）
+在 `master` 上經驗證後，待下一個測試週期合併進入 `develop` 並開始進行公開測試階段（beta）。
 在 `develop` 上測試期滿並驗證後，併入 `production`，正式進入穩定正式版發布。
 
 ### 分支角色
@@ -130,7 +130,7 @@ git checkout -b <type>/<issue-name>
 在發送 PR 或將 Draft 轉換為 Ready for review 前，請快速核對以下項目：
 
 - [ ] 是否已建立或關聯對應 Issue？
-- [ ] 是否已經 fork repo `NSYSU_AP`?
+- [ ] 是否已經 fork repo `NSYSU-AP`？
 - [ ] 開發分支是否基於 `master` 建立？PR 目標分支是否為 `master`？
 - [ ] 分支命名是否符合既有格式，例如 `feature/xxx`、`fix/xxx`、`refactor/xxx`、`chore/xxx`...？
 - [ ] 是否已在本機執行 `flutter analyze` 且無錯誤？
