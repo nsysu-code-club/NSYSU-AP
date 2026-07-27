@@ -28,7 +28,7 @@ on:
 jobs:
   monitor:
     name: Crawler Structure Monitor
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS]
     timeout-minutes: 15
     steps:
       - name: Checkout code

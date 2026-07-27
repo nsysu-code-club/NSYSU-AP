@@ -23,7 +23,7 @@ void main() {
     test(
       'getBusInfoList(zh) returns a non-empty list of routes',
       () async {
-        print('[live] GET nsysu-bus/bus_info_data_zh.json');
+        print('[live] POST iBus GraphQL route summaries (zh)');
         final ApiResult<List<BusInfo>?> result = await BusHelper.instance
             .getBusInfoList(languageCode: 'zh');
         expect(result, isA<ApiSuccess<List<BusInfo>?>>());
@@ -34,6 +34,13 @@ void main() {
         );
         expect(list, isNotNull);
         expect(list, isNotEmpty);
+        expect(list!.map((BusInfo route) => route.routeId), <int>[
+          901,
+          9011,
+          50,
+          219,
+          2192,
+        ]);
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
@@ -41,7 +48,7 @@ void main() {
     test(
       'getBusInfoList(en) returns english route names',
       () async {
-        print('[live] GET nsysu-bus/bus_info_data_en.json');
+        print('[live] POST iBus GraphQL route summaries (en)');
         final ApiResult<List<BusInfo>?> result = await BusHelper.instance
             .getBusInfoList(languageCode: 'en');
         expect(result, isA<ApiSuccess<List<BusInfo>?>>());
@@ -52,6 +59,8 @@ void main() {
         );
         expect(list, isNotNull);
         expect(list, isNotEmpty);
+        expect(list!.first.routeId, 901);
+        expect(list.first.departure, contains('Hamasen'));
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
@@ -59,7 +68,7 @@ void main() {
     test(
       'getBusTime returns arrival times for the first route',
       () async {
-        print('[live] GET bus info to pick a route, then POST RoutePathStop');
+        print('[live] GET bus info to pick a route, then POST iBus GraphQL');
         final ApiResult<List<BusInfo>?> infoResult = await BusHelper.instance
             .getBusInfoList(languageCode: 'zh');
         final List<BusInfo> list =
@@ -72,6 +81,12 @@ void main() {
         final List<BusTime>? times =
             (result as ApiSuccess<List<BusTime>?>).data;
         print('[live]   ← ${times?.length ?? 0} arrival entries');
+        expect(times, isNotNull);
+        expect(times, isNotEmpty);
+        expect(
+          times!.map((BusTime time) => time.direction),
+          containsAll(<BusDirection>[BusDirection.go, BusDirection.back]),
+        );
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
