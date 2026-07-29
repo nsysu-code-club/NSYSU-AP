@@ -23,15 +23,19 @@ void main() {
     test(
       'getBusInfoList(zh) returns a non-empty list of routes',
       () async {
-        print('[live] POST iBus GraphQL route summaries (zh)');
+        logTarget('BusHelper', 'getBusInfoList', <String, dynamic>{
+          'lang': 'zh',
+          'desc': 'route summaries',
+        });
         final ApiResult<List<BusInfo>?> result = await BusHelper.instance
             .getBusInfoList(languageCode: 'zh');
         expect(result, isA<ApiSuccess<List<BusInfo>?>>());
         final List<BusInfo>? list = (result as ApiSuccess<List<BusInfo>?>).data;
-        print(
-          '[live]   ← ${list?.length ?? 0} routes; '
-          'first="${list?.firstOrNull?.name ?? '<none>'}"',
-        );
+        logSuccess('BusHelper', 'getBusInfoList', <String, dynamic>{
+          'lang': 'zh',
+          'count': list?.length ?? 0,
+          'first': list?.firstOrNull?.name ?? '<none>',
+        });
         expect(list, isNotNull);
         expect(list, isNotEmpty);
         expect(list!.map((BusInfo route) => route.routeId), <int>[
@@ -48,15 +52,19 @@ void main() {
     test(
       'getBusInfoList(en) returns english route names',
       () async {
-        print('[live] POST iBus GraphQL route summaries (en)');
+        logTarget('BusHelper', 'getBusInfoList', <String, dynamic>{
+          'lang': 'en',
+          'desc': 'route summaries',
+        });
         final ApiResult<List<BusInfo>?> result = await BusHelper.instance
             .getBusInfoList(languageCode: 'en');
         expect(result, isA<ApiSuccess<List<BusInfo>?>>());
         final List<BusInfo>? list = (result as ApiSuccess<List<BusInfo>?>).data;
-        print(
-          '[live]   ← ${list?.length ?? 0} routes; '
-          'first="${list?.firstOrNull?.name ?? '<none>'}"',
-        );
+        logSuccess('BusHelper', 'getBusInfoList', <String, dynamic>{
+          'lang': 'en',
+          'count': list?.length ?? 0,
+          'first': list?.firstOrNull?.name ?? '<none>',
+        });
         expect(list, isNotNull);
         expect(list, isNotEmpty);
         expect(list!.first.routeId, 901);
@@ -68,19 +76,27 @@ void main() {
     test(
       'getBusTime returns arrival times for the first route',
       () async {
-        print('[live] GET bus info to pick a route, then POST iBus GraphQL');
+        logTarget('BusHelper', 'getBusTime', <String, dynamic>{
+          'lang': 'zh',
+          'desc': 'arrival times',
+        });
         final ApiResult<List<BusInfo>?> infoResult = await BusHelper.instance
             .getBusInfoList(languageCode: 'zh');
         final List<BusInfo> list =
             (infoResult as ApiSuccess<List<BusInfo>?>).data!;
         final BusInfo first = list.first;
-        print('[live]   route: "${first.name}" (RID=${first.routeId})');
+        logInfo('BusHelper', 'selectRoute', <String, dynamic>{
+          'route': first.name,
+          'routeId': first.routeId,
+        });
         final ApiResult<List<BusTime>?> result = await BusHelper.instance
             .getBusTime(languageCode: 'zh', busInfo: first);
         expect(result, isA<ApiSuccess<List<BusTime>?>>());
         final List<BusTime>? times =
             (result as ApiSuccess<List<BusTime>?>).data;
-        print('[live]   ← ${times?.length ?? 0} arrival entries');
+        logSuccess('BusHelper', 'getBusTime', <String, dynamic>{
+          'count': times?.length ?? 0,
+        });
         expect(times, isNotNull);
         expect(times, isNotEmpty);
         expect(

@@ -5,10 +5,12 @@ presets:
     exclude_tags: '__never__'
     include_tags: 'live'
     reporter: expanded
+    concurrency: 1
   live-anonymous:
     exclude_tags: '__never__'
     include_tags: 'live-anonymous'
     reporter: expanded
+    concurrency: 1
 
 tags:
   live:

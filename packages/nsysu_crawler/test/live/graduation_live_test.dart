@@ -17,22 +17,27 @@ void main() {
   final bool hasCreds = username.isNotEmpty && password.isNotEmpty;
   final String? skipReason = hasCreds
       ? null
-      : 'NSYSU_USER / NSYSU_PASS env vars not set';
+      : '[ALERT] NSYSU_USER / NSYSU_PASS env vars not set.';
 
   group('GraduationHelper', () {
     setUpAll(() async {
       enableHttpLogging(GraduationHelper.instance.dio);
       if (!hasCreds) {
-        print('[live] no credentials in env — graduation tests will skip');
+        logInfo('GraduationHelper', 'login', <String, dynamic>{
+          'status': 'skipped',
+          'reason': '[ALERT] NSYSU_USER / NSYSU_PASS env vars not set.',
+        });
         return;
       }
-      print('[live] login as ${redact(username)} (gadchk graduation system)');
+      logInfo('GraduationHelper', 'login', <String, dynamic>{
+        'user': redact(username),
+      });
       final ApiResult<GeneralResponse> result = await GraduationHelper.instance
           .login(username: username, password: password);
-      print(
-        '[live]   ← isLogin=${GraduationHelper.instance.isLogin} '
-        'result=${result.runtimeType}',
-      );
+      logSuccess('GraduationHelper', 'login', <String, dynamic>{
+        'isLogin': GraduationHelper.instance.isLogin,
+        'result': result.runtimeType.toString(),
+      });
       expect(
         result,
         isA<ApiSuccess<GeneralResponse>>(),
@@ -47,7 +52,10 @@ void main() {
     test(
       'getGraduationReport returns a non-error result',
       () async {
-        print('[live] GET /gadchk/gad_chk_stu_list.asp (graduation report)');
+        logTarget('GraduationHelper', 'getGraduationReport', <String, dynamic>{
+          'method': 'GET',
+          'path': '/gadchk/gad_chk_stu_list.asp',
+        });
         final ApiResult<GraduationReportData?> result = await GraduationHelper
             .instance
             .getGraduationReport(username: username);
@@ -55,13 +63,19 @@ void main() {
         final GraduationReportData? data =
             (result as ApiSuccess<GraduationReportData?>).data;
         if (data == null) {
-          print('[live]   ← null (no report — first-year / non-degree?)');
+          logInfo('GraduationHelper', 'getGraduationReport', <String, dynamic>{
+            'result': 'null',
+            'note': 'no report (first-year or non-degree)',
+          });
         } else {
-          print(
-            '[live]   ← missing=${data.missingRequiredCourse.length} '
-            'general=${data.generalEducationCourse.length} '
-            'other=${data.otherEducationsCourse.length} '
-            '(detail credits redacted)',
+          logSuccess(
+            'GraduationHelper',
+            'getGraduationReport',
+            <String, dynamic>{
+              'missingRequired': data.missingRequiredCourse.length,
+              'generalEducation': data.generalEducationCourse.length,
+              'otherEducations': data.otherEducationsCourse.length,
+            },
           );
         }
       },

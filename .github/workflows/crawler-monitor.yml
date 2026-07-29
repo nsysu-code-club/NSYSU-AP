@@ -83,11 +83,11 @@ jobs:
           CRAWLER_FAIL=$(echo "$FAILED" | grep -iv 'Health Check' || true)
 
           if [ -n "$HEALTH_FAIL" ] && [ -n "$CRAWLER_FAIL" ]; then
-            CATEGORY="🔴 NSYSU 網站連線異常 + 爬蟲結構異常"
+            CATEGORY="[ERROR] NSYSU 網站連線異常 + 爬蟲結構異常"
           elif [ -n "$HEALTH_FAIL" ]; then
-            CATEGORY="🔴 NSYSU 網站連線異常（可能掛掉）"
+            CATEGORY="[ERROR] NSYSU 網站連線異常（伺服器無回應或連線逾時）"
           else
-            CATEGORY="🟡 NSYSU 爬蟲結構異常（網站正常但 HTML 結構可能已變更）"
+            CATEGORY="[WARNING] NSYSU 爬蟲結構異常（網站正常但 HTML 結構可能已變更）"
           fi
 
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
@@ -96,11 +96,28 @@ jobs:
           echo "$FAILED" >> "$GITHUB_OUTPUT"
           echo "$EOF" >> "$GITHUB_OUTPUT"
 
+      - name: Generate Job Summary
+        if: always()
+        run: |
+          echo "## [MONITOR] NSYSU Crawler Status Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.test_live.outputs.exit_code }}" == "0" ] && [ "${{ steps.test_anon.outputs.exit_code }}" == "0" ]; then
+            echo "### [PASS] All crawler endpoints operating normally." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### [FAIL] Endpoint issue detected." >> $GITHUB_STEP_SUMMARY
+            echo "**Category:** ${{ steps.msg.outputs.category }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "#### Failed Items:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "${{ steps.msg.outputs.failures }}" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: Notify Discord
         if: steps.test_live.outputs.exit_code != '0' || steps.test_anon.outputs.exit_code != '0'
         run: |
           jq -n \
-            --arg content "🚨 **NSYSU 爬蟲監控異常**
+            --arg content "[ALERT] **NSYSU 爬蟲監控異常**
 
           ${{ steps.msg.outputs.category }}
 
