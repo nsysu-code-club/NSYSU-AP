@@ -98,6 +98,36 @@ NSYSU_USER=B12345678 NSYSU_PASS=xxx dart test -P live -r expanded
 - `NSYSU_USERNAME` / `NSYSU_PASSWORD`：跑 cron 的測試帳號（**用 alt account，不要日常帳號**）
 - `DISCORD_WEBHOOK_URL`：失敗通知用
 
+### 本地 pre-commit
+
+第一次設定本機 Git hooks：
+
+```bash
+fvm dart run tool/install_git_hooks.dart
+```
+
+沒有使用 FVM 的環境可改用：
+
+```bash
+dart run tool/install_git_hooks.dart
+```
+
+安裝器會透過 `git_hooks` 套件建立 `.git/hooks/*`，並讓 `pre-commit` 指向 [`bin/git_hooks.dart`](bin/git_hooks.dart)。
+
+之後每次 `git commit` 前會自動執行：
+
+```bash
+fvm dart analyze --no-fatal-warnings .
+fvm dart run slang
+cd packages/nsysu_crawler && fvm dart test
+```
+
+如果本機沒有 FVM，腳本會 fallback 使用 `dart` / `flutter`。
+pre-commit 結束時會輸出 summary，列出每個 step 的 success / failed 狀態，並附上 crawler test log；任一步失敗都會阻擋 commit。
+
+pre-commit 的主要流程寫在 [`tool/pre_commit.dart`](tool/pre_commit.dart)，
+hook 入口由 [`bin/git_hooks.dart`](bin/git_hooks.dart) 管理，安裝流程寫在 [`tool/install_git_hooks.dart`](tool/install_git_hooks.dart)。
+
 ## 爬蟲
 
 邏輯以需要登入做系統區隔，若有功能有問題可向 [中山大學軟體工程組執掌查詢](https://lis.nsysu.edu.tw/p/405-1001-180580,c1173.php) 聯絡
