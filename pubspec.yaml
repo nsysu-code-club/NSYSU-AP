@@ -40,7 +40,10 @@ dependencies:
   google_sign_in_dartio: ^0.3.0
   json_annotation: ^4.6.0
   package_info_plus: ^8.0.3
+  path_provider: ^2.1.5
   printing: 5.13.4
+  flutter_native_ocr: ^0.1.0
+  image: ^4.5.4
 
 dev_dependencies:
   flutter_test:
@@ -67,4 +70,3 @@ flutter:
     - changelog.json
     - assets/car_park_area.json
     - assets/ca/
-
