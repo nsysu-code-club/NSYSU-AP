@@ -1,8 +1,10 @@
 import 'package:ap_common/ap_common.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/pages/debug/captcha_ocr_debug_page.dart';
 import 'package:nsysu_ap/pages/login/search_student_id_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/utils.dart';
@@ -107,6 +109,13 @@ class LoginPageState extends State<LoginPage> {
           },
           text: ap.searchUsername,
         ),
+        if (kDebugMode)
+          ApFlatButton(
+            onPressed: () {
+              Navigator.pushNamed(context, CaptchaOcrDebugPage.routerName);
+            },
+            text: '驗證碼 OCR 測試',
+          ),
       ],
     );
   }

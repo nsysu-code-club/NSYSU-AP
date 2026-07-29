@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/bus/bus_list_page.dart';
+import 'package:nsysu_ap/pages/enroll_certificate/enroll_certificate_page.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/guide/school_map_page.dart';
 import 'package:nsysu_ap/pages/info/shcool_info_page.dart';
@@ -280,8 +281,7 @@ class HomePageState extends State<HomePage> {
       final dynamic rawContent = map[ap.locale];
       final String? updateNoteContent = switch (rawContent) {
         final String s => s,
-        final List<dynamic> l =>
-          l.map((dynamic e) => '* $e').join('\n'),
+        final List<dynamic> l => l.map((dynamic e) => '* $e').join('\n'),
         _ => null,
       };
       if (!mounted) return;
@@ -345,101 +345,107 @@ class HomePageState extends State<HomePage> {
           Constants.prefDisplayPicture,
           true,
         ),
-      onTapHeader: () {
-        if (isLogin) {
-          if (userInfo != null) {
-            ApUtils.pushCupertinoStyle(
-              context,
-              UserInfoPage(userInfo: userInfo!),
-            );
+        onTapHeader: () {
+          if (isLogin) {
+            if (userInfo != null) {
+              ApUtils.pushCupertinoStyle(
+                context,
+                UserInfoPage(userInfo: userInfo!),
+              );
+            }
+          } else {
+            if (!isTablet) Navigator.of(context).pop();
+            openLoginPage();
           }
-        } else {
-          if (!isTablet) Navigator.of(context).pop();
-          openLoginPage();
-        }
-      },
-      widgets: <Widget>[
-        if (isTablet)
+        },
+        widgets: <Widget>[
+          if (isTablet)
+            DrawerMenuItem(
+              icon: ApIcon.home,
+              title: ap.home,
+              onTap: () => setState(() => content = null),
+            ),
+          _buildStudySection(),
           DrawerMenuItem(
-            icon: ApIcon.home,
-            title: ap.home,
-            onTap: () => setState(() => content = null),
+            icon: ApIcon.directionsBus,
+            title: ap.bus,
+            onTap: () =>
+                _openPage(BusListPage(locale: Locale(Intl.defaultLocale!))),
           ),
-        _buildStudySection(),
-        DrawerMenuItem(
-          icon: ApIcon.directionsBus,
-          title: ap.bus,
-          onTap: () =>
-              _openPage(BusListPage(locale: Locale(Intl.defaultLocale!))),
-        ),
-        _buildSchoolNavigationSection(),
-        DrawerMenuItem(
-          icon: ApIcon.school,
-          title: app.graduationCheckChecklist,
-          onTap: () => _openPage(const GraduationReportPage(), needLogin: true),
-        ),
-        DrawerMenuItem(
-          icon: ApIcon.monetizationOn,
-          title: app.tuitionAndFees,
-          onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
-        ),
-        DrawerMenuItem(
-          icon: ApIcon.info,
-          title: ap.schoolInfo,
-          onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
-        ),
-        DrawerMenuItem(
-          icon: ApIcon.face,
-          title: ap.about,
-          onTap: () => _openPage(
-            AboutUsPage(
-              assetImage: ImageAssets.nsysu,
-              githubName: 'nsysu-code-club',
-              email: 'nsysu.gdsc@gmail.com',
-              appLicense: app.aboutOpenSourceContent,
-              fbFanPageId: '100906232372556',
-              instagramUsername: 'gdsc_nsysu',
-              fbFanPageUrl: 'https://www.facebook.com/NSYSUGDSC',
-              githubUrl: 'https://github.com/nsysu-code-club',
+          _buildSchoolNavigationSection(),
+          DrawerMenuItem(
+            icon: ApIcon.school,
+            title: app.graduationCheckChecklist,
+            onTap: () =>
+                _openPage(const GraduationReportPage(), needLogin: true),
+          ),
+          DrawerMenuItem(
+            icon: ApIcon.monetizationOn,
+            title: app.tuitionAndFees,
+            onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
+          ),
+          DrawerMenuItem(
+            icon: Icons.picture_as_pdf_outlined,
+            title: app.enrollCertificate.title,
+            onTap: () => _openPage(const EnrollCertificatePage()),
+          ),
+          DrawerMenuItem(
+            icon: ApIcon.info,
+            title: ap.schoolInfo,
+            onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
+          ),
+          DrawerMenuItem(
+            icon: ApIcon.face,
+            title: ap.about,
+            onTap: () => _openPage(
+              AboutUsPage(
+                assetImage: ImageAssets.nsysu,
+                githubName: 'nsysu-code-club',
+                email: 'nsysu.gdsc@gmail.com',
+                appLicense: app.aboutOpenSourceContent,
+                fbFanPageId: '100906232372556',
+                instagramUsername: 'gdsc_nsysu',
+                fbFanPageUrl: 'https://www.facebook.com/NSYSUGDSC',
+                githubUrl: 'https://github.com/nsysu-code-club',
+              ),
             ),
           ),
-        ),
-        DrawerMenuItem(
-          icon: ApIcon.settings,
-          title: ap.settings,
-          onTap: () => _openPage(SettingPage()),
-        ),
-        if (isLogin) ...<Widget>[
-          const DrawerDivider(),
           DrawerMenuItem(
-            icon: ApIcon.powerSettingsNew,
-            title: ap.logout,
-            iconColor: colorScheme.error,
-            onTap: () async {
-              await PreferenceUtil.instance.setBool(
-                Constants.prefAutoLogin,
-                false,
-              );
-              SelcrsHelper.instance.logout();
-              GraduationHelper.instance.logout();
-              TuitionHelper.instance.logout();
-              await ApCommonPlugin.clearCourseWidget();
-              setState(() {
-                ShareDataWidget.of(context)!.data.isLogin = false;
-                ShareDataWidget.of(context)!.data.userInfo = null;
-                courseData = null;
-              });
-              content = null;
-              if (!isTablet) {
-                if (!context.mounted) return;
-                Navigator.of(context).pop();
-              }
-              _checkLoginState();
-            },
+            icon: ApIcon.settings,
+            title: ap.settings,
+            onTap: () => _openPage(SettingPage()),
           ),
+          if (isLogin) ...<Widget>[
+            const DrawerDivider(),
+            DrawerMenuItem(
+              icon: ApIcon.powerSettingsNew,
+              title: ap.logout,
+              iconColor: colorScheme.error,
+              onTap: () async {
+                await PreferenceUtil.instance.setBool(
+                  Constants.prefAutoLogin,
+                  false,
+                );
+                SelcrsHelper.instance.logout();
+                GraduationHelper.instance.logout();
+                TuitionHelper.instance.logout();
+                await ApCommonPlugin.clearCourseWidget();
+                setState(() {
+                  ShareDataWidget.of(context)!.data.isLogin = false;
+                  ShareDataWidget.of(context)!.data.userInfo = null;
+                  courseData = null;
+                });
+                content = null;
+                if (!isTablet) {
+                  if (!context.mounted) return;
+                  Navigator.of(context).pop();
+                }
+                _checkLoginState();
+              },
+            ),
+          ],
         ],
-      ],
-    ),
+      ),
     );
   }
 
@@ -476,8 +482,8 @@ class HomePageState extends State<HomePage> {
                   title: Text(app.openingBrowserTitle),
                   content: Text(
                     '${app.openingBrowserContent}:\n'
-                    '${Constants.courseSelectorUrl}'
-                    ),
+                    '${Constants.courseSelectorUrl}',
+                  ),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -494,7 +500,9 @@ class HomePageState extends State<HomePage> {
               PlatformUtil.instance.launchUrl(uri.toString());
             } else {
               UiUtil.instance.showToast(context, app.visitingUnSafeLink);
-              debugPrint('Attempted to launch an insecure URL: ${Constants.courseSelectorUrl}');
+              debugPrint(
+                'Attempted to launch an insecure URL: ${Constants.courseSelectorUrl}',
+              );
             }
           },
         ),

@@ -241,6 +241,140 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 
 	/// zh-Hant-TW: '不安全的連結，請確認網址是否正確'
 	String get visitingUnSafeLink => '不安全的連結，請確認網址是否正確';
+
+	late final AppLocalizationsEnrollCertificateZhHantTw enrollCertificate = AppLocalizationsEnrollCertificateZhHantTw.internal(_root);
+}
+
+// Path: enrollCertificate
+class AppLocalizationsEnrollCertificateZhHantTw {
+	AppLocalizationsEnrollCertificateZhHantTw.internal(this._root);
+
+	final AppLocalizations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh-Hant-TW: '在學證明'
+	String get title => '在學證明';
+
+	/// zh-Hant-TW: '重新生成'
+	String get regenerate => '重新生成';
+
+	/// zh-Hant-TW: '重新執行'
+	String get retry => '重新執行';
+
+	/// zh-Hant-TW: '在學證明'
+	String get fileName => '在學證明';
+
+	/// zh-Hant-TW: '正在讀取已儲存的在學證明...'
+	String get loadingCached => '正在讀取已儲存的在學證明...';
+
+	/// zh-Hant-TW: '正在開啟自動取得流程...'
+	String get openingFlow => '正在開啟自動取得流程...';
+
+	/// zh-Hant-TW: '找不到目前登入帳號，請先重新登入 App 後再取得在學證明。'
+	String get missingAccount => '找不到目前登入帳號，請先重新登入 App 後再取得在學證明。';
+
+	/// zh-Hant-TW: '找不到目前登入帳密，請先重新登入 App 後再重新生成。'
+	String get missingCredentials => '找不到目前登入帳密，請先重新登入 App 後再重新生成。';
+
+	/// zh-Hant-TW: '儲存在學證明失敗，請重新執行。'
+	String get saveFailed => '儲存在學證明失敗，請重新執行。';
+
+	/// zh-Hant-TW: '尚未取得在學證明，請重新執行。'
+	String get notObtained => '尚未取得在學證明，請重新執行。';
+
+	/// zh-Hant-TW: '正在嘗試 ${current}/${total}'
+	String attemptProgress({required Object current, required Object total}) => '正在嘗試 ${current}/${total}';
+
+	/// zh-Hant-TW: '可能需要至多 ${seconds} 秒'
+	String mayTakeUpToSeconds({required Object seconds}) => '可能需要至多 ${seconds} 秒';
+
+	/// zh-Hant-TW: '隱藏狀態'
+	String get hideStatus => '隱藏狀態';
+
+	/// zh-Hant-TW: '請在目前網頁中手動操作'
+	String get manualOperation => '請在目前網頁中手動操作';
+
+	/// zh-Hant-TW: '找不到在學證明入口'
+	String get manualEntryNotFound => '找不到在學證明入口';
+
+	/// zh-Hant-TW: '請在目前網頁中手動點選在學證明'
+	String get manualEntryInstruction => '請在目前網頁中手動點選在學證明';
+
+	/// zh-Hant-TW: '校方系統嘗試開啟未知頁面'
+	String get unknownPage => '校方系統嘗試開啟未知頁面';
+
+	/// zh-Hant-TW: '已阻止未知的網頁跳轉'
+	String get unknownNavigation => '已阻止未知的網頁跳轉';
+
+	/// zh-Hant-TW: '帳號或密碼錯誤'
+	String get credentialError => '帳號或密碼錯誤';
+
+	/// zh-Hant-TW: '網路註冊系統拒絕登入'
+	String get loginRejected => '網路註冊系統拒絕登入';
+
+	/// zh-Hant-TW: '校方系統拒絕目前 Session'
+	String get sessionRejected => '校方系統拒絕目前 Session';
+
+	/// zh-Hant-TW: '無法驗證網路註冊主頁'
+	String get registrationPageInvalid => '無法驗證網路註冊主頁';
+
+	/// zh-Hant-TW: '自動登入已達 ${count} 次'
+	String attemptsReached({required Object count}) => '自動登入已達 ${count} 次';
+
+	/// zh-Hant-TW: '找不到登入表單'
+	String get loginFormMissing => '找不到登入表單';
+
+	/// zh-Hant-TW: '連續 ${count} 組驗證碼無法辨識'
+	String captchaUnrecognized({required Object count}) => '連續 ${count} 組驗證碼無法辨識';
+
+	/// zh-Hant-TW: '自動登入已重試 ${count} 次'
+	String attemptsExhausted({required Object count}) => '自動登入已重試 ${count} 次';
+
+	/// zh-Hant-TW: '重新載入登入頁失敗'
+	String get loginPageReloadFailed => '重新載入登入頁失敗';
+
+	/// zh-Hant-TW: '網路註冊主頁沒有回應'
+	String get registrationNoResponse => '網路註冊主頁沒有回應';
+
+	/// zh-Hant-TW: '無法讀取在學證明 PDF'
+	String get pdfUnreadable => '無法讀取在學證明 PDF';
+
+	/// zh-Hant-TW: '下載在學證明 PDF 失敗'
+	String get pdfDownloadFailed => '下載在學證明 PDF 失敗';
+
+	/// zh-Hant-TW: '校方系統沒有回傳有效的 PDF'
+	String get pdfInvalid => '校方系統沒有回傳有效的 PDF';
+
+	/// zh-Hant-TW: '處理在學證明 PDF 失敗'
+	String get pdfProcessingFailed => '處理在學證明 PDF 失敗';
+
+	/// zh-Hant-TW: '等待 PDF 回應逾時'
+	String get pdfTimeout => '等待 PDF 回應逾時';
+
+	/// zh-Hant-TW: '請點擊重新生成後再試'
+	String get retryInstruction => '請點擊重新生成後再試';
+
+	/// zh-Hant-TW: '請稍後點擊重新生成'
+	String get retryLater => '請稍後點擊重新生成';
+
+	/// zh-Hant-TW: '請返回上一頁確認登入資料'
+	String get checkCredentials => '請返回上一頁確認登入資料';
+
+	/// zh-Hant-TW: '已停止自動跳轉，請重新生成'
+	String get navigationStopped => '已停止自動跳轉，請重新生成';
+
+	/// zh-Hant-TW: '頁面內容不完整，請重新生成'
+	String get pageIncomplete => '頁面內容不完整，請重新生成';
+
+	/// zh-Hant-TW: '請確認網路後點擊重新生成'
+	String get checkNetwork => '請確認網路後點擊重新生成';
+
+	/// zh-Hant-TW: '檔案不完整，請重新生成'
+	String get documentIncomplete => '檔案不完整，請重新生成';
+
+	/// zh-Hant-TW: '校方系統未在 ${seconds} 秒內回傳文件，請重新生成'
+	String pdfTimeoutDetail({required Object seconds}) => '校方系統未在 ${seconds} 秒內回傳文件，請重新生成';
 }
 
 /// The flat map containing all translations for locale <zh-Hant-TW>.
@@ -318,6 +452,47 @@ extension on AppLocalizations {
 			'openingBrowserContent' => '將使用瀏覽器開啟外部網站，是否繼續？',
 			'openingBrowserTitle' => '開啟外部網站',
 			'visitingUnSafeLink' => '不安全的連結，請確認網址是否正確',
+			'enrollCertificate.title' => '在學證明',
+			'enrollCertificate.regenerate' => '重新生成',
+			'enrollCertificate.retry' => '重新執行',
+			'enrollCertificate.fileName' => '在學證明',
+			'enrollCertificate.loadingCached' => '正在讀取已儲存的在學證明...',
+			'enrollCertificate.openingFlow' => '正在開啟自動取得流程...',
+			'enrollCertificate.missingAccount' => '找不到目前登入帳號，請先重新登入 App 後再取得在學證明。',
+			'enrollCertificate.missingCredentials' => '找不到目前登入帳密，請先重新登入 App 後再重新生成。',
+			'enrollCertificate.saveFailed' => '儲存在學證明失敗，請重新執行。',
+			'enrollCertificate.notObtained' => '尚未取得在學證明，請重新執行。',
+			'enrollCertificate.attemptProgress' => ({required Object current, required Object total}) => '正在嘗試 ${current}/${total}',
+			'enrollCertificate.mayTakeUpToSeconds' => ({required Object seconds}) => '可能需要至多 ${seconds} 秒',
+			'enrollCertificate.hideStatus' => '隱藏狀態',
+			'enrollCertificate.manualOperation' => '請在目前網頁中手動操作',
+			'enrollCertificate.manualEntryNotFound' => '找不到在學證明入口',
+			'enrollCertificate.manualEntryInstruction' => '請在目前網頁中手動點選在學證明',
+			'enrollCertificate.unknownPage' => '校方系統嘗試開啟未知頁面',
+			'enrollCertificate.unknownNavigation' => '已阻止未知的網頁跳轉',
+			'enrollCertificate.credentialError' => '帳號或密碼錯誤',
+			'enrollCertificate.loginRejected' => '網路註冊系統拒絕登入',
+			'enrollCertificate.sessionRejected' => '校方系統拒絕目前 Session',
+			'enrollCertificate.registrationPageInvalid' => '無法驗證網路註冊主頁',
+			'enrollCertificate.attemptsReached' => ({required Object count}) => '自動登入已達 ${count} 次',
+			'enrollCertificate.loginFormMissing' => '找不到登入表單',
+			'enrollCertificate.captchaUnrecognized' => ({required Object count}) => '連續 ${count} 組驗證碼無法辨識',
+			'enrollCertificate.attemptsExhausted' => ({required Object count}) => '自動登入已重試 ${count} 次',
+			'enrollCertificate.loginPageReloadFailed' => '重新載入登入頁失敗',
+			'enrollCertificate.registrationNoResponse' => '網路註冊主頁沒有回應',
+			'enrollCertificate.pdfUnreadable' => '無法讀取在學證明 PDF',
+			'enrollCertificate.pdfDownloadFailed' => '下載在學證明 PDF 失敗',
+			'enrollCertificate.pdfInvalid' => '校方系統沒有回傳有效的 PDF',
+			'enrollCertificate.pdfProcessingFailed' => '處理在學證明 PDF 失敗',
+			'enrollCertificate.pdfTimeout' => '等待 PDF 回應逾時',
+			'enrollCertificate.retryInstruction' => '請點擊重新生成後再試',
+			'enrollCertificate.retryLater' => '請稍後點擊重新生成',
+			'enrollCertificate.checkCredentials' => '請返回上一頁確認登入資料',
+			'enrollCertificate.navigationStopped' => '已停止自動跳轉，請重新生成',
+			'enrollCertificate.pageIncomplete' => '頁面內容不完整，請重新生成',
+			'enrollCertificate.checkNetwork' => '請確認網路後點擊重新生成',
+			'enrollCertificate.documentIncomplete' => '檔案不完整，請重新生成',
+			'enrollCertificate.pdfTimeoutDetail' => ({required Object seconds}) => '校方系統未在 ${seconds} 秒內回傳文件，請重新生成',
 			_ => null,
 		};
 	}

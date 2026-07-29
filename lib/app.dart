@@ -3,11 +3,13 @@ import 'package:ap_common/ap_common.dart'
 import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:ap_common_flutter_core/ap_common_flutter_core.dart' as ap_l10n
     show TranslationProvider;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/pages/debug/captcha_ocr_debug_page.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/home_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
@@ -142,6 +144,10 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
                                 const GraduationReportPage(),
                         SettingPage.routerName: (BuildContext context) =>
                             SettingPage(),
+                        if (kDebugMode)
+                          CaptchaOcrDebugPage.routerName:
+                              (BuildContext context) =>
+                                  const CaptchaOcrDebugPage(),
                       },
                       theme: ApTheme.light(seedColor),
                       darkTheme: ApTheme.dark(seedColor),

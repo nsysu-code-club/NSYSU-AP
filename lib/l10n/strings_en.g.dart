@@ -106,6 +106,57 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get openingBrowserContent => 'This will open an external website in your browser. Continue?';
 	@override String get openingBrowserTitle => 'Open External Website';
 	@override String get visitingUnSafeLink => 'Unsafe link. Please confirm the URL is correct.';
+	@override late final _AppLocalizationsEnrollCertificateEn enrollCertificate = _AppLocalizationsEnrollCertificateEn._(_root);
+}
+
+// Path: enrollCertificate
+class _AppLocalizationsEnrollCertificateEn extends AppLocalizationsEnrollCertificateZhHantTw {
+	_AppLocalizationsEnrollCertificateEn._(AppLocalizationsEn root) : this._root = root, super.internal(root);
+
+	final AppLocalizationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Certificate of Enrollment';
+	@override String get regenerate => 'Regenerate';
+	@override String get retry => 'Try Again';
+	@override String get fileName => 'Certificate of Enrollment';
+	@override String get loadingCached => 'Loading the saved certificate...';
+	@override String get openingFlow => 'Starting the automatic certificate process...';
+	@override String get missingAccount => 'No signed-in account was found. Sign in to the app before obtaining a certificate.';
+	@override String get missingCredentials => 'No saved credentials were found. Sign in to the app before regenerating the certificate.';
+	@override String get saveFailed => 'Failed to save the certificate. Please try again.';
+	@override String get notObtained => 'The certificate has not been obtained. Please try again.';
+	@override String attemptProgress({required Object current, required Object total}) => 'Attempting ${current}/${total}';
+	@override String mayTakeUpToSeconds({required Object seconds}) => 'This may take up to ${seconds} seconds';
+	@override String get hideStatus => 'Hide status';
+	@override String get manualOperation => 'Continue manually in the current page';
+	@override String get manualEntryNotFound => 'Certificate entry not found';
+	@override String get manualEntryInstruction => 'Select Certificate of Enrollment on the current page';
+	@override String get unknownPage => 'The university system tried to open an unknown page';
+	@override String get unknownNavigation => 'An unknown page navigation was blocked';
+	@override String get credentialError => 'Incorrect username or password';
+	@override String get loginRejected => 'The registration system rejected the login';
+	@override String get sessionRejected => 'The university system rejected the current session';
+	@override String get registrationPageInvalid => 'Unable to verify the registration page';
+	@override String attemptsReached({required Object count}) => 'Automatic login reached ${count} attempts';
+	@override String get loginFormMissing => 'Login form not found';
+	@override String captchaUnrecognized({required Object count}) => 'Unable to recognize ${count} consecutive CAPTCHAs';
+	@override String attemptsExhausted({required Object count}) => 'Automatic login failed after ${count} attempts';
+	@override String get loginPageReloadFailed => 'Failed to reload the login page';
+	@override String get registrationNoResponse => 'The registration page did not respond';
+	@override String get pdfUnreadable => 'Unable to read the certificate PDF';
+	@override String get pdfDownloadFailed => 'Failed to download the certificate PDF';
+	@override String get pdfInvalid => 'The university system did not return a valid PDF';
+	@override String get pdfProcessingFailed => 'Failed to process the certificate PDF';
+	@override String get pdfTimeout => 'Timed out waiting for the PDF';
+	@override String get retryInstruction => 'Select Regenerate to try again';
+	@override String get retryLater => 'Please select Regenerate and try again later';
+	@override String get checkCredentials => 'Go back and verify your sign-in details';
+	@override String get navigationStopped => 'Automatic navigation stopped. Please regenerate the certificate';
+	@override String get pageIncomplete => 'The page is incomplete. Please regenerate the certificate';
+	@override String get checkNetwork => 'Check your connection and select Regenerate';
+	@override String get documentIncomplete => 'The file is incomplete. Please regenerate the certificate';
+	@override String pdfTimeoutDetail({required Object seconds}) => 'The university system did not return a document within ${seconds} seconds';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -183,6 +234,47 @@ extension on AppLocalizationsEn {
 			'openingBrowserContent' => 'This will open an external website in your browser. Continue?',
 			'openingBrowserTitle' => 'Open External Website',
 			'visitingUnSafeLink' => 'Unsafe link. Please confirm the URL is correct.',
+			'enrollCertificate.title' => 'Certificate of Enrollment',
+			'enrollCertificate.regenerate' => 'Regenerate',
+			'enrollCertificate.retry' => 'Try Again',
+			'enrollCertificate.fileName' => 'Certificate of Enrollment',
+			'enrollCertificate.loadingCached' => 'Loading the saved certificate...',
+			'enrollCertificate.openingFlow' => 'Starting the automatic certificate process...',
+			'enrollCertificate.missingAccount' => 'No signed-in account was found. Sign in to the app before obtaining a certificate.',
+			'enrollCertificate.missingCredentials' => 'No saved credentials were found. Sign in to the app before regenerating the certificate.',
+			'enrollCertificate.saveFailed' => 'Failed to save the certificate. Please try again.',
+			'enrollCertificate.notObtained' => 'The certificate has not been obtained. Please try again.',
+			'enrollCertificate.attemptProgress' => ({required Object current, required Object total}) => 'Attempting ${current}/${total}',
+			'enrollCertificate.mayTakeUpToSeconds' => ({required Object seconds}) => 'This may take up to ${seconds} seconds',
+			'enrollCertificate.hideStatus' => 'Hide status',
+			'enrollCertificate.manualOperation' => 'Continue manually in the current page',
+			'enrollCertificate.manualEntryNotFound' => 'Certificate entry not found',
+			'enrollCertificate.manualEntryInstruction' => 'Select Certificate of Enrollment on the current page',
+			'enrollCertificate.unknownPage' => 'The university system tried to open an unknown page',
+			'enrollCertificate.unknownNavigation' => 'An unknown page navigation was blocked',
+			'enrollCertificate.credentialError' => 'Incorrect username or password',
+			'enrollCertificate.loginRejected' => 'The registration system rejected the login',
+			'enrollCertificate.sessionRejected' => 'The university system rejected the current session',
+			'enrollCertificate.registrationPageInvalid' => 'Unable to verify the registration page',
+			'enrollCertificate.attemptsReached' => ({required Object count}) => 'Automatic login reached ${count} attempts',
+			'enrollCertificate.loginFormMissing' => 'Login form not found',
+			'enrollCertificate.captchaUnrecognized' => ({required Object count}) => 'Unable to recognize ${count} consecutive CAPTCHAs',
+			'enrollCertificate.attemptsExhausted' => ({required Object count}) => 'Automatic login failed after ${count} attempts',
+			'enrollCertificate.loginPageReloadFailed' => 'Failed to reload the login page',
+			'enrollCertificate.registrationNoResponse' => 'The registration page did not respond',
+			'enrollCertificate.pdfUnreadable' => 'Unable to read the certificate PDF',
+			'enrollCertificate.pdfDownloadFailed' => 'Failed to download the certificate PDF',
+			'enrollCertificate.pdfInvalid' => 'The university system did not return a valid PDF',
+			'enrollCertificate.pdfProcessingFailed' => 'Failed to process the certificate PDF',
+			'enrollCertificate.pdfTimeout' => 'Timed out waiting for the PDF',
+			'enrollCertificate.retryInstruction' => 'Select Regenerate to try again',
+			'enrollCertificate.retryLater' => 'Please select Regenerate and try again later',
+			'enrollCertificate.checkCredentials' => 'Go back and verify your sign-in details',
+			'enrollCertificate.navigationStopped' => 'Automatic navigation stopped. Please regenerate the certificate',
+			'enrollCertificate.pageIncomplete' => 'The page is incomplete. Please regenerate the certificate',
+			'enrollCertificate.checkNetwork' => 'Check your connection and select Regenerate',
+			'enrollCertificate.documentIncomplete' => 'The file is incomplete. Please regenerate the certificate',
+			'enrollCertificate.pdfTimeoutDetail' => ({required Object seconds}) => 'The university system did not return a document within ${seconds} seconds',
 			_ => null,
 		};
 	}
