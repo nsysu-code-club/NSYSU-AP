@@ -120,6 +120,11 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get pleaseConfirmForm => 'Please fill out confirm form before login.\nIf you still can\'t log in after filling in, please click on the upper right corner to fill in through other browsers (ex. Chrome)';
 	@override String get openBrowserToFill => 'Open browser to fill';
 	@override String get minute => 'Min';
+	@override String get busArriving => 'Arriving';
+	@override String get busComingSoon => 'Coming\nSoon';
+	@override String busScheduledTime({required Object time}) => 'Scheduled\n${time}';
+	@override String get busDeparted => 'Departed';
+	@override String get busNotOperating => 'Not\nOperating';
 	@override String get towCarHelper => 'Tow Car Helper';
 	@override String get subscriptionArea => 'Subscription Area';
 	@override String get towCarNews => 'News';
@@ -236,6 +241,11 @@ extension on AppLocalizationsEn {
 			'pleaseConfirmForm' => 'Please fill out confirm form before login.\nIf you still can\'t log in after filling in, please click on the upper right corner to fill in through other browsers (ex. Chrome)',
 			'openBrowserToFill' => 'Open browser to fill',
 			'minute' => 'Min',
+			'busArriving' => 'Arriving',
+			'busComingSoon' => 'Coming\nSoon',
+			'busScheduledTime' => ({required Object time}) => 'Scheduled\n${time}',
+			'busDeparted' => 'Departed',
+			'busNotOperating' => 'Not\nOperating',
 			'towCarHelper' => 'Tow Car Helper',
 			'subscriptionArea' => 'Subscription Area',
 			'towCarNews' => 'News',

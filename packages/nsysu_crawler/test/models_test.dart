@@ -19,6 +19,8 @@ void main() {
       expect(restored.routeId, info.routeId);
       expect(restored.stopName, info.stopName);
       expect(restored.destination, info.destination);
+      expect(restored.busIds, <String>['A123']);
+      expect(restored.isOperating, isTrue);
     });
 
     test(
@@ -42,6 +44,32 @@ void main() {
         expect(info.destination, 'Marine');
       },
     );
+  });
+
+  group('BusTime', () {
+    test('round-trips typed iBus fields and legacy fields', () {
+      final BusTime time = BusTime(
+        routeId: 901,
+        stopId: '2059',
+        name: '哈瑪星',
+        arrivedTime: '3',
+        realArrivedTime: '12:00',
+        isGoBack: 'N',
+        seqNo: 1,
+        direction: BusDirection.go,
+        arrivalStatus: BusArrivalStatus.minutes,
+        etaMinutes: 3,
+        scheduledTime: '12:00',
+      );
+
+      final BusTime restored = BusTime.fromRawJson(time.toRawJson());
+      expect(restored.direction, BusDirection.go);
+      expect(restored.arrivalStatus, BusArrivalStatus.minutes);
+      expect(restored.etaMinutes, 3);
+      expect(restored.scheduledTime, '12:00');
+      expect(restored.arrivedTime, '3');
+      expect(restored.isGoBack, 'N');
+    });
   });
 
   group('TuitionAndFees', () {
