@@ -465,6 +465,11 @@ Map<String, String> _extractFormFields(dom.Element form) {
   for (final dom.Element input in form.getElementsByTagName('input')) {
     final String? name = input.attributes['name'];
     if (name == null || name.isEmpty) continue;
+    final String type = (input.attributes['type'] ?? 'text').toLowerCase();
+    if ((type == 'radio' || type == 'checkbox') &&
+        input.attributes['checked'] == null) {
+      continue;
+    }
     fields[name] = input.attributes['value'] ?? '';
   }
   for (final dom.Element textarea in form.getElementsByTagName('textarea')) {

@@ -136,7 +136,7 @@ class StudentLeaveSubmitResult {
   final String body;
   final StudentLeaveConfirmation confirmation;
 
-  bool get looksSuccessful {
+  bool? get looksSuccessful {
     if (body.contains('不成功') ||
         body.contains('失敗') ||
         body.contains('錯誤') ||
@@ -144,10 +144,13 @@ class StudentLeaveSubmitResult {
         body.contains('異常')) {
       return false;
     }
-    return body.contains('成功') ||
+    if (body.contains('成功') ||
         body.contains('完成') ||
         body.contains('已新增') ||
-        body.contains('存檔');
+        body.contains('存檔')) {
+      return true;
+    }
+    return null;
   }
 }
 

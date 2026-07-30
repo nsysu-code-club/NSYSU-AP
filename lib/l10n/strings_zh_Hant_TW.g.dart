@@ -170,7 +170,7 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '開啟證明檔案'
 	String get studentLeaveOpenAttachment => '開啟證明檔案';
 
-	/// zh-Hant-TW: '附件大小不能超過 {maxSize}'
+	/// zh-Hant-TW: '附件大小不能超過 ${maxSize}'
 	String studentLeaveAttachmentTooLarge({required Object maxSize}) => '附件大小不能超過 ${maxSize}';
 
 	/// zh-Hant-TW: '無法讀取此附件，請重新選擇其他檔案'
@@ -217,6 +217,15 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 
 	/// zh-Hant-TW: '假單已送出'
 	String get studentLeaveSubmitSuccess => '假單已送出';
+
+	/// zh-Hant-TW: '假單送出失敗'
+	String get studentLeaveSubmitFailedTitle => '假單送出失敗';
+
+	/// zh-Hant-TW: '假單送出失敗，請先至校務系統確認後再重新嘗試。'
+	String get studentLeaveSubmitFailed => '假單送出失敗，請先至校務系統確認後再重新嘗試。';
+
+	/// zh-Hant-TW: '送出結果待確認'
+	String get studentLeaveSubmitUnknownTitle => '送出結果待確認';
 
 	/// zh-Hant-TW: '已送出，但校務系統回傳結果無法判定，請至校務系統確認。'
 	String get studentLeaveSubmitUnknownResult => '已送出，但校務系統回傳結果無法判定，請至校務系統確認。';
@@ -442,6 +451,9 @@ extension on AppLocalizations {
 			'studentLeaveSubmitConfirmContent' => '送出後會直接送到校務系統，請確認內容正確。',
 			'studentLeaveSubmitting' => '假單送出中...',
 			'studentLeaveSubmitSuccess' => '假單已送出',
+			'studentLeaveSubmitFailedTitle' => '假單送出失敗',
+			'studentLeaveSubmitFailed' => '假單送出失敗，請先至校務系統確認後再重新嘗試。',
+			'studentLeaveSubmitUnknownTitle' => '送出結果待確認',
 			'studentLeaveSubmitUnknownResult' => '已送出，但校務系統回傳結果無法判定，請至校務系統確認。',
 			'studentLeaveLoginFailed' => '請假系統登入失敗，請確認帳號密碼或稍後再試。',
 			'studentLeaveTimeInvalid' => '結束時間需晚於開始時間',

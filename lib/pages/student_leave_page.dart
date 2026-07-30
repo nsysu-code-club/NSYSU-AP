@@ -1090,7 +1090,10 @@ class _StudentLeaveResultPageState extends State<StudentLeaveResultPage> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 24.0),
               children: <Widget>[
-                _ConfirmationHeader(isPreview: confirmForm != null),
+                _ConfirmationHeader(
+                  isPreview: confirmForm != null,
+                  submitResult: widget.submitResult,
+                ),
                 if (confirmForm != null) ...<Widget>[
                   const SizedBox(height: 12.0),
                   _StudentLeaveNotice(lines: confirmation.noticeLines),
@@ -1145,12 +1148,13 @@ class _StudentLeaveResultPageState extends State<StudentLeaveResultPage> {
       case ApiSuccess<StudentLeaveSubmitResult>(
         :final StudentLeaveSubmitResult data,
       ):
-        UiUtil.instance.showToast(
-          context,
-          data.looksSuccessful
-              ? app.studentLeaveSubmitSuccess
-              : app.studentLeaveSubmitUnknownResult,
-        );
+        final bool? looksSuccessful = data.looksSuccessful;
+        UiUtil.instance.showToast(context, switch (looksSuccessful) {
+          true => app.studentLeaveSubmitSuccess,
+          false => app.studentLeaveSubmitFailed,
+          null => app.studentLeaveSubmitUnknownResult,
+        });
+        if (looksSuccessful == false) return;
         Navigator.of(context).pop(true);
       case ApiError<StudentLeaveSubmitResult>(:final GeneralResponse response):
         _showStudentLeaveApiError(context, response);
@@ -1221,40 +1225,61 @@ class _ConfirmationSectionCard extends StatelessWidget {
 }
 
 class _ConfirmationHeader extends StatelessWidget {
-  const _ConfirmationHeader({required this.isPreview});
+  const _ConfirmationHeader({
+    required this.isPreview,
+    required this.submitResult,
+  });
 
   final bool isPreview;
+  final StudentLeaveSubmitResult? submitResult;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final bool? looksSuccessful = submitResult?.looksSuccessful;
+    final Color backgroundColor = isPreview
+        ? theme.colorScheme.primaryContainer
+        : switch (looksSuccessful) {
+            false => theme.colorScheme.errorContainer,
+            null => theme.colorScheme.tertiaryContainer,
+            true => theme.colorScheme.secondaryContainer,
+          };
+    final Color foregroundColor = isPreview
+        ? theme.colorScheme.onPrimaryContainer
+        : switch (looksSuccessful) {
+            false => theme.colorScheme.onErrorContainer,
+            null => theme.colorScheme.onTertiaryContainer,
+            true => theme.colorScheme.onSecondaryContainer,
+          };
+    final IconData icon = isPreview
+        ? Icons.fact_check_outlined
+        : switch (looksSuccessful) {
+            false => Icons.error_outline,
+            null => Icons.help_outline,
+            true => Icons.check_circle_outline,
+          };
+    final String title = isPreview
+        ? app.studentLeaveFinalCheck
+        : switch (looksSuccessful) {
+            false => app.studentLeaveSubmitFailedTitle,
+            null => app.studentLeaveSubmitUnknownTitle,
+            true => app.studentLeaveSubmitSuccess,
+          };
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: isPreview
-            ? theme.colorScheme.primaryContainer
-            : theme.colorScheme.secondaryContainer,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Row(
         children: <Widget>[
-          Icon(
-            isPreview ? Icons.fact_check_outlined : Icons.check_circle_outline,
-            size: 28.0,
-            color: isPreview
-                ? theme.colorScheme.onPrimaryContainer
-                : theme.colorScheme.onSecondaryContainer,
-          ),
+          Icon(icon, size: 28.0, color: foregroundColor),
           const SizedBox(width: 12.0),
           Expanded(
             child: Text(
-              isPreview
-                  ? app.studentLeaveFinalCheck
-                  : app.studentLeaveSubmitSuccess,
+              title,
               style: theme.textTheme.titleMedium?.copyWith(
-                color: isPreview
-                    ? theme.colorScheme.onPrimaryContainer
-                    : theme.colorScheme.onSecondaryContainer,
+                color: foregroundColor,
                 fontWeight: FontWeight.w700,
               ),
             ),

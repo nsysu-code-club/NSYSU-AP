@@ -98,6 +98,9 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get studentLeaveSubmitConfirmContent => 'This will submit the request to the school system. Please confirm the details are correct.';
 	@override String get studentLeaveSubmitting => 'Submitting leave request...';
 	@override String get studentLeaveSubmitSuccess => 'Leave request submitted';
+	@override String get studentLeaveSubmitFailedTitle => 'Leave request failed';
+	@override String get studentLeaveSubmitFailed => 'Leave request submission failed. Please check the school system before trying again.';
+	@override String get studentLeaveSubmitUnknownTitle => 'Submission needs confirmation';
 	@override String get studentLeaveSubmitUnknownResult => 'Submitted, but the school system response could not be verified. Please check the school system.';
 	@override String get studentLeaveLoginFailed => 'Could not log in to the leave system. Please check your account or try again later.';
 	@override String get studentLeaveTimeInvalid => 'End time must be later than start time';
@@ -219,6 +222,9 @@ extension on AppLocalizationsEn {
 			'studentLeaveSubmitConfirmContent' => 'This will submit the request to the school system. Please confirm the details are correct.',
 			'studentLeaveSubmitting' => 'Submitting leave request...',
 			'studentLeaveSubmitSuccess' => 'Leave request submitted',
+			'studentLeaveSubmitFailedTitle' => 'Leave request failed',
+			'studentLeaveSubmitFailed' => 'Leave request submission failed. Please check the school system before trying again.',
+			'studentLeaveSubmitUnknownTitle' => 'Submission needs confirmation',
 			'studentLeaveSubmitUnknownResult' => 'Submitted, but the school system response could not be verified. Please check the school system.',
 			'studentLeaveLoginFailed' => 'Could not log in to the leave system. Please check your account or try again later.',
 			'studentLeaveTimeInvalid' => 'End time must be later than start time',
