@@ -333,6 +333,37 @@ void main() {
       expect(confirmation.noticeLines[1], startsWith('(1)不需課程請假期間：'));
       expect(confirmation.noticeLines[2], contains('檢查請假單內容是否正確'));
     });
+
+    test('keeps checked radio and checkbox values only', () {
+      const String html = '''
+      <html>
+        <body>
+          <form action="SLAMS_stuLeave_add_act.php">
+            <input type="hidden" name="Lclass" value="stu" />
+            <input type="hidden" name="sub_Lclass" value="student" />
+            <input type="hidden" name="s_date" value="2025-01-06" />
+            <input type="hidden" name="s_time" value="09:00" />
+            <input type="hidden" name="e_date" value="2025-01-06" />
+            <input type="hidden" name="e_time" value="12:00" />
+            <input type="radio" name="confirm" value="N" />
+            <input type="radio" name="confirm" value="Y" checked />
+            <input type="checkbox" name="notify" value="N" />
+            <input type="checkbox" name="courseFlag" value="selected" checked />
+            <input type="checkbox" name="courseFlag" value="unselected" />
+          </form>
+        </body>
+      </html>
+      ''';
+
+      final StudentLeaveConfirmForm? result = parseStudentLeaveConfirmForm(
+        html,
+      );
+
+      expect(result, isNotNull);
+      expect(result!.fields['confirm'], 'Y');
+      expect(result.fields['notify'], isNull);
+      expect(result.fields['courseFlag'], 'selected');
+    });
   });
 
   group('BusInfo JSON parsing', () {

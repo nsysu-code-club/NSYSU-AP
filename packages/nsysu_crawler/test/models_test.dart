@@ -157,5 +157,15 @@ void main() {
         expect(result.looksSuccessful, isFalse);
       }
     });
+
+    test('treats unrecognized submit responses as unknown', () {
+      const StudentLeaveSubmitResult result = StudentLeaveSubmitResult(
+        statusCode: 200,
+        body: '系統已收到資料，請稍後查詢處理狀態',
+        confirmation: confirmation,
+      );
+
+      expect(result.looksSuccessful, isNull);
+    });
   });
 }

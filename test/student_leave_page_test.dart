@@ -164,6 +164,29 @@ void main() {
     expect(find.text(app.studentLeaveNoticeTitle), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('failed submitted result does not use the success header', (
+    WidgetTester tester,
+  ) async {
+    const StudentLeaveSubmitResult result = StudentLeaveSubmitResult(
+      statusCode: 200,
+      body: '假單送出失敗，請稍後再試',
+      confirmation: StudentLeaveConfirmation(
+        messages: <String>['假單送出失敗，請稍後再試'],
+        rawText: '假單送出失敗，請稍後再試',
+        sections: <StudentLeaveConfirmationSection>[],
+      ),
+    );
+
+    await tester.pumpWidget(
+      _testApp(const StudentLeaveResultPage(submitResult: result)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(app.studentLeaveSubmitFailedTitle), findsOneWidget);
+    expect(find.text(app.studentLeaveSubmitSuccess), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _FakeAnalyticsUtil extends AnalyticsUtil {
