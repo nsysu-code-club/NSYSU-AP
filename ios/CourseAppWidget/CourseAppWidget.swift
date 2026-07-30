@@ -44,27 +44,28 @@ struct Provider: IntentTimelineProvider {
     
     func getTimeline(for configuration: ConfigurationIntent, in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
         var entries: [SimpleEntry] = []
-        
+
         var myUserDefaults :UserDefaults!
         myUserDefaults = UserDefaults(suiteName: "group.com.nsysu.ap")
         var title = "尚無課程資料"
         var classTime = ""
         var location = ""
         var shortText = "尚無課程資料"
-        
+
         var nextTitle = ""
         var nextTime = ""
         var nextLocation = ""
         var shortNext = ""
         var compactNext = ""
-        
+        var nextCourseEndDate: Date?
+
         if let json = myUserDefaults?.string(forKey: "course_notify"),
            let courseData = try? JSONDecoder().decode(CourseData.self, from: Data(json.utf8)) {
             let today = Date()
             let dateComponents = Calendar.current.dateComponents(in: TimeZone.current, from: today)
             let courses = courseData.courses
             let weekday = dateComponents.weekday == 1 ? 7 : (dateComponents.weekday ?? 1) - 1
-            
+
             struct TempCourseItem {
                 let course: Course
                 let startTime: String
@@ -73,10 +74,10 @@ struct Provider: IntentTimelineProvider {
                 let startDate: Date
                 var endDate: Date
             }
-            
+
             var todayCourses: [TempCourseItem] = []
             var todayCount = 0
-            
+
             courses.forEach({ (course) in
                 course.sectionTimes.forEach { (sectionTime) in
                     if weekday == sectionTime.weekday {
@@ -97,7 +98,7 @@ struct Provider: IntentTimelineProvider {
                     }
                 }
             })
-            
+
             let sortedCourses = todayCourses.sorted { $0.startDate < $1.startDate }
             var mergedCourses: [TempCourseItem] = []
 
@@ -115,7 +116,7 @@ struct Provider: IntentTimelineProvider {
 
             let activeAndFutureCourses = mergedCourses.filter { $0.endDate > today }
             let topTwoCourses = Array(activeAndFutureCourses.prefix(2))
-            
+
             if let first = topTwoCourses.first {
                 classTime = "\(first.startTime) - \(first.endTime)"
                 location = cleanLocation(
@@ -123,7 +124,8 @@ struct Provider: IntentTimelineProvider {
                 )
                 title = first.course.title
                 shortText = "\(first.course.title): \(location) \(first.startTime)"
-                
+                nextCourseEndDate = first.endDate
+
                 if topTwoCourses.count > 1 {
                     let second = topTwoCourses[1]
                     nextTime = "\(second.startTime) - \(second.endTime)"
@@ -144,7 +146,7 @@ struct Provider: IntentTimelineProvider {
                 }
             }
         }
-        
+
         let entry = SimpleEntry(
             classTime: classTime,
             location: location,
@@ -158,8 +160,16 @@ struct Provider: IntentTimelineProvider {
             configuration: configuration
         )
         entries.append(entry)
-        
-        let timeline = Timeline(entries: entries, policy: .atEnd)
+
+        let policy: TimelineReloadPolicy
+        if let endDate = nextCourseEndDate {
+            policy = .after(endDate)
+        } else {
+            let nextMidnight = Calendar.current.startOfDay(for: Date().addingTimeInterval(86400))
+            policy = .after(nextMidnight)
+        }
+
+        let timeline = Timeline(entries: entries, policy: policy)
         completion(timeline)
     }
 
