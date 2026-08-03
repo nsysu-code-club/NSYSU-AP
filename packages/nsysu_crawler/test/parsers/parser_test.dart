@@ -277,8 +277,10 @@ void main() {
         result[0].printUrl,
         'https://sis.nsysu.edu.tw/SLAMS/SLAMS_stuLeave_print.php?id=SL1130001',
       );
+      expect(result[0].canDelete, isTrue);
       expect(result[1].number, 'SL1130002');
       expect(result[1].proofText, '無');
+      expect(result[1].canDelete, isFalse);
       expect(result[1].proofUrl, isNull);
       expect(result[1].printUrl, isNull);
     });

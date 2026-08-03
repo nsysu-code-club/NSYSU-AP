@@ -78,6 +78,7 @@ class StudentLeaveRecord {
     required this.proofText,
     this.proofUrl,
     this.printUrl,
+    this.canDelete = false,
   });
 
   final String number;
@@ -91,6 +92,7 @@ class StudentLeaveRecord {
   final String proofText;
   final String? proofUrl;
   final String? printUrl;
+  final bool canDelete;
 }
 
 class StudentLeaveRequest {
@@ -148,6 +150,30 @@ class StudentLeaveSubmitResult {
         body.contains('完成') ||
         body.contains('已新增') ||
         body.contains('存檔')) {
+      return true;
+    }
+    return null;
+  }
+}
+
+class StudentLeaveDeleteResult {
+  const StudentLeaveDeleteResult({
+    required this.statusCode,
+    required this.body,
+  });
+
+  final int? statusCode;
+  final String body;
+
+  bool? get looksSuccessful {
+    if (body.contains('不成功') ||
+        body.contains('失敗') ||
+        body.contains('錯誤') ||
+        body.contains('未完成') ||
+        body.contains('異常')) {
+      return false;
+    }
+    if (body.contains('刪除') && (body.contains('成功') || body.contains('完成'))) {
       return true;
     }
     return null;

@@ -149,6 +149,7 @@ List<StudentLeaveRecord> parseStudentLeaveRecords(String html) {
           proofText: _cleanText(proofCell.text),
           proofUrl: _proofHref(proofCell),
           printUrl: _hrefByText(maintenanceCell, '列印'),
+          canDelete: _cleanText(maintenanceCell.text).contains('刪除'),
         ),
       );
     }

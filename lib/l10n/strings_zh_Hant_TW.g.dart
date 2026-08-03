@@ -113,6 +113,33 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '新增假單'
 	String get studentLeaveAdd => '新增假單';
 
+	/// zh-Hant-TW: '刪除假單'
+	String get studentLeaveDelete => '刪除假單';
+
+	/// zh-Hant-TW: '確定刪除？'
+	String get studentLeaveDeleteConfirmTitle => '確定刪除？';
+
+	/// zh-Hant-TW: '刪除後無法復原，是否確定刪除這張假單？'
+	String get studentLeaveDeleteConfirmContent => '刪除後無法復原，是否確定刪除這張假單？';
+
+	/// zh-Hant-TW: '假單刪除中...'
+	String get studentLeaveDeleting => '假單刪除中...';
+
+	/// zh-Hant-TW: '假單已刪除'
+	String get studentLeaveDeleteSuccess => '假單已刪除';
+
+	/// zh-Hant-TW: '假單刪除失敗'
+	String get studentLeaveDeleteFailedTitle => '假單刪除失敗';
+
+	/// zh-Hant-TW: '假單刪除失敗，請至校務系統確認後再試。'
+	String get studentLeaveDeleteFailed => '假單刪除失敗，請至校務系統確認後再試。';
+
+	/// zh-Hant-TW: '刪除結果待確認'
+	String get studentLeaveDeleteUnknownTitle => '刪除結果待確認';
+
+	/// zh-Hant-TW: '校務系統已收到刪除請求，但回傳結果無法判定，請重新整理假單確認。'
+	String get studentLeaveDeleteUnknownResult => '校務系統已收到刪除請求，但回傳結果無法判定，請重新整理假單確認。';
+
 	/// zh-Hant-TW: '這學期還沒有請假紀錄'
 	String get studentLeaveEmpty => '這學期還沒有請假紀錄';
 
@@ -416,6 +443,15 @@ extension on AppLocalizations {
 			'studentLeaveSelectSemester' => '查詢學期',
 			'studentLeaveRefresh' => '重新整理假單',
 			'studentLeaveAdd' => '新增假單',
+			'studentLeaveDelete' => '刪除假單',
+			'studentLeaveDeleteConfirmTitle' => '確定刪除？',
+			'studentLeaveDeleteConfirmContent' => '刪除後無法復原，是否確定刪除這張假單？',
+			'studentLeaveDeleting' => '假單刪除中...',
+			'studentLeaveDeleteSuccess' => '假單已刪除',
+			'studentLeaveDeleteFailedTitle' => '假單刪除失敗',
+			'studentLeaveDeleteFailed' => '假單刪除失敗，請至校務系統確認後再試。',
+			'studentLeaveDeleteUnknownTitle' => '刪除結果待確認',
+			'studentLeaveDeleteUnknownResult' => '校務系統已收到刪除請求，但回傳結果無法判定，請重新整理假單確認。',
 			'studentLeaveEmpty' => '這學期還沒有請假紀錄',
 			'studentLeaveNumber' => '假單編號',
 			'studentLeaveYearSemester' => ({required Object year, required Object semester}) => '${year}學年度第${semester}學期',

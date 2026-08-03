@@ -187,6 +187,41 @@ void main() {
     expect(find.text(app.studentLeaveSubmitSuccess), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('English leave review values translate 檢視 as View', (
+    WidgetTester tester,
+  ) async {
+    LocaleSettings.setLocaleSync(AppLocale.en);
+    addTearDown(() => LocaleSettings.setLocaleSync(AppLocale.zhHantTw));
+    const StudentLeavePreviewResult preview = StudentLeavePreviewResult(
+      statusCode: 200,
+      body: '',
+      confirmation: StudentLeaveConfirmation(
+        messages: <String>[],
+        rawText: '',
+        sections: <StudentLeaveConfirmationSection>[
+          StudentLeaveConfirmationSection(
+            title: '假單資料',
+            fields: <StudentLeaveConfirmationField>[
+              StudentLeaveConfirmationField(label: '課程審核', value: '檢視'),
+            ],
+          ),
+        ],
+      ),
+      confirmForm: StudentLeaveConfirmForm(
+        action: 'SLAMS_stuLeave_add_act.php',
+        fields: <String, String>{'confirm': '1'},
+      ),
+    );
+
+    await tester.pumpWidget(
+      _testApp(const StudentLeaveResultPage(previewResult: preview)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('View'), findsOneWidget);
+    expect(find.text('檢視'), findsNothing);
+  });
 }
 
 class _FakeAnalyticsUtil extends AnalyticsUtil {

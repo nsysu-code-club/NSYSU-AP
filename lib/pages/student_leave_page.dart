@@ -20,6 +20,7 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
   late final List<StudentLeaveSemester> _semesterOptions;
   late StudentLeaveSemester _selectedSemester;
   int _recordsRequestId = 0;
+  bool _deleting = false;
 
   @override
   void initState() {
@@ -119,7 +120,14 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
                 if (index == 0) {
                   return _RecordListHeader(recordCount: records.length);
                 }
-                return _LeaveRecordCard(record: records[index - 1]);
+                final StudentLeaveRecord record = records[index - 1];
+                return _LeaveRecordCard(
+                  record: record,
+                  isDeleting: _deleting,
+                  onDelete: record.canDelete
+                      ? () => _deleteRecord(record)
+                      : null,
+                );
               },
             ),
           ),
@@ -170,6 +178,96 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
     if (semester == null || semester == _selectedSemester) return;
     setState(() => _selectedSemester = semester);
     _getRecords();
+  }
+
+  Future<void> _deleteRecord(StudentLeaveRecord record) async {
+    if (_deleting) return;
+    setState(() => _deleting = true);
+    final ApiResult<GeneralResponse> checkResult = await StudentLeaveHelper
+        .instance
+        .checkLeaveDeletion(
+          username: SelcrsHelper.instance.username,
+          password: SelcrsHelper.instance.password,
+          leaveNumber: record.number,
+        );
+    if (!mounted) return;
+    if (checkResult is! ApiSuccess<GeneralResponse>) {
+      setState(() => _deleting = false);
+      _showDeleteFailure();
+      return;
+    }
+
+    setState(() => _deleting = false);
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: Text(app.studentLeaveDeleteConfirmTitle),
+        content: Text(app.studentLeaveDeleteConfirmContent),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(app.optionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(app.optionComfirm),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+
+    setState(() => _deleting = true);
+    final ApiResult<StudentLeaveDeleteResult> result = await StudentLeaveHelper
+        .instance
+        .deleteLeave(leaveNumber: record.number);
+    if (!mounted) return;
+    setState(() => _deleting = false);
+    switch (result) {
+      case ApiSuccess<StudentLeaveDeleteResult>(
+        :final StudentLeaveDeleteResult data,
+      ):
+        if (data.looksSuccessful == false) {
+          _showDeleteFailure();
+          return;
+        }
+        if (data.looksSuccessful == true) {
+          UiUtil.instance.showToast(context, app.studentLeaveDeleteSuccess);
+        } else {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(app.studentLeaveDeleteUnknownResult),
+                duration: const Duration(seconds: 5),
+              ),
+            );
+        }
+        await _getRecords();
+      case ApiError<StudentLeaveDeleteResult>():
+        _showDeleteFailure();
+      case ApiFailure<StudentLeaveDeleteResult>(:final DioException exception):
+        UiUtil.instance.showToast(
+          context,
+          exception.i18nMessage ?? app.studentLeaveDeleteFailed,
+        );
+    }
+  }
+
+  void _showDeleteFailure() {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: Text(app.studentLeaveDeleteFailedTitle),
+        content: Text(app.studentLeaveDeleteFailed),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(app.optionComfirm),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -535,9 +633,15 @@ class _RecordListHeader extends StatelessWidget {
 }
 
 class _LeaveRecordCard extends StatelessWidget {
-  const _LeaveRecordCard({required this.record});
+  const _LeaveRecordCard({
+    required this.record,
+    required this.isDeleting,
+    this.onDelete,
+  });
 
   final StudentLeaveRecord record;
+  final bool isDeleting;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -662,6 +766,27 @@ class _LeaveRecordCard extends StatelessWidget {
                 ],
               ],
             ),
+            if (onDelete != null) ...<Widget>[
+              const SizedBox(height: 12.0),
+              Align(
+                alignment: Alignment.centerRight,
+                child: OutlinedButton.icon(
+                  onPressed: isDeleting ? null : onDelete,
+                  icon: isDeleting
+                      ? const SizedBox(
+                          width: 18.0,
+                          height: 18.0,
+                          child: CircularProgressIndicator(strokeWidth: 2.0),
+                        )
+                      : const Icon(Icons.delete_outline),
+                  label: Text(
+                    isDeleting
+                        ? app.studentLeaveDeleting
+                        : app.studentLeaveDelete,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -1507,6 +1632,7 @@ String _englishConfirmationText(String text) {
     '無': 'None',
     '未確認': 'Unconfirmed',
     '不須確認': 'Not required',
+    '檢視': 'View',
   };
   if (titleMap.containsKey(text)) return titleMap[text]!;
 

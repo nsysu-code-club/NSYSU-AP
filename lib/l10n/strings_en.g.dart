@@ -63,6 +63,15 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get studentLeaveSelectSemester => 'Semester';
 	@override String get studentLeaveRefresh => 'Refresh leave records';
 	@override String get studentLeaveAdd => 'New Leave Request';
+	@override String get studentLeaveDelete => 'Delete Leave Request';
+	@override String get studentLeaveDeleteConfirmTitle => 'Delete this leave request?';
+	@override String get studentLeaveDeleteConfirmContent => 'This cannot be undone. Do you want to delete this leave request?';
+	@override String get studentLeaveDeleting => 'Deleting leave request...';
+	@override String get studentLeaveDeleteSuccess => 'Leave request deleted';
+	@override String get studentLeaveDeleteFailedTitle => 'Leave deletion failed';
+	@override String get studentLeaveDeleteFailed => 'Leave deletion failed. Please check the school system before trying again.';
+	@override String get studentLeaveDeleteUnknownTitle => 'Deletion needs confirmation';
+	@override String get studentLeaveDeleteUnknownResult => 'The school system received the deletion request, but the result could not be verified. Refresh the list to confirm.';
 	@override String get studentLeaveEmpty => 'No leave records for this semester';
 	@override String get studentLeaveNumber => 'Request No.';
 	@override String studentLeaveYearSemester({required Object year, required Object semester}) => 'Academic Year ${year}, Semester ${semester}';
@@ -187,6 +196,15 @@ extension on AppLocalizationsEn {
 			'studentLeaveSelectSemester' => 'Semester',
 			'studentLeaveRefresh' => 'Refresh leave records',
 			'studentLeaveAdd' => 'New Leave Request',
+			'studentLeaveDelete' => 'Delete Leave Request',
+			'studentLeaveDeleteConfirmTitle' => 'Delete this leave request?',
+			'studentLeaveDeleteConfirmContent' => 'This cannot be undone. Do you want to delete this leave request?',
+			'studentLeaveDeleting' => 'Deleting leave request...',
+			'studentLeaveDeleteSuccess' => 'Leave request deleted',
+			'studentLeaveDeleteFailedTitle' => 'Leave deletion failed',
+			'studentLeaveDeleteFailed' => 'Leave deletion failed. Please check the school system before trying again.',
+			'studentLeaveDeleteUnknownTitle' => 'Deletion needs confirmation',
+			'studentLeaveDeleteUnknownResult' => 'The school system received the deletion request, but the result could not be verified. Refresh the list to confirm.',
 			'studentLeaveEmpty' => 'No leave records for this semester',
 			'studentLeaveNumber' => 'Request No.',
 			'studentLeaveYearSemester' => ({required Object year, required Object semester}) => 'Academic Year ${year}, Semester ${semester}',

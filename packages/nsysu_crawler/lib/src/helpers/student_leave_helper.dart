@@ -235,6 +235,74 @@ class StudentLeaveHelper {
     }
   }
 
+  Future<ApiResult<GeneralResponse>> checkLeaveDeletion({
+    required String username,
+    required String password,
+    required String leaveNumber,
+  }) async {
+    try {
+      final ApiResult<GeneralResponse> loginResult = await _ensureLogin(
+        username: username,
+        password: password,
+      );
+      switch (loginResult) {
+        case ApiSuccess<GeneralResponse>():
+          break;
+        case ApiFailure<GeneralResponse>(:final DioException exception):
+          return ApiFailure<GeneralResponse>(exception);
+        case ApiError<GeneralResponse>(:final GeneralResponse response):
+          return ApiError<GeneralResponse>(response);
+      }
+
+      final Response<Uint8List> checkResponse = await dio.get<Uint8List>(
+        _leaveMaintenanceUri(leaveNumber, 'check').toString(),
+        options: _bytesOption,
+      );
+      final String checkText = big5.decode(checkResponse.data!);
+      if (_isSessionExpired(checkText)) {
+        isLogin = false;
+        return const ApiError<GeneralResponse>(
+          GeneralResponse(statusCode: 401, message: 'sis session expired'),
+        );
+      }
+      return ApiSuccess<GeneralResponse>(GeneralResponse.success());
+    } on DioException catch (e) {
+      return ApiFailure<GeneralResponse>(e);
+    } on Exception catch (_) {
+      if (kCrawlerDebugMode) rethrow;
+      return ApiError<GeneralResponse>(GeneralResponse.unknownError());
+    }
+  }
+
+  Future<ApiResult<StudentLeaveDeleteResult>> deleteLeave({
+    required String leaveNumber,
+  }) async {
+    try {
+      final Response<Uint8List> deleteResponse = await dio.get<Uint8List>(
+        _leaveMaintenanceUri(leaveNumber, 'del').toString(),
+        options: _bytesOption,
+      );
+      final String text = big5.decode(deleteResponse.data!);
+      if (_isSessionExpired(text)) {
+        isLogin = false;
+        return const ApiError<StudentLeaveDeleteResult>(
+          GeneralResponse(statusCode: 401, message: 'sis session expired'),
+        );
+      }
+      return ApiSuccess<StudentLeaveDeleteResult>(
+        StudentLeaveDeleteResult(
+          statusCode: deleteResponse.statusCode,
+          body: text,
+        ),
+      );
+    } on DioException catch (e) {
+      return ApiFailure<StudentLeaveDeleteResult>(e);
+    } on Exception catch (_) {
+      if (kCrawlerDebugMode) rethrow;
+      return ApiError<StudentLeaveDeleteResult>(GeneralResponse.unknownError());
+    }
+  }
+
   Future<ApiResult<GeneralResponse>> _ensureLogin({
     required String username,
     required String password,
@@ -268,6 +336,15 @@ class StudentLeaveHelper {
         'ID=$encodedId&GPID=07&APFLAG=49&search_type=year&'
         'school_year=${semester.schoolYear}&sem=${semester.semester}';
   }
+
+  Uri _leaveMaintenanceUri(String leaveNumber, String action) {
+    return Uri.parse('$baseUrl/SLAMS/SLAMS_stuLeave_ischecked.php').replace(
+      queryParameters: <String, String>{'SLA_SNO': leaveNumber, 'act': action},
+    );
+  }
+
+  bool _isSessionExpired(String text) =>
+      text.contains('loginCheck.php') || text.contains('請重新登入');
 
   Future<Object> _submitData(StudentLeaveRequest request) async {
     final Map<String, dynamic> fields = <String, dynamic>{

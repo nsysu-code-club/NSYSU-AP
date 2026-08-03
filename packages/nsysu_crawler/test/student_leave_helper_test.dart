@@ -31,10 +31,43 @@ void main() {
     expect(adapter.requestUri?.queryParameters['school_year'], '113');
     expect(adapter.requestUri?.queryParameters['sem'], '1');
   });
+
+  test('leave deletion follows the SIS check then delete sequence', () async {
+    final StudentLeaveHelper helper = StudentLeaveHelper();
+    final _RecordingAdapter adapter = _RecordingAdapter();
+    helper.dio.httpClientAdapter = adapter;
+    helper
+      ..isLogin = true
+      ..username = 'student';
+    addTearDown(helper.dio.close);
+
+    final ApiResult<GeneralResponse> checkResult = await helper
+        .checkLeaveDeletion(
+          username: 'student',
+          password: 'password',
+          leaveNumber: 'B1232450051150811',
+        );
+    final ApiResult<StudentLeaveDeleteResult> result = await helper.deleteLeave(
+      leaveNumber: 'B1232450051150811',
+    );
+
+    expect(checkResult, isA<ApiSuccess<GeneralResponse>>());
+    expect(result, isA<ApiSuccess<StudentLeaveDeleteResult>>());
+    expect(adapter.requestUris, hasLength(2));
+    expect(
+      adapter.requestUris.map((Uri uri) => uri.queryParameters['act']),
+      <String?>['check', 'del'],
+    );
+    expect(
+      adapter.requestUris.map((Uri uri) => uri.queryParameters['SLA_SNO']),
+      <String?>['B1232450051150811', 'B1232450051150811'],
+    );
+  });
 }
 
 class _RecordingAdapter implements HttpClientAdapter {
   Uri? requestUri;
+  final List<Uri> requestUris = <Uri>[];
 
   @override
   Future<ResponseBody> fetch(
@@ -43,6 +76,7 @@ class _RecordingAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     requestUri = options.uri;
+    requestUris.add(options.uri);
     return ResponseBody.fromBytes(
       utf8.encode('<html><body></body></html>'),
       200,
