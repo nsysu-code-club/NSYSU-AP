@@ -20,7 +20,7 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
   late final List<StudentLeaveSemester> _semesterOptions;
   late StudentLeaveSemester _selectedSemester;
   int _recordsRequestId = 0;
-  bool _deleting = false;
+  String? _deletingRecordNumber;
 
   @override
   void initState() {
@@ -123,7 +123,7 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
                 final StudentLeaveRecord record = records[index - 1];
                 return _LeaveRecordCard(
                   record: record,
-                  isDeleting: _deleting,
+                  isDeleting: _deletingRecordNumber == record.number,
                   onDelete: record.canDelete
                       ? () => _deleteRecord(record)
                       : null,
@@ -181,8 +181,8 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
   }
 
   Future<void> _deleteRecord(StudentLeaveRecord record) async {
-    if (_deleting) return;
-    setState(() => _deleting = true);
+    if (_deletingRecordNumber != null) return;
+    setState(() => _deletingRecordNumber = record.number);
     final ApiResult<GeneralResponse> checkResult = await StudentLeaveHelper
         .instance
         .checkLeaveDeletion(
@@ -191,13 +191,23 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
           leaveNumber: record.number,
         );
     if (!mounted) return;
-    if (checkResult is! ApiSuccess<GeneralResponse>) {
-      setState(() => _deleting = false);
-      _showDeleteFailure();
-      return;
+    switch (checkResult) {
+      case ApiSuccess<GeneralResponse>():
+        break;
+      case ApiFailure<GeneralResponse>(:final DioException exception):
+        setState(() => _deletingRecordNumber = null);
+        UiUtil.instance.showToast(
+          context,
+          exception.i18nMessage ?? app.studentLeaveDeleteFailed,
+        );
+        return;
+      case ApiError<GeneralResponse>():
+        setState(() => _deletingRecordNumber = null);
+        _showDeleteFailure();
+        return;
     }
 
-    setState(() => _deleting = false);
+    setState(() => _deletingRecordNumber = null);
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
@@ -217,12 +227,12 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
     );
     if (!mounted || confirmed != true) return;
 
-    setState(() => _deleting = true);
+    setState(() => _deletingRecordNumber = record.number);
     final ApiResult<StudentLeaveDeleteResult> result = await StudentLeaveHelper
         .instance
         .deleteLeave(leaveNumber: record.number);
     if (!mounted) return;
-    setState(() => _deleting = false);
+    setState(() => _deletingRecordNumber = null);
     switch (result) {
       case ApiSuccess<StudentLeaveDeleteResult>(
         :final StudentLeaveDeleteResult data,
