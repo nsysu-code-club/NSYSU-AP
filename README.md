@@ -15,7 +15,16 @@
 - [ ] Linux
 
 ## 開發環境
- - Flutter 穩定版本 v3.38.10
+ - Flutter 穩定版本 v3.38.10 （即將變更到3.44系列開發）
+
+第一次設定本機開發環境時，建議安裝專案提供的 pre-commit hook：
+
+```bash
+fvm dart run tool/install_git_hooks.dart
+```
+
+沒有使用 FVM 的環境可改用 `dart run tool/install_git_hooks.dart`。安裝後，每次 `git commit` 前會自動執行 `dart analyze --no-fatal-warnings .`、`dart run slang`、l10n 產生檔差異檢查，以及 `packages/nsysu_crawler` 的 `dart test`。詳細流程請參考 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
+
 ## 功能列表
 
 - 首頁最新消息

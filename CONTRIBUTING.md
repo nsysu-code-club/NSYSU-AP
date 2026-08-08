@@ -16,6 +16,33 @@
 flutter pub get
 ```
 
+### Pre-commit 檢查
+
+本專案提供 Dart-based Git hooks。第一次設定本機環境時，請在專案根目錄執行：
+
+```bash
+fvm dart run tool/install_git_hooks.dart
+```
+
+沒有使用 FVM 的環境可改用：
+
+```bash
+dart run tool/install_git_hooks.dart
+```
+
+安裝後，每次 `git commit` 前會透過 `bin/git_hooks.dart` 執行 `tool/pre_commit.dart`。pre-commit 目前會跑：
+
+- `dart analyze --no-fatal-warnings .`
+- `dart run slang`
+- 確認 `lib/l10n` 產生檔沒有未提交差異
+- `packages/nsysu_crawler` 的 `dart test`
+
+若需要在不 commit 的情況下手動驗證，可直接執行：
+
+```bash
+fvm dart run tool/pre_commit.dart
+```
+
 ## 2. Issue 與分支原則
 
 所有變更在開始前都應該先有對應的 Issue。這能讓討論、設計取捨、實作分支與 PR 都有清楚的追蹤來源。
@@ -82,7 +109,7 @@ git checkout -b <type>/<issue-name>
 
 1. 進行程式碼修改。
 2. 盡量保持每個 commit 的獨立性，並建議使用語意化 commit 訊息，例如 `feat(UI): 增加首頁跑馬燈`、`fix(selcrs): 修正課表無法滑動的問題`。
-3. 提交前，請在本機執行以下檢查：
+3. 提交前，請確認已安裝本機 pre-commit hook，或手動執行同等檢查：
 
    ```bash
    flutter pub get
@@ -136,6 +163,7 @@ git checkout -b <type>/<issue-name>
 - [ ] 是否已在本機執行 `flutter analyze` 且無錯誤？
 - [ ] 是否已視需要執行 `flutter test` 或 `dart test`？
 - [ ] 若修改 l10n 翻譯檔，是否已執行 `dart run slang`？
+- [ ] 是否已安裝本機 pre-commit hook，或手動執行 `fvm dart run tool/pre_commit.dart`？
 - [ ] 程式碼是否乾淨，沒有誤改無關檔案？
 - [ ] PR 說明是否足夠詳盡，並附上必要的截圖或錄影？
 - [ ] 若有對應功能變更，是否已更新或新增測試？
