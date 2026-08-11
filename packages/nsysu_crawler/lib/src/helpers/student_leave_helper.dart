@@ -12,6 +12,18 @@ import 'package:nsysu_crawler/src/utils/big5/big5.dart';
 
 class StudentLeaveHelper {
   static const String baseUrl = 'https://sis.nsysu.edu.tw';
+  static const GeneralResponse _loginError = GeneralResponse(
+    statusCode: 401,
+    message: 'sis login error',
+  );
+  static const GeneralResponse _sessionExpired = GeneralResponse(
+    statusCode: 401,
+    message: 'sis session expired',
+  );
+  static const GeneralResponse _invalidConfirmAction = GeneralResponse(
+    statusCode: 400,
+    message: 'invalid sis confirmation action',
+  );
 
   static StudentLeaveHelper? _instance;
 
@@ -51,6 +63,10 @@ class StudentLeaveHelper {
   }
 
   void logout() {
+    _resetSession();
+  }
+
+  void _resetSession() {
     isLogin = false;
     username = '';
     initCookiesJar();
@@ -60,6 +76,7 @@ class StudentLeaveHelper {
     required String username,
     required String password,
   }) async {
+    _resetSession();
     try {
       final Response<Uint8List> loginResponse = await dio.post<Uint8List>(
         '$baseUrl/include/loginCheck.php',
@@ -71,14 +88,18 @@ class StudentLeaveHelper {
         },
       );
       final String loginText = big5.decode(loginResponse.data!);
-      final String okToken =
-          RegExp(
-            r'''afterCheck\.php\?OK=([^"']+)''',
-          ).firstMatch(loginText)?.group(1) ??
-          'MTJZ';
+      final String? okToken = RegExp(
+        r'''afterCheck\.php\?OK=([^"']+)''',
+      ).firstMatch(loginText)?.group(1);
+      if (okToken == null || okToken.isEmpty) {
+        _resetSession();
+        return const ApiError<GeneralResponse>(_loginError);
+      }
 
       await dio.get<Uint8List>(
-        '$baseUrl/include/afterCheck.php?OK=$okToken',
+        Uri.parse(
+          '$baseUrl/include/afterCheck.php',
+        ).replace(queryParameters: <String, String>{'OK': okToken}).toString(),
         options: _bytesOption,
       );
       final Response<Uint8List> mainResponse = await dio.get<Uint8List>(
@@ -87,17 +108,18 @@ class StudentLeaveHelper {
       );
       final String mainText = big5.decode(mainResponse.data!);
       if (mainText.contains('loginCheck.php') || mainText.contains('請重新登入')) {
-        return const ApiError<GeneralResponse>(
-          GeneralResponse(statusCode: 401, message: 'sis login error'),
-        );
+        _resetSession();
+        return const ApiError<GeneralResponse>(_loginError);
       }
 
       this.username = username;
       isLogin = true;
       return ApiSuccess<GeneralResponse>(GeneralResponse.success());
     } on DioException catch (e) {
+      _resetSession();
       return ApiFailure<GeneralResponse>(e);
     } on Exception catch (_) {
+      _resetSession();
       if (kCrawlerDebugMode) rethrow;
       return ApiError<GeneralResponse>(GeneralResponse.unknownError());
     }
@@ -122,7 +144,9 @@ class StudentLeaveHelper {
           return ApiError<StudentLeavePreviewResult>(response);
       }
 
-      await _prepareLeaveSession(username);
+      if (!await _prepareLeaveSession(username)) {
+        return const ApiError<StudentLeavePreviewResult>(_sessionExpired);
+      }
 
       final Response<Uint8List> response = await dio.post<Uint8List>(
         '$baseUrl/SLAMS/SLAMS_stuLeave_add_view.php',
@@ -131,15 +155,14 @@ class StudentLeaveHelper {
       );
       final String text = big5.decode(response.data!);
       if (text.contains('loginCheck.php') || text.contains('請重新登入')) {
-        isLogin = false;
-        return const ApiError<StudentLeavePreviewResult>(
-          GeneralResponse(statusCode: 401, message: 'sis session expired'),
-        );
+        _resetSession();
+        return const ApiError<StudentLeavePreviewResult>(_sessionExpired);
       }
       final StudentLeaveConfirmForm? confirmForm = parseStudentLeaveConfirmForm(
         text,
       );
-      if (confirmForm == null) {
+      if (confirmForm == null ||
+          _confirmActionUri(confirmForm.action) == null) {
         return ApiError<StudentLeavePreviewResult>(
           GeneralResponse.unknownError(),
         );
@@ -188,10 +211,8 @@ class StudentLeaveHelper {
       );
       final String text = big5.decode(response.data!);
       if (text.contains('loginCheck.php') || text.contains('請重新登入')) {
-        isLogin = false;
-        return const ApiError<List<StudentLeaveRecord>>(
-          GeneralResponse(statusCode: 401, message: 'sis session expired'),
-        );
+        _resetSession();
+        return const ApiError<List<StudentLeaveRecord>>(_sessionExpired);
       }
       return ApiSuccess<List<StudentLeaveRecord>>(
         parseStudentLeaveRecords(text),
@@ -207,18 +228,23 @@ class StudentLeaveHelper {
   Future<ApiResult<StudentLeaveSubmitResult>> confirmLeave({
     required StudentLeaveConfirmForm confirmForm,
   }) async {
+    if (!_hasActiveSession) {
+      return const ApiError<StudentLeaveSubmitResult>(_sessionExpired);
+    }
+    final Uri? confirmUri = _confirmActionUri(confirmForm.action);
+    if (confirmUri == null) {
+      return const ApiError<StudentLeaveSubmitResult>(_invalidConfirmAction);
+    }
     try {
       final Response<Uint8List> response = await dio.post<Uint8List>(
-        _resolveUrl(confirmForm.action, '$baseUrl/SLAMS/'),
+        confirmUri.toString(),
         options: _formOption,
         data: confirmForm.fields,
       );
       final String text = big5.decode(response.data!);
       if (text.contains('loginCheck.php') || text.contains('請重新登入')) {
-        isLogin = false;
-        return const ApiError<StudentLeaveSubmitResult>(
-          GeneralResponse(statusCode: 401, message: 'sis session expired'),
-        );
+        _resetSession();
+        return const ApiError<StudentLeaveSubmitResult>(_sessionExpired);
       }
       return ApiSuccess<StudentLeaveSubmitResult>(
         StudentLeaveSubmitResult(
@@ -260,10 +286,8 @@ class StudentLeaveHelper {
       );
       final String checkText = big5.decode(checkResponse.data!);
       if (_isSessionExpired(checkText)) {
-        isLogin = false;
-        return const ApiError<GeneralResponse>(
-          GeneralResponse(statusCode: 401, message: 'sis session expired'),
-        );
+        _resetSession();
+        return const ApiError<GeneralResponse>(_sessionExpired);
       }
       return ApiSuccess<GeneralResponse>(GeneralResponse.success());
     } on DioException catch (e) {
@@ -277,6 +301,9 @@ class StudentLeaveHelper {
   Future<ApiResult<StudentLeaveDeleteResult>> deleteLeave({
     required String leaveNumber,
   }) async {
+    if (!_hasActiveSession) {
+      return const ApiError<StudentLeaveDeleteResult>(_sessionExpired);
+    }
     try {
       final Response<Uint8List> deleteResponse = await dio.get<Uint8List>(
         _leaveMaintenanceUri(leaveNumber, 'del').toString(),
@@ -284,10 +311,8 @@ class StudentLeaveHelper {
       );
       final String text = big5.decode(deleteResponse.data!);
       if (_isSessionExpired(text)) {
-        isLogin = false;
-        return const ApiError<StudentLeaveDeleteResult>(
-          GeneralResponse(statusCode: 401, message: 'sis session expired'),
-        );
+        _resetSession();
+        return const ApiError<StudentLeaveDeleteResult>(_sessionExpired);
       }
       return ApiSuccess<StudentLeaveDeleteResult>(
         StudentLeaveDeleteResult(
@@ -313,16 +338,25 @@ class StudentLeaveHelper {
     return login(username: username, password: password);
   }
 
-  Future<void> _prepareLeaveSession(String username) async {
+  Future<bool> _prepareLeaveSession(String username) async {
     final StudentLeaveSemester currentSemester = StudentLeaveSemester.current();
-    await dio.get<Uint8List>(
+    final Response<Uint8List> studentViewResponse = await dio.get<Uint8List>(
       _studentViewUrl(username: username, semester: currentSemester),
       options: _bytesOption,
     );
-    await dio.get<Uint8List>(
+    if (_isSessionExpired(big5.decode(studentViewResponse.data!))) {
+      _resetSession();
+      return false;
+    }
+    final Response<Uint8List> addPageResponse = await dio.get<Uint8List>(
       '$baseUrl/SLAMS/SLAMS_stuLeave_add.php',
       options: _bytesOption,
     );
+    if (_isSessionExpired(big5.decode(addPageResponse.data!))) {
+      _resetSession();
+      return false;
+    }
+    return true;
   }
 
   String _studentViewUrl({
@@ -345,6 +379,27 @@ class StudentLeaveHelper {
 
   bool _isSessionExpired(String text) =>
       text.contains('loginCheck.php') || text.contains('請重新登入');
+
+  bool get _hasActiveSession => isLogin && username.isNotEmpty;
+
+  Uri? _confirmActionUri(String action) {
+    final String trimmedAction = action.trim();
+    if (trimmedAction.isEmpty) return null;
+    final Uri? parsedAction = Uri.tryParse(trimmedAction);
+    if (parsedAction == null) return null;
+
+    final Uri baseUri = Uri.parse('$baseUrl/SLAMS/');
+    final Uri resolvedUri = baseUri.resolveUri(parsedAction);
+    if (resolvedUri.scheme != 'https' ||
+        resolvedUri.host != baseUri.host ||
+        resolvedUri.port != baseUri.port ||
+        resolvedUri.userInfo.isNotEmpty ||
+        resolvedUri.hasFragment ||
+        resolvedUri.path != '/SLAMS/SLAMS_stuLeave_add_act.php') {
+      return null;
+    }
+    return resolvedUri;
+  }
 
   Future<Object> _submitData(StudentLeaveRequest request) async {
     final Map<String, dynamic> fields = <String, dynamic>{
@@ -382,11 +437,6 @@ class StudentLeaveHelper {
       return Options(responseType: ResponseType.bytes);
     }
     return _formOption;
-  }
-
-  String _resolveUrl(String action, String base) {
-    if (action.startsWith('http')) return action;
-    return Uri.parse(base).resolve(action).toString();
   }
 
   String _formatDate(DateTime dateTime) {
