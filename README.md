@@ -1,4 +1,4 @@
-[![Build Test](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/workflow.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/workflow.yml)
+[![CI](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/ci.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/ci.yml) [![Store CD](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/cd.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/cd.yml) [![Crawler Monitor](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/crawler-monitor.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/crawler-monitor.yml)
 # 中山校務通
 
  提供中山學生更方便的校務系統查詢入口，由 Google 開源跨平台框架 [Flutter](https://flutter.dev) 開發
@@ -15,15 +15,25 @@
 - [ ] Linux
 
 ## 開發環境
- - Flutter 穩定版本 v3.29
+ - Flutter 穩定版本 v3.38.10 （即將變更到3.44系列開發）
+
+第一次設定本機開發環境時，建議安裝專案提供的 pre-commit hook：
+
+```bash
+fvm dart run tool/install_git_hooks.dart
+```
+
+沒有使用 FVM 的環境可改用 `dart run tool/install_git_hooks.dart`。安裝後，每次 `git commit` 前會自動執行 `dart analyze --no-fatal-warnings .`、`dart run slang`、l10n 產生檔差異檢查，以及 `packages/nsysu_crawler` 的 `dart test`。詳細流程請參考 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
+
 ## 功能列表
 
 - 首頁最新消息
-    - 前端 [ap_common](https://github.com/abc873693/ap_common/blob/master/lib/scaffold/home_page_scaffold.dart)
+    - 前端 [ap_common](https://github.com/abc873693/ap_common)
     - 後端 [announcements_service](https://github.com/takidog/announcements_service)
 - 課程學習
     - [x] 學期成績查詢(選課系統)
     - [x] 學期課表查詢(成績查詢系統)
+    - [x] 請假系統(學生請假系統)
 - 校車系統
     - [x] 校園公車列表
     - [x] 公車時刻查詢
@@ -56,6 +66,7 @@
 |---|---|
 | [`packages/nsysu_crawler/README.md`](packages/nsysu_crawler/README.md) | 純 Dart 爬蟲 package 的公開 API、bootstrap 範例、測試方式 |
 | [`packages/nsysu_crawler/docs/endpoint-catalog.md`](packages/nsysu_crawler/docs/endpoint-catalog.md) | 所有 NSYSU endpoint 的 method / encoding / 成功 sentinel / 已知坑 |
+| [`CONTRIBUTING.md`](packages/nsysu_crawler/docs/endpoint-catalog.md) | 如何參與 NSYSU_AP 的開發（如要貢獻，請詳閱） |
 
 ## 測試
 
@@ -144,15 +155,17 @@ hook 入口由 [`bin/git_hooks.dart`](bin/git_hooks.dart) 管理，安裝流程�
       - [ ] 學生預警查詢
       - [x] 學期成績查詢
       - [ ] 歷年成績查詢
-  - [x] [畢業審查系統](https://selcrs.nsysu.edu.tw/gadchk/)
+  - [x] [畢業審查系統](https://sis.nsysu.edu.tw/SLAMS/SLAMS_student_view.php)
   - [ ] 總務處維修系統
+  - [x] [學生請假系統](https://sso.nsysu.edu.tw/index.php/home/applisturl/0H00/0051)
+  - [ ] 新網路大學 To-Do 提示
   - [x] [學雜費繳費單列印暨繳費狀況查詢系統](https://tfstu.nsysu.edu.tw/)
   - [x] [校車系統](https://selcrs.nsysu.edu.tw/scoreqry/)
 
 ## 維護團隊
 
 校務通源於高科校務通，後續衍伸出中山校務通，又因套件獨立而產生AP Common，讓校務通開發更加統一與高效。  
-目前由中山大學程式研習社做維護， App 商店託管由 [OCF 財團法人開放文化基金會](https://ocf.tw)管理。  
-開發人員：房志剛（Rainvisitor），胡智強（JohnHuCC），張柏瑄（Ryan Chang），蔡明軒（Yukimura），高聖傑（JasonZzz）
+目前由 [中山大學程式研習社xGoogle開發者社群](https://www.instagram.com/gdg.nsysu/) 做主要維護，App 商店託管由 [OCF 財團法人開放文化基金會](https://ocf.tw)管理。  
+開發人員：房志剛（Rainvisitor），胡智強（JohnHuCC），張柏瑄（Ryan Chang），蔡明軒（Yukimura），高聖傑（JasonZzz ，陳展皝 （David），吳楷鈞 （TWCKaijin）
 
 OCF 由多個台灣開源社群共同發起，在開放源碼、開放資料、開放政府等領域，提供社群支援、組織合作、海外交流、顧問諮詢等服務。期待以法人組織的力量激起開放協作的火花。
