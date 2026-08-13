@@ -17,6 +17,7 @@ class SettingPageState extends State<SettingPage> {
   bool displayPicture = true;
 
   String appVersion = '1.0.0';
+  String buildNumber = '1';
 
   @override
   void initState() {
@@ -32,12 +33,9 @@ class SettingPageState extends State<SettingPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text(ap.settings),
-      ),
+      appBar: AppBar(title: Text(ap.settings)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,16 +44,10 @@ class SettingPageState extends State<SettingPage> {
               text: ap.notificationItem,
               icon: Icons.notifications_outlined,
             ),
-            SettingCard(
-              children: <Widget>[
-                const CheckCourseNotifyItem(),
-                const ClearAllNotifyItem(),
-              ],
+            const SettingCard(
+              children: <Widget>[CheckCourseNotifyItem(), ClearAllNotifyItem()],
             ),
-            SettingTitle(
-              text: ap.otherSettings,
-              icon: Icons.tune_outlined,
-            ),
+            SettingTitle(text: ap.otherSettings, icon: Icons.tune_outlined),
             SettingCard(
               children: <Widget>[
                 SettingSwitch(
@@ -98,10 +90,9 @@ class SettingPageState extends State<SettingPage> {
                         ? index
                         : ApTheme.customColorIndex;
                     final Color? newCustomColor = (index != -1) ? null : color;
-                    ShareDataWidget.of(context)!.data.loadThemeColor(
-                          newIndex,
-                          newCustomColor,
-                        );
+                    ShareDataWidget.of(
+                      context,
+                    )!.data.loadThemeColor(newIndex, newCustomColor);
                     ApTheme.of(context).saveSettings(
                       index: newIndex,
                       customColor: newCustomColor,
@@ -110,10 +101,7 @@ class SettingPageState extends State<SettingPage> {
                 ),
               ],
             ),
-            SettingTitle(
-              text: ap.otherInfo,
-              icon: Icons.info_outline,
-            ),
+            SettingTitle(text: ap.otherInfo, icon: Icons.info_outline),
             SettingCard(
               children: <Widget>[
                 SettingItem(
@@ -129,7 +117,7 @@ class SettingPageState extends State<SettingPage> {
                 SettingInfoItem(
                   text: ap.appVersion,
                   icon: Icons.info_outline,
-                  value: 'v$appVersion',
+                  value: 'v$appVersion ($buildNumber)',
                 ),
               ],
             ),
@@ -144,8 +132,11 @@ class SettingPageState extends State<SettingPage> {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     setState(() {
       appVersion = packageInfo.version;
-      displayPicture =
-          PreferenceUtil.instance.getBool(Constants.prefDisplayPicture, true);
+      buildNumber = packageInfo.buildNumber;
+      displayPicture = PreferenceUtil.instance.getBool(
+        Constants.prefDisplayPicture,
+        true,
+      );
     });
   }
 }
