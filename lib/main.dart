@@ -87,7 +87,7 @@ Future<void> main() async {
 
   bootstrapCrawler();
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 void _migrate700() {
