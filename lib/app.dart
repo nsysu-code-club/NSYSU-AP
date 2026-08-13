@@ -1,12 +1,11 @@
 import 'package:ap_common/ap_common.dart'
-    hide TranslationProvider, LocaleSettings, AppLocaleUtils, AppLocale;
+    hide AppLocale, AppLocaleUtils, LocaleSettings, TranslationProvider;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:ap_common_flutter_core/ap_common_flutter_core.dart' as ap_l10n
     show TranslationProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/home_page.dart';
@@ -15,9 +14,10 @@ import 'package:nsysu_ap/pages/study/course_page.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   MyAppState createState() => MyAppState();

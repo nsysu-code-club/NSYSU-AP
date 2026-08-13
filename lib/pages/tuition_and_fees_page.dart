@@ -4,9 +4,9 @@ import 'dart:typed_data';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/extensions/tuition_and_fees_ui_extension.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class TuitionAndFeesPage extends StatefulWidget {
   const TuitionAndFeesPage({super.key});
@@ -37,7 +37,6 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(title: Text(app.tuitionAndFees)),
       body: _body(),
@@ -52,10 +51,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
       ),
       error: (String? hint) => InkWell(
         onTap: _getData,
-        child: HintContent(
-          icon: Icons.assignment,
-          content: ap.clickToRetry,
-        ),
+        child: HintContent(icon: Icons.assignment, content: ap.clickToRetry),
       ),
       empty: (String? hint) => InkWell(
         onTap: _getData,
@@ -81,7 +77,9 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
               return Text(
                 app.tuitionAndFeesPageHint,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               );
             } else {
               return _notificationItem(data[index - 1]);
@@ -116,10 +114,8 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                   PopScope(canPop: false, child: ProgressDialog(ap.loading)),
               barrierDismissible: false,
             );
-            final ApiResult<Uint8List?> result =
-                await TuitionHelper.instance.downloadFdf(
-              serialNumber: item.serialNumber,
-            );
+            final ApiResult<Uint8List?> result = await TuitionHelper.instance
+                .downloadFdf(serialNumber: item.serialNumber);
             if (!mounted) return;
             Navigator.of(context, rootNavigator: true).pop();
             switch (result) {
@@ -133,10 +129,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                   UiUtil.instance.showToast(context, exception.i18nMessage!);
                 }
               case ApiError<Uint8List?>():
-                UiUtil.instance.showToast(
-                  context,
-                  ap.somethingError,
-                );
+                UiUtil.instance.showToast(context, ap.somethingError);
             }
           },
           subtitle: Padding(
@@ -154,11 +147,11 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   }
 
   Future<void> _login() async {
-    final ApiResult<GeneralResponse> result =
-        await TuitionHelper.instance.login(
-      username: SelcrsHelper.instance.username,
-      password: SelcrsHelper.instance.password,
-    );
+    final ApiResult<GeneralResponse> result = await TuitionHelper.instance
+        .login(
+          username: SelcrsHelper.instance.username,
+          password: SelcrsHelper.instance.password,
+        );
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<GeneralResponse>():
@@ -171,8 +164,8 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   }
 
   Future<void> _getData() async {
-    final ApiResult<List<TuitionAndFees>> result =
-        await TuitionHelper.instance.getData();
+    final ApiResult<List<TuitionAndFees>> result = await TuitionHelper.instance
+        .getData();
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<List<TuitionAndFees>>(:final List<TuitionAndFees> data):

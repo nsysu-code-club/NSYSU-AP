@@ -71,8 +71,8 @@ class ScorePageState extends State<ScorePage> {
 
   SemesterData _toSemesterData(ScoreSemesterData data) {
     final List<Semester> semesters = <Semester>[];
-    for (final yearOption in data.years) {
-      for (final semOption in data.semesters) {
+    for (final SemesterOptions yearOption in data.years) {
+      for (final SemesterOptions semOption in data.semesters) {
         semesters.add(
           Semester(
             year: yearOption.value,
