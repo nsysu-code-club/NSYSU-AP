@@ -134,7 +134,7 @@ class SelcrsHelper {
           await Future.delayed(
             Duration(seconds: (1 << errorCount).clamp(1, 4)),
           );
-          return login(
+          return await login(
             username: username,
             password: password,
             errorCount: errorCount + 1,
@@ -235,7 +235,7 @@ class SelcrsHelper {
       final String text = const Utf8Decoder().convert(response.data!);
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
-        return getUserInfo();
+        return await getUserInfo();
       }
       if (!canReLogin) {
         _dumpError('getUserInfo', text);
@@ -260,7 +260,7 @@ class SelcrsHelper {
       final String text = const Utf8Decoder().convert(response.data!);
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
-        return getCourseSemesterData(defaultSemester: defaultSemester);
+        return await getCourseSemesterData(defaultSemester: defaultSemester);
       }
       if (!canReLogin) {
         _dumpError('getCourseSemesterData', text);
@@ -298,7 +298,7 @@ class SelcrsHelper {
       final String text = const Utf8Decoder().convert(response.data!);
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
-        return getCourseData(
+        return await getCourseData(
           username: username,
           timeCodeConfig: timeCodeConfig,
           semester: semester,
@@ -510,7 +510,7 @@ class SelcrsHelper {
       final String text = const Utf8Decoder().convert(response.data!);
       if (text.contains(courseTimeoutText) && canReLogin) {
         await reLogin();
-        return changeMail(mail: mail);
+        return await changeMail(mail: mail);
       }
       if (!canReLogin) {
         _dumpError('changeMail', text);
