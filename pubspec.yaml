@@ -1,7 +1,8 @@
 name: nsysu_ap
 description: NSYSU AP
 
-version: 2.0.1+20001
+version: 2.1.0+20100
+publish_to: none
 
 environment:
   sdk: '>=3.10.0 <4.0.0'
@@ -68,4 +69,3 @@ flutter:
     - changelog.json
     - assets/car_park_area.json
     - assets/ca/
-
