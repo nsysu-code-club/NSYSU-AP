@@ -107,11 +107,13 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
-      - name: Install Fastlane
-        run: gem install fastlane fastlane-plugin-flutter_version
+      - name: Install Ruby dependencies
+        run: |
+          bundle config set path vendor/bundle
+          bundle install
         working-directory: ./android
       - name: Run Fastlane
-        run: fastlane ${{ needs.prepare.outputs.is_production == 'true' && 'playstore' || 'beta' }}
+        run: bundle exec fastlane ${{ needs.prepare.outputs.is_production == 'true' && 'playstore' || 'beta' }}
         working-directory: ./android
 
   deploy_ios:
@@ -146,6 +148,15 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Flutter Initialize
         run: flutter doctor -v
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - name: Install Ruby dependencies
+        run: |
+          bundle config set path vendor/bundle
+          bundle install
+        working-directory: ./ios
       - name: Unlock keychain for code signing
         run: |
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$HOME/Library/Keychains/login.keychain-db"
@@ -160,7 +171,7 @@ jobs:
         run: |
           echo "${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}" | base64 --decode > ios/AuthKey.p8
       - name: Deploy iOS Beta to TestFlight via Fastlane
-        run: fastlane ios release key_id:"${{ env.KEY_ID }}" issuer_id:"${{ env.ISSUER_ID }}"
+        run: bundle exec fastlane ios release key_id:"${{ env.KEY_ID }}" issuer_id:"${{ env.ISSUER_ID }}"
         working-directory: ./ios
         env:
           APP_STORE_CONNECT_TEAM_ID: '${{ secrets.APP_STORE_CONNECT_TEAM_ID }}'
