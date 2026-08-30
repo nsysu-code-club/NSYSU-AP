@@ -1,5 +1,5 @@
 import 'package:ap_common/ap_common.dart'
-    hide TranslationProvider, LocaleSettings, AppLocaleUtils, AppLocale;
+    hide AppLocale, AppLocaleUtils, LocaleSettings, TranslationProvider;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:ap_common_plugin/ap_common_plugin.dart';
 import 'package:flutter/material.dart';

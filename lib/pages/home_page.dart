@@ -193,12 +193,12 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _getAllAnnouncement() async {
-    final result = await AnnouncementHelper.instance.getAnnouncements(
-      tags: <String>['nsysu'],
-    );
+    final ApiResult<List<Announcement>> result = await AnnouncementHelper
+        .instance
+        .getAnnouncements(tags: <String>['nsysu']);
     if (!mounted) return;
     switch (result) {
-      case ApiSuccess<List<Announcement>>(:final data):
+      case ApiSuccess<List<Announcement>>(:final List<Announcement> data):
         announcements = data;
         setState(() {
           state = announcements.isEmpty ? HomeState.empty : HomeState.finish;
@@ -342,108 +342,109 @@ class HomePageState extends State<HomePage> {
           Constants.prefDisplayPicture,
           true,
         ),
-        onTapHeader: () {
-          if (isLogin) {
-            if (userInfo != null) {
-              ApUtils.pushCupertinoStyle(
-                context,
-                UserInfoPage(userInfo: userInfo!),
-              );
+          onTapHeader: () {
+            if (isLogin) {
+              if (userInfo != null) {
+                ApUtils.pushCupertinoStyle(
+                  context,
+                  UserInfoPage(userInfo: userInfo!),
+                );
+              }
+            } else {
+              if (!isTablet) Navigator.of(context).pop();
+              openLoginPage();
             }
-          } else {
-            if (!isTablet) Navigator.of(context).pop();
-            openLoginPage();
-          }
-        },
-        widgets: <Widget>[
-          if (isTablet)
+          },
+          widgets: <Widget>[
+            if (isTablet)
+              DrawerMenuItem(
+                icon: ApIcon.home,
+                title: ap.home,
+                onTap: () => setState(() => content = null),
+              ),
+            _buildStudySection(),
             DrawerMenuItem(
-              icon: ApIcon.home,
-              title: ap.home,
-              onTap: () => setState(() => content = null),
+              icon: ApIcon.directionsBus,
+              title: ap.bus,
+              onTap: () =>
+                  _openPage(BusListPage(locale: Locale(Intl.defaultLocale!))),
             ),
-          _buildStudySection(),
-          DrawerMenuItem(
-            icon: ApIcon.directionsBus,
-            title: ap.bus,
-            onTap: () =>
-                _openPage(BusListPage(locale: Locale(Intl.defaultLocale!))),
-          ),
-          _buildSchoolNavigationSection(),
-          DrawerMenuItem(
-            icon: ApIcon.school,
-            title: app.graduationCheckChecklist,
-            onTap: () =>
+            _buildSchoolNavigationSection(),
+            DrawerMenuItem(
+              icon: ApIcon.school,
+              title: app.graduationCheckChecklist,
+              onTap: () =>
+               
                 _openPage(const GraduationReportPage(), needLogin: true),
-          ),
-          DrawerMenuItem(
-            icon: ApIcon.monetizationOn,
-            title: app.tuitionAndFees,
-            onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
-          ),
-          DrawerMenuItem(
-            icon: Icons.event_busy,
-            title: app.studentLeave,
-            onTap: () => _openPage(const StudentLeavePage(), needLogin: true),
-          ),
-          DrawerMenuItem(
-            icon: ApIcon.info,
-            title: ap.schoolInfo,
-            onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
-          ),
-          DrawerMenuItem(
-            icon: ApIcon.face,
-            title: ap.about,
-            onTap: () => _openPage(
-              AboutUsPage(
-                assetImage: ImageAssets.nsysu,
-                githubName: 'nsysu-code-club',
-                email: 'nsysu.gdsc@gmail.com',
-                appLicense: app.aboutOpenSourceContent,
-                fbFanPageId: '100906232372556',
-                instagramUsername: 'gdsc_nsysu',
-                fbFanPageUrl: 'https://www.facebook.com/NSYSUGDSC',
-                githubUrl: 'https://github.com/nsysu-code-club',
+            ),
+            DrawerMenuItem(
+              icon: ApIcon.monetizationOn,
+              title: app.tuitionAndFees,
+              onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
+            ),
+            DrawerMenuItem(
+              icon: Icons.event_busy,
+              title: app.studentLeave,
+              onTap: () => _openPage(const StudentLeavePage(), needLogin: true),
+            ),
+            DrawerMenuItem(
+              icon: ApIcon.info,
+              title: ap.schoolInfo,
+              onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
+            ),
+            DrawerMenuItem(
+              icon: ApIcon.face,
+              title: ap.about,
+              onTap: () => _openPage(
+                AboutUsPage(
+                  assetImage: ImageAssets.nsysu,
+                  githubName: 'nsysu-code-club',
+                  email: 'nsysu.gdsc@gmail.com',
+                  appLicense: app.aboutOpenSourceContent,
+                  fbFanPageId: '100906232372556',
+                  instagramUsername: 'gdsc_nsysu',
+                  fbFanPageUrl: 'https://www.facebook.com/NSYSUGDSC',
+                  githubUrl: 'https://github.com/nsysu-code-club',
+                ),
               ),
             ),
-          ),
-          DrawerMenuItem(
-            icon: ApIcon.settings,
-            title: ap.settings,
-            onTap: () => _openPage(SettingPage()),
-          ),
-          if (isLogin) ...<Widget>[
-            const DrawerDivider(),
             DrawerMenuItem(
-              icon: ApIcon.powerSettingsNew,
-              title: ap.logout,
-              iconColor: colorScheme.error,
-              onTap: () async {
-                await PreferenceUtil.instance.setBool(
-                  Constants.prefAutoLogin,
-                  false,
-                );
-                SelcrsHelper.instance.logout();
-                GraduationHelper.instance.logout();
-                TuitionHelper.instance.logout();
-                StudentLeaveHelper.instance.logout();
-                await ApCommonPlugin.clearCourseWidget();
-                setState(() {
-                  ShareDataWidget.of(context)!.data.isLogin = false;
-                  ShareDataWidget.of(context)!.data.userInfo = null;
-                  courseData = null;
-                });
-                content = null;
-                if (!isTablet) {
-                  if (!context.mounted) return;
-                  Navigator.of(context).pop();
-                }
-                _checkLoginState();
-              },
+              icon: ApIcon.settings,
+              title: ap.settings,
+              onTap: () => _openPage(SettingPage()),
             ),
+            if (isLogin) ...<Widget>[
+              const DrawerDivider(),
+              DrawerMenuItem(
+                icon: ApIcon.powerSettingsNew,
+                title: ap.logout,
+                iconColor: colorScheme.error,
+                onTap: () async {
+                  await PreferenceUtil.instance.setBool(
+                    Constants.prefAutoLogin,
+                    false,
+                  );
+                  SelcrsHelper.instance.logout();
+                  GraduationHelper.instance.logout();
+                  TuitionHelper.instance.logout();
+                StudentLeaveHelper.instance.logout();
+                  await ApCommonPlugin.clearCourseWidget();
+                  if (!mounted) return;
+                setState(() {
+                    ShareDataWidget.of(context)!.data.isLogin = false;
+                    ShareDataWidget.of(context)!.data.userInfo = null;
+                    courseData = null;
+                  });
+                  content = null;
+                  if (!isTablet) {
+                      Navigator.of(context).pop();
+                  }
+                  _checkLoginState();
+                },
+              ),
+            ],
           ],
-        ],
-      ),
+        ),
     );
   }
 
@@ -499,7 +500,8 @@ class HomePageState extends State<HomePage> {
             } else {
               UiUtil.instance.showToast(context, app.visitingUnSafeLink);
               debugPrint(
-                'Attempted to launch an insecure URL: ${Constants.courseSelectorUrl}',
+                'Attempted to launch an insecure URL: '
+                '${Constants.courseSelectorUrl}',
               );
             }
           },

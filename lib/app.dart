@@ -19,7 +19,7 @@ import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   MyAppState createState() => MyAppState();
