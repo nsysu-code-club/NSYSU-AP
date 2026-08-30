@@ -146,6 +146,7 @@ void main() {
             '未確認': StudentLeaveReviewStatus.pending,
             'not confirmed': StudentLeaveReviewStatus.pending,
             'not-confirmed': StudentLeaveReviewStatus.pending,
+            '審核中': StudentLeaveReviewStatus.pending,
             '未通過': StudentLeaveReviewStatus.rejected,
             '未完成': StudentLeaveReviewStatus.rejected,
             'not approved': StudentLeaveReviewStatus.rejected,

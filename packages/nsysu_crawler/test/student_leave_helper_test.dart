@@ -369,6 +369,7 @@ void main() {
         body,
         contains('sla_cont=${Uri.encodeQueryComponent(encodedReason)}'),
       );
+      expect(Uri.splitQueryString(body)['sla_cont'], encodedReason);
       expect(body, isNot(contains(reason)));
     },
   );
@@ -627,12 +628,13 @@ void main() {
           .confirmLeave(confirmForm: confirmForm);
 
       expect(result, isA<ApiSuccess<StudentLeaveSubmitResult>>());
+      final String body = utf8.decode(adapter.requestBodies.last);
+      final String encodedReason = Uri.encodeFull(reason);
       expect(
-        utf8.decode(adapter.requestBodies.last),
-        contains(
-          'sla_cont=${Uri.encodeQueryComponent(Uri.encodeFull(reason))}',
-        ),
+        body,
+        contains('sla_cont=${Uri.encodeQueryComponent(encodedReason)}'),
       );
+      expect(Uri.splitQueryString(body)['sla_cont'], encodedReason);
     },
   );
 
@@ -974,6 +976,36 @@ void main() {
     expect(adapter.maxConcurrentRequests, 1);
   });
 
+  test('queued operations survive a shared implicit login', () async {
+    final StudentLeaveHelper helper = StudentLeaveHelper();
+    final _RecordingAdapter adapter = _RecordingAdapter(
+      responseFactory: (RequestOptions options) =>
+          options.uri.path == '/include/loginCheck.php'
+          ? _htmlResponse(
+              '<a href="afterCheck.php?OK=SHARED_TOKEN">continue</a>',
+            )
+          : _htmlResponse('<html>authenticated</html>'),
+    );
+    helper.dio.httpClientAdapter = adapter;
+    addTearDown(helper.dio.close);
+
+    final List<ApiResult<List<StudentLeaveRecord>>> results =
+        await Future.wait(<Future<ApiResult<List<StudentLeaveRecord>>>>[
+          helper.getLeaveRecords(username: 'student', password: 'password'),
+          helper.getLeaveRecords(username: 'student', password: 'password'),
+        ]);
+
+    expect(results, everyElement(isA<ApiSuccess<List<StudentLeaveRecord>>>()));
+    expect(adapter.requestUris.map((Uri uri) => uri.path), <String>[
+      '/include/loginCheck.php',
+      '/include/afterCheck.php',
+      '/main.php',
+      '/SLAMS/SLAMS_student_view.php',
+      '/SLAMS/SLAMS_student_view.php',
+    ]);
+    expect(adapter.maxConcurrentRequests, 1);
+  });
+
   test('logout invalidates in-flight and queued record requests', () async {
     final Completer<void> requestStarted = Completer<void>();
     final Completer<void> releaseResponse = Completer<void>();
@@ -1025,10 +1057,14 @@ void main() {
     final Future<ApiResult<List<StudentLeaveRecord>>> records = helper
         .getLeaveRecords(username: 'student', password: 'password');
     await requestStarted.future;
+    final Future<ApiResult<List<StudentLeaveRecord>>> queued = helper
+        .getLeaveRecords(username: 'student', password: 'password');
     final ApiResult<List<StudentLeaveRecord>> result = await records;
     releaseResponse.complete();
 
     expect(result, isA<ApiError<List<StudentLeaveRecord>>>());
+    expect(await queued, isA<ApiError<List<StudentLeaveRecord>>>());
+    expect(adapter.requests, hasLength(1));
     expect(helper.isLogin, isFalse);
     expect(helper.username, isEmpty);
   });

@@ -102,11 +102,15 @@ class StudentLeaveHelper {
   Options get _streamOption => Options(responseType: ResponseType.stream);
 
   void initCookiesJar() {
+    _rotateSession(invalidateQueuedOperations: true);
+  }
+
+  void _rotateSession({required bool invalidateQueuedOperations}) {
     if (!_sessionCancelToken.isCancelled) {
       _sessionCancelToken.cancel('student leave session reset');
     }
     _sessionCancelToken = CancelToken();
-    _sessionGeneration++;
+    if (invalidateQueuedOperations) _sessionGeneration++;
     _sessionIdentity = Object();
     _pendingConfirmForms.clear();
     _authorizedDeletions.clear();
@@ -122,10 +126,10 @@ class StudentLeaveHelper {
     _resetSession();
   }
 
-  void _resetSession() {
+  void _resetSession({bool invalidateQueuedOperations = true}) {
     isLogin = false;
     username = '';
-    initCookiesJar();
+    _rotateSession(invalidateQueuedOperations: invalidateQueuedOperations);
   }
 
   Future<ApiResult<GeneralResponse>> login({
@@ -135,15 +139,20 @@ class StudentLeaveHelper {
     final int generation = _sessionGeneration;
     return _withSessionOperation(
       generation,
-      () => _login(username: username, password: password),
+      () => _login(
+        username: username,
+        password: password,
+        invalidateQueuedOperations: true,
+      ),
     );
   }
 
   Future<ApiResult<GeneralResponse>> _login({
     required String username,
     required String password,
+    required bool invalidateQueuedOperations,
   }) async {
-    _resetSession();
+    _resetSession(invalidateQueuedOperations: invalidateQueuedOperations);
     final Object loginSessionIdentity = _sessionIdentity;
     final CancelToken cancelToken = _sessionCancelToken;
     try {
@@ -165,7 +174,7 @@ class StudentLeaveHelper {
         r'''afterCheck\.php\?OK=([^"']+)''',
       ).firstMatch(loginText)?.group(1);
       if (okToken == null || okToken.isEmpty) {
-        _resetSession();
+        _resetSession(invalidateQueuedOperations: invalidateQueuedOperations);
         return const ApiError<GeneralResponse>(_loginError);
       }
 
@@ -187,7 +196,7 @@ class StudentLeaveHelper {
         return const ApiError<GeneralResponse>(_sessionExpired);
       }
       if (mainText.contains('loginCheck.php') || mainText.contains('請重新登入')) {
-        _resetSession();
+        _resetSession(invalidateQueuedOperations: invalidateQueuedOperations);
         return const ApiError<GeneralResponse>(_loginError);
       }
 
@@ -195,10 +204,14 @@ class StudentLeaveHelper {
       isLogin = true;
       return ApiSuccess<GeneralResponse>(GeneralResponse.success());
     } on DioException catch (e) {
-      if (identical(loginSessionIdentity, _sessionIdentity)) _resetSession();
+      if (identical(loginSessionIdentity, _sessionIdentity)) {
+        _resetSession(invalidateQueuedOperations: invalidateQueuedOperations);
+      }
       return ApiFailure<GeneralResponse>(e);
     } on Exception catch (_) {
-      if (identical(loginSessionIdentity, _sessionIdentity)) _resetSession();
+      if (identical(loginSessionIdentity, _sessionIdentity)) {
+        _resetSession(invalidateQueuedOperations: invalidateQueuedOperations);
+      }
       if (kCrawlerDebugMode) rethrow;
       return ApiError<GeneralResponse>(GeneralResponse.unknownError());
     }
@@ -538,7 +551,7 @@ class StudentLeaveHelper {
         confirmForm.fields,
       );
       final String? reason = fields['sla_cont'];
-      if (reason != null) fields['sla_cont'] = Uri.encodeFull(reason);
+      if (reason != null) fields['sla_cont'] = _encodeSisReason(reason);
       final Response<Uint8List> response = await _postHtml(
         confirmUri.toString(),
         data: fields,
@@ -721,7 +734,11 @@ class StudentLeaveHelper {
     if (isLogin && this.username == username) {
       return ApiSuccess<GeneralResponse>(GeneralResponse.success());
     }
-    return _login(username: username, password: password);
+    return _login(
+      username: username,
+      password: password,
+      invalidateQueuedOperations: false,
+    );
   }
 
   Future<Response<Uint8List>> _getHtml(
@@ -943,7 +960,7 @@ class StudentLeaveHelper {
       'start_time': _formatTime(request.startDateTime),
       'end_date': _formatDate(request.endDateTime),
       'end_time': _formatTime(request.endDateTime),
-      'sla_cont': Uri.encodeFull(request.reason.trim()),
+      'sla_cont': _encodeSisReason(request.reason.trim()),
     };
     final StudentLeaveAttachment? attachment = request.attachment;
     if (attachment == null || !attachment.hasData) {
@@ -1023,6 +1040,12 @@ class StudentLeaveHelper {
     final String hour = dateTime.hour.toString().padLeft(2, '0');
     final String minute = dateTime.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+
+  String _encodeSisReason(String value) {
+    // The live SIS forms run encodeURI before browser form serialization.
+    // Form decoding removes only the transport layer added around this value.
+    return Uri.encodeFull(value);
   }
 
   bool _isValidLeaveNumber(String value) =>

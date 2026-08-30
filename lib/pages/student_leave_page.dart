@@ -590,6 +590,11 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
       initialDate = initialDate.subtract(const Duration(days: 1));
       validStartTimes = _availableStartTimesForDate(constraints, initialDate);
     }
+    if (validStartTimes.isEmpty) {
+      _constraints = null;
+      _attachmentFile = null;
+      return;
+    }
     final String startTime = validStartTimes.contains('09:00')
         ? '09:00'
         : validStartTimes.first;

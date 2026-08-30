@@ -292,6 +292,7 @@ StudentLeaveReviewStatus resolveStudentLeaveReviewStatus(String value) {
   }
   if (status.contains('未確認') ||
       status.contains('未審核') ||
+      status.contains('審核中') ||
       status.contains('待') ||
       status.contains('pending') ||
       status.contains('unconfirmed') ||
