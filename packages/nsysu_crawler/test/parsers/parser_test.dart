@@ -225,8 +225,9 @@ void main() {
     });
 
     test('returns null for invalid HTML', () {
-      final GraduationReportData? result =
-          parseGraduationReport('<html><body></body></html>');
+      final GraduationReportData? result = parseGraduationReport(
+        '<html><body></body></html>',
+      );
       expect(result, isNull);
     });
   });
@@ -250,6 +251,346 @@ void main() {
       final String html = _readFixture('tuition_empty.html');
       final List<TuitionAndFees>? result = parseTuitionData(html);
       expect(result, isNull);
+    });
+  });
+
+  group('parseStudentLeaveRecords', () {
+    test('parses leave records and related links from HTML', () {
+      final String html = _readFixture('student_leave_records.html');
+      final List<StudentLeaveRecord> result = parseStudentLeaveRecords(html);
+
+      expect(result.length, 2);
+      expect(result[0].number, 'SL1130001');
+      expect(result[0].schoolYear, '113');
+      expect(result[0].semester, '1');
+      expect(result[0].category, '病假');
+      expect(result[0].dateRange, '2025-01-06 09:00 ~ 2025-01-06 12:00');
+      expect(result[0].tutorStatus, '已通過');
+      expect(result[0].chairStatus, '審核中');
+      expect(result[0].instructorStatus, '免審核');
+      expect(result[0].proofText, '病假證明.pdf');
+      expect(
+        result[0].proofUrl,
+        'https://sis.nsysu.edu.tw/SLAMS/download.php?id=SL1130001',
+      );
+      expect(
+        result[0].printUrl,
+        'https://sis.nsysu.edu.tw/SLAMS/SLAMS_stuLeave_print.php?id=SL1130001',
+      );
+      expect(result[0].canDelete, isTrue);
+      expect(result[1].number, 'SL1130002');
+      expect(result[1].proofText, '無');
+      expect(result[1].canDelete, isFalse);
+      expect(result[1].proofUrl, isNull);
+      expect(result[1].printUrl, isNull);
+    });
+
+    test('rejects untrusted proof and print links', () {
+      final String html = _readFixture('student_leave_records.html');
+      const List<String> untrustedLinks = <String>[
+        'https://evil.example/collect',
+        '//evil.example/collect',
+        'http://sis.nsysu.edu.tw/SLAMS/download.php?id=1',
+        'javascript:alert(1)',
+        'https://sis.nsysu.edu.tw:444/SLAMS/download.php?id=1',
+      ];
+
+      for (final String href in untrustedLinks) {
+        final List<StudentLeaveRecord> proofResult = parseStudentLeaveRecords(
+          html.replaceFirst('download.php?id=SL1130001', href),
+        );
+        expect(proofResult.first.proofUrl, isNull, reason: href);
+
+        final List<StudentLeaveRecord> printResult = parseStudentLeaveRecords(
+          html.replaceFirst('SLAMS_stuLeave_print.php?id=SL1130001', href),
+        );
+        expect(printResult.first.printUrl, isNull, reason: href);
+      }
+    });
+
+    test('allows SIS proof storage paths but not arbitrary SIS pages', () {
+      final String html = _readFixture('student_leave_records.html');
+      final List<StudentLeaveRecord> storedProof = parseStudentLeaveRecords(
+        html.replaceFirst(
+          'download.php?id=SL1130001',
+          '/doctr02/2026/proof.pdf',
+        ),
+      );
+      expect(
+        storedProof.first.proofUrl,
+        'https://sis.nsysu.edu.tw/doctr02/2026/proof.pdf',
+      );
+
+      final List<StudentLeaveRecord> arbitraryPage = parseStudentLeaveRecords(
+        html.replaceFirst('download.php?id=SL1130001', '/SLAMS/other.php'),
+      );
+      expect(arbitraryPage.first.proofUrl, isNull);
+    });
+  });
+
+  group('parseStudentLeaveFormConstraints', () {
+    test('parses the SIS form options and conservative upload limit', () {
+      final String html = _readFixture('student_leave_add_form.html');
+      final StudentLeaveFormConstraints? result =
+          parseStudentLeaveFormConstraints(html);
+
+      expect(result, isNotNull);
+      expect(
+        result!.leaveTypes.map((StudentLeaveType type) => type.code),
+        <String>['11', '12', '20'],
+      );
+      expect(
+        result.leaveTypes.map((StudentLeaveType type) => type.name),
+        <String>['公假', '事假', '心理不適'],
+      );
+      expect(result.firstStartDate, DateTime(2026, 2));
+      expect(result.lastStartDate, DateTime(2026, 9));
+      expect(result.firstEndDate, DateTime(2026, 7, 12));
+      expect(result.lastEndDate, DateTime(2026, 9));
+      expect(result.startTimes, <String>['09:00', '09:30', '10:00']);
+      expect(result.endTimes, <String>['09:00', '09:30', '10:00']);
+      expect(result.maxReasonLength, 100);
+      expect(result.allowedAttachmentExtensions, <String>['pdf']);
+      expect(result.maxAttachmentBytes, 1572864);
+    });
+
+    test(
+      'returns null rather than guessing when required limits are absent',
+      () {
+        const String html = '''
+      <form action="SLAMS_stuLeave_add_view.php">
+        <select name="class_name"><option value="12">事假</option></select>
+      </form>
+      ''';
+
+        expect(parseStudentLeaveFormConstraints(html), isNull);
+      },
+    );
+
+    test('recovers unique controls reparented by malformed SIS markup', () {
+      const String html = '''
+      <form action="SLAMS_stuLeave_add_view.php"></form>
+      <select name="class_name"><option value="12">事假</option></select>
+      <input name="start_date" min="2026-02-01">
+      <input name="end_date" max="2026-09-01">
+      <select name="start_time"><option value="09:00">09:00</option></select>
+      <select name="end_time"><option value="09:30">09:30</option></select>
+      <textarea name="sla_cont" maxlength="100"></textarea>
+      <p>僅限 PDF，2 MB</p>
+      <input name="upload_file">
+      <script>const maxSize = 1.5 * 1024 * 1024;</script>
+      ''';
+
+      final StudentLeaveFormConstraints? result =
+          parseStudentLeaveFormConstraints(html);
+
+      expect(result, isNotNull);
+      expect(result!.leaveTypes.single.code, '12');
+      expect(result.startTimes, <String>['09:00']);
+      expect(result.endTimes, <String>['09:30']);
+      expect(result.maxAttachmentBytes, 1572864);
+
+      final String ambiguousHtml = html.replaceFirst(
+        '<select name="class_name"><option value="12">事假</option></select>',
+        '<select name="class_name"><option value="12">事假</option></select>\n'
+            '<select name="class_name"><option value="13">病假</option></select>',
+      );
+      expect(parseStudentLeaveFormConstraints(ambiguousHtml), isNull);
+    });
+
+    test('rejects untrusted or ambiguous form structure', () {
+      final String html = _readFixture('student_leave_add_form.html');
+      expect(
+        parseStudentLeaveFormConstraints(
+          html.replaceFirst(
+            'action="SLAMS_stuLeave_add_view.php"',
+            'action="https://evil.example/SLAMS/SLAMS_stuLeave_add_view.php"',
+          ),
+        ),
+        isNull,
+      );
+      expect(parseStudentLeaveFormConstraints('$html$html'), isNull);
+      expect(
+        parseStudentLeaveFormConstraints(
+          html.replaceFirst(
+            '<select name="class_name">',
+            '<select name="class_name"><option value="13">病假</option>\n'
+                '</select><select name="class_name">',
+          ),
+        ),
+        isNull,
+      );
+    });
+
+    test('rejects out-of-range time values instead of normalizing them', () {
+      final String html = _readFixture('student_leave_add_form.html')
+          .replaceAll('value="09:00"', 'value="24:00"')
+          .replaceAll('value="09:30"', 'value="99:99"')
+          .replaceAll('value="10:00"', 'value="12:60"');
+
+      expect(parseStudentLeaveFormConstraints(html), isNull);
+    });
+
+    test('fails closed when the server advertises unsupported file types', () {
+      final String html = _readFixture('student_leave_add_form.html')
+          .replaceFirst(
+            '<input type="file" name="upload_file">',
+            '<input type="file" name="upload_file" accept=".pdf,.jpg">',
+          );
+
+      expect(parseStudentLeaveFormConstraints(html), isNull);
+    });
+
+    test('caps a server-advertised upload limit at the client hard limit', () {
+      final String html = _readFixture(
+        'student_leave_add_form.html',
+      ).replaceFirst('1.5 * 1024 * 1024', '100 * 1024 * 1024');
+
+      final StudentLeaveFormConstraints? result =
+          parseStudentLeaveFormConstraints(html);
+
+      expect(result, isNotNull);
+      expect(result!.maxAttachmentBytes, 10 * 1024 * 1024);
+    });
+  });
+
+  group('parseStudentLeaveConfirmForm', () {
+    test('parses preview confirmation form fields from HTML', () {
+      final String html = _readFixture('student_leave_confirm_form.html');
+      final StudentLeaveConfirmForm? result = parseStudentLeaveConfirmForm(
+        html,
+      );
+
+      expect(result, isNotNull);
+      expect(result!.action, 'SLAMS_stuLeave_add_act.php');
+      expect(result.fields['Lclass'], 'stu');
+      expect(result.fields['sub_Lclass'], 'student');
+      expect(result.fields['s_date'], '2025-01-06');
+      expect(result.fields['s_time'], '09:00');
+      expect(result.fields['e_date'], '2025-01-06');
+      expect(result.fields['e_time'], '12:00');
+      expect(result.fields['sla_cont'], '身體不適');
+      expect(result.fields['class_name'], '02');
+
+      final StudentLeaveConfirmation confirmation =
+          parseStudentLeaveConfirmation(html);
+      expect(confirmation.noticeLines, hasLength(5));
+      expect(confirmation.noticeLines[0], '請同學注意以下說明：');
+      expect(confirmation.noticeLines[1], startsWith('(1)不需課程請假期間：'));
+      expect(confirmation.noticeLines[2], contains('請同學檢查請假單內容是否正確'));
+      expect(confirmation.noticeLines[3], contains('系所主任代替導師'));
+      expect(confirmation.noticeLines[4], contains('自動mail通知'));
+    });
+
+    test('falls back to broad notice search when structure is unknown', () {
+      const String html = '''
+      <html>
+        <body>
+          <section>
+            請同學注意以下說明：<br>
+            (1)不需課程請假期間：YYYY/MM/DD至YYYY/MM/DD。<br>
+            (2)請同學檢查請假單內容是否正確。
+          </section>
+        </body>
+      </html>
+      ''';
+
+      final StudentLeaveConfirmation confirmation =
+          parseStudentLeaveConfirmation(html);
+
+      expect(confirmation.noticeLines, hasLength(3));
+      expect(confirmation.noticeLines[0], '請同學注意以下說明：');
+      expect(confirmation.noticeLines[1], startsWith('(1)不需課程請假期間：'));
+      expect(confirmation.noticeLines[2], contains('檢查請假單內容是否正確'));
+    });
+
+    test('keeps checked radio and checkbox values only', () {
+      const String html = '''
+      <html>
+        <body>
+          <form action="SLAMS_stuLeave_add_act.php">
+            <input type="hidden" name="Lclass" value="stu" />
+            <input type="hidden" name="sub_Lclass" value="student" />
+            <input type="hidden" name="s_date" value="2025-01-06" />
+            <input type="hidden" name="s_time" value="09:00" />
+            <input type="hidden" name="e_date" value="2025-01-06" />
+            <input type="hidden" name="e_time" value="12:00" />
+            <input type="radio" name="confirm" value="N" />
+            <input type="radio" name="confirm" value="Y" checked />
+            <input type="checkbox" name="notify" value="N" />
+            <input type="checkbox" name="courseFlag" value="selected" checked />
+            <input type="checkbox" name="courseFlag" value="unselected" />
+          </form>
+        </body>
+      </html>
+      ''';
+
+      final StudentLeaveConfirmForm? result = parseStudentLeaveConfirmForm(
+        html,
+      );
+
+      expect(result, isNotNull);
+      expect(result!.fields['confirm'], 'Y');
+      expect(result.fields['notify'], isNull);
+      expect(result.fields['courseFlag'], 'selected');
+    });
+
+    test('rejects untrusted or ambiguous confirmation forms', () {
+      final String html = _readFixture('student_leave_confirm_form.html');
+      expect(
+        parseStudentLeaveConfirmForm(
+          html.replaceFirst(
+            'action="SLAMS_stuLeave_add_act.php"',
+            'action="https://evil.example/collect"',
+          ),
+        ),
+        isNull,
+      );
+      expect(parseStudentLeaveConfirmForm('$html$html'), isNull);
+      expect(
+        parseStudentLeaveConfirmForm(
+          html.replaceFirst(
+            '<input type="hidden" name="Lclass" value="stu" />',
+            '<input type="hidden" name="Lclass" value="stu" />\n'
+                '<input type="hidden" name="Lclass" value="duplicate" />',
+          ),
+        ),
+        isNull,
+      );
+      final StudentLeaveConfirmForm? disabledDuplicate =
+          parseStudentLeaveConfirmForm(
+            html.replaceFirst(
+              '<input type="hidden" name="Lclass" value="stu" />',
+              '<input type="hidden" name="Lclass" value="stu" />\n'
+                  '<input type="hidden" name="Lclass" value="ignored" '
+                  'disabled />',
+            ),
+          );
+      expect(disabledDuplicate, isNotNull);
+      expect(disabledDuplicate!.fields['Lclass'], 'stu');
+
+      final StudentLeaveConfirmForm? effectivelyDisabled =
+          parseStudentLeaveConfirmForm(
+            html.replaceFirst(
+              '<input type="hidden" name="Lclass" value="stu" />',
+              '''
+<input type="hidden" name="Lclass" value="stu" />
+<fieldset disabled>
+  <input name="Lclass" value="fieldset-ignored" />
+</fieldset>
+<input name="otherOwner" value="ignored" form="different-form" />
+<select name="disabledChoice">
+  <optgroup disabled>
+    <option selected value="ignored">ignored</option>
+  </optgroup>
+</select>
+''',
+            ),
+          );
+      expect(effectivelyDisabled, isNotNull);
+      expect(effectivelyDisabled!.fields['Lclass'], 'stu');
+      expect(effectivelyDisabled.fields['otherOwner'], isNull);
+      expect(effectivelyDisabled.fields['disabledChoice'], isNull);
     });
   });
 

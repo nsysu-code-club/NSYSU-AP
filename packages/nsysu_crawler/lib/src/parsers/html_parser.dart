@@ -4,6 +4,7 @@ import 'package:html/parser.dart';
 import 'package:nsysu_crawler/src/models/graduation_report_data.dart';
 import 'package:nsysu_crawler/src/models/options.dart';
 import 'package:nsysu_crawler/src/models/score_semester_data.dart';
+import 'package:nsysu_crawler/src/models/student_leave.dart';
 import 'package:nsysu_crawler/src/models/tuition_and_fees.dart';
 
 /// Parse user info HTML page into [UserInfo].
@@ -20,14 +21,334 @@ UserInfo parseUserInfo(String html) {
   );
 }
 
+StudentLeaveConfirmation parseStudentLeaveConfirmation(String html) {
+  final dom.Document document = parse(html, encoding: 'BIG-5');
+  document
+      .querySelectorAll('script, style, noscript')
+      .forEach((dom.Element element) => element.remove());
+
+  final List<StudentLeaveConfirmationSection> sections =
+      <StudentLeaveConfirmationSection>[];
+  final Set<String> seenFields = <String>{};
+
+  for (final dom.Element table in document.getElementsByTagName('table')) {
+    final String tableTitle = _cleanText(
+      table.getElementsByTagName('caption').isNotEmpty
+          ? table.getElementsByTagName('caption').first.text
+          : '',
+    );
+    String currentTitle = tableTitle;
+    final List<StudentLeaveConfirmationField> fields =
+        <StudentLeaveConfirmationField>[];
+    List<String>? courseHeaderLabels;
+    int courseRowCount = 0;
+
+    for (final dom.Element row in table.getElementsByTagName('tr')) {
+      final List<String> cells = row.children
+          .where((dom.Element cell) {
+            final String tag = cell.localName ?? '';
+            return tag == 'td' || tag == 'th';
+          })
+          .map((dom.Element cell) => _cleanText(cell.text))
+          .where((String text) => text.isNotEmpty)
+          .toList();
+      if (cells.isEmpty) continue;
+      if (cells.length == 1) {
+        if (currentTitle.isEmpty || _isLeaveCourseSection(cells.first)) {
+          currentTitle = cells.first;
+        }
+        continue;
+      }
+      if (_isLeaveCourseSection(currentTitle)) {
+        if (_isLeaveCourseHeader(cells)) {
+          courseHeaderLabels = cells.map(_cleanLabel).toList();
+          continue;
+        }
+        final List<String>? labels = courseHeaderLabels;
+        if (labels != null && cells.length == labels.length) {
+          for (int i = 0; i < labels.length; i++) {
+            final String label = labels[i];
+            final String value = cells[i].isEmpty ? '空' : cells[i];
+            final String key = '$currentTitle:$label=$value';
+            if (!seenFields.add(key)) continue;
+            fields.add(
+              StudentLeaveConfirmationField(label: label, value: value),
+            );
+          }
+          courseRowCount++;
+          continue;
+        }
+      }
+      for (int i = 0; i + 1 < cells.length; i += 2) {
+        final String label = _cleanLabel(cells[i]);
+        final String value = cells[i + 1];
+        if (label.isEmpty || value.isEmpty || label == value) continue;
+        final String key = '$label=$value';
+        if (!seenFields.add(key)) continue;
+        fields.add(StudentLeaveConfirmationField(label: label, value: value));
+      }
+    }
+
+    if (courseHeaderLabels != null && courseRowCount == 0) {
+      for (final String label in courseHeaderLabels) {
+        final String key = '$currentTitle:$label=空';
+        if (!seenFields.add(key)) continue;
+        fields.add(StudentLeaveConfirmationField(label: label, value: '空'));
+      }
+    }
+
+    if (fields.isNotEmpty) {
+      sections.add(
+        StudentLeaveConfirmationSection(title: currentTitle, fields: fields),
+      );
+    }
+  }
+
+  final List<String> lines = _extractTextLines(document.body?.text ?? '');
+  final List<String> messages = lines
+      .where(
+        (String line) =>
+            line.contains('成功') ||
+            line.contains('完成') ||
+            line.contains('確認') ||
+            line.contains('假單') ||
+            line.contains('錯誤') ||
+            line.contains('失敗'),
+      )
+      .take(6)
+      .toList();
+  return StudentLeaveConfirmation(
+    sections: sections,
+    messages: messages,
+    rawText: lines.join('\n'),
+    noticeLines: _extractLeaveNoticeLines(document),
+  );
+}
+
+List<StudentLeaveRecord> parseStudentLeaveRecords(String html) {
+  final dom.Document document = parse(html, encoding: 'BIG-5');
+  final List<StudentLeaveRecord> records = <StudentLeaveRecord>[];
+  for (final dom.Element table in document.getElementsByTagName('table')) {
+    final List<dom.Element> rows = table.getElementsByTagName('tr');
+    if (rows.isEmpty || !rows.first.text.contains('請假單編號')) continue;
+    for (int i = 1; i < rows.length; i++) {
+      final List<dom.Element> cells = rows[i].getElementsByTagName('td');
+      if (cells.length < 10) continue;
+      final dom.Element proofCell = cells[8];
+      final dom.Element maintenanceCell = cells[9];
+      records.add(
+        StudentLeaveRecord(
+          number: _cleanText(cells[0].text),
+          schoolYear: _cleanText(cells[1].text),
+          semester: _cleanText(cells[2].text),
+          category: _cleanText(cells[3].text),
+          dateRange: _cleanText(cells[4].text),
+          tutorStatus: _cleanText(cells[5].text),
+          chairStatus: _cleanText(cells[6].text),
+          instructorStatus: _cleanText(cells[7].text),
+          proofText: _cleanText(proofCell.text),
+          proofUrl: _proofHref(proofCell),
+          printUrl: _hrefByText(maintenanceCell, '列印'),
+          canDelete: _cleanText(maintenanceCell.text).contains('刪除'),
+        ),
+      );
+    }
+  }
+  return records;
+}
+
+StudentLeaveFormConstraints? parseStudentLeaveFormConstraints(String html) {
+  final dom.Document document = parse(html, encoding: 'BIG-5');
+  final List<dom.Element> forms = document
+      .querySelectorAll('form')
+      .where(
+        (dom.Element form) => _isTrustedSisFormAction(
+          form.attributes['action'],
+          '/SLAMS/SLAMS_stuLeave_add_view.php',
+        ),
+      )
+      .toList();
+  if (forms.length != 1) return null;
+  final dom.Element form = forms.single;
+
+  final dom.Element? leaveTypeSelect = _formControl(
+    document,
+    form,
+    'select[name="class_name"]',
+  );
+  final List<StudentLeaveType> leaveTypes =
+      leaveTypeSelect
+          ?.querySelectorAll('option')
+          .where(
+            (dom.Element option) =>
+                option.attributes['disabled'] == null &&
+                (option.attributes['value'] ?? '').trim().isNotEmpty,
+          )
+          .map(
+            (dom.Element option) => StudentLeaveType(
+              code: option.attributes['value']!.trim(),
+              name: _leaveTypeName(option.text),
+            ),
+          )
+          .toList() ??
+      <StudentLeaveType>[];
+
+  final dom.Element? startDateInput = _formControl(
+    document,
+    form,
+    'input[name="start_date"]',
+  );
+  final dom.Element? endDateInput = _formControl(
+    document,
+    form,
+    'input[name="end_date"]',
+  );
+  final DateTime? firstDate = _parseSisDate(startDateInput?.attributes['min']);
+  final DateTime? lastDate = _parseSisDate(
+    startDateInput?.attributes['max'] ?? endDateInput?.attributes['max'],
+  );
+  final DateTime? firstEndDate = _parseSisDate(
+    endDateInput?.attributes['min'] ?? startDateInput?.attributes['min'],
+  );
+  final DateTime? lastEndDate = _parseSisDate(
+    endDateInput?.attributes['max'] ?? startDateInput?.attributes['max'],
+  );
+  final List<String> startTimes = _selectValues(
+    _formControl(document, form, 'select[name="start_time"]'),
+  );
+  final List<String> endTimes = _selectValues(
+    _formControl(document, form, 'select[name="end_time"]'),
+  );
+
+  final dom.Element? reasonField = _formControl(
+    document,
+    form,
+    'textarea[name="sla_cont"]',
+  );
+  final int? maxReasonLength = _maxReasonLength(reasonField);
+  final dom.Element? attachmentInput = _formControl(
+    document,
+    form,
+    'input[name="upload_file"]',
+  );
+  final List<String> allowedExtensions = _attachmentExtensions(
+    attachmentInput,
+    document,
+  );
+  final int? maxAttachmentBytes = _maxAttachmentBytes(document);
+
+  if (leaveTypes.isEmpty ||
+      leaveTypes.any(
+        (StudentLeaveType type) => type.code.isEmpty || type.name.isEmpty,
+      ) ||
+      leaveTypes.map((StudentLeaveType type) => type.code).toSet().length !=
+          leaveTypes.length ||
+      firstDate == null ||
+      lastDate == null ||
+      firstEndDate == null ||
+      lastEndDate == null ||
+      firstDate.isAfter(lastDate) ||
+      firstEndDate.isAfter(lastEndDate) ||
+      firstDate.isAfter(lastEndDate) ||
+      lastDate.isAfter(lastEndDate) ||
+      startTimes.isEmpty ||
+      endTimes.isEmpty ||
+      maxReasonLength == null ||
+      maxReasonLength <= 0 ||
+      allowedExtensions.length != 1 ||
+      allowedExtensions.single != 'pdf' ||
+      maxAttachmentBytes == null ||
+      maxAttachmentBytes <= 0) {
+    return null;
+  }
+
+  final int earliestStartMinutes = startTimes
+      .map(_timeMinutes)
+      .reduce((int first, int second) => first < second ? first : second);
+  final int latestEndMinutes = endTimes
+      .map(_timeMinutes)
+      .reduce((int first, int second) => first > second ? first : second);
+  final DateTime earliestStart = DateTime(
+    firstDate.year,
+    firstDate.month,
+    firstDate.day,
+  ).add(Duration(minutes: earliestStartMinutes));
+  final DateTime latestEnd = DateTime(
+    lastEndDate.year,
+    lastEndDate.month,
+    lastEndDate.day,
+  ).add(Duration(minutes: latestEndMinutes));
+  if (!latestEnd.isAfter(earliestStart)) {
+    return null;
+  }
+
+  return StudentLeaveFormConstraints(
+    leaveTypes: leaveTypes,
+    firstStartDate: firstDate,
+    lastStartDate: lastDate,
+    firstEndDate: firstEndDate,
+    lastEndDate: lastEndDate,
+    startTimes: startTimes,
+    endTimes: endTimes,
+    maxReasonLength: maxReasonLength,
+    allowedAttachmentExtensions: allowedExtensions,
+    maxAttachmentBytes: maxAttachmentBytes,
+  );
+}
+
+StudentLeaveConfirmForm? parseStudentLeaveConfirmForm(String html) {
+  final dom.Document document = parse(html, encoding: 'BIG-5');
+  final List<dom.Element> forms = document
+      .getElementsByTagName('form')
+      .where(
+        (dom.Element form) => _isTrustedSisFormAction(
+          form.attributes['action'],
+          '/SLAMS/SLAMS_stuLeave_add_act.php',
+        ),
+      )
+      .toList();
+  if (forms.length != 1) return null;
+
+  final dom.Element form = forms.single;
+  final Map<String, String>? fields = _extractFormFields(form);
+  if (fields == null) return null;
+  const Set<String> requiredFields = <String>{
+    'Lclass',
+    'sub_Lclass',
+    's_date',
+    's_time',
+    'e_date',
+    'e_time',
+  };
+  if (!requiredFields.every(
+    (String name) =>
+        form
+                .querySelectorAll('[name="$name"]')
+                .where(
+                  (dom.Element element) =>
+                      _isSuccessfulFormControl(element, form),
+                )
+                .length ==
+            1 &&
+        (fields[name]?.trim().isNotEmpty ?? false),
+  )) {
+    return null;
+  }
+  return StudentLeaveConfirmForm(
+    action: form.attributes['action']!,
+    fields: fields,
+  );
+}
+
 /// Parse course semester data HTML into [SemesterData].
 SemesterData parseCourseSemesterData(
   String html, {
   required Semester defaultSemester,
 }) {
   final dom.Document document = parse(html);
-  final List<dom.Element> optionElements =
-      document.getElementsByTagName('option');
+  final List<dom.Element> optionElements = document.getElementsByTagName(
+    'option',
+  );
   final List<Semester> semesters = <Semester>[];
   for (int i = 0; i < optionElements.length; i++) {
     semesters.add(
@@ -38,10 +359,7 @@ SemesterData parseCourseSemesterData(
       ),
     );
   }
-  return SemesterData(
-    data: semesters,
-    defaultSemester: defaultSemester,
-  );
+  return SemesterData(data: semesters, defaultSemester: defaultSemester);
 }
 
 /// Parse course data HTML into [CourseData].
@@ -60,9 +378,7 @@ CourseData parseCourseData(
 
   for (int i = 1; i < trDoc.length; i++) {
     final List<dom.Element> tdDoc = trDoc[i].getElementsByTagName('td');
-    final dom.Element titleElement = tdDoc[4]
-        .getElementsByTagName('a')
-        .first;
+    final dom.Element titleElement = tdDoc[4].getElementsByTagName('a').first;
     final List<String> titles = titleElement.innerHtml.split('<br>');
     String title = titleElement.text;
     if (titles.length >= 2) {
@@ -98,10 +414,7 @@ CourseData parseCourseData(
       ),
     );
   }
-  return CourseData(
-    courses: courses,
-    timeCodes: timeCodeConfig.timeCodes,
-  );
+  return CourseData(courses: courses, timeCodes: timeCodeConfig.timeCodes);
 }
 
 /// Parse score semester data HTML into [ScoreSemesterData].
@@ -162,7 +475,7 @@ class ParsedScoreResult {
 ParsedScoreResult parseScoreData(String html) {
   final dom.Document document = parse(html, encoding: 'BIG-5');
   final List<Score> list = <Score>[];
-  Detail detail = Detail();
+  Detail detail = const Detail();
   final List<String?> missingCourseNumbers = <String?>[];
   final List<dom.Element> tableDoc = document.getElementsByTagName('tbody');
   if (tableDoc.length >= 2) {
@@ -229,6 +542,368 @@ ScoreType resolveScoreType(List<Score> scores) {
     return double.tryParse(s) == null;
   });
   return hasLetterGrades ? ScoreType.gradePoint : ScoreType.numeric;
+}
+
+String _cleanLabel(String text) {
+  return _cleanText(text).replaceAll(RegExp(r'[:：]\s*$'), '');
+}
+
+bool _isLeaveCourseSection(String title) {
+  return title.contains('請假期間課程名稱') || title.toLowerCase().contains('course');
+}
+
+bool _isLeaveCourseHeader(List<String> cells) {
+  return cells.length == 4 &&
+      cells[0].contains('日期') &&
+      cells[1].contains('節次') &&
+      cells[2].contains('任課教師') &&
+      cells[3].contains('課目名稱');
+}
+
+String _cleanText(String text) {
+  return text.replaceAll('\u00a0', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+}
+
+List<String> _extractTextLines(String text) {
+  final List<String> lines = text
+      .replaceAll('\u00a0', ' ')
+      .split(RegExp(r'[\r\n]+'))
+      .map(_cleanText)
+      .where((String line) => line.isNotEmpty)
+      .toList();
+  final Set<String> seen = <String>{};
+  return <String>[
+    for (final String line in lines)
+      if (seen.add(line)) line,
+  ];
+}
+
+List<String> _extractLeaveNoticeLines(dom.Document document) {
+  List<dom.Element> candidates = document
+      .querySelectorAll('td, div, font, span, p')
+      .where((dom.Element element) => element.text.contains('請同學注意以下說明'))
+      .toList();
+  if (candidates.isEmpty) {
+    candidates = document
+        .querySelectorAll('*')
+        .where((dom.Element element) => element.text.contains('請同學注意以下說明'))
+        .toList();
+  }
+  if (candidates.isEmpty) return const <String>[];
+
+  candidates.sort(
+    (dom.Element a, dom.Element b) =>
+        _cleanText(a.text).length.compareTo(_cleanText(b.text).length),
+  );
+  final String html = candidates.first.innerHtml.replaceAll(
+    RegExp(r'<br\s*/?>', caseSensitive: false),
+    '\n',
+  );
+  final List<String> lines = _extractTextLines(parseFragment(html).text ?? '');
+  final int startIndex = lines.indexWhere(
+    (String line) => line.contains('請同學注意以下說明'),
+  );
+  if (startIndex == -1) return const <String>[];
+
+  final List<String> noticeLines = <String>[lines[startIndex]];
+  for (final String line in lines.skip(startIndex + 1)) {
+    if (!RegExp(r'^\(\d+\)').hasMatch(line)) break;
+    noticeLines.add(line);
+  }
+  return noticeLines;
+}
+
+Map<String, String>? _extractFormFields(dom.Element form) {
+  final Map<String, String> fields = <String, String>{};
+  bool addField(String name, String value) {
+    if (fields.containsKey(name)) return false;
+    fields[name] = value;
+    return true;
+  }
+
+  for (final dom.Element input in form.getElementsByTagName('input')) {
+    final String? name = input.attributes['name'];
+    if (name == null ||
+        name.isEmpty ||
+        !_isSuccessfulFormControl(input, form)) {
+      continue;
+    }
+    if (!addField(name, input.attributes['value'] ?? '')) return null;
+  }
+  for (final dom.Element textarea in form.getElementsByTagName('textarea')) {
+    final String? name = textarea.attributes['name'];
+    if (name == null ||
+        name.isEmpty ||
+        !_isSuccessfulFormControl(textarea, form)) {
+      continue;
+    }
+    if (!addField(name, textarea.text)) return null;
+  }
+  for (final dom.Element select in form.getElementsByTagName('select')) {
+    final String? name = select.attributes['name'];
+    if (name == null ||
+        name.isEmpty ||
+        !_isSuccessfulFormControl(select, form)) {
+      continue;
+    }
+    final List<dom.Element> options = select.getElementsByTagName('option');
+    final List<dom.Element> explicitlySelected = options
+        .where((dom.Element option) => option.attributes['selected'] != null)
+        .toList();
+    final List<dom.Element> selectedOptions = explicitlySelected
+        .where(_isEnabledOption)
+        .toList();
+    if (select.attributes['multiple'] != null && selectedOptions.length > 1) {
+      return null;
+    }
+    final dom.Element? option = selectedOptions.isNotEmpty
+        ? selectedOptions.first
+        : explicitlySelected.isEmpty && select.attributes['multiple'] == null
+        ? options.where(_isEnabledOption).firstOrNull
+        : null;
+    if (option == null) continue;
+    if (!addField(name, option.attributes['value'] ?? option.text)) {
+      return null;
+    }
+  }
+  return fields;
+}
+
+bool _isSuccessfulFormControl(dom.Element element, dom.Element form) {
+  final String? formOwner = element.attributes['form'];
+  if (formOwner != null && (formOwner.isEmpty || form.id != formOwner)) {
+    return false;
+  }
+  if (element.attributes['disabled'] != null ||
+      _hasDisabledFieldsetAncestor(element, form)) {
+    return false;
+  }
+  if (element.localName != 'input') return true;
+  final String type = (element.attributes['type'] ?? 'text').toLowerCase();
+  if (<String>{'button', 'file', 'image', 'reset', 'submit'}.contains(type)) {
+    return false;
+  }
+  if ((type == 'radio' || type == 'checkbox') &&
+      element.attributes['checked'] == null) {
+    return false;
+  }
+  return true;
+}
+
+bool _hasDisabledFieldsetAncestor(dom.Element element, dom.Element form) {
+  dom.Element? ancestor = element.parent;
+  while (ancestor != null && ancestor != form) {
+    if (ancestor.localName == 'fieldset' &&
+        ancestor.attributes['disabled'] != null) {
+      return true;
+    }
+    ancestor = ancestor.parent;
+  }
+  return false;
+}
+
+bool _isEnabledOption(dom.Element option) {
+  if (option.attributes['disabled'] != null) return false;
+  dom.Element? ancestor = option.parent;
+  while (ancestor != null && ancestor.localName != 'select') {
+    if (ancestor.localName == 'optgroup' &&
+        ancestor.attributes['disabled'] != null) {
+      return false;
+    }
+    ancestor = ancestor.parent;
+  }
+  return true;
+}
+
+String _leaveTypeName(String text) {
+  final String name = _cleanText(text);
+  final int englishLabelStart = name.indexOf('(');
+  return englishLabelStart == -1
+      ? name
+      : name.substring(0, englishLabelStart).trim();
+}
+
+DateTime? _parseSisDate(String? value) {
+  if (value == null) return null;
+  final RegExpMatch? match = RegExp(
+    r'^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$',
+  ).firstMatch(value.trim());
+  if (match == null) return null;
+  final int year = int.parse(match.group(1)!);
+  final int month = int.parse(match.group(2)!);
+  final int day = int.parse(match.group(3)!);
+  final DateTime result = DateTime(year, month, day);
+  if (result.year != year || result.month != month || result.day != day) {
+    return null;
+  }
+  return result;
+}
+
+dom.Element? _formControl(
+  dom.Document document,
+  dom.Element form,
+  String selector,
+) {
+  final List<dom.Element> nestedControls = form.querySelectorAll(selector);
+  if (nestedControls.length == 1) return nestedControls.single;
+  if (nestedControls.length > 1) return null;
+
+  final List<dom.Element> documentControls = document.querySelectorAll(
+    selector,
+  );
+  return documentControls.length == 1 ? documentControls.single : null;
+}
+
+List<String> _selectValues(dom.Element? select) {
+  if (select == null) return const <String>[];
+  final Set<String> values = <String>{};
+  for (final dom.Element option in select.querySelectorAll('option')) {
+    if (option.attributes['disabled'] != null) continue;
+    final String value = (option.attributes['value'] ?? '').trim();
+    if (_isValidTimeValue(value)) values.add(value);
+  }
+  return values.toList();
+}
+
+bool _isTrustedSisFormAction(String? action, String expectedPath) {
+  final String trimmedAction = (action ?? '').trim();
+  if (trimmedAction.isEmpty) return false;
+  final Uri? parsedAction = Uri.tryParse(trimmedAction);
+  if (parsedAction == null) return false;
+
+  final Uri baseUri = Uri.parse('https://sis.nsysu.edu.tw/SLAMS/');
+  final Uri resolvedUri = baseUri.resolveUri(parsedAction);
+  return resolvedUri.scheme == 'https' &&
+      resolvedUri.host == baseUri.host &&
+      resolvedUri.port == baseUri.port &&
+      resolvedUri.userInfo.isEmpty &&
+      !resolvedUri.hasFragment &&
+      resolvedUri.path == expectedPath;
+}
+
+bool _isValidTimeValue(String value) {
+  final RegExpMatch? match = RegExp(r'^(\d{2}):(\d{2})$').firstMatch(value);
+  if (match == null) return false;
+  final int hour = int.parse(match.group(1)!);
+  final int minute = int.parse(match.group(2)!);
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+}
+
+int _timeMinutes(String value) {
+  final List<String> parts = value.split(':');
+  return int.parse(parts[0]) * 60 + int.parse(parts[1]);
+}
+
+int? _maxReasonLength(dom.Element? reasonField) {
+  if (reasonField == null) return null;
+  final int? attributeValue = int.tryParse(
+    reasonField.attributes['maxlength'] ?? '',
+  );
+  if (attributeValue != null && attributeValue > 0) return attributeValue;
+
+  final String hint = <String>[
+    reasonField.attributes['placeholder'] ?? '',
+    reasonField.parent?.text ?? '',
+  ].join(' ');
+  return int.tryParse(RegExp(r'(\d+)\s*字').firstMatch(hint)?.group(1) ?? '');
+}
+
+List<String> _attachmentExtensions(
+  dom.Element? attachmentInput,
+  dom.Document document,
+) {
+  if (attachmentInput == null) return const <String>[];
+  final Set<String> extensions = <String>{};
+  final String accept = attachmentInput.attributes['accept'] ?? '';
+  for (final String value in accept.split(',')) {
+    final String normalized = value.trim().toLowerCase();
+    if (normalized.startsWith('.') && normalized.length > 1) {
+      extensions.add(normalized.substring(1));
+    } else if (normalized == 'application/pdf') {
+      extensions.add('pdf');
+    }
+  }
+  if (extensions.isEmpty &&
+      (document.body?.text ?? '').toUpperCase().contains('PDF')) {
+    extensions.add('pdf');
+  }
+  return extensions.toList();
+}
+
+int? _maxAttachmentBytes(dom.Document document) {
+  const int hardMaximumBytes = 10 * 1024 * 1024;
+  final String scripts = document
+      .querySelectorAll('script')
+      .map((dom.Element script) => script.text)
+      .join('\n');
+  final RegExpMatch? scriptLimit = RegExp(
+    r'maxSize\s*=\s*(\d+(?:\.\d+)?)\s*\*\s*1024\s*\*\s*1024',
+  ).firstMatch(scripts);
+  final double? scriptMegabytes = double.tryParse(scriptLimit?.group(1) ?? '');
+  if (scriptMegabytes != null && scriptMegabytes > 0) {
+    return (scriptMegabytes * 1024 * 1024).round().clamp(1, hardMaximumBytes);
+  }
+
+  final RegExpMatch? visibleLimit = RegExp(
+    r'(\d+(?:\.\d+)?)\s*MB',
+    caseSensitive: false,
+  ).firstMatch(_cleanText(document.body?.text ?? ''));
+  final double? visibleMegabytes = double.tryParse(
+    visibleLimit?.group(1) ?? '',
+  );
+  if (visibleMegabytes == null || visibleMegabytes <= 0) return null;
+  return (visibleMegabytes * 1024 * 1024).round().clamp(1, hardMaximumBytes);
+}
+
+String? _firstHref(dom.Element element) {
+  final List<dom.Element> links = element.getElementsByTagName('a');
+  if (links.isEmpty) return null;
+  return links.first.attributes['href'];
+}
+
+String? _proofHref(dom.Element element) {
+  final String text = _cleanText(element.text);
+  if (text == '無' || text.isEmpty) return null;
+  return _resolveSisUrl(
+    _firstHref(element),
+    isAllowedPath: (String path) =>
+        path == '/SLAMS/download.php' || path.startsWith('/doctr02/'),
+  );
+}
+
+String? _hrefByText(dom.Element element, String text) {
+  for (final dom.Element link in element.getElementsByTagName('a')) {
+    if (link.text.contains(text)) {
+      return _resolveSisUrl(
+        link.attributes['href'],
+        isAllowedPath: (String path) =>
+            path == '/SLAMS/SLAMS_stuLeave_print.php',
+      );
+    }
+  }
+  return null;
+}
+
+String? _resolveSisUrl(
+  String? href, {
+  required bool Function(String path) isAllowedPath,
+}) {
+  final String trimmedHref = (href ?? '').trim();
+  if (trimmedHref.isEmpty) return null;
+  final Uri? parsedHref = Uri.tryParse(trimmedHref);
+  if (parsedHref == null) return null;
+
+  final Uri baseUri = Uri.parse('https://sis.nsysu.edu.tw/SLAMS/');
+  final Uri resolvedUri = baseUri.resolveUri(parsedHref);
+  if (resolvedUri.scheme != 'https' ||
+      resolvedUri.host != baseUri.host ||
+      resolvedUri.port != baseUri.port ||
+      resolvedUri.userInfo.isNotEmpty ||
+      resolvedUri.hasFragment ||
+      !isAllowedPath(resolvedUri.path)) {
+    return null;
+  }
+  return resolvedUri.toString();
 }
 
 /// Parse graduation report HTML into [GraduationReportData].

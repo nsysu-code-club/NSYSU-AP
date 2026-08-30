@@ -95,6 +95,177 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '學雜費繳費狀況查詢'
 	String get tuitionAndFees => '學雜費繳費狀況查詢';
 
+	/// zh-Hant-TW: '學生請假'
+	String get studentLeave => '學生請假';
+
+	/// zh-Hant-TW: '請假紀錄'
+	String get studentLeaveRecords => '請假紀錄';
+
+	/// zh-Hant-TW: '共 ${count} 張'
+	String studentLeaveRecordsCount({required Object count}) => '共 ${count} 張';
+
+	/// zh-Hant-TW: '查詢學期'
+	String get studentLeaveSelectSemester => '查詢學期';
+
+	/// zh-Hant-TW: '重新整理假單'
+	String get studentLeaveRefresh => '重新整理假單';
+
+	/// zh-Hant-TW: '新增假單'
+	String get studentLeaveAdd => '新增假單';
+
+	/// zh-Hant-TW: '刪除假單'
+	String get studentLeaveDelete => '刪除假單';
+
+	/// zh-Hant-TW: '確定刪除？'
+	String get studentLeaveDeleteConfirmTitle => '確定刪除？';
+
+	/// zh-Hant-TW: '刪除後無法復原，是否確定刪除這張假單？'
+	String get studentLeaveDeleteConfirmContent => '刪除後無法復原，是否確定刪除這張假單？';
+
+	/// zh-Hant-TW: '假單刪除中...'
+	String get studentLeaveDeleting => '假單刪除中...';
+
+	/// zh-Hant-TW: '假單已刪除'
+	String get studentLeaveDeleteSuccess => '假單已刪除';
+
+	/// zh-Hant-TW: '假單刪除失敗'
+	String get studentLeaveDeleteFailedTitle => '假單刪除失敗';
+
+	/// zh-Hant-TW: '假單刪除失敗，請至校務系統確認後再試。'
+	String get studentLeaveDeleteFailed => '假單刪除失敗，請至校務系統確認後再試。';
+
+	/// zh-Hant-TW: '刪除結果待確認'
+	String get studentLeaveDeleteUnknownTitle => '刪除結果待確認';
+
+	/// zh-Hant-TW: '校務系統已收到刪除請求，但回傳結果無法判定，請重新整理假單確認。'
+	String get studentLeaveDeleteUnknownResult => '校務系統已收到刪除請求，但回傳結果無法判定，請重新整理假單確認。';
+
+	/// zh-Hant-TW: '這學期還沒有請假紀錄'
+	String get studentLeaveEmpty => '這學期還沒有請假紀錄';
+
+	/// zh-Hant-TW: '假單編號'
+	String get studentLeaveNumber => '假單編號';
+
+	/// zh-Hant-TW: '${year}學年度第${semester}學期'
+	String studentLeaveYearSemester({required Object year, required Object semester}) => '${year}學年度第${semester}學期';
+
+	/// zh-Hant-TW: '導師確認'
+	String get studentLeaveTutorStatus => '導師確認';
+
+	/// zh-Hant-TW: '主任確認'
+	String get studentLeaveChairStatus => '主任確認';
+
+	/// zh-Hant-TW: '課程審核'
+	String get studentLeaveInstructorStatus => '課程審核';
+
+	/// zh-Hant-TW: '假別'
+	String get studentLeaveType => '假別';
+
+	/// zh-Hant-TW: '假單資料'
+	String get studentLeaveRequestDetails => '假單資料';
+
+	/// zh-Hant-TW: '請假期間'
+	String get studentLeavePeriod => '請假期間';
+
+	/// zh-Hant-TW: '共 ${duration}'
+	String studentLeaveDuration({required Object duration}) => '共 ${duration}';
+
+	/// zh-Hant-TW: '開始時間'
+	String get studentLeaveStart => '開始時間';
+
+	/// zh-Hant-TW: '結束時間'
+	String get studentLeaveEnd => '結束時間';
+
+	/// zh-Hant-TW: '請假事由'
+	String get studentLeaveReason => '請假事由';
+
+	/// zh-Hant-TW: '請輸入請假事由'
+	String get studentLeaveReasonHint => '請輸入請假事由';
+
+	/// zh-Hant-TW: '證明文件'
+	String get studentLeaveAttachment => '證明文件';
+
+	/// zh-Hant-TW: '限一份，可不附加'
+	String get studentLeaveAttachmentHint => '限一份，可不附加';
+
+	/// zh-Hant-TW: '選擇檔案'
+	String get studentLeavePickAttachment => '選擇檔案';
+
+	/// zh-Hant-TW: '移除檔案'
+	String get studentLeaveRemoveAttachment => '移除檔案';
+
+	/// zh-Hant-TW: '開啟證明檔案'
+	String get studentLeaveOpenAttachment => '開啟證明檔案';
+
+	/// zh-Hant-TW: '附件大小不能超過 ${maxSize}'
+	String studentLeaveAttachmentTooLarge({required Object maxSize}) => '附件大小不能超過 ${maxSize}';
+
+	/// zh-Hant-TW: '無法讀取此附件，請重新選擇其他檔案'
+	String get studentLeaveAttachmentUnavailable => '無法讀取此附件，請重新選擇其他檔案';
+
+	/// zh-Hant-TW: '審核進度'
+	String get studentLeaveReviewProgress => '審核進度';
+
+	/// zh-Hant-TW: '已通過'
+	String get studentLeaveStatusApproved => '已通過';
+
+	/// zh-Hant-TW: '審核中'
+	String get studentLeaveStatusPending => '審核中';
+
+	/// zh-Hant-TW: '未通過'
+	String get studentLeaveStatusRejected => '未通過';
+
+	/// zh-Hant-TW: '免審核'
+	String get studentLeaveStatusNoReview => '免審核';
+
+	/// zh-Hant-TW: '未知狀態'
+	String get studentLeaveStatusUnknown => '未知狀態';
+
+	/// zh-Hant-TW: '確認假單'
+	String get studentLeaveResult => '確認假單';
+
+	/// zh-Hant-TW: '送出前確認'
+	String get studentLeaveFinalCheck => '送出前確認';
+
+	/// zh-Hant-TW: '請假注意事項'
+	String get studentLeaveNoticeTitle => '請假注意事項';
+
+	/// zh-Hant-TW: '預覽假單'
+	String get studentLeaveSubmit => '預覽假單';
+
+	/// zh-Hant-TW: '確認送出'
+	String get studentLeaveFinalSubmit => '確認送出';
+
+	/// zh-Hant-TW: '確認送出假單'
+	String get studentLeaveSubmitConfirmTitle => '確認送出假單';
+
+	/// zh-Hant-TW: '送出後會直接送到校務系統，請確認內容正確。'
+	String get studentLeaveSubmitConfirmContent => '送出後會直接送到校務系統，請確認內容正確。';
+
+	/// zh-Hant-TW: '假單送出中...'
+	String get studentLeaveSubmitting => '假單送出中...';
+
+	/// zh-Hant-TW: '假單已送出'
+	String get studentLeaveSubmitSuccess => '假單已送出';
+
+	/// zh-Hant-TW: '假單送出失敗'
+	String get studentLeaveSubmitFailedTitle => '假單送出失敗';
+
+	/// zh-Hant-TW: '假單送出失敗，請先至校務系統確認後再重新嘗試。'
+	String get studentLeaveSubmitFailed => '假單送出失敗，請先至校務系統確認後再重新嘗試。';
+
+	/// zh-Hant-TW: '送出結果待確認'
+	String get studentLeaveSubmitUnknownTitle => '送出結果待確認';
+
+	/// zh-Hant-TW: '已送出，但校務系統回傳結果無法判定，請至校務系統確認。'
+	String get studentLeaveSubmitUnknownResult => '已送出，但校務系統回傳結果無法判定，請至校務系統確認。';
+
+	/// zh-Hant-TW: '請假系統登入失敗，請確認帳號密碼或稍後再試。'
+	String get studentLeaveLoginFailed => '請假系統登入失敗，請確認帳號密碼或稍後再試。';
+
+	/// zh-Hant-TW: '結束時間需晚於開始時間'
+	String get studentLeaveTimeInvalid => '結束時間需晚於開始時間';
+
 	/// zh-Hant-TW: '金額：${amount} 繳費日期：${date}'
 	String tuitionAndFeesItemTitleFormat({required Object amount, required Object date}) => '金額：${amount}\n繳費日期：${date}';
 
@@ -269,6 +440,63 @@ extension on AppLocalizations {
 			'graduationCheckChecklistSummary' => '總結',
 			'firstLoginHint' => '首次登入密碼預設為身分證末六碼',
 			'tuitionAndFees' => '學雜費繳費狀況查詢',
+			'studentLeave' => '學生請假',
+			'studentLeaveRecords' => '請假紀錄',
+			'studentLeaveRecordsCount' => ({required Object count}) => '共 ${count} 張',
+			'studentLeaveSelectSemester' => '查詢學期',
+			'studentLeaveRefresh' => '重新整理假單',
+			'studentLeaveAdd' => '新增假單',
+			'studentLeaveDelete' => '刪除假單',
+			'studentLeaveDeleteConfirmTitle' => '確定刪除？',
+			'studentLeaveDeleteConfirmContent' => '刪除後無法復原，是否確定刪除這張假單？',
+			'studentLeaveDeleting' => '假單刪除中...',
+			'studentLeaveDeleteSuccess' => '假單已刪除',
+			'studentLeaveDeleteFailedTitle' => '假單刪除失敗',
+			'studentLeaveDeleteFailed' => '假單刪除失敗，請至校務系統確認後再試。',
+			'studentLeaveDeleteUnknownTitle' => '刪除結果待確認',
+			'studentLeaveDeleteUnknownResult' => '校務系統已收到刪除請求，但回傳結果無法判定，請重新整理假單確認。',
+			'studentLeaveEmpty' => '這學期還沒有請假紀錄',
+			'studentLeaveNumber' => '假單編號',
+			'studentLeaveYearSemester' => ({required Object year, required Object semester}) => '${year}學年度第${semester}學期',
+			'studentLeaveTutorStatus' => '導師確認',
+			'studentLeaveChairStatus' => '主任確認',
+			'studentLeaveInstructorStatus' => '課程審核',
+			'studentLeaveType' => '假別',
+			'studentLeaveRequestDetails' => '假單資料',
+			'studentLeavePeriod' => '請假期間',
+			'studentLeaveDuration' => ({required Object duration}) => '共 ${duration}',
+			'studentLeaveStart' => '開始時間',
+			'studentLeaveEnd' => '結束時間',
+			'studentLeaveReason' => '請假事由',
+			'studentLeaveReasonHint' => '請輸入請假事由',
+			'studentLeaveAttachment' => '證明文件',
+			'studentLeaveAttachmentHint' => '限一份，可不附加',
+			'studentLeavePickAttachment' => '選擇檔案',
+			'studentLeaveRemoveAttachment' => '移除檔案',
+			'studentLeaveOpenAttachment' => '開啟證明檔案',
+			'studentLeaveAttachmentTooLarge' => ({required Object maxSize}) => '附件大小不能超過 ${maxSize}',
+			'studentLeaveAttachmentUnavailable' => '無法讀取此附件，請重新選擇其他檔案',
+			'studentLeaveReviewProgress' => '審核進度',
+			'studentLeaveStatusApproved' => '已通過',
+			'studentLeaveStatusPending' => '審核中',
+			'studentLeaveStatusRejected' => '未通過',
+			'studentLeaveStatusNoReview' => '免審核',
+			'studentLeaveStatusUnknown' => '未知狀態',
+			'studentLeaveResult' => '確認假單',
+			'studentLeaveFinalCheck' => '送出前確認',
+			'studentLeaveNoticeTitle' => '請假注意事項',
+			'studentLeaveSubmit' => '預覽假單',
+			'studentLeaveFinalSubmit' => '確認送出',
+			'studentLeaveSubmitConfirmTitle' => '確認送出假單',
+			'studentLeaveSubmitConfirmContent' => '送出後會直接送到校務系統，請確認內容正確。',
+			'studentLeaveSubmitting' => '假單送出中...',
+			'studentLeaveSubmitSuccess' => '假單已送出',
+			'studentLeaveSubmitFailedTitle' => '假單送出失敗',
+			'studentLeaveSubmitFailed' => '假單送出失敗，請先至校務系統確認後再重新嘗試。',
+			'studentLeaveSubmitUnknownTitle' => '送出結果待確認',
+			'studentLeaveSubmitUnknownResult' => '已送出，但校務系統回傳結果無法判定，請至校務系統確認。',
+			'studentLeaveLoginFailed' => '請假系統登入失敗，請確認帳號密碼或稍後再試。',
+			'studentLeaveTimeInvalid' => '結束時間需晚於開始時間',
 			'tuitionAndFeesItemTitleFormat' => ({required Object amount, required Object date}) => '金額：${amount}\n繳費日期：${date}',
 			'admissionGuide' => '入學指南',
 			'tuitionAndFeesPageHint' => '點擊可查看收據或繳費單',

@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <body>
+    <div class="notice">
+      請同學注意以下說明：<br />
+      (1)不需課程請假期間：YYYY/MM/DD至YYYY/MM/DD。<br />
+      (2)請同學檢查請假單內容是否正確，如有錯誤請回上一頁修改。<br />
+      (3)於系所導生名冊未完成安排前，系統將以系所主任代替導師。<br />
+      (4)請假單確定送出後，系統會自動mail通知系所主任、導師及任課老師。
+    </div>
+    <form method="post" action="SLAMS_stuLeave_add_act.php">
+      <input type="hidden" name="Lclass" value="stu" />
+      <input type="hidden" name="sub_Lclass" value="student" />
+      <input type="hidden" name="s_date" value="2025-01-06" />
+      <input type="hidden" name="s_time" value="09:00" />
+      <input type="hidden" name="e_date" value="2025-01-06" />
+      <input type="hidden" name="e_time" value="12:00" />
+      <textarea name="sla_cont">身體不適</textarea>
+      <select name="class_name">
+        <option value="01">事假</option>
+        <option value="02" selected>病假</option>
+      </select>
+    </form>
+  </body>
+</html>

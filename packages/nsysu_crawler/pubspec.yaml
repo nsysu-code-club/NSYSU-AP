@@ -9,6 +9,7 @@ environment:
 dependencies:
   ap_common_core: ^1.0.1-dev.10
 
+  characters: ^1.4.0
   cookie_jar: ^4.0.3
   crypto: ^3.0.1
   dio: ^5.0.0

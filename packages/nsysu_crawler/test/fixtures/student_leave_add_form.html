@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <script>
+      function checkfilesize() {
+        const maxSize = 1.5 * 1024 * 1024;
+      }
+    </script>
+  </head>
+  <body>
+    <form action="SLAMS_stuLeave_add_view.php" method="post" enctype="multipart/form-data">
+      <select name="class_name">
+        <option selected disabled>請選擇請假類別</option>
+        <option value="11">公假(official leave)</option>
+        <option value="12">事假(personal leave)</option>
+        <option value="20">心理不適(mental distress)</option>
+      </select>
+      <input type="date" name="start_date" min="2026-02-01">
+      <select name="start_time">
+        <option selected disabled>請選擇時間</option>
+        <option value="09:00">09:00</option>
+        <option value="09:30">09:30</option>
+        <option value="10:00">10:00</option>
+      </select>
+      <input
+        type="date"
+        name="end_date"
+        min="2026-07-12"
+        max="2026-09-01"
+      >
+      <select name="end_time">
+        <option selected disabled>請選擇時間</option>
+        <option value="09:00">09:00</option>
+        <option value="09:30">09:30</option>
+        <option value="10:00">10:00</option>
+      </select>
+      <textarea
+        name="sla_cont"
+        placeholder="限中文100字內"
+        required
+      ></textarea>
+      <div>
+        <span>僅限上傳PDF檔案，2MB為限</span>
+        <input type="file" name="upload_file">
+      </div>
+    </form>
+  </body>
+</html>

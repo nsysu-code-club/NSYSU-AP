@@ -1,3 +1,5 @@
+# Agent  file
+.agents/
 # Miscellaneous
 *.class
 *.log

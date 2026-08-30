@@ -41,6 +41,7 @@ dependencies:
   json_annotation: ^4.6.0
   package_info_plus: ^8.0.3
   printing: 5.13.4
+  file_picker: ^11.0.2
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +56,14 @@ dependency_overrides:
   web: 0.5.1
   google_sign_in: 6.2.1
   google_sign_in_ios: 5.7.6
+  # intl: 0.20.2
+  # flutter_inappwebview: ^6.0.0
+  # ap_common:
+  #   path: ../ap_common/packages/ap_common
+  # ap_common_flutter_ui:
+  #   path: ../ap_common/packages/ap_common_flutter_ui
+  # ap_common_announcement_ui:
+  #   path: ../ap_common/packages/ap_common_announcement_ui
 
 flutter:
 
