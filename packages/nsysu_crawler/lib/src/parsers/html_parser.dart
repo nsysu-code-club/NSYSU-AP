@@ -157,35 +157,187 @@ List<StudentLeaveRecord> parseStudentLeaveRecords(String html) {
   return records;
 }
 
+StudentLeaveFormConstraints? parseStudentLeaveFormConstraints(String html) {
+  final dom.Document document = parse(html, encoding: 'BIG-5');
+  final List<dom.Element> forms = document
+      .querySelectorAll('form')
+      .where(
+        (dom.Element form) => _isTrustedSisFormAction(
+          form.attributes['action'],
+          '/SLAMS/SLAMS_stuLeave_add_view.php',
+        ),
+      )
+      .toList();
+  if (forms.length != 1) return null;
+  final dom.Element form = forms.single;
+
+  final dom.Element? leaveTypeSelect = _formControl(
+    document,
+    form,
+    'select[name="class_name"]',
+  );
+  final List<StudentLeaveType> leaveTypes =
+      leaveTypeSelect
+          ?.querySelectorAll('option')
+          .where(
+            (dom.Element option) =>
+                option.attributes['disabled'] == null &&
+                (option.attributes['value'] ?? '').trim().isNotEmpty,
+          )
+          .map(
+            (dom.Element option) => StudentLeaveType(
+              code: option.attributes['value']!.trim(),
+              name: _leaveTypeName(option.text),
+            ),
+          )
+          .toList() ??
+      <StudentLeaveType>[];
+
+  final dom.Element? startDateInput = _formControl(
+    document,
+    form,
+    'input[name="start_date"]',
+  );
+  final dom.Element? endDateInput = _formControl(
+    document,
+    form,
+    'input[name="end_date"]',
+  );
+  final DateTime? firstDate = _parseSisDate(startDateInput?.attributes['min']);
+  final DateTime? lastDate = _parseSisDate(
+    startDateInput?.attributes['max'] ?? endDateInput?.attributes['max'],
+  );
+  final DateTime? firstEndDate = _parseSisDate(
+    endDateInput?.attributes['min'] ?? startDateInput?.attributes['min'],
+  );
+  final DateTime? lastEndDate = _parseSisDate(
+    endDateInput?.attributes['max'] ?? startDateInput?.attributes['max'],
+  );
+  final List<String> startTimes = _selectValues(
+    _formControl(document, form, 'select[name="start_time"]'),
+  );
+  final List<String> endTimes = _selectValues(
+    _formControl(document, form, 'select[name="end_time"]'),
+  );
+
+  final dom.Element? reasonField = _formControl(
+    document,
+    form,
+    'textarea[name="sla_cont"]',
+  );
+  final int? maxReasonLength = _maxReasonLength(reasonField);
+  final dom.Element? attachmentInput = _formControl(
+    document,
+    form,
+    'input[name="upload_file"]',
+  );
+  final List<String> allowedExtensions = _attachmentExtensions(
+    attachmentInput,
+    document,
+  );
+  final int? maxAttachmentBytes = _maxAttachmentBytes(document);
+
+  if (leaveTypes.isEmpty ||
+      leaveTypes.any(
+        (StudentLeaveType type) => type.code.isEmpty || type.name.isEmpty,
+      ) ||
+      leaveTypes.map((StudentLeaveType type) => type.code).toSet().length !=
+          leaveTypes.length ||
+      firstDate == null ||
+      lastDate == null ||
+      firstEndDate == null ||
+      lastEndDate == null ||
+      firstDate.isAfter(lastDate) ||
+      firstEndDate.isAfter(lastEndDate) ||
+      firstDate.isAfter(lastEndDate) ||
+      lastDate.isAfter(lastEndDate) ||
+      startTimes.isEmpty ||
+      endTimes.isEmpty ||
+      maxReasonLength == null ||
+      maxReasonLength <= 0 ||
+      allowedExtensions.length != 1 ||
+      allowedExtensions.single != 'pdf' ||
+      maxAttachmentBytes == null ||
+      maxAttachmentBytes <= 0) {
+    return null;
+  }
+
+  final int earliestStartMinutes = startTimes
+      .map(_timeMinutes)
+      .reduce((int first, int second) => first < second ? first : second);
+  final int latestEndMinutes = endTimes
+      .map(_timeMinutes)
+      .reduce((int first, int second) => first > second ? first : second);
+  final DateTime earliestStart = DateTime(
+    firstDate.year,
+    firstDate.month,
+    firstDate.day,
+  ).add(Duration(minutes: earliestStartMinutes));
+  final DateTime latestEnd = DateTime(
+    lastEndDate.year,
+    lastEndDate.month,
+    lastEndDate.day,
+  ).add(Duration(minutes: latestEndMinutes));
+  if (!latestEnd.isAfter(earliestStart)) {
+    return null;
+  }
+
+  return StudentLeaveFormConstraints(
+    leaveTypes: leaveTypes,
+    firstStartDate: firstDate,
+    lastStartDate: lastDate,
+    firstEndDate: firstEndDate,
+    lastEndDate: lastEndDate,
+    startTimes: startTimes,
+    endTimes: endTimes,
+    maxReasonLength: maxReasonLength,
+    allowedAttachmentExtensions: allowedExtensions,
+    maxAttachmentBytes: maxAttachmentBytes,
+  );
+}
+
 StudentLeaveConfirmForm? parseStudentLeaveConfirmForm(String html) {
   final dom.Document document = parse(html, encoding: 'BIG-5');
-  final List<dom.Element> forms = document.getElementsByTagName('form');
-  for (final dom.Element form in forms) {
-    final String action = form.attributes['action'] ?? '';
-    if (action.contains('SLAMS_stuLeave_add_act.php')) {
-      return StudentLeaveConfirmForm(
-        action: action,
-        fields: _extractFormFields(form),
-      );
-    }
+  final List<dom.Element> forms = document
+      .getElementsByTagName('form')
+      .where(
+        (dom.Element form) => _isTrustedSisFormAction(
+          form.attributes['action'],
+          '/SLAMS/SLAMS_stuLeave_add_act.php',
+        ),
+      )
+      .toList();
+  if (forms.length != 1) return null;
+
+  final dom.Element form = forms.single;
+  final Map<String, String>? fields = _extractFormFields(form);
+  if (fields == null) return null;
+  const Set<String> requiredFields = <String>{
+    'Lclass',
+    'sub_Lclass',
+    's_date',
+    's_time',
+    'e_date',
+    'e_time',
+  };
+  if (!requiredFields.every(
+    (String name) =>
+        form
+                .querySelectorAll('[name="$name"]')
+                .where(
+                  (dom.Element element) =>
+                      _isSuccessfulFormControl(element, form),
+                )
+                .length ==
+            1 &&
+        (fields[name]?.trim().isNotEmpty ?? false),
+  )) {
+    return null;
   }
-  for (final dom.Element form in forms) {
-    final Map<String, String> fields = _extractFormFields(form);
-    if (<String>{
-      'Lclass',
-      'sub_Lclass',
-      's_date',
-      's_time',
-      'e_date',
-      'e_time',
-    }.every(fields.containsKey)) {
-      return StudentLeaveConfirmForm(
-        action: form.attributes['action'] ?? '',
-        fields: fields,
-      );
-    }
-  }
-  return null;
+  return StudentLeaveConfirmForm(
+    action: form.attributes['action']!,
+    fields: fields,
+  );
 }
 
 /// Parse course semester data HTML into [SemesterData].
@@ -461,39 +613,246 @@ List<String> _extractLeaveNoticeLines(dom.Document document) {
   return noticeLines;
 }
 
-Map<String, String> _extractFormFields(dom.Element form) {
+Map<String, String>? _extractFormFields(dom.Element form) {
   final Map<String, String> fields = <String, String>{};
+  bool addField(String name, String value) {
+    if (fields.containsKey(name)) return false;
+    fields[name] = value;
+    return true;
+  }
+
   for (final dom.Element input in form.getElementsByTagName('input')) {
     final String? name = input.attributes['name'];
-    if (name == null || name.isEmpty) continue;
-    final String type = (input.attributes['type'] ?? 'text').toLowerCase();
-    if ((type == 'radio' || type == 'checkbox') &&
-        input.attributes['checked'] == null) {
+    if (name == null ||
+        name.isEmpty ||
+        !_isSuccessfulFormControl(input, form)) {
       continue;
     }
-    fields[name] = input.attributes['value'] ?? '';
+    if (!addField(name, input.attributes['value'] ?? '')) return null;
   }
   for (final dom.Element textarea in form.getElementsByTagName('textarea')) {
     final String? name = textarea.attributes['name'];
-    if (name == null || name.isEmpty) continue;
-    fields[name] = textarea.text;
+    if (name == null ||
+        name.isEmpty ||
+        !_isSuccessfulFormControl(textarea, form)) {
+      continue;
+    }
+    if (!addField(name, textarea.text)) return null;
   }
   for (final dom.Element select in form.getElementsByTagName('select')) {
     final String? name = select.attributes['name'];
-    if (name == null || name.isEmpty) continue;
-    final List<dom.Element> selectedOptions = select
-        .getElementsByTagName('option')
+    if (name == null ||
+        name.isEmpty ||
+        !_isSuccessfulFormControl(select, form)) {
+      continue;
+    }
+    final List<dom.Element> options = select.getElementsByTagName('option');
+    final List<dom.Element> explicitlySelected = options
         .where((dom.Element option) => option.attributes['selected'] != null)
         .toList();
-    final List<dom.Element> options = select.getElementsByTagName('option');
+    final List<dom.Element> selectedOptions = explicitlySelected
+        .where(_isEnabledOption)
+        .toList();
+    if (select.attributes['multiple'] != null && selectedOptions.length > 1) {
+      return null;
+    }
     final dom.Element? option = selectedOptions.isNotEmpty
         ? selectedOptions.first
-        : options.isNotEmpty
-        ? options.first
+        : explicitlySelected.isEmpty && select.attributes['multiple'] == null
+        ? options.where(_isEnabledOption).firstOrNull
         : null;
-    fields[name] = option?.attributes['value'] ?? option?.text ?? '';
+    if (option == null) continue;
+    if (!addField(name, option.attributes['value'] ?? option.text)) {
+      return null;
+    }
   }
   return fields;
+}
+
+bool _isSuccessfulFormControl(dom.Element element, dom.Element form) {
+  final String? formOwner = element.attributes['form'];
+  if (formOwner != null && (formOwner.isEmpty || form.id != formOwner)) {
+    return false;
+  }
+  if (element.attributes['disabled'] != null ||
+      _hasDisabledFieldsetAncestor(element, form)) {
+    return false;
+  }
+  if (element.localName != 'input') return true;
+  final String type = (element.attributes['type'] ?? 'text').toLowerCase();
+  if (<String>{'button', 'file', 'image', 'reset', 'submit'}.contains(type)) {
+    return false;
+  }
+  if ((type == 'radio' || type == 'checkbox') &&
+      element.attributes['checked'] == null) {
+    return false;
+  }
+  return true;
+}
+
+bool _hasDisabledFieldsetAncestor(dom.Element element, dom.Element form) {
+  dom.Element? ancestor = element.parent;
+  while (ancestor != null && ancestor != form) {
+    if (ancestor.localName == 'fieldset' &&
+        ancestor.attributes['disabled'] != null) {
+      return true;
+    }
+    ancestor = ancestor.parent;
+  }
+  return false;
+}
+
+bool _isEnabledOption(dom.Element option) {
+  if (option.attributes['disabled'] != null) return false;
+  dom.Element? ancestor = option.parent;
+  while (ancestor != null && ancestor.localName != 'select') {
+    if (ancestor.localName == 'optgroup' &&
+        ancestor.attributes['disabled'] != null) {
+      return false;
+    }
+    ancestor = ancestor.parent;
+  }
+  return true;
+}
+
+String _leaveTypeName(String text) {
+  final String name = _cleanText(text);
+  final int englishLabelStart = name.indexOf('(');
+  return englishLabelStart == -1
+      ? name
+      : name.substring(0, englishLabelStart).trim();
+}
+
+DateTime? _parseSisDate(String? value) {
+  if (value == null) return null;
+  final RegExpMatch? match = RegExp(
+    r'^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$',
+  ).firstMatch(value.trim());
+  if (match == null) return null;
+  final int year = int.parse(match.group(1)!);
+  final int month = int.parse(match.group(2)!);
+  final int day = int.parse(match.group(3)!);
+  final DateTime result = DateTime(year, month, day);
+  if (result.year != year || result.month != month || result.day != day) {
+    return null;
+  }
+  return result;
+}
+
+dom.Element? _formControl(
+  dom.Document document,
+  dom.Element form,
+  String selector,
+) {
+  final List<dom.Element> nestedControls = form.querySelectorAll(selector);
+  if (nestedControls.length == 1) return nestedControls.single;
+  if (nestedControls.length > 1) return null;
+
+  final List<dom.Element> documentControls = document.querySelectorAll(
+    selector,
+  );
+  return documentControls.length == 1 ? documentControls.single : null;
+}
+
+List<String> _selectValues(dom.Element? select) {
+  if (select == null) return const <String>[];
+  final Set<String> values = <String>{};
+  for (final dom.Element option in select.querySelectorAll('option')) {
+    if (option.attributes['disabled'] != null) continue;
+    final String value = (option.attributes['value'] ?? '').trim();
+    if (_isValidTimeValue(value)) values.add(value);
+  }
+  return values.toList();
+}
+
+bool _isTrustedSisFormAction(String? action, String expectedPath) {
+  final String trimmedAction = (action ?? '').trim();
+  if (trimmedAction.isEmpty) return false;
+  final Uri? parsedAction = Uri.tryParse(trimmedAction);
+  if (parsedAction == null) return false;
+
+  final Uri baseUri = Uri.parse('https://sis.nsysu.edu.tw/SLAMS/');
+  final Uri resolvedUri = baseUri.resolveUri(parsedAction);
+  return resolvedUri.scheme == 'https' &&
+      resolvedUri.host == baseUri.host &&
+      resolvedUri.port == baseUri.port &&
+      resolvedUri.userInfo.isEmpty &&
+      !resolvedUri.hasFragment &&
+      resolvedUri.path == expectedPath;
+}
+
+bool _isValidTimeValue(String value) {
+  final RegExpMatch? match = RegExp(r'^(\d{2}):(\d{2})$').firstMatch(value);
+  if (match == null) return false;
+  final int hour = int.parse(match.group(1)!);
+  final int minute = int.parse(match.group(2)!);
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+}
+
+int _timeMinutes(String value) {
+  final List<String> parts = value.split(':');
+  return int.parse(parts[0]) * 60 + int.parse(parts[1]);
+}
+
+int? _maxReasonLength(dom.Element? reasonField) {
+  if (reasonField == null) return null;
+  final int? attributeValue = int.tryParse(
+    reasonField.attributes['maxlength'] ?? '',
+  );
+  if (attributeValue != null && attributeValue > 0) return attributeValue;
+
+  final String hint = <String>[
+    reasonField.attributes['placeholder'] ?? '',
+    reasonField.parent?.text ?? '',
+  ].join(' ');
+  return int.tryParse(RegExp(r'(\d+)\s*字').firstMatch(hint)?.group(1) ?? '');
+}
+
+List<String> _attachmentExtensions(
+  dom.Element? attachmentInput,
+  dom.Document document,
+) {
+  if (attachmentInput == null) return const <String>[];
+  final Set<String> extensions = <String>{};
+  final String accept = attachmentInput.attributes['accept'] ?? '';
+  for (final String value in accept.split(',')) {
+    final String normalized = value.trim().toLowerCase();
+    if (normalized.startsWith('.') && normalized.length > 1) {
+      extensions.add(normalized.substring(1));
+    } else if (normalized == 'application/pdf') {
+      extensions.add('pdf');
+    }
+  }
+  if (extensions.isEmpty &&
+      (document.body?.text ?? '').toUpperCase().contains('PDF')) {
+    extensions.add('pdf');
+  }
+  return extensions.toList();
+}
+
+int? _maxAttachmentBytes(dom.Document document) {
+  const int hardMaximumBytes = 10 * 1024 * 1024;
+  final String scripts = document
+      .querySelectorAll('script')
+      .map((dom.Element script) => script.text)
+      .join('\n');
+  final RegExpMatch? scriptLimit = RegExp(
+    r'maxSize\s*=\s*(\d+(?:\.\d+)?)\s*\*\s*1024\s*\*\s*1024',
+  ).firstMatch(scripts);
+  final double? scriptMegabytes = double.tryParse(scriptLimit?.group(1) ?? '');
+  if (scriptMegabytes != null && scriptMegabytes > 0) {
+    return (scriptMegabytes * 1024 * 1024).round().clamp(1, hardMaximumBytes);
+  }
+
+  final RegExpMatch? visibleLimit = RegExp(
+    r'(\d+(?:\.\d+)?)\s*MB',
+    caseSensitive: false,
+  ).firstMatch(_cleanText(document.body?.text ?? ''));
+  final double? visibleMegabytes = double.tryParse(
+    visibleLimit?.group(1) ?? '',
+  );
+  if (visibleMegabytes == null || visibleMegabytes <= 0) return null;
+  return (visibleMegabytes * 1024 * 1024).round().clamp(1, hardMaximumBytes);
 }
 
 String? _firstHref(dom.Element element) {
@@ -505,22 +864,46 @@ String? _firstHref(dom.Element element) {
 String? _proofHref(dom.Element element) {
   final String text = _cleanText(element.text);
   if (text == '無' || text.isEmpty) return null;
-  return _resolveSisUrl(_firstHref(element));
+  return _resolveSisUrl(
+    _firstHref(element),
+    isAllowedPath: (String path) =>
+        path == '/SLAMS/download.php' || path.startsWith('/doctr02/'),
+  );
 }
 
 String? _hrefByText(dom.Element element, String text) {
   for (final dom.Element link in element.getElementsByTagName('a')) {
     if (link.text.contains(text)) {
-      return _resolveSisUrl(link.attributes['href']);
+      return _resolveSisUrl(
+        link.attributes['href'],
+        isAllowedPath: (String path) =>
+            path == '/SLAMS/SLAMS_stuLeave_print.php',
+      );
     }
   }
   return null;
 }
 
-String? _resolveSisUrl(String? href) {
-  if (href == null || href.isEmpty) return null;
-  if (href.startsWith('http')) return href;
-  return Uri.parse('https://sis.nsysu.edu.tw/SLAMS/').resolve(href).toString();
+String? _resolveSisUrl(
+  String? href, {
+  required bool Function(String path) isAllowedPath,
+}) {
+  final String trimmedHref = (href ?? '').trim();
+  if (trimmedHref.isEmpty) return null;
+  final Uri? parsedHref = Uri.tryParse(trimmedHref);
+  if (parsedHref == null) return null;
+
+  final Uri baseUri = Uri.parse('https://sis.nsysu.edu.tw/SLAMS/');
+  final Uri resolvedUri = baseUri.resolveUri(parsedHref);
+  if (resolvedUri.scheme != 'https' ||
+      resolvedUri.host != baseUri.host ||
+      resolvedUri.port != baseUri.port ||
+      resolvedUri.userInfo.isNotEmpty ||
+      resolvedUri.hasFragment ||
+      !isAllowedPath(resolvedUri.path)) {
+    return null;
+  }
+  return resolvedUri.toString();
 }
 
 /// Parse graduation report HTML into [GraduationReportData].

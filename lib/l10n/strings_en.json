@@ -58,6 +58,7 @@
   "studentLeaveStatusPending": "In review",
   "studentLeaveStatusRejected": "Rejected",
   "studentLeaveStatusNoReview": "No review",
+  "studentLeaveStatusUnknown": "Unknown status",
   "studentLeaveResult": "Leave Confirmation",
   "studentLeaveFinalCheck": "Final Check",
   "studentLeaveNoticeTitle": "Important Leave Information",

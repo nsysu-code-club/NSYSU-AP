@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:ap_common/ap_common.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,7 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
   late StudentLeaveSemester _selectedSemester;
   int _recordsRequestId = 0;
   String? _deletingRecordNumber;
+  String? _openingProofUrl;
 
   @override
   void initState() {
@@ -124,6 +127,10 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
                 return _LeaveRecordCard(
                   record: record,
                   isDeleting: _deletingRecordNumber == record.number,
+                  isOpeningProof: _openingProofUrl == record.proofUrl,
+                  onOpenProof: record.proofUrl == null
+                      ? null
+                      : () => _openProof(record),
                   onDelete: record.canDelete
                       ? () => _deleteRecord(record)
                       : null,
@@ -183,31 +190,6 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
   Future<void> _deleteRecord(StudentLeaveRecord record) async {
     if (_deletingRecordNumber != null) return;
     setState(() => _deletingRecordNumber = record.number);
-    final ApiResult<GeneralResponse> checkResult = await StudentLeaveHelper
-        .instance
-        .checkLeaveDeletion(
-          username: SelcrsHelper.instance.username,
-          password: SelcrsHelper.instance.password,
-          leaveNumber: record.number,
-        );
-    if (!mounted) return;
-    switch (checkResult) {
-      case ApiSuccess<GeneralResponse>():
-        break;
-      case ApiFailure<GeneralResponse>(:final DioException exception):
-        setState(() => _deletingRecordNumber = null);
-        UiUtil.instance.showToast(
-          context,
-          exception.i18nMessage ?? app.studentLeaveDeleteFailed,
-        );
-        return;
-      case ApiError<GeneralResponse>():
-        setState(() => _deletingRecordNumber = null);
-        _showDeleteFailure();
-        return;
-    }
-
-    setState(() => _deletingRecordNumber = null);
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
@@ -225,12 +207,19 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
         ],
       ),
     );
-    if (!mounted || confirmed != true) return;
+    if (!mounted) return;
+    if (confirmed != true) {
+      setState(() => _deletingRecordNumber = null);
+      return;
+    }
 
-    setState(() => _deletingRecordNumber = record.number);
     final ApiResult<StudentLeaveDeleteResult> result = await StudentLeaveHelper
         .instance
-        .deleteLeave(leaveNumber: record.number);
+        .checkAndDeleteLeave(
+          username: SelcrsHelper.instance.username,
+          password: SelcrsHelper.instance.password,
+          leaveNumber: record.number,
+        );
     if (!mounted) return;
     setState(() => _deletingRecordNumber = null);
     switch (result) {
@@ -261,6 +250,41 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
           context,
           exception.i18nMessage ?? app.studentLeaveDeleteFailed,
         );
+    }
+  }
+
+  Future<void> _openProof(StudentLeaveRecord record) async {
+    final String? proofUrl = record.proofUrl;
+    if (proofUrl == null || _openingProofUrl != null) return;
+    setState(() => _openingProofUrl = proofUrl);
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) =>
+          PopScope(canPop: false, child: ProgressDialog(ap.loading)),
+      barrierDismissible: false,
+    );
+    final ApiResult<Uint8List> result = await StudentLeaveHelper.instance
+        .downloadProof(
+          username: SelcrsHelper.instance.username,
+          password: SelcrsHelper.instance.password,
+          proofUrl: proofUrl,
+        );
+    if (!mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
+    setState(() => _openingProofUrl = null);
+    switch (result) {
+      case ApiSuccess<Uint8List>(:final Uint8List data):
+        ApUtils.pushCupertinoStyle(
+          context,
+          PdfView(state: PdfState.finish, data: data),
+        );
+      case ApiFailure<Uint8List>(:final DioException exception):
+        UiUtil.instance.showToast(
+          context,
+          exception.i18nMessage ?? ap.somethingError,
+        );
+      case ApiError<Uint8List>():
+        UiUtil.instance.showToast(context, ap.somethingError);
     }
   }
 
@@ -325,15 +349,15 @@ class StudentLeaveSemesterSelector extends StatelessWidget {
 }
 
 class StudentLeaveAddPage extends StatefulWidget {
-  const StudentLeaveAddPage({super.key});
+  const StudentLeaveAddPage({super.key, this.initialConstraints});
+
+  final StudentLeaveFormConstraints? initialConstraints;
 
   @override
   State<StudentLeaveAddPage> createState() => _StudentLeaveAddPageState();
 }
 
 class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
-  static const int _maxAttachmentBytes = 10 * 1024 * 1024;
-
   final TextEditingController _reasonController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -341,6 +365,8 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
   DateTime _startDateTime = _initialStartDateTime();
   DateTime _endDateTime = _initialEndDateTime();
   PlatformFile? _attachmentFile;
+  StudentLeaveFormConstraints? _constraints;
+  bool _isLoadingConstraints = true;
 
   @override
   void initState() {
@@ -349,6 +375,14 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
       'StudentLeaveAddPage',
       'student_leave_page.dart',
     );
+    final StudentLeaveFormConstraints? initialConstraints =
+        widget.initialConstraints;
+    if (initialConstraints != null) {
+      _applyConstraints(initialConstraints);
+      _isLoadingConstraints = false;
+    } else {
+      _loadConstraints();
+    }
   }
 
   @override
@@ -359,6 +393,21 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
 
   @override
   Widget build(BuildContext context) {
+    final StudentLeaveFormConstraints? constraints = _constraints;
+    if (constraints == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(app.studentLeaveAdd)),
+        body: _isLoadingConstraints
+            ? const Center(child: CircularProgressIndicator())
+            : InkWell(
+                onTap: _loadConstraints,
+                child: HintContent(
+                  icon: Icons.assignment_late_outlined,
+                  content: ap.clickToRetry,
+                ),
+              ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: Text(app.studentLeaveAdd)),
       body: Column(
@@ -382,7 +431,7 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
                       labelText: app.studentLeaveType,
                       prefixIcon: const Icon(Icons.category_outlined),
                     ),
-                    items: StudentLeaveType.values
+                    items: constraints.leaveTypes
                         .map(
                           (StudentLeaveType type) =>
                               DropdownMenuItem<StudentLeaveType>(
@@ -444,6 +493,7 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
                   ),
                   TextFormField(
                     controller: _reasonController,
+                    maxLength: constraints.maxReasonLength,
                     decoration: InputDecoration(
                       border: const OutlineInputBorder(),
                       hintText: app.studentLeaveReasonHint,
@@ -464,6 +514,7 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
                   ),
                   _AttachmentTile(
                     file: _attachmentFile,
+                    hint: _attachmentHint(constraints),
                     onPick: _pickAttachment,
                     onRemove: () => setState(() => _attachmentFile = null),
                   ),
@@ -480,41 +531,122 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
     );
   }
 
+  Future<void> _loadConstraints() async {
+    if (mounted) {
+      setState(() {
+        _isLoadingConstraints = true;
+        _constraints = null;
+      });
+    }
+    final ApiResult<StudentLeaveFormConstraints> result =
+        await StudentLeaveHelper.instance.getLeaveFormConstraints(
+          username: SelcrsHelper.instance.username,
+          password: SelcrsHelper.instance.password,
+        );
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess<StudentLeaveFormConstraints>(
+        :final StudentLeaveFormConstraints data,
+      ):
+        setState(() {
+          _applyConstraints(data);
+          _isLoadingConstraints = false;
+        });
+      case ApiError<StudentLeaveFormConstraints>(
+        :final GeneralResponse response,
+      ):
+        setState(() => _isLoadingConstraints = false);
+        _showStudentLeaveApiError(context, response);
+      case ApiFailure<StudentLeaveFormConstraints>(
+        :final DioException exception,
+      ):
+        setState(() => _isLoadingConstraints = false);
+        UiUtil.instance.showToast(
+          context,
+          exception.i18nMessage ?? ap.somethingError,
+        );
+    }
+  }
+
+  void _applyConstraints(StudentLeaveFormConstraints constraints) {
+    _constraints = constraints;
+    _type = constraints.leaveTypes.firstWhere(
+      (StudentLeaveType type) => type.code == '12',
+      orElse: () => constraints.leaveTypes.first,
+    );
+
+    final DateTime today = _dateOnly(DateTime.now());
+    DateTime initialDate = today.isBefore(constraints.firstStartDate)
+        ? constraints.firstStartDate
+        : today.isAfter(constraints.lastStartDate)
+        ? constraints.lastStartDate
+        : today;
+    List<String> validStartTimes = _availableStartTimesForDate(
+      constraints,
+      initialDate,
+    );
+    while (validStartTimes.isEmpty &&
+        initialDate.isAfter(_dateOnly(constraints.firstStartDate))) {
+      initialDate = initialDate.subtract(const Duration(days: 1));
+      validStartTimes = _availableStartTimesForDate(constraints, initialDate);
+    }
+    final String startTime = validStartTimes.contains('09:00')
+        ? '09:00'
+        : validStartTimes.first;
+    _startDateTime = _withTime(initialDate, startTime);
+    _endDateTime =
+        _nextEndDateTime(constraints, _startDateTime) ?? _startDateTime;
+    _attachmentFile = null;
+  }
+
   Future<void> _pickDateTime({required bool isStart}) async {
+    final StudentLeaveFormConstraints? constraints = _constraints;
+    if (constraints == null) return;
     final DateTime current = isStart ? _startDateTime : _endDateTime;
-    final DateTime now = DateTime.now();
-    final DateTime computedFirstDate = now.subtract(const Duration(days: 30));
-    final DateTime computedLastDate = now.add(const Duration(days: 365));
-    final DateTime firstDate = current.isBefore(computedFirstDate)
-        ? current
-        : computedFirstDate;
-    final DateTime lastDate = current.isAfter(computedLastDate)
-        ? current
-        : computedLastDate;
+    final DateTime firstDate = isStart
+        ? constraints.firstStartDate
+        : _startDateTime.isAfter(constraints.firstEndDate)
+        ? _dateOnly(_startDateTime)
+        : constraints.firstEndDate;
+    final DateTime lastDate = isStart
+        ? constraints.lastStartDate
+        : constraints.lastEndDate;
+    final DateTime currentDate = _dateOnly(current);
+    final DateTime initialDate = currentDate.isBefore(firstDate)
+        ? firstDate
+        : currentDate.isAfter(lastDate)
+        ? lastDate
+        : currentDate;
     final DateTime? date = await showDatePicker(
       context: context,
-      initialDate: current,
+      initialDate: initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
     );
     if (date == null || !mounted) return;
-    final TimeOfDay? time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(current),
+    final List<String> availableTimes = isStart
+        ? _availableStartTimesForDate(constraints, date)
+        : constraints.endTimes.where((String value) {
+            final DateTime candidate = _withTime(date, value);
+            return candidate.isAfter(_startDateTime);
+          }).toList();
+    if (availableTimes.isEmpty) {
+      UiUtil.instance.showToast(context, app.studentLeaveTimeInvalid);
+      return;
+    }
+    final String? time = await _pickTimeOption(
+      options: availableTimes,
+      selected: _formatTimeValue(current),
+      title: isStart ? app.studentLeaveStart : app.studentLeaveEnd,
     );
     if (time == null || !mounted) return;
-    final DateTime value = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
+    final DateTime value = _withTime(date, time);
     setState(() {
       if (isStart) {
         _startDateTime = value;
         if (!_endDateTime.isAfter(_startDateTime)) {
-          _endDateTime = _startDateTime.add(const Duration(hours: 1));
+          _endDateTime =
+              _nextEndDateTime(constraints, _startDateTime) ?? _startDateTime;
         }
       } else {
         _endDateTime = value;
@@ -522,9 +654,50 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
     });
   }
 
+  Future<String?> _pickTimeOption({
+    required List<String> options,
+    required String selected,
+    required String title,
+  }) {
+    final double listHeight = options.length > 7
+        ? 336.0
+        : options.length * 48.0;
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: Text(title),
+        content: SizedBox(
+          width: 320.0,
+          height: listHeight,
+          child: ListView.builder(
+            itemExtent: 48.0,
+            itemCount: options.length,
+            itemBuilder: (BuildContext context, int index) {
+              final String option = options[index];
+              return ListTile(
+                title: Text(option),
+                trailing: option == selected ? const Icon(Icons.check) : null,
+                onTap: () => Navigator.of(dialogContext).pop(option),
+              );
+            },
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(app.optionCancel),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _pickAttachment() async {
+    final StudentLeaveFormConstraints? constraints = _constraints;
+    if (constraints == null) return;
     final FilePickerResult? result = await FilePicker.pickFiles(
-      withData: false,
+      type: FileType.custom,
+      allowedExtensions: constraints.allowedAttachmentExtensions,
     );
     if (!mounted) return;
     if (result == null || result.files.isEmpty) return;
@@ -533,10 +706,16 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
       UiUtil.instance.showToast(context, app.studentLeaveAttachmentUnavailable);
       return;
     }
-    if (file.size > _maxAttachmentBytes) {
+    if (file.size <= 0 || !constraints.allowsAttachmentFileName(file.name)) {
+      UiUtil.instance.showToast(context, app.studentLeaveAttachmentUnavailable);
+      return;
+    }
+    if (file.size > constraints.maxAttachmentBytes) {
       UiUtil.instance.showToast(
         context,
-        app.studentLeaveAttachmentTooLarge(maxSize: '10 MB'),
+        app.studentLeaveAttachmentTooLarge(
+          maxSize: _AttachmentTile.formatBytes(constraints.maxAttachmentBytes),
+        ),
       );
       return;
     }
@@ -544,9 +723,26 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
   }
 
   Future<void> _submit() async {
+    final StudentLeaveFormConstraints? constraints = _constraints;
+    if (constraints == null) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (!_endDateTime.isAfter(_startDateTime)) {
       UiUtil.instance.showToast(context, app.studentLeaveTimeInvalid);
+      return;
+    }
+    final StudentLeaveRequest request = StudentLeaveRequest(
+      type: _type,
+      startDateTime: _startDateTime,
+      endDateTime: _endDateTime,
+      reason: _reasonController.text.trim(),
+      attachment: _attachment(),
+    );
+    final StudentLeaveRequestIssue? issue = constraints.validate(
+      request,
+      attachmentSizeBytes: _attachmentFile?.size,
+    );
+    if (issue != null) {
+      _showConstraintIssue(issue, constraints);
       return;
     }
     showDialog(
@@ -562,13 +758,7 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
         .previewLeave(
           username: SelcrsHelper.instance.username,
           password: SelcrsHelper.instance.password,
-          request: StudentLeaveRequest(
-            type: _type,
-            startDateTime: _startDateTime,
-            endDateTime: _endDateTime,
-            reason: _reasonController.text.trim(),
-            attachment: _attachment(),
-          ),
+          request: request,
         );
     if (!mounted) return;
     Navigator.of(context, rootNavigator: true).pop();
@@ -593,6 +783,28 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
     }
   }
 
+  void _showConstraintIssue(
+    StudentLeaveRequestIssue issue,
+    StudentLeaveFormConstraints constraints,
+  ) {
+    final String message = switch (issue) {
+      StudentLeaveRequestIssue.invalidDateRange ||
+      StudentLeaveRequestIssue.invalidTime => app.studentLeaveTimeInvalid,
+      StudentLeaveRequestIssue.attachmentTooLarge =>
+        app.studentLeaveAttachmentTooLarge(
+          maxSize: _AttachmentTile.formatBytes(constraints.maxAttachmentBytes),
+        ),
+      StudentLeaveRequestIssue.invalidAttachment ||
+      StudentLeaveRequestIssue.emptyAttachment =>
+        app.studentLeaveAttachmentUnavailable,
+      StudentLeaveRequestIssue.invalidLeaveClass ||
+      StudentLeaveRequestIssue.invalidLeaveType ||
+      StudentLeaveRequestIssue.emptyReason ||
+      StudentLeaveRequestIssue.reasonTooLong => ap.somethingError,
+    };
+    UiUtil.instance.showToast(context, message);
+  }
+
   StudentLeaveAttachment? _attachment() {
     final PlatformFile? file = _attachmentFile;
     if (file == null) return null;
@@ -603,6 +815,16 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
     );
   }
 
+  String _attachmentHint(StudentLeaveFormConstraints constraints) {
+    final String extensions = constraints.allowedAttachmentExtensions
+        .map((String value) => value.toUpperCase())
+        .join(', ');
+    final String size = _AttachmentTile.formatBytes(
+      constraints.maxAttachmentBytes,
+    );
+    return '${app.studentLeaveAttachmentHint} ($extensions, $size)';
+  }
+
   static DateTime _initialStartDateTime() {
     final DateTime now = DateTime.now();
     return DateTime(now.year, now.month, now.day, 9);
@@ -611,6 +833,56 @@ class _StudentLeaveAddPageState extends State<StudentLeaveAddPage> {
   static DateTime _initialEndDateTime() {
     final DateTime now = DateTime.now();
     return DateTime(now.year, now.month, now.day, 12);
+  }
+
+  static DateTime _dateOnly(DateTime value) =>
+      DateTime(value.year, value.month, value.day);
+
+  static DateTime _withTime(DateTime date, String time) {
+    final List<String> parts = time.split(':');
+    return DateTime(
+      date.year,
+      date.month,
+      date.day,
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+    );
+  }
+
+  static String _formatTimeValue(DateTime value) {
+    final String hour = value.hour.toString().padLeft(2, '0');
+    final String minute = value.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  static List<String> _availableStartTimesForDate(
+    StudentLeaveFormConstraints constraints,
+    DateTime date,
+  ) => constraints.startTimes
+      .where(
+        (String value) =>
+            _nextEndDateTime(constraints, _withTime(date, value)) != null,
+      )
+      .toList();
+
+  static DateTime? _nextEndDateTime(
+    StudentLeaveFormConstraints constraints,
+    DateTime start,
+  ) {
+    final DateTime startDate = _dateOnly(start);
+    final DateTime firstEndDate = _dateOnly(constraints.firstEndDate);
+    final DateTime candidateDate = startDate.isBefore(firstEndDate)
+        ? firstEndDate
+        : startDate;
+    if (candidateDate.isAfter(_dateOnly(constraints.lastEndDate))) return null;
+    for (final String time in constraints.endTimes) {
+      final DateTime candidate = _withTime(candidateDate, time);
+      if (candidate.isAfter(start)) return candidate;
+    }
+
+    final DateTime nextDate = candidateDate.add(const Duration(days: 1));
+    if (nextDate.isAfter(_dateOnly(constraints.lastEndDate))) return null;
+    return _withTime(nextDate, constraints.endTimes.first);
   }
 }
 
@@ -646,17 +918,22 @@ class _LeaveRecordCard extends StatelessWidget {
   const _LeaveRecordCard({
     required this.record,
     required this.isDeleting,
+    required this.isOpeningProof,
+    this.onOpenProof,
     this.onDelete,
   });
 
   final StudentLeaveRecord record;
   final bool isDeleting;
+  final bool isOpeningProof;
+  final VoidCallback? onOpenProof;
   final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final _LeaveStatusTone overallTone = _overallStatusTone(record);
+    final StudentLeaveReviewStatus overallTone =
+        resolveStudentLeaveOverallStatus(record);
     final String? proofUrl = record.proofUrl;
     return Card(
       margin: EdgeInsets.zero,
@@ -769,9 +1046,16 @@ class _LeaveRecordCard extends StatelessWidget {
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       tooltip: app.studentLeaveOpenAttachment,
-                      onPressed: () =>
-                          PlatformUtil.instance.launchUrl(proofUrl),
-                      icon: const Icon(Icons.open_in_new, size: 20.0),
+                      onPressed: isOpeningProof ? null : onOpenProof,
+                      icon: isOpeningProof
+                          ? const SizedBox(
+                              width: 18.0,
+                              height: 18.0,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.0,
+                              ),
+                            )
+                          : const Icon(Icons.open_in_new, size: 20.0),
                     ),
                 ],
               ],
@@ -865,7 +1149,9 @@ class _ReviewStatusRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _LeaveStatusTone tone = _statusTone(value);
+    final StudentLeaveReviewStatus tone = resolveStudentLeaveReviewStatus(
+      value,
+    );
     final _ToneStyle style = _toneStyle(context, tone);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
@@ -903,7 +1189,7 @@ class _ReviewStatusRow extends StatelessWidget {
 class _StatusBadge extends StatelessWidget {
   const _StatusBadge({required this.tone});
 
-  final _LeaveStatusTone tone;
+  final StudentLeaveReviewStatus tone;
 
   @override
   Widget build(BuildContext context) {
@@ -932,8 +1218,6 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
-enum _LeaveStatusTone { approved, pending, rejected, neutral }
-
 class _ToneStyle {
   const _ToneStyle({
     required this.background,
@@ -946,92 +1230,55 @@ class _ToneStyle {
   final IconData icon;
 }
 
-_LeaveStatusTone _statusTone(String value) {
-  final String status = value.toLowerCase().replaceAll(' ', '');
-  if (status.contains('退') ||
-      status.contains('拒') ||
-      status.contains('不通過') ||
-      status.contains('失敗') ||
-      status.contains('reject') ||
-      status.contains('denied')) {
-    return _LeaveStatusTone.rejected;
-  }
-  if (status.contains('未確認') ||
-      status.contains('待') ||
-      status.contains('pending') ||
-      status.contains('unconfirmed')) {
-    return _LeaveStatusTone.pending;
-  }
-  if (status.contains('已確認') ||
-      status.contains('通過') ||
-      status.contains('核准') ||
-      status.contains('完成') ||
-      status.contains('approved') ||
-      status.contains('confirmed')) {
-    return _LeaveStatusTone.approved;
-  }
-  return _LeaveStatusTone.neutral;
-}
-
-_LeaveStatusTone _overallStatusTone(StudentLeaveRecord record) {
-  final List<_LeaveStatusTone> tones = <_LeaveStatusTone>[
-    _statusTone(record.tutorStatus),
-    _statusTone(record.chairStatus),
-    _statusTone(record.instructorStatus),
-  ];
-  if (tones.contains(_LeaveStatusTone.rejected)) {
-    return _LeaveStatusTone.rejected;
-  }
-  if (tones.contains(_LeaveStatusTone.pending)) {
-    return _LeaveStatusTone.pending;
-  }
-  if (tones.contains(_LeaveStatusTone.approved)) {
-    return _LeaveStatusTone.approved;
-  }
-  return _LeaveStatusTone.neutral;
-}
-
-_ToneStyle _toneStyle(BuildContext context, _LeaveStatusTone tone) {
+_ToneStyle _toneStyle(BuildContext context, StudentLeaveReviewStatus tone) {
   final ColorScheme colors = Theme.of(context).colorScheme;
   return switch (tone) {
-    _LeaveStatusTone.approved => _ToneStyle(
+    StudentLeaveReviewStatus.approved => _ToneStyle(
       background: colors.primaryContainer,
       foreground: colors.onPrimaryContainer,
       icon: Icons.check_circle_outline,
     ),
-    _LeaveStatusTone.pending => _ToneStyle(
+    StudentLeaveReviewStatus.pending => _ToneStyle(
       background: colors.tertiaryContainer,
       foreground: colors.onTertiaryContainer,
       icon: Icons.schedule,
     ),
-    _LeaveStatusTone.rejected => _ToneStyle(
+    StudentLeaveReviewStatus.rejected => _ToneStyle(
       background: colors.errorContainer,
       foreground: colors.onErrorContainer,
       icon: Icons.error_outline,
     ),
-    _LeaveStatusTone.neutral => _ToneStyle(
+    StudentLeaveReviewStatus.noReview => _ToneStyle(
       background: colors.surfaceContainerHighest,
       foreground: colors.onSurfaceVariant,
       icon: Icons.remove_circle_outline,
     ),
+    StudentLeaveReviewStatus.unknown => _ToneStyle(
+      background: colors.surfaceContainerHighest,
+      foreground: colors.onSurfaceVariant,
+      icon: Icons.help_outline,
+    ),
   };
 }
 
-String _statusLabel(_LeaveStatusTone tone) => switch (tone) {
-  _LeaveStatusTone.approved => app.studentLeaveStatusApproved,
-  _LeaveStatusTone.pending => app.studentLeaveStatusPending,
-  _LeaveStatusTone.rejected => app.studentLeaveStatusRejected,
-  _LeaveStatusTone.neutral => app.studentLeaveStatusNoReview,
+String _statusLabel(StudentLeaveReviewStatus tone) => switch (tone) {
+  StudentLeaveReviewStatus.approved => app.studentLeaveStatusApproved,
+  StudentLeaveReviewStatus.pending => app.studentLeaveStatusPending,
+  StudentLeaveReviewStatus.rejected => app.studentLeaveStatusRejected,
+  StudentLeaveReviewStatus.noReview => app.studentLeaveStatusNoReview,
+  StudentLeaveReviewStatus.unknown => app.studentLeaveStatusUnknown,
 };
 
 class _AttachmentTile extends StatelessWidget {
   const _AttachmentTile({
     required this.file,
+    required this.hint,
     required this.onPick,
     required this.onRemove,
   });
 
   final PlatformFile? file;
+  final String hint;
   final VoidCallback onPick;
   final VoidCallback onRemove;
 
@@ -1082,9 +1329,7 @@ class _AttachmentTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2.0),
                     Text(
-                      file == null
-                          ? app.studentLeaveAttachmentHint
-                          : _formatBytes(file.size),
+                      file == null ? hint : formatBytes(file.size),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -1108,7 +1353,7 @@ class _AttachmentTile extends StatelessWidget {
     );
   }
 
-  static String _formatBytes(int bytes) {
+  static String formatBytes(int bytes) {
     if (bytes < 1024) return '$bytes B';
     final double kb = bytes / 1024;
     if (kb < 1024) return '${kb.toStringAsFixed(1)} KB';
@@ -1208,6 +1453,8 @@ class StudentLeaveResultPage extends StatefulWidget {
 }
 
 class _StudentLeaveResultPageState extends State<StudentLeaveResultPage> {
+  bool _confirmAttempted = false;
+
   StudentLeaveConfirmation get confirmation =>
       widget.submitResult?.confirmation ?? widget.previewResult!.confirmation;
 
@@ -1259,13 +1506,35 @@ class _StudentLeaveResultPageState extends State<StudentLeaveResultPage> {
             ),
           ),
           if (confirmForm != null)
-            _ConfirmationSubmitBar(onConfirm: () => _confirm(confirmForm)),
+            _ConfirmationSubmitBar(
+              onConfirm: _confirmAttempted ? null : () => _confirm(confirmForm),
+            ),
         ],
       ),
     );
   }
 
   Future<void> _confirm(StudentLeaveConfirmForm confirmForm) async {
+    if (_confirmAttempted) return;
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: Text(app.studentLeaveSubmitConfirmTitle),
+        content: Text(app.studentLeaveSubmitConfirmContent),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(app.optionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(app.optionComfirm),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+    setState(() => _confirmAttempted = true);
     showDialog(
       context: context,
       builder: (BuildContext context) => PopScope(
@@ -1296,18 +1565,18 @@ class _StudentLeaveResultPageState extends State<StudentLeaveResultPage> {
       case ApiFailure<StudentLeaveSubmitResult>(:final DioException exception):
         UiUtil.instance.showToast(
           context,
-          exception.i18nMessage ?? ap.somethingError,
+          exception.i18nMessage ?? app.studentLeaveSubmitFailed,
         );
     }
   }
 }
 
 void _showStudentLeaveApiError(BuildContext context, GeneralResponse response) {
-  final String message = response.statusCode == 401
-      ? app.studentLeaveLoginFailed
-      : response.message.isNotEmpty
-      ? response.message
-      : ap.somethingError;
+  final String message = switch (response.statusCode) {
+    401 => app.studentLeaveLoginFailed,
+    400 || 408 || 409 || 422 || 503 => ap.somethingError,
+    _ => ap.somethingError,
+  };
   UiUtil.instance.showToast(context, message);
 }
 
@@ -1567,7 +1836,7 @@ class _NoticeLine extends StatelessWidget {
 class _ConfirmationSubmitBar extends StatelessWidget {
   const _ConfirmationSubmitBar({required this.onConfirm});
 
-  final VoidCallback onConfirm;
+  final VoidCallback? onConfirm;
 
   @override
   Widget build(BuildContext context) {

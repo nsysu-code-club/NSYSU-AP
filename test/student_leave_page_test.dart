@@ -10,8 +10,10 @@ import 'package:nsysu_crawler/nsysu_crawler.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() {
+  setUpAll(() async {
     registerApCommonService(analytics: const _FakeAnalyticsUtil());
+    await LocaleSettings.setLocale(AppLocale.en);
+    LocaleSettings.setLocaleSync(AppLocale.zhHantTw);
   });
 
   setUp(() {
@@ -26,7 +28,9 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(_testApp(const StudentLeaveAddPage()));
+    await tester.pumpWidget(
+      _testApp(StudentLeaveAddPage(initialConstraints: _testConstraints())),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text(app.studentLeaveRequestDetails), findsOneWidget);
@@ -34,10 +38,49 @@ void main() {
     expect(find.text(app.studentLeaveReason), findsOneWidget);
     expect(find.text(app.studentLeaveSubmit), findsOneWidget);
 
-    final TextFormField reasonField = tester.widget<TextFormField>(
-      find.byType(TextFormField),
+    final TextField reasonField = tester.widget<TextField>(
+      find.byType(TextField),
     );
     expect(reasonField.controller?.text, isEmpty);
+    expect(reasonField.maxLength, 100);
+    expect(find.textContaining('PDF'), findsOneWidget);
+    expect(find.textContaining('1.5 MB'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('initial start skips a day with no valid end time', (
+    WidgetTester tester,
+  ) async {
+    final DateTime today = DateTime.now();
+    final DateTime todayOnly = DateTime(today.year, today.month, today.day);
+    final DateTime yesterday = todayOnly.subtract(const Duration(days: 1));
+    final StudentLeaveFormConstraints constraints = StudentLeaveFormConstraints(
+      leaveTypes: StudentLeaveType.values,
+      firstStartDate: yesterday,
+      lastStartDate: todayOnly,
+      firstEndDate: yesterday,
+      lastEndDate: todayOnly,
+      startTimes: const <String>['23:00'],
+      endTimes: const <String>['22:00'],
+      maxReasonLength: 100,
+      allowedAttachmentExtensions: const <String>['pdf'],
+      maxAttachmentBytes: 1572864,
+    );
+
+    await tester.pumpWidget(
+      _testApp(StudentLeaveAddPage(initialConstraints: constraints)),
+    );
+    await tester.pumpAndSettle();
+
+    final BuildContext context = tester.element(
+      find.byType(StudentLeaveAddPage),
+    );
+    final String expectedDate = MaterialLocalizations.of(
+      context,
+    ).formatMediumDate(yesterday);
+    expect(find.text(expectedDate), findsOneWidget);
+    expect(find.text('23:00'), findsOneWidget);
+    expect(find.text('22:00'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -138,6 +181,16 @@ void main() {
 
     expect(find.text('假單資料'), findsOneWidget);
     expect(find.text('事假'), findsOneWidget);
+    expect(find.text(app.studentLeaveFinalSubmit), findsOneWidget);
+
+    await tester.tap(find.text(app.studentLeaveFinalSubmit));
+    await tester.pumpAndSettle();
+
+    expect(find.text(app.studentLeaveSubmitConfirmTitle), findsOneWidget);
+    expect(find.text(app.studentLeaveSubmitConfirmContent), findsOneWidget);
+    await tester.tap(find.text(app.optionCancel));
+    await tester.pumpAndSettle();
+
     expect(find.text(app.studentLeaveFinalSubmit), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -276,5 +329,20 @@ Widget _testApp(Widget child) {
       ),
       home: child,
     ),
+  );
+}
+
+StudentLeaveFormConstraints _testConstraints() {
+  return StudentLeaveFormConstraints(
+    leaveTypes: StudentLeaveType.values,
+    firstStartDate: DateTime(2026, 2),
+    lastStartDate: DateTime(2026, 9),
+    firstEndDate: DateTime(2026, 2),
+    lastEndDate: DateTime(2026, 9),
+    startTimes: const <String>['07:00', '09:00', '12:00'],
+    endTimes: const <String>['07:30', '09:30', '12:00'],
+    maxReasonLength: 100,
+    allowedAttachmentExtensions: const <String>['pdf'],
+    maxAttachmentBytes: 1572864,
   );
 }

@@ -218,6 +218,9 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '免審核'
 	String get studentLeaveStatusNoReview => '免審核';
 
+	/// zh-Hant-TW: '未知狀態'
+	String get studentLeaveStatusUnknown => '未知狀態';
+
 	/// zh-Hant-TW: '確認假單'
 	String get studentLeaveResult => '確認假單';
 
@@ -478,6 +481,7 @@ extension on AppLocalizations {
 			'studentLeaveStatusPending' => '審核中',
 			'studentLeaveStatusRejected' => '未通過',
 			'studentLeaveStatusNoReview' => '免審核',
+			'studentLeaveStatusUnknown' => '未知狀態',
 			'studentLeaveResult' => '確認假單',
 			'studentLeaveFinalCheck' => '送出前確認',
 			'studentLeaveNoticeTitle' => '請假注意事項',

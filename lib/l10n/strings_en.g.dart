@@ -98,6 +98,7 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get studentLeaveStatusPending => 'In review';
 	@override String get studentLeaveStatusRejected => 'Rejected';
 	@override String get studentLeaveStatusNoReview => 'No review';
+	@override String get studentLeaveStatusUnknown => 'Unknown status';
 	@override String get studentLeaveResult => 'Leave Confirmation';
 	@override String get studentLeaveFinalCheck => 'Final Check';
 	@override String get studentLeaveNoticeTitle => 'Important Leave Information';
@@ -231,6 +232,7 @@ extension on AppLocalizationsEn {
 			'studentLeaveStatusPending' => 'In review',
 			'studentLeaveStatusRejected' => 'Rejected',
 			'studentLeaveStatusNoReview' => 'No review',
+			'studentLeaveStatusUnknown' => 'Unknown status',
 			'studentLeaveResult' => 'Leave Confirmation',
 			'studentLeaveFinalCheck' => 'Final Check',
 			'studentLeaveNoticeTitle' => 'Important Leave Information',
