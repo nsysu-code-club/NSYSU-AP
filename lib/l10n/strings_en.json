@@ -65,5 +65,22 @@
   "optionCancel": "Cancel",
   "openingBrowserContent": "This will open an external website in your browser. Continue?",
   "openingBrowserTitle": "Open External Website",
-  "visitingUnSafeLink": "Unsafe link. Please confirm the URL is correct."
+  "visitingUnSafeLink": "Unsafe link. Please confirm the URL is correct.",
+  "enrollCertificate": {
+    "title": "Certificate of Enrollment",
+    "regenerate": "Retrieve Again",
+    "retry": "Try Again",
+    "download": "Download / Export",
+    "fileName": "Certificate of Enrollment",
+    "loadingCached": "Loading the saved certificate...",
+    "retrieving": "Retrieving the certificate from the university system...",
+    "missingAccount": "No account was found. Sign in to the app before obtaining a certificate.",
+    "missingCredentials": "No saved credentials were found. Sign in to the app again before retrieving a new certificate.",
+    "saveFailed": "The document was retrieved, but the local cache could not be updated.",
+    "notObtained": "The certificate has not been obtained. Please try again.",
+    "requestTimedOut": "The university system timed out. Please try retrieving the certificate later.",
+    "requestFailed": "The certificate could not be retrieved. Check your connection and try again.",
+    "invalidResponse": "The university system did not return a valid certificate PDF. Check your credentials or try again later.",
+    "downloadFailed": "The certificate could not be downloaded or exported. Please try again later."
+  }
 }

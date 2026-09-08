@@ -40,6 +40,7 @@ dependencies:
   google_sign_in_dartio: ^0.3.0
   json_annotation: ^4.6.0
   package_info_plus: ^8.0.3
+  path_provider: ^2.1.5
   printing: 5.13.4
 
 dev_dependencies:
