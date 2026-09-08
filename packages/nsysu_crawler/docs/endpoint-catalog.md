@@ -86,7 +86,25 @@ PDF 序號從 `<a onclick="javascript:window.location.href='...'">` 解出。
 
 ---
 
-## 4. 校車 — `ibus.nsysu.edu.tw` + GitHub Pages CDN
+## 4. 在學證明 — `regweb.nsysu.edu.tw/webreg/`
+
+| Path | Method | Body | Encoding | Sentinel |
+|---|---|---|---|---|
+| `/webreg/wregloginchk2.asp` | POST | `ID=<學號>`, `passwd=<明文>` | response bytes | 2xx after same-host redirect chain |
+| `/webreg/WRegMain3.asp?act=71&out=print/enrollcert.asp` | GET | — | response bytes | 2xx |
+| `/webreg/print/enrollcert.asp` | POST | `ssn1=idno`, `idno=<學號>` | bytes (PDF) | `%PDF-` header + `%%EOF` trailer |
+
+實作：`EnrollmentCertificateHelper.download()`。RegWeb 和 `SelcrsHelper` / `GraduationHelper` / `TuitionHelper` 不共用 cookie jar；Flutter app 每次提取時建立新的 helper，完成、失敗或離開頁面時都會 `close()`。
+
+安全邊界：
+
+- redirect 只允許留在 `https://regweb.nsysu.edu.tw:443/webreg/`，避免把登入狀態或表單送到站外。
+- response body 上限 10 MiB；過大的 `Content-Length` 或 stream 都會被取消。
+- PDF cache 在 app 端依帳號 hash 分檔，登出時會清除該帳號的 `.pdf` / `.tmp` / `.bak`。
+
+---
+
+## 5. 校車 — `ibus.nsysu.edu.tw` + GitHub Pages CDN
 
 | Path | Method | Body | Encoding | Helper |
 |---|---|---|---|---|
@@ -99,7 +117,7 @@ URL query 後綴 `?<millisecondsSinceEpoch>` 是用來破 CDN cache，不是 aut
 
 ---
 
-## 5. 其它（已知但目前未實作）
+## 6. 其它（已知但目前未實作）
 
 這些 endpoint 在 root README 的爬蟲清單裡有列、但尚未抽 helper：
 

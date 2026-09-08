@@ -5,9 +5,20 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:path_provider/path_provider.dart';
 
+/// Returns the directory where app-support files should be stored.
 typedef SupportDirectoryProvider = Future<Directory> Function();
 
+/// Account-scoped storage for the last valid enrollment certificate PDF.
+///
+/// The cache file name uses a short hash of the normalized username so multiple
+/// accounts on the same device do not read each other's certificate. Every
+/// write validates the PDF and commits through temporary/backup artifacts so a
+/// failed refresh cannot replace a previously usable document.
 class EnrollCertificateCache {
+  /// Creates a cache bound to [username].
+  ///
+  /// [supportDirectoryProvider] is injectable so tests can use a temporary
+  /// directory without touching the app support directory.
   EnrollCertificateCache({
     required String username,
     SupportDirectoryProvider? supportDirectoryProvider,
@@ -27,6 +38,11 @@ class EnrollCertificateCache {
   final String _accountKey;
   final SupportDirectoryProvider _supportDirectoryProvider;
 
+  /// Returns the current account's cached PDF, or `null` when no valid cache
+  /// exists.
+  ///
+  /// Invalid primary files are deleted, and valid `.bak` / `.tmp` recovery
+  /// artifacts are promoted back to the primary path when possible.
   Future<Uint8List?> read() async {
     final File file = await _cacheFile();
     final File temporaryFile = File('${file.path}.tmp');
@@ -61,6 +77,11 @@ class EnrollCertificateCache {
     return null;
   }
 
+  /// Saves [bytes] after extracting one bounded PDF payload.
+  ///
+  /// Throws [FormatException] before touching disk when the response is not a
+  /// valid PDF. I/O failures during replacement restore the previous cache when
+  /// possible, then rethrow the original error.
   Future<void> save(Uint8List bytes) async {
     // Validate before touching any on-disk state so a bad response can never
     // replace a previously cached certificate.
@@ -112,6 +133,8 @@ class EnrollCertificateCache {
     }
   }
 
+  /// Removes the current account's primary cache and pending replacement
+  /// artifacts.
   Future<void> clear() async {
     final File file = await _cacheFile();
     for (final File artifact in <File>[
@@ -125,6 +148,10 @@ class EnrollCertificateCache {
     }
   }
 
+  /// Extracts a single PDF from a RegWeb response.
+  ///
+  /// Only ASCII whitespace may surround the PDF. HTML error pages, arbitrary
+  /// prefixes, truncated files, and oversized payloads return `null`.
   static Uint8List? extractPdf(Uint8List bytes) {
     if (bytes.length > maximumPdfLength) {
       return null;

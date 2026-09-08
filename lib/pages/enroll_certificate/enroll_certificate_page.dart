@@ -9,32 +9,54 @@ import 'package:nsysu_ap/utils/enroll_certificate/enroll_certificate_cache.dart'
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:printing/printing.dart';
 
+/// Supplies the credentials used by [EnrollCertificatePage].
 typedef EnrollmentCertificateCredentialsProvider =
     EnrollmentCertificateCredentials Function();
+
+/// Retrieves a fresh enrollment certificate PDF.
 typedef EnrollmentCertificateDownload =
     Future<Uint8List> Function({
       required String username,
       required String password,
     });
+
+/// Reads an account-scoped cached enrollment certificate PDF.
 typedef EnrollmentCertificateCacheReader =
     Future<Uint8List?> Function({required String username});
+
+/// Writes an account-scoped cached enrollment certificate PDF.
 typedef EnrollmentCertificateCacheWriter =
     Future<void> Function({required String username, required Uint8List bytes});
+
+/// Exports the displayed PDF to the platform share/save flow.
 typedef EnrollmentCertificatePdfExporter =
     Future<bool> Function({required Uint8List bytes, required String fileName});
+
+/// Builds the PDF viewer for a validated enrollment certificate.
 typedef EnrollmentCertificatePdfViewBuilder =
     Widget Function(BuildContext context, Uint8List bytes, String fileName);
 
+/// Username/password pair used to retrieve an enrollment certificate.
 class EnrollmentCertificateCredentials {
   const EnrollmentCertificateCredentials({
     required this.username,
     required this.password,
   });
 
+  /// Student ID used by RegWeb.
   final String username;
+
+  /// Password for the school account.
   final String password;
 }
 
+/// Loads, refreshes, displays, and exports the current user's enrollment
+/// certificate PDF.
+///
+/// The optional callbacks keep network, cache, export, and PDF rendering
+/// injectable for widget tests. In production, the page reads the active app
+/// credentials, uses [EnrollmentCertificateHelper] for RegWeb, and stores the
+/// last valid PDF in [EnrollCertificateCache].
 class EnrollCertificatePage extends StatefulWidget {
   const EnrollCertificatePage({
     super.key,

@@ -42,6 +42,8 @@ fvm dart run tool/install_git_hooks.dart
 - 畢業生審查系統
     - [ ] 歷年成績單
     - [x] 應屆畢業生成績檢核表
+- 教務處註冊系統
+    - [x] 在學證明 PDF 提取與匯出
 - 各類所得劃帳暨歸戶查詢
     - [ ] 各類所得郵局劃帳暨歸戶查詢系統
 - 設定
@@ -126,6 +128,8 @@ NSYSU_USER=B12345678 NSYSU_PASS=xxx dart test -P live -r expanded
       - [x] 學期成績查詢
       - [ ] 歷年成績查詢
   - [x] [畢業審查系統](https://sis.nsysu.edu.tw/SLAMS/SLAMS_student_view.php)
+  - [x] [教務處註冊系統](https://regweb.nsysu.edu.tw/webreg/)
+      - [x] 在學證明 PDF 提取
   - [ ] 總務處維修系統
   - [x] [學生請假系統](https://sso.nsysu.edu.tw/index.php/home/applisturl/0H00/0051)
   - [ ] 新網路大學 To-Do 提示

@@ -9,17 +9,35 @@ import 'package:dio/io.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:nsysu_crawler/src/build_mode.dart';
 
+/// Categories of recoverable enrollment-certificate failures.
 enum EnrollmentCertificateExceptionKind {
+  /// The caller did not provide a usable username/password, or RegWeb rejected
+  /// them at the login step.
   credentials,
+
+  /// A request exceeded the configured RegWeb timeout.
   timeout,
+
+  /// RegWeb returned a non-success status outside the login credential case.
   http,
+
+  /// A redirect was missing, malformed, excessive, or outside the allowed host.
   redirect,
+
+  /// RegWeb declared or streamed a response larger than the safety limit.
   tooLarge,
+
+  /// The final response was not a bounded PDF payload.
   invalidPdf,
+
+  /// The helper was closed or the underlying Dio request was cancelled.
   cancelled,
+
+  /// The request failed before a trusted HTTP response was available.
   network,
 }
 
+/// Typed failure returned by [EnrollmentCertificateHelper].
 class EnrollmentCertificateException implements Exception {
   const EnrollmentCertificateException(
     this.kind,
@@ -28,9 +46,16 @@ class EnrollmentCertificateException implements Exception {
     this.cause,
   });
 
+  /// Machine-readable category used by app UI to choose a user message.
   final EnrollmentCertificateExceptionKind kind;
+
+  /// Developer-facing failure summary.
   final String message;
+
+  /// HTTP status attached to the failure, when one was available.
   final int? statusCode;
+
+  /// Original transport/parser error, when this exception wraps one.
   final Object? cause;
 
   @override
@@ -46,6 +71,11 @@ class EnrollmentCertificateException implements Exception {
 /// requests in that one session. Redirects are followed manually so cookies
 /// are retained without allowing RegWeb to redirect credentials elsewhere.
 class EnrollmentCertificateHelper {
+  /// Creates an isolated RegWeb client.
+  ///
+  /// Pass [dio] and [cookieJar] only in tests. Production callers should create
+  /// a fresh helper per download and call [close] when the page is disposed or
+  /// the request finishes.
   EnrollmentCertificateHelper({Dio? dio, CookieJar? cookieJar})
     : _dio = dio ?? _createProductionDio(),
       _cookieJar = cookieJar ?? CookieJar() {
@@ -107,6 +137,11 @@ class EnrollmentCertificateHelper {
       ..headers[HttpHeaders.userAgentHeader] = _userAgent;
   }
 
+  /// Logs in to RegWeb, enters the enrollment-certificate context, and returns
+  /// the generated PDF bytes.
+  ///
+  /// The method does not persist credentials or cache the PDF. Callers are
+  /// responsible for storage and for closing this helper after use.
   Future<Uint8List> download({
     required String username,
     required String password,
@@ -686,6 +721,7 @@ class EnrollmentCertificateHelper {
     }
   }
 
+  /// Cancels active requests/readers and closes the Dio client.
   void close() {
     if (_isClosed) return;
     _debugLog(
