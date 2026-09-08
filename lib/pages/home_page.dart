@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/bus/bus_list_page.dart';
+import 'package:nsysu_ap/pages/enroll_certificate/enroll_certificate_page.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/guide/school_map_page.dart';
 import 'package:nsysu_ap/pages/info/shcool_info_page.dart';
@@ -19,6 +20,7 @@ import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/pages/user_info_page.dart';
 import 'package:nsysu_ap/resources/image_assets.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/enroll_certificate_cache.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
@@ -381,6 +383,12 @@ class HomePageState extends State<HomePage> {
             onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
           ),
           DrawerMenuItem(
+            icon: Icons.picture_as_pdf_outlined,
+            title: app.enrollCertificate.title,
+            onTap: () =>
+                _openPage(const EnrollCertificatePage(), needLogin: true),
+          ),
+          DrawerMenuItem(
             icon: ApIcon.info,
             title: ap.schoolInfo,
             onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
@@ -417,6 +425,7 @@ class HomePageState extends State<HomePage> {
                   Constants.prefAutoLogin,
                   false,
                 );
+                await _clearEnrollmentCertificateCache();
                 SelcrsHelper.instance.logout();
                 GraduationHelper.instance.logout();
                 TuitionHelper.instance.logout();
@@ -438,6 +447,24 @@ class HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  Future<void> _clearEnrollmentCertificateCache() async {
+    // Read the in-memory username before SelcrsHelper.logout() clears it.
+    String username = SelcrsHelper.instance.username.trim();
+    username = username.isNotEmpty
+        ? username
+        : PreferenceUtil.instance.getString(Constants.prefUsername, '').trim();
+    if (username.isEmpty) return;
+
+    try {
+      await EnrollCertificateCache(username: username).clear();
+    } on Exception catch (error) {
+      debugPrint(
+        'Failed to clear enrollment certificate cache during logout: '
+        '${error.runtimeType}',
+      );
+    }
   }
 
   Widget _buildStudySection() {

@@ -241,6 +241,62 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 
 	/// zh-Hant-TW: '不安全的連結，請確認網址是否正確'
 	String get visitingUnSafeLink => '不安全的連結，請確認網址是否正確';
+
+	late final AppLocalizationsEnrollCertificateZhHantTw enrollCertificate = AppLocalizationsEnrollCertificateZhHantTw.internal(_root);
+}
+
+// Path: enrollCertificate
+class AppLocalizationsEnrollCertificateZhHantTw {
+	AppLocalizationsEnrollCertificateZhHantTw.internal(this._root);
+
+	final AppLocalizations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh-Hant-TW: '在學證明'
+	String get title => '在學證明';
+
+	/// zh-Hant-TW: '重新提取'
+	String get regenerate => '重新提取';
+
+	/// zh-Hant-TW: '重新執行'
+	String get retry => '重新執行';
+
+	/// zh-Hant-TW: '下載／匯出'
+	String get download => '下載／匯出';
+
+	/// zh-Hant-TW: '在學證明'
+	String get fileName => '在學證明';
+
+	/// zh-Hant-TW: '正在讀取已儲存的在學證明...'
+	String get loadingCached => '正在讀取已儲存的在學證明...';
+
+	/// zh-Hant-TW: '正在向校方系統提取在學證明...'
+	String get retrieving => '正在向校方系統提取在學證明...';
+
+	/// zh-Hant-TW: '找不到目前帳號，請先登入 App 後再取得在學證明。'
+	String get missingAccount => '找不到目前帳號，請先登入 App 後再取得在學證明。';
+
+	/// zh-Hant-TW: '找不到目前登入帳密，請先重新登入 App 後再重新提取。'
+	String get missingCredentials => '找不到目前登入帳密，請先重新登入 App 後再重新提取。';
+
+	/// zh-Hant-TW: '已取得文件，但無法更新本機快取。'
+	String get saveFailed => '已取得文件，但無法更新本機快取。';
+
+	/// zh-Hant-TW: '尚未取得在學證明，請重新執行。'
+	String get notObtained => '尚未取得在學證明，請重新執行。';
+
+	/// zh-Hant-TW: '校方系統回應逾時，請稍後重新提取。'
+	String get requestTimedOut => '校方系統回應逾時，請稍後重新提取。';
+
+	/// zh-Hant-TW: '無法從校方系統取得在學證明，請確認網路後重試。'
+	String get requestFailed => '無法從校方系統取得在學證明，請確認網路後重試。';
+
+	/// zh-Hant-TW: '校方系統未回傳有效的在學證明 PDF，請確認帳密或稍後重試。'
+	String get invalidResponse => '校方系統未回傳有效的在學證明 PDF，請確認帳密或稍後重試。';
+
+	/// zh-Hant-TW: '無法下載／匯出在學證明，請稍後再試。'
+	String get downloadFailed => '無法下載／匯出在學證明，請稍後再試。';
 }
 
 /// The flat map containing all translations for locale <zh-Hant-TW>.
@@ -318,6 +374,21 @@ extension on AppLocalizations {
 			'openingBrowserContent' => '將使用瀏覽器開啟外部網站，是否繼續？',
 			'openingBrowserTitle' => '開啟外部網站',
 			'visitingUnSafeLink' => '不安全的連結，請確認網址是否正確',
+			'enrollCertificate.title' => '在學證明',
+			'enrollCertificate.regenerate' => '重新提取',
+			'enrollCertificate.retry' => '重新執行',
+			'enrollCertificate.download' => '下載／匯出',
+			'enrollCertificate.fileName' => '在學證明',
+			'enrollCertificate.loadingCached' => '正在讀取已儲存的在學證明...',
+			'enrollCertificate.retrieving' => '正在向校方系統提取在學證明...',
+			'enrollCertificate.missingAccount' => '找不到目前帳號，請先登入 App 後再取得在學證明。',
+			'enrollCertificate.missingCredentials' => '找不到目前登入帳密，請先重新登入 App 後再重新提取。',
+			'enrollCertificate.saveFailed' => '已取得文件，但無法更新本機快取。',
+			'enrollCertificate.notObtained' => '尚未取得在學證明，請重新執行。',
+			'enrollCertificate.requestTimedOut' => '校方系統回應逾時，請稍後重新提取。',
+			'enrollCertificate.requestFailed' => '無法從校方系統取得在學證明，請確認網路後重試。',
+			'enrollCertificate.invalidResponse' => '校方系統未回傳有效的在學證明 PDF，請確認帳密或稍後重試。',
+			'enrollCertificate.downloadFailed' => '無法下載／匯出在學證明，請稍後再試。',
 			_ => null,
 		};
 	}
