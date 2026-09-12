@@ -137,8 +137,17 @@ Future<_StepResult> _ensureL10nIsCommitted() async {
     '--',
     'lib/l10n',
   ], environment: _processEnvironment());
-  if (result.exitCode == 0) {
-    stdout.writeln('No unstaged l10n changes detected.');
+  final ProcessResult untracked = await Process.run('git', <String>[
+    'ls-files',
+    '--others',
+    '--exclude-standard',
+    '--',
+    'lib/l10n',
+  ], environment: _processEnvironment());
+  if (result.exitCode == 0 &&
+      untracked.exitCode == 0 &&
+      (untracked.stdout as String).trim().isEmpty) {
+    stdout.writeln('No unstaged or untracked l10n changes detected.');
     return const _StepResult(title: 'Check l10n generated files', exitCode: 0);
   }
 
@@ -152,6 +161,8 @@ Future<_StepResult> _ensureL10nIsCommitted() async {
     'lib/l10n',
   ], environment: _processEnvironment());
   stderr.write(changedFiles.stdout);
+  stderr.write(untracked.stdout);
+  stderr.write(untracked.stderr);
   return _StepResult(
     title: 'Check l10n generated files',
     exitCode: 1,

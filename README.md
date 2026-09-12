@@ -123,7 +123,7 @@ fvm dart run tool/install_git_hooks.dart
 dart run tool/install_git_hooks.dart
 ```
 
-安裝器會透過 `git_hooks` 套件建立 `.git/hooks/*`，並讓 `pre-commit` 指向 [`bin/git_hooks.dart`](bin/git_hooks.dart)。
+安裝器只會在 Git 的 hooks 目錄建立 `pre-commit`，指向 [`bin/git_hooks.dart`](bin/git_hooks.dart)。既有的其他 hooks 會保留；若有不同的 `pre-commit` 或設定了 `core.hooksPath`，安裝器會提示手動整合並停止，不會覆寫 hook 或修改 Git 設定。
 
 之後每次 `git commit` 前會自動執行：
 
@@ -133,7 +133,7 @@ fvm dart run slang
 cd packages/nsysu_crawler && fvm dart test
 ```
 
-如果本機沒有 FVM，腳本會 fallback 使用 `dart` / `flutter`。
+如果本機沒有 FVM，腳本會 fallback 使用 `dart`。
 pre-commit 結束時會輸出 summary，列出每個 step 的 success / failed 狀態，並附上 crawler test log；任一步失敗都會阻擋 commit。
 
 pre-commit 的主要流程寫在 [`tool/pre_commit.dart`](tool/pre_commit.dart)，

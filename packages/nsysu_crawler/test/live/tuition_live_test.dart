@@ -34,10 +34,19 @@ void main() {
       });
       final ApiResult<GeneralResponse> result = await TuitionHelper.instance
           .login(username: username, password: password);
-      logSuccess('TuitionHelper', 'login', <String, dynamic>{
-        'isLogin': TuitionHelper.instance.isLogin,
-        'result': result.runtimeType.toString(),
-      });
+      logStructured(
+        tag:
+            result is ApiSuccess<GeneralResponse> &&
+                TuitionHelper.instance.isLogin
+            ? 'SUCCESS'
+            : 'ERROR',
+        scope: 'TuitionHelper',
+        action: 'login',
+        fields: <String, dynamic>{
+          'isLogin': TuitionHelper.instance.isLogin,
+          'result': result.runtimeType.toString(),
+        },
+      );
       expect(
         result,
         isA<ApiSuccess<GeneralResponse>>(),

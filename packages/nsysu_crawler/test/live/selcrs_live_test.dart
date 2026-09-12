@@ -42,10 +42,19 @@ void main() {
       });
       final ApiResult<GeneralResponse> result = await SelcrsHelper.instance
           .login(username: username, password: password);
-      logSuccess('SelcrsHelper', 'login', <String, dynamic>{
-        'isLogin': SelcrsHelper.instance.isLogin,
-        'result': result.runtimeType.toString(),
-      });
+      logStructured(
+        tag:
+            result is ApiSuccess<GeneralResponse> &&
+                SelcrsHelper.instance.isLogin
+            ? 'SUCCESS'
+            : 'ERROR',
+        scope: 'SelcrsHelper',
+        action: 'login',
+        fields: <String, dynamic>{
+          'isLogin': SelcrsHelper.instance.isLogin,
+          'result': result.runtimeType.toString(),
+        },
+      );
       expect(
         result,
         isA<ApiSuccess<GeneralResponse>>(),

@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_print
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:ap_common_core/ap_common_core.dart';
@@ -63,11 +64,13 @@ void logStructured({
   required String action,
   Map<String, dynamic>? fields,
 }) {
-  final StringBuffer buffer = StringBuffer('[$tag] [$scope] action="$action"');
+  final StringBuffer buffer = StringBuffer(
+    '[$tag] [$scope] action=${jsonEncode(action)}',
+  );
   if (fields != null) {
     for (final MapEntry<String, dynamic> entry in fields.entries) {
       if (entry.value != null) {
-        buffer.write(' ${entry.key}="${entry.value}"');
+        buffer.write(' ${entry.key}=${jsonEncode(entry.value.toString())}');
       }
     }
   }

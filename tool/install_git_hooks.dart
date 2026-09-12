@@ -1,16 +1,10 @@
 import 'dart:io';
 
-import 'package:git_hooks/git_hooks.dart';
-
 Future<void> main() async {
   final String repoRoot = await _repoRoot();
   Directory.current = repoRoot;
 
-  await _unsetCustomHooksPathIfNeeded();
-
-  GitHooks.init(targetPath: 'bin/git_hooks.dart');
-  await Future<void>.delayed(const Duration(milliseconds: 500));
-
+  await _checkCustomHooksPath();
   await _writeStableHookWrappers();
 
   stdout.writeln(
@@ -31,7 +25,7 @@ Future<String> _repoRoot() async {
   return File(script).parent.parent.absolute.path;
 }
 
-Future<void> _unsetCustomHooksPathIfNeeded() async {
+Future<void> _checkCustomHooksPath() async {
   final ProcessResult currentHooksPath = await Process.run('git', <String>[
     'config',
     '--get',
@@ -43,24 +37,34 @@ Future<void> _unsetCustomHooksPathIfNeeded() async {
     return;
   }
 
-  final ProcessResult unsetHooksPath = await Process.run('git', <String>[
-    'config',
-    '--unset',
-    'core.hooksPath',
-  ], environment: _processEnvironment());
-  stdout.write(unsetHooksPath.stdout);
-  stderr.write(unsetHooksPath.stderr);
-  if (unsetHooksPath.exitCode != 0) {
-    exit(unsetHooksPath.exitCode);
-  }
+  stderr.writeln(
+    'core.hooksPath is configured as "$hooksPath". Installation stopped; '
+    'existing hooks and Git configuration were preserved. '
+    'Integrate tool/pre_commit.dart with your hook manager before retrying.',
+  );
+  exit(1);
 }
 
 Future<void> _writeStableHookWrappers() async {
-  final Directory hooksDirectory = Directory('.git/hooks');
-  for (final String hookName in hookList.values) {
+  final ProcessResult result = await Process.run('git', <String>[
+    'rev-parse',
+    '--git-path',
+    'hooks',
+  ], environment: _processEnvironment());
+  if (result.exitCode != 0) {
+    stderr.write(result.stderr);
+    exit(result.exitCode);
+  }
+  final Directory hooksDirectory = Directory((result.stdout as String).trim());
+  await hooksDirectory.create(recursive: true);
+  for (final String hookName in <String>['pre-commit']) {
     final File hookFile = File('${hooksDirectory.path}/$hookName');
-    if (!hookFile.existsSync()) {
-      continue;
+    if (hookFile.existsSync() &&
+        await hookFile.readAsString() != _hookWrapper) {
+      stderr.writeln(
+        'Existing pre-commit hook preserved. Integrate tool/pre_commit.dart manually.',
+      );
+      exit(1);
     }
 
     await hookFile.writeAsString(_hookWrapper);
