@@ -46,16 +46,32 @@ jobs:
           VERSION=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
-      - name: Get version code and bump VERSION_CODE for next run
+      - name: Get version code and reserve the next build number
         id: get_version_code
         env:
+          APP_VERSION: ${{ steps.get_version.outputs.version }}
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          STORED_VERSION_CODE: ${{ vars.VERSION_CODE }}
         run: |
-          CURRENT="${{ vars.VERSION_CODE }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$APP_VERSION"
+          if [[ ! "$MAJOR" =~ ^[0-9]+$ || ! "$MINOR" =~ ^[0-9]+$ ]]; then
+            echo "Invalid app version: $APP_VERSION"
+            exit 1
+          fi
+          if [[ ! "$STORED_VERSION_CODE" =~ ^[0-9]+$ ]]; then
+            echo "VERSION_CODE must be a positive integer"
+            exit 1
+          fi
+
+          BASE=$((10#$MAJOR * 10000 + 10#$MINOR * 100))
+          CURRENT=$((10#$STORED_VERSION_CODE))
+          if (( CURRENT < BASE )); then
+            CURRENT=$BASE
+          fi
           NEXT=$((CURRENT + 1))
           echo "version_code=$CURRENT" >> $GITHUB_OUTPUT
           gh variable set VERSION_CODE --body "$NEXT" --repo "${{ github.repository }}"
-          echo "Using version code: $CURRENT (VERSION_CODE bumped to $NEXT for next run)"
+          echo "Version $APP_VERSION uses build $CURRENT; reserved $NEXT for the next run"
       - name: Aggregate changelog from merged PRs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -67,7 +83,6 @@ jobs:
         with:
           name: changelog-aggregated
           path: changelog_aggregated.json
-
   deploy_android:
     name: Android Play Store
     needs: prepare
@@ -89,7 +104,7 @@ jobs:
         with:
           name: changelog-aggregated
       - name: Format changelog for Android
-        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} android
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" android
         working-directory: ./android/fastlane
         env:
           AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
@@ -136,7 +151,7 @@ jobs:
         with:
           name: changelog-aggregated
       - name: Format changelog for iOS
-        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} ios
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ios
         working-directory: ./ios/fastlane
         env:
           AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
@@ -229,7 +244,7 @@ jobs:
         with:
           name: changelog-aggregated
       - name: Format changelog for GitHub Release
-        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} github
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" github
         env:
           AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
           RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
