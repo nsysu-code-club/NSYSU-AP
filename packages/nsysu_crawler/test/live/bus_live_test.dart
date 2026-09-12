@@ -31,11 +31,6 @@ void main() {
             .getBusInfoList(languageCode: 'zh');
         expect(result, isA<ApiSuccess<List<BusInfo>?>>());
         final List<BusInfo>? list = (result as ApiSuccess<List<BusInfo>?>).data;
-        logSuccess('BusHelper', 'getBusInfoList', <String, dynamic>{
-          'lang': 'zh',
-          'count': list?.length ?? 0,
-          'first': list?.firstOrNull?.name ?? '<none>',
-        });
         expect(list, isNotNull);
         expect(list, isNotEmpty);
         expect(list!.map((BusInfo route) => route.routeId), <int>[
@@ -45,6 +40,11 @@ void main() {
           219,
           2192,
         ]);
+        logSuccess('BusHelper', 'getBusInfoList', <String, dynamic>{
+          'lang': 'zh',
+          'count': list.length,
+          'first': list.first.name,
+        });
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
@@ -60,15 +60,15 @@ void main() {
             .getBusInfoList(languageCode: 'en');
         expect(result, isA<ApiSuccess<List<BusInfo>?>>());
         final List<BusInfo>? list = (result as ApiSuccess<List<BusInfo>?>).data;
-        logSuccess('BusHelper', 'getBusInfoList', <String, dynamic>{
-          'lang': 'en',
-          'count': list?.length ?? 0,
-          'first': list?.firstOrNull?.name ?? '<none>',
-        });
         expect(list, isNotNull);
         expect(list, isNotEmpty);
         expect(list!.first.routeId, 901);
         expect(list.first.departure, contains('Hamasen'));
+        logSuccess('BusHelper', 'getBusInfoList', <String, dynamic>{
+          'lang': 'en',
+          'count': list.length,
+          'first': list.first.name,
+        });
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
@@ -94,15 +94,15 @@ void main() {
         expect(result, isA<ApiSuccess<List<BusTime>?>>());
         final List<BusTime>? times =
             (result as ApiSuccess<List<BusTime>?>).data;
-        logSuccess('BusHelper', 'getBusTime', <String, dynamic>{
-          'count': times?.length ?? 0,
-        });
         expect(times, isNotNull);
         expect(times, isNotEmpty);
         expect(
           times!.map((BusTime time) => time.direction),
           containsAll(<BusDirection>[BusDirection.go, BusDirection.back]),
         );
+        logSuccess('BusHelper', 'getBusTime', <String, dynamic>{
+          'count': times.length,
+        });
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );

@@ -77,14 +77,14 @@ void main() {
             .getUserInfo();
         expect(result, isA<ApiSuccess<UserInfo>>());
         final UserInfo data = (result as ApiSuccess<UserInfo>).data;
+        expect(data.id, equals(username));
+        expect(data.name, isNotEmpty);
         logSuccess('SelcrsHelper', 'getUserInfo', <String, dynamic>{
           'id': redact(data.id),
           'name': redact(data.name),
           'department': redact(data.department),
           'className': redact(data.className),
         });
-        expect(data.id, equals(username));
-        expect(data.name, isNotEmpty);
       },
       skip: skipReason,
       timeout: const Timeout(Duration(seconds: 30)),
@@ -107,11 +107,11 @@ void main() {
             );
         expect(result, isA<ApiSuccess<SemesterData>>());
         final SemesterData data = (result as ApiSuccess<SemesterData>).data;
+        expect(data.data, isNotEmpty);
         logSuccess('SelcrsHelper', 'getCourseSemesterData', <String, dynamic>{
           'count': data.data.length,
           'first': data.data.firstOrNull?.text ?? '<none>',
         });
-        expect(data.data, isNotEmpty);
       },
       skip: skipReason,
       timeout: const Timeout(Duration(seconds: 30)),
@@ -181,12 +181,12 @@ void main() {
         expect(result, isA<ApiSuccess<ScoreSemesterData>>());
         final ScoreSemesterData data =
             (result as ApiSuccess<ScoreSemesterData>).data;
+        expect(data.years, isNotEmpty);
+        expect(data.semesters, isNotEmpty);
         logSuccess('SelcrsHelper', 'getScoreSemesterData', <String, dynamic>{
           'yearsCount': data.years.length,
           'semestersCount': data.semesters.length,
         });
-        expect(data.years, isNotEmpty);
-        expect(data.semesters, isNotEmpty);
       },
       skip: skipReason,
       timeout: const Timeout(Duration(seconds: 30)),
