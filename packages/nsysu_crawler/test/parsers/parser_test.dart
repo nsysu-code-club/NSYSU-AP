@@ -127,7 +127,7 @@ void main() {
       expect(result.scores.length, 3);
       expect(result.scores[0].title, '程式設計');
       expect(result.scores[0].courseNumber, 'CSE101');
-      expect(result.scores[0].middleScore, '85');
+      expect(result.scores[0].units, '3');
       expect(result.scores[0].finalScore, '90');
 
       expect(result.scores[2].title, '演算法');

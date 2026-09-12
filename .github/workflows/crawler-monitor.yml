@@ -1,10 +1,8 @@
 name: Crawler Monitor
 
 # Runs the nsysu_crawler live integration tests against the real NSYSU
-# servers on a schedule. Two modes of failure are detected:
-#
-#   - Health check fails → school server is down / unreachable
-#   - Parser test fails  → server is up but HTML structure has drifted
+# servers on a schedule. Failures identify the affected test group;
+# test names alone do not establish a network or HTML parsing root cause.
 #
 # The Discord notification message labels which one fired so on-call can
 # triage faster.
@@ -40,6 +38,7 @@ jobs:
           sdk: stable
 
       - name: Pub get (nsysu_crawler)
+        id: dependencies
         working-directory: packages/nsysu_crawler
         run: dart pub get
 
@@ -65,9 +64,23 @@ jobs:
           set -e
 
       - name: Classify failures
-        if: steps.test_live.outputs.exit_code != '0' || steps.test_anon.outputs.exit_code != '0'
+        if: always() && (steps.test_live.outputs.exit_code != '0' || steps.test_anon.outputs.exit_code != '0')
         id: msg
+        env:
+          SETUP_OUTCOME: ${{ steps.dependencies.outcome }}
+          LIVE_EXIT: ${{ steps.test_live.outputs.exit_code }}
+          ANON_EXIT: ${{ steps.test_anon.outputs.exit_code }}
         run: |
+          if [ "$SETUP_OUTCOME" != success ]; then
+            echo 'category=[ERROR] 監控環境設定失敗（checkout、Dart 或依賴安裝）' >> "$GITHUB_OUTPUT"
+            echo 'failures=測試未執行，請查看 setup 步驟紀錄。' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -z "$LIVE_EXIT" ] || [ -z "$ANON_EXIT" ]; then
+            echo 'category=[ERROR] 測試執行未完成' >> "$GITHUB_OUTPUT"
+            echo 'failures=缺少測試結果，請查看執行紀錄。' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           # Combine outputs from both presets
           cat live_output.txt anon_output.txt > combined_output.txt 2>/dev/null || true
 
@@ -78,17 +91,18 @@ jobs:
             | sed 's/ \[E\]//' \
             | sort -u | head -20 || true)
 
-          # Classify: health check vs parser/structure
+          # Identify affected groups without guessing the underlying cause.
           HEALTH_FAIL=$(echo "$FAILED" | grep -i 'Health Check' || true)
           CRAWLER_FAIL=$(echo "$FAILED" | grep -iv 'Health Check' || true)
 
           if [ -n "$HEALTH_FAIL" ] && [ -n "$CRAWLER_FAIL" ]; then
-            CATEGORY="🔴 NSYSU 網站連線異常 + 爬蟲結構異常"
+            CATEGORY="[ERROR] 健康檢查與爬蟲測試失敗（原因請查看測試紀錄）"
           elif [ -n "$HEALTH_FAIL" ]; then
-            CATEGORY="🔴 NSYSU 網站連線異常（可能掛掉）"
+            CATEGORY="[ERROR] 健康檢查失敗（連線、HTTP 狀態或回應驗證，請查看測試紀錄）"
           else
-            CATEGORY="🟡 NSYSU 爬蟲結構異常（網站正常但 HTML 結構可能已變更）"
+            CATEGORY="[ERROR] 爬蟲測試失敗（登入、請求或資料驗證，請查看測試紀錄）"
           fi
+          FAILED=${FAILED:-未找到失敗測試名稱，請查看測試載入或執行錯誤。}
 
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "category=$CATEGORY" >> "$GITHUB_OUTPUT"
@@ -96,22 +110,48 @@ jobs:
           echo "$FAILED" >> "$GITHUB_OUTPUT"
           echo "$EOF" >> "$GITHUB_OUTPUT"
 
+      - name: Generate Job Summary
+        if: always()
+        env:
+          LIVE_EXIT: ${{ steps.test_live.outputs.exit_code }}
+          ANON_EXIT: ${{ steps.test_anon.outputs.exit_code }}
+          CATEGORY: ${{ steps.msg.outputs.category }}
+          FAILURES: ${{ steps.msg.outputs.failures }}
+        run: |
+          echo "## [MONITOR] NSYSU Crawler Status Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "$LIVE_EXIT" == "0" ] && [ "$ANON_EXIT" == "0" ]; then
+            echo "### [PASS] Executed crawler tests passed (credentialed tests may be skipped)." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### [FAIL] Monitor failure detected." >> $GITHUB_STEP_SUMMARY
+            echo "**Category:** ${CATEGORY:-監控未完成，請查看執行紀錄。}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "#### Failed Items:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            printf '%s\n' "$FAILURES" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: Notify Discord
-        if: steps.test_live.outputs.exit_code != '0' || steps.test_anon.outputs.exit_code != '0'
+        if: always() && steps.msg.outputs.category != ''
+        env:
+          CATEGORY: ${{ steps.msg.outputs.category }}
+          FAILURES: ${{ steps.msg.outputs.failures }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           jq -n \
-            --arg content "🚨 **NSYSU 爬蟲監控異常**
+            --arg content "[ALERT] **NSYSU 爬蟲監控異常**
 
-          ${{ steps.msg.outputs.category }}
+          $CATEGORY
 
           **失敗項目：**
           \`\`\`
-          ${{ steps.msg.outputs.failures }}
+          $FAILURES
           \`\`\`
 
           [查看執行紀錄](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" \
             '{content: $content}' | \
-          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+          curl -s -X POST "$DISCORD_WEBHOOK_URL" \
             -H "Content-Type: application/json" \
             -d @-
 

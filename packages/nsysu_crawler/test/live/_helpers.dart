@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_print
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:ap_common_core/ap_common_core.dart';
@@ -56,10 +57,54 @@ String redact(String? value) {
   return '${value[0]}${"•" * (value.length - 2)}${value[value.length - 1]}';
 }
 
+/// Structured logger for live tests.
+void logStructured({
+  required String tag,
+  required String scope,
+  required String action,
+  Map<String, dynamic>? fields,
+}) {
+  final StringBuffer buffer = StringBuffer(
+    '[$tag] [$scope] action=${jsonEncode(action)}',
+  );
+  if (fields != null) {
+    for (final MapEntry<String, dynamic> entry in fields.entries) {
+      if (entry.value != null) {
+        buffer.write(' ${entry.key}=${jsonEncode(entry.value.toString())}');
+      }
+    }
+  }
+  print(buffer);
+}
+
+void logInfo(String scope, String action, [Map<String, dynamic>? fields]) =>
+    logStructured(tag: 'INFO', scope: scope, action: action, fields: fields);
+
+void logTarget(String scope, String action, [Map<String, dynamic>? fields]) =>
+    logStructured(tag: 'TARGET', scope: scope, action: action, fields: fields);
+
+void logSuccess(String scope, String action, [Map<String, dynamic>? fields]) =>
+    logStructured(tag: 'SUCCESS', scope: scope, action: action, fields: fields);
+
+void logError(
+  String scope,
+  String action,
+  Object error, [
+  Map<String, dynamic>? fields,
+]) => logStructured(
+  tag: 'ERROR',
+  scope: scope,
+  action: action,
+  fields: <String, dynamic>{'error': error.toString(), ...?fields},
+);
+
 class _RequestLogInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    print('[http] → ${options.method} ${options.uri}');
+    logTarget('HTTP', 'onRequest', <String, dynamic>{
+      'method': options.method,
+      'url': options.uri.toString(),
+    });
     handler.next(options);
   }
 
@@ -68,9 +113,10 @@ class _RequestLogInterceptor extends Interceptor {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
-    print(
-      '[http] ← ${response.statusCode} ${response.requestOptions.uri.path}',
-    );
+    logSuccess('HTTP', 'onResponse', <String, dynamic>{
+      'status': response.statusCode,
+      'path': response.requestOptions.uri.path,
+    });
     handler.next(response);
   }
 
@@ -78,11 +124,10 @@ class _RequestLogInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final int? code = err.response?.statusCode;
     final String location = err.response?.headers.value('location') ?? '';
-    print(
-      '[http] ✗ ${code ?? err.type.name} '
-      '${err.requestOptions.uri.path}'
-      '${location.isEmpty ? '' : ' → $location'}',
-    );
+    logError('HTTP', 'onError', code ?? err.type.name, <String, dynamic>{
+      'path': err.requestOptions.uri.path,
+      if (location.isNotEmpty) 'redirect': location,
+    });
     handler.next(err);
   }
 }
@@ -94,9 +139,9 @@ class _RequestLogInterceptor extends Interceptor {
 /// contain cookies and URL-embedded student ids, so don't paste publicly).
 void enableHttpLogging(Dio dio) {
   if (Platform.environment['NSYSU_HTTP_LOG'] != '1') return;
-  print(
-    '[live] !! NSYSU_HTTP_LOG=1: dumping every request URL '
-    '(may include student id / cookies — do not paste publicly) !!',
-  );
+  logInfo('HTTP', 'enableHttpLogging', <String, dynamic>{
+    'note':
+        'NSYSU_HTTP_LOG=1 dumping every request URL (do not paste publicly)',
+  });
   dio.interceptors.add(_RequestLogInterceptor());
 }
