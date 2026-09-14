@@ -52,10 +52,6 @@ void main() {
         final Response<dynamic> response = await healthDio.get<dynamic>(
           entry.value,
         );
-        logSuccess('HealthCheck', 'getEndpoint', <String, dynamic>{
-          'name': entry.key,
-          'statusCode': response.statusCode,
-        });
         expect(
           response.statusCode,
           isNotNull,
@@ -68,6 +64,10 @@ void main() {
               '${entry.key} returned HTTP ${response.statusCode} (server '
               'error / outage)',
         );
+        logSuccess('HealthCheck', 'getEndpoint', <String, dynamic>{
+          'name': entry.key,
+          'statusCode': response.statusCode,
+        });
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
@@ -87,12 +87,12 @@ void main() {
           'query': 'query { route(xno: 901, lang: "zh") { name } }',
         },
       );
+      expect(response.statusCode, 200);
+      expect(response.data, isA<Map<String, dynamic>>());
       logSuccess('HealthCheck', 'postEndpoint', <String, dynamic>{
         'name': 'iBus (campus bus realtime)',
         'statusCode': response.statusCode,
       });
-      expect(response.statusCode, 200);
-      expect(response.data, isA<Map<String, dynamic>>());
     },
     timeout: const Timeout(Duration(seconds: 30)),
   );
