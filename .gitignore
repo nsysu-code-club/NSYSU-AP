@@ -62,6 +62,10 @@ pubspec_overrides.yaml
 # Android Builds Related
 .cxx/
 
+# Bundler local configuration and installed gems
+**/.bundle/
+**/vendor/bundle/
+
 # Local env files (NSYSU creds for live tests, etc.)
 .envrc
 .env

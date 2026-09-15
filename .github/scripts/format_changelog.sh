@@ -1,115 +1,106 @@
 #!/bin/bash
 set -euo pipefail
 
-VERSION_CODE="$1"
-TARGET="$2" # android, ios, or github
+TARGET="$1" # android, ios, or github
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# ---------------------------------------------------------------------------
-# New path: use aggregated changelog if AGGREGATED_CHANGELOG is set
-# ---------------------------------------------------------------------------
+# Prefer the changelog aggregated from merged PRs when Actions provides it.
 if [ -n "${AGGREGATED_CHANGELOG:-}" ] && [ -f "$AGGREGATED_CHANGELOG" ]; then
   ENTRY_COUNT=$(jq length "$AGGREGATED_CHANGELOG")
 
   if [ "$ENTRY_COUNT" -eq 0 ]; then
-    echo "WARNING: No aggregated changelog entries found for ${TARGET}, using fallback."
-    FALLBACK="Bug fixes and improvements."
+    echo "No aggregated changelog entries found; using checked-in changelog."
+  else
     case "$TARGET" in
       android)
         for locale in "en-US" "zh-TW"; do
           mkdir -p "metadata/android/${locale}/changelogs/"
-          echo "$FALLBACK" > "metadata/android/${locale}/changelogs/default.txt"
+          jq -r ".[] | \"* \" + .[\"${locale}\"]" "$AGGREGATED_CHANGELOG" \
+            > "metadata/android/${locale}/changelogs/default.txt"
         done
         ;;
       ios)
-        echo "$FALLBACK" > "en-US.txt"
-        echo "問題修正與效能改善。" > "zh-TW.txt"
+        for locale in "en-US" "zh-TW"; do
+          jq -r ".[] | \"* \" + .[\"${locale}\"]" "$AGGREGATED_CHANGELOG" \
+            > "${locale}.txt"
+        done
         ;;
       github)
-        echo "Bug fixes and improvements." > RELEASE_NOTES_GENERATED.md
+        {
+          echo "## v${RELEASE_VERSION:-unknown}"
+          echo ""
+          echo "**What's New**"
+          jq -r '.[] | "- " + .["en-US"]' "$AGGREGATED_CHANGELOG"
+          echo ""
+          echo "---"
+          echo ""
+          echo "**更新內容**"
+          jq -r '.[] | "- " + .["zh-TW"]' "$AGGREGATED_CHANGELOG"
+        } > RELEASE_NOTES_GENERATED.md
+        ;;
+      *)
+        echo "ERROR: Unknown target '${TARGET}'. Use: android, ios, or github"
+        exit 1
         ;;
     esac
+
+    echo "Generated ${TARGET} changelog from $ENTRY_COUNT aggregated entries"
     exit 0
   fi
-
-  case "$TARGET" in
-    android)
-      for locale in "en-US" "zh-TW"; do
-        mkdir -p "metadata/android/${locale}/changelogs/"
-        jq -r ".[] | \"* \" + .[\"${locale}\"]" "$AGGREGATED_CHANGELOG" \
-          > "metadata/android/${locale}/changelogs/default.txt"
-      done
-      echo "Generated Android changelog ($ENTRY_COUNT entries)"
-      ;;
-    ios)
-      for locale in "en-US" "zh-TW"; do
-        jq -r ".[] | \"* \" + .[\"${locale}\"]" "$AGGREGATED_CHANGELOG" \
-          > "${locale}.txt"
-      done
-      echo "Generated iOS changelog ($ENTRY_COUNT entries)"
-      ;;
-    github)
-      VERSION="${RELEASE_VERSION:-unknown}"
-      {
-        echo "## v${VERSION}"
-        echo ""
-        echo "**What's New**"
-        jq -r ".[] | \"- \" + .[\"en-US\"]" "$AGGREGATED_CHANGELOG"
-        echo ""
-        echo "---"
-        echo ""
-        echo "**更新內容**"
-        jq -r ".[] | \"- \" + .[\"zh-TW\"]" "$AGGREGATED_CHANGELOG"
-      } > RELEASE_NOTES_GENERATED.md
-      echo "Generated GitHub release notes ($ENTRY_COUNT entries)"
-      ;;
-    *)
-      echo "ERROR: Unknown target '${TARGET}'. Use: android, ios, or github"
-      exit 1
-      ;;
-  esac
-  exit 0
 fi
 
-# ---------------------------------------------------------------------------
-# Legacy path: read from changelog.json keyed by version_code
-# ---------------------------------------------------------------------------
+# Fall back to the checked-in changelog, matched by public app version.
 CHANGELOG_FILE="$SCRIPT_DIR/../../changelog.json"
+APP_VERSION=$(grep '^version: ' "$SCRIPT_DIR/../../pubspec.yaml" | sed 's/version: //' | cut -d'+' -f1)
+CHANGELOG_ENTRY=""
+if [ -f "$CHANGELOG_FILE" ]; then
+  CHANGELOG_ENTRY=$(jq -c --arg version "$APP_VERSION" \
+    'to_entries | map(select(.value.version == $version)) | first | .value // empty' \
+    "$CHANGELOG_FILE")
+fi
 
-if ! jq -e ".\"${VERSION_CODE}\"" "$CHANGELOG_FILE" > /dev/null 2>&1; then
-  echo "WARNING: Version code ${VERSION_CODE} not found in ${CHANGELOG_FILE}, skipping changelog generation."
-  exit 0
+if [ -z "$CHANGELOG_ENTRY" ]; then
+  echo "WARNING: App version ${APP_VERSION} is missing from ${CHANGELOG_FILE}; using default release notes."
+  CHANGELOG_ENTRY=$(jq -nc --arg version "$APP_VERSION" '{
+    version: $version,
+    "en-US": ["Bug fixes and improvements."],
+    "zh-TW": ["問題修正與效能改善。"]
+  }')
 fi
 
 case "$TARGET" in
   android)
     for locale in "en-US" "zh-TW"; do
       mkdir -p "metadata/android/${locale}/changelogs/"
-      jq -r ".\"${VERSION_CODE}\".\"${locale}\" | map(\"* \" + .) | join(\"\n\")" "$CHANGELOG_FILE" \
+      printf '%s' "$CHANGELOG_ENTRY" | \
+        jq -r ".\"${locale}\" | map(\"* \" + .) | join(\"\n\")" \
         > "metadata/android/${locale}/changelogs/default.txt"
     done
-    echo "Generated Android changelog for version code ${VERSION_CODE}"
+    echo "Generated Android changelog for app version ${APP_VERSION}"
     ;;
   ios)
     for locale in "en-US" "zh-TW"; do
-      jq -r ".\"${VERSION_CODE}\".\"${locale}\" | map(\"* \" + .) | join(\"\n\")" "$CHANGELOG_FILE" \
+      printf '%s' "$CHANGELOG_ENTRY" | \
+        jq -r ".\"${locale}\" | map(\"* \" + .) | join(\"\n\")" \
         > "${locale}.txt"
     done
-    echo "Generated iOS changelog for version code ${VERSION_CODE}"
+    echo "Generated iOS changelog for app version ${APP_VERSION}"
     ;;
   github)
-    VERSION=$(jq -r ".\"${VERSION_CODE}\".version" "$CHANGELOG_FILE")
+    VERSION="$APP_VERSION"
     {
       echo "## v${VERSION}"
       echo ""
-      jq -r ".\"${VERSION_CODE}\".\"en-US\" | map(\"- \" + .) | join(\"\n\")" "$CHANGELOG_FILE"
+      printf '%s' "$CHANGELOG_ENTRY" | \
+        jq -r '."en-US" | map("- " + .) | join("\n")'
       echo ""
       echo "---"
       echo ""
-      jq -r ".\"${VERSION_CODE}\".\"zh-TW\" | map(\"- \" + .) | join(\"\n\")" "$CHANGELOG_FILE"
+      printf '%s' "$CHANGELOG_ENTRY" | \
+        jq -r '."zh-TW" | map("- " + .) | join("\n")'
     } > RELEASE_NOTES_GENERATED.md
-    echo "Generated GitHub release notes for version code ${VERSION_CODE}"
+    echo "Generated GitHub release notes for app version ${APP_VERSION}"
     ;;
   *)
     echo "ERROR: Unknown target '${TARGET}'. Use: android, ios, or github"
