@@ -104,7 +104,7 @@ jobs:
           fi
           FAILED=${FAILED:-未找到失敗測試名稱，請查看測試載入或執行錯誤。}
 
-          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          EOF=$(dd if=/dev/urandom bs=15 count=1 2>/dev/null | base64)
           echo "category=$CATEGORY" >> "$GITHUB_OUTPUT"
           echo "failures<<$EOF" >> "$GITHUB_OUTPUT"
           echo "$FAILED" >> "$GITHUB_OUTPUT"

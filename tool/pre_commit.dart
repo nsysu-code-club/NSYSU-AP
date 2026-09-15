@@ -15,19 +15,6 @@ Future<void> main() async {
       : <String>['dart'];
 
   results.add(
-    await _runStep('Dart analyze', dartCommand.first, <String>[
-      ...dartCommand.skip(1),
-      'analyze',
-      '--no-fatal-warnings',
-      '.',
-    ]),
-  );
-  if (results.last.failed) {
-    _printSummary(results, crawlerLog);
-    exit(results.last.exitCode);
-  }
-
-  results.add(
     await _runStep('Generate l10n', dartCommand.first, <String>[
       ...dartCommand.skip(1),
       'run',
@@ -40,6 +27,19 @@ Future<void> main() async {
   }
 
   results.add(await _ensureL10nIsCommitted());
+  if (results.last.failed) {
+    _printSummary(results, crawlerLog);
+    exit(results.last.exitCode);
+  }
+
+  results.add(
+    await _runStep('Dart analyze', dartCommand.first, <String>[
+      ...dartCommand.skip(1),
+      'analyze',
+      '--no-fatal-warnings',
+      '.',
+    ]),
+  );
   if (results.last.failed) {
     _printSummary(results, crawlerLog);
     exit(results.last.exitCode);
