@@ -28,10 +28,24 @@ Future<void> migratePreferences(
     }
     // Keep the user's current setting if the old migration already ran.
     if (!keys.contains(ApConstants.showCourseSearchButton)) {
+      final bool showCourseSearchButton = preferences.getBool(
+        Constants.prefIsShowCourseSearchButton,
+        true,
+      );
       await preferences.setBool(
         ApConstants.showCourseSearchButton,
-        preferences.getBool(Constants.prefIsShowCourseSearchButton, true),
+        showCourseSearchButton,
       );
+      final bool wasWritten =
+          preferences.getKeys().contains(ApConstants.showCourseSearchButton) &&
+          preferences.getBool(
+                ApConstants.showCourseSearchButton,
+                !showCourseSearchButton,
+              ) ==
+              showCourseSearchButton;
+      if (!wasWritten) {
+        throw StateError('Could not migrate course-search preference');
+      }
     }
   }
 
