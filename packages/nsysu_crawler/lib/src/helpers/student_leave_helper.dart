@@ -7,7 +7,6 @@ import 'package:ap_common_core/ap_common_core.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:html/parser.dart' as html_parser;
 import 'package:nsysu_crawler/src/build_mode.dart';
 import 'package:nsysu_crawler/src/models/student_leave.dart';
 import 'package:nsysu_crawler/src/parsers/html_parser.dart';
@@ -44,7 +43,11 @@ class StudentLeaveHelper {
   );
   static const GeneralResponse _deleteCheckRejected = GeneralResponse(
     statusCode: 409,
-    message: 'student leave deletion check was not authorized',
+    message: 'student leave record already reviewed; deletion is not allowed',
+  );
+  static const GeneralResponse _deleteCheckUnavailable = GeneralResponse(
+    statusCode: 503,
+    message: 'student leave deletion check returned an unexpected response',
   );
   static const GeneralResponse _invalidLeaveRequest = GeneralResponse(
     statusCode: 400,
@@ -53,6 +56,10 @@ class StudentLeaveHelper {
   static const GeneralResponse _leaveFormUnavailable = GeneralResponse(
     statusCode: 503,
     message: 'student leave form constraints unavailable',
+  );
+  static const GeneralResponse _leaveRecordsUnavailable = GeneralResponse(
+    statusCode: 503,
+    message: 'student leave records page unavailable',
   );
   static const GeneralResponse _invalidProofResponse = GeneralResponse(
     statusCode: 422,
@@ -432,6 +439,11 @@ class StudentLeaveHelper {
         _resetSession();
         return const ApiError<List<StudentLeaveRecord>>(_sessionExpired);
       }
+      if (!isRecognizedStudentLeaveRecordsPage(text)) {
+        return const ApiError<List<StudentLeaveRecord>>(
+          _leaveRecordsUnavailable,
+        );
+      }
       return ApiSuccess<List<StudentLeaveRecord>>(
         parseStudentLeaveRecords(text),
       );
@@ -621,8 +633,11 @@ class StudentLeaveHelper {
       final Object sessionIdentity = _sessionIdentity;
       final CancelToken cancelToken = _sessionCancelToken;
 
-      final Response<Uint8List> checkResponse = await _getHtml(
+      // Match the SIS isTcheck() AJAX request: POST with query parameters.
+      final Response<Uint8List> checkResponse = await _postHtml(
         _leaveMaintenanceUri(leaveNumber, 'check').toString(),
+        data: const <String, String>{},
+        formEncoded: true,
         cancelToken: cancelToken,
       );
       final String checkText = big5.decode(checkResponse.data!);
@@ -633,8 +648,14 @@ class StudentLeaveHelper {
         _resetSession();
         return const ApiError<GeneralResponse>(_sessionExpired);
       }
-      if (!_authorizesLeaveDeletion(checkText, leaveNumber)) {
+      final String? checkStatus = _parseLeaveDeletionCheck(checkText);
+      if (checkStatus == 'T') {
         return const ApiError<GeneralResponse>(_deleteCheckRejected);
+      }
+      // T means at least one reviewer has confirmed the record. F permits
+      // deletion after removing only the observed SIS warning blocks.
+      if (checkStatus != 'F') {
+        return const ApiError<GeneralResponse>(_deleteCheckUnavailable);
       }
       _authorizedDeletions[leaveNumber] = DateTime.now().add(
         _deleteAuthorizationLifetime,
@@ -701,9 +722,12 @@ class StudentLeaveHelper {
     final Object sessionIdentity = _sessionIdentity;
     final CancelToken cancelToken = _sessionCancelToken;
     try {
-      final Response<Uint8List> deleteResponse = await _getHtml(
+      final Response<Uint8List> deleteResponse = await _postHtml(
         _leaveMaintenanceUri(leaveNumber, 'del').toString(),
+        data: const <String, String>{},
+        formEncoded: true,
         cancelToken: cancelToken,
+        acceptServiceUnavailable: true,
       );
       final String text = big5.decode(deleteResponse.data!);
       if (!identical(sessionIdentity, _sessionIdentity)) {
@@ -758,10 +782,18 @@ class StudentLeaveHelper {
     required Object? data,
     required bool formEncoded,
     required CancelToken cancelToken,
+    bool acceptServiceUnavailable = false,
   }) async {
+    final Options options = formEncoded ? _streamFormOption : _streamOption;
+    if (acceptServiceUnavailable) {
+      // Only the deletion POST opts in: SIS can return 503 after the mutation.
+      // Preserve the response for an unknown result and a read-only refresh.
+      options.validateStatus = (int? status) =>
+          status == 503 || dio.options.validateStatus(status);
+    }
     final Response<ResponseBody> response = await dio.post<ResponseBody>(
       url,
-      options: formEncoded ? _streamFormOption : _streamOption,
+      options: options,
       data: data,
       cancelToken: cancelToken,
     );
@@ -857,53 +889,25 @@ class StudentLeaveHelper {
     );
   }
 
-  bool _authorizesLeaveDeletion(String text, String leaveNumber) {
-    final RegExp assignmentPattern = RegExp(
-      r'''^\s*(?:window\.)?location\.href\s*=\s*(?:"([^"]+)"|'([^']+)')\s*;?\s*$''',
-      caseSensitive: false,
+  String? _parseLeaveDeletionCheck(String text) {
+    // SIS can prefix its T/F result with these PHP diagnostics even when
+    // deletion works in its web UI. Do not strip arbitrary HTML or errors.
+    final RegExp warning = RegExp(
+      r'^\s*(?:<br\s*/?>\s*)?<b>Warning</b>:\s*'
+      r'(?:Undefined global variable \$_SESSION|'
+      'Trying to access array offset on null|'
+      r'Undefined variable \$(?:ITEM_NO|GROUP_ID))'
+      r'\s+in\s+<b>[^<>\r\n]+[\\/]SLAMS[\\/]include[\\/]'
+      r'(?:link_odbc|syear_sem)\.php</b>'
+      r'\s+on line\s+<b>\d+</b>\s*<br\s*/?>\s*',
     );
-    const Set<String> executableScriptTypes = <String>{
-      '',
-      'module',
-      'text/javascript',
-      'application/javascript',
-      'text/ecmascript',
-      'application/ecmascript',
-    };
-    final List<RegExpMatch> assignments = html_parser
-        .parse(text, encoding: 'BIG-5')
-        .getElementsByTagName('script')
-        .where((element) {
-          final String type = (element.attributes['type'] ?? '')
-              .trim()
-              .toLowerCase();
-          return element.attributes['src'] == null &&
-              executableScriptTypes.contains(type);
-        })
-        .map((element) => assignmentPattern.firstMatch(element.text))
-        .whereType<RegExpMatch>()
-        .toList();
-    if (assignments.length != 1) return false;
-
-    final String action =
-        (assignments.single.group(1) ?? assignments.single.group(2)!)
-            .replaceAll('&amp;', '&');
-    final Uri? candidate = Uri.tryParse(action);
-    if (candidate == null) return false;
-    final Uri baseUri = Uri.parse('$baseUrl/SLAMS/');
-    final Uri resolved = baseUri.resolveUri(candidate);
-    final List<String>? leaveNumbers = resolved.queryParametersAll['SLA_SNO'];
-    final List<String>? actions = resolved.queryParametersAll['act'];
-    return resolved.scheme == baseUri.scheme &&
-        resolved.host == baseUri.host &&
-        resolved.port == baseUri.port &&
-        resolved.userInfo.isEmpty &&
-        !resolved.hasFragment &&
-        resolved.path == '/SLAMS/SLAMS_stuLeave_ischecked.php' &&
-        leaveNumbers?.length == 1 &&
-        leaveNumbers!.single == leaveNumber &&
-        actions?.length == 1 &&
-        actions!.single == 'del';
+    String remaining = text.trim();
+    while (true) {
+      final RegExpMatch? match = warning.firstMatch(remaining);
+      if (match == null) break;
+      remaining = remaining.substring(match.end).trim();
+    }
+    return remaining == 'T' || remaining == 'F' ? remaining : null;
   }
 
   bool _isSessionExpired(String text) =>

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ap_common/ap_common.dart'
     hide AppLocale, AppLocaleUtils, LocaleSettings, TranslationProvider;
 import 'package:flutter/material.dart';
@@ -130,6 +132,176 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('record refresh is disabled while one load is in progress', (
+    WidgetTester tester,
+  ) async {
+    final _FakeStudentLeaveHelper helper = _FakeStudentLeaveHelper();
+    addTearDown(helper.dio.close);
+
+    await tester.pumpWidget(_testApp(StudentLeavePage(helper: helper)));
+    await tester.pump();
+
+    expect(helper.recordRequestCount, 1);
+    final Finder refreshButtonFinder = find.ancestor(
+      of: find.byIcon(Icons.refresh),
+      matching: find.byType(IconButton),
+    );
+    IconButton refreshButton = tester.widget<IconButton>(refreshButtonFinder);
+    expect(refreshButton.onPressed, isNull);
+
+    await tester.tap(find.byIcon(Icons.refresh));
+    await tester.pump();
+    expect(helper.recordRequestCount, 1);
+
+    helper.completeNextRecords(const <StudentLeaveRecord>[
+      StudentLeaveRecord(
+        number: 'SL1130001',
+        schoolYear: '113',
+        semester: '1',
+        category: '事假',
+        dateRange: '2026-08-11 09:00 ~ 2026-08-11 10:00',
+        tutorStatus: '已通過',
+        chairStatus: '已通過',
+        instructorStatus: '免審核',
+        proofText: '無',
+      ),
+    ]);
+    await tester.pumpAndSettle();
+
+    refreshButton = tester.widget<IconButton>(refreshButtonFinder);
+    expect(refreshButton.onPressed, isNotNull);
+    expect(helper.recordRequestCount, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an uncertain deletion refreshes the list without retrying', (
+    WidgetTester tester,
+  ) async {
+    final _FakeStudentLeaveHelper helper = _FakeStudentLeaveHelper();
+    addTearDown(helper.dio.close);
+    await tester.pumpWidget(
+      _testApp(
+        ApTheme(
+          themeMode: ThemeMode.light,
+          preferences: _FakePreferences(),
+          child: StudentLeavePage(helper: helper),
+        ),
+      ),
+    );
+    await tester.pump();
+    helper.completeNextRecords(const <StudentLeaveRecord>[
+      StudentLeaveRecord(
+        number: 'SL1130001',
+        schoolYear: '113',
+        semester: '1',
+        category: '事假',
+        dateRange: '2026-08-11 09:00 ~ 2026-08-11 10:00',
+        tutorStatus: '未確認',
+        chairStatus: '未確認',
+        instructorStatus: '未確認',
+        proofText: '無',
+        canDelete: true,
+      ),
+    ]);
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.byIcon(Icons.delete_outline));
+    await tester.tap(find.byIcon(Icons.delete_outline));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text(app.optionComfirm));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(helper.deleteRequestCount, 1);
+    expect(helper.recordRequestCount, 2);
+    expect(find.text(app.studentLeaveDeleteUnknownResult), findsOneWidget);
+    expect(find.text(app.studentLeaveDeleteFailed), findsNothing);
+
+    helper.completeNextRecords(const <StudentLeaveRecord>[]);
+    await tester.pumpAndSettle();
+    expect(find.text(app.studentLeaveEmpty), findsOneWidget);
+    expect(find.byIcon(Icons.delete_outline), findsNothing);
+    expect(helper.deleteRequestCount, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('semester changes during a load fetch only the latest semester', (
+    WidgetTester tester,
+  ) async {
+    final List<StudentLeaveSemester> options = StudentLeaveSemester.recent();
+    final _FakeStudentLeaveHelper helper = _FakeStudentLeaveHelper();
+    addTearDown(helper.dio.close);
+
+    await tester.pumpWidget(_testApp(StudentLeavePage(helper: helper)));
+    await tester.pump();
+
+    expect(helper.requestedSemesters, <StudentLeaveSemester>[options.first]);
+
+    await tester.tap(
+      find.text(
+        app.studentLeaveYearSemester(
+          year: options.first.schoolYear,
+          semester: options.first.semester,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(
+      find
+          .text(
+            app.studentLeaveYearSemester(
+              year: options[1].schoolYear,
+              semester: options[1].semester,
+            ),
+          )
+          .last,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(helper.recordRequestCount, 1);
+    helper.completeNextRecords(const <StudentLeaveRecord>[
+      StudentLeaveRecord(
+        number: 'SL-old',
+        schoolYear: '113',
+        semester: '1',
+        category: '事假',
+        dateRange: '2026-08-11 09:00 ~ 2026-08-11 10:00',
+        tutorStatus: '已通過',
+        chairStatus: '已通過',
+        instructorStatus: '免審核',
+        proofText: '無',
+      ),
+    ]);
+    await tester.pump();
+
+    expect(helper.requestedSemesters, <StudentLeaveSemester>[
+      options.first,
+      options[1],
+    ]);
+
+    helper.completeNextRecords(const <StudentLeaveRecord>[
+      StudentLeaveRecord(
+        number: 'SL-new',
+        schoolYear: '113',
+        semester: '2',
+        category: '病假',
+        dateRange: '2026-08-12 09:00 ~ 2026-08-12 10:00',
+        tutorStatus: '已通過',
+        chairStatus: '已通過',
+        instructorStatus: '免審核',
+        proofText: '無',
+      ),
+    ]);
+    await tester.pumpAndSettle();
+
+    expect(find.text('SL-old'), findsNothing);
+    expect(find.text('SL-new'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('preview page presents structured fields and final action', (
     WidgetTester tester,
   ) async {
@@ -257,6 +429,14 @@ void main() {
             title: '假單資料',
             fields: <StudentLeaveConfirmationField>[
               StudentLeaveConfirmationField(label: '課程審核', value: '檢視'),
+              StudentLeaveConfirmationField(
+                label: '假別',
+                value: '事假(Personal leave)',
+              ),
+              StudentLeaveConfirmationField(
+                label: '備註',
+                value: 'Doctor visit (follow-up)',
+              ),
             ],
           ),
         ],
@@ -273,7 +453,46 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('View'), findsOneWidget);
+    expect(find.text('Personal leave'), findsOneWidget);
+    expect(find.text('Doctor visit (follow-up)'), findsOneWidget);
+    expect(find.text('follow-up'), findsNothing);
     expect(find.text('檢視'), findsNothing);
+  });
+
+  testWidgets('Chinese confirmation values preserve arbitrary parentheses', (
+    WidgetTester tester,
+  ) async {
+    const StudentLeavePreviewResult preview = StudentLeavePreviewResult(
+      statusCode: 200,
+      body: '',
+      confirmation: StudentLeaveConfirmation(
+        messages: <String>[],
+        rawText: '',
+        sections: <StudentLeaveConfirmationSection>[
+          StudentLeaveConfirmationSection(
+            title: '假單資料',
+            fields: <StudentLeaveConfirmationField>[
+              StudentLeaveConfirmationField(
+                label: '備註',
+                value: 'Doctor visit (follow-up)',
+              ),
+            ],
+          ),
+        ],
+      ),
+      confirmForm: StudentLeaveConfirmForm(
+        action: 'SLAMS_stuLeave_add_act.php',
+        fields: <String, String>{'confirm': '1'},
+      ),
+    );
+
+    await tester.pumpWidget(
+      _testApp(const StudentLeaveResultPage(previewResult: preview)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Doctor visit (follow-up)'), findsOneWidget);
+    expect(find.text('Doctor visit'), findsNothing);
   });
 }
 
@@ -309,6 +528,52 @@ class _FakeAnalyticsUtil extends AnalyticsUtil {
   Future<void> setUserProperty(String name, String value) async {}
 }
 
+class _FakePreferences extends Fake implements PreferenceUtil {}
+
+class _FakeStudentLeaveHelper extends StudentLeaveHelper {
+  final List<Completer<ApiResult<List<StudentLeaveRecord>>>> _recordRequests =
+      <Completer<ApiResult<List<StudentLeaveRecord>>>>[];
+  final List<StudentLeaveSemester> requestedSemesters =
+      <StudentLeaveSemester>[];
+
+  int get recordRequestCount => _recordRequests.length;
+  int deleteRequestCount = 0;
+
+  @override
+  Future<ApiResult<StudentLeaveDeleteResult>> checkAndDeleteLeave({
+    required String username,
+    required String password,
+    required String leaveNumber,
+  }) async {
+    deleteRequestCount++;
+    return const ApiSuccess<StudentLeaveDeleteResult>(
+      StudentLeaveDeleteResult(statusCode: 503, body: 'Service Unavailable'),
+    );
+  }
+
+  @override
+  Future<ApiResult<List<StudentLeaveRecord>>> getLeaveRecords({
+    required String username,
+    required String password,
+    StudentLeaveSemester? semester,
+  }) {
+    final Completer<ApiResult<List<StudentLeaveRecord>>> completer =
+        Completer<ApiResult<List<StudentLeaveRecord>>>();
+    requestedSemesters.add(semester ?? StudentLeaveSemester.current());
+    _recordRequests.add(completer);
+    return completer.future;
+  }
+
+  void completeNextRecords(List<StudentLeaveRecord> records) {
+    _recordRequests
+        .firstWhere(
+          (Completer<ApiResult<List<StudentLeaveRecord>>> completer) =>
+              !completer.isCompleted,
+        )
+        .complete(ApiSuccess<List<StudentLeaveRecord>>(records));
+  }
+}
+
 Widget _testApp(Widget child) {
   return TranslationProvider(
     child: MaterialApp(
@@ -333,12 +598,14 @@ Widget _testApp(Widget child) {
 }
 
 StudentLeaveFormConstraints _testConstraints() {
+  final DateTime now = DateTime.now();
+  final DateTime today = DateTime(now.year, now.month, now.day);
   return StudentLeaveFormConstraints(
     leaveTypes: StudentLeaveType.values,
-    firstStartDate: DateTime(2026, 2),
-    lastStartDate: DateTime(2026, 9),
-    firstEndDate: DateTime(2026, 2),
-    lastEndDate: DateTime(2026, 9),
+    firstStartDate: today.subtract(const Duration(days: 30)),
+    lastStartDate: today.add(const Duration(days: 30)),
+    firstEndDate: today.subtract(const Duration(days: 30)),
+    lastEndDate: today.add(const Duration(days: 30)),
     startTimes: const <String>['07:00', '09:00', '12:00'],
     endTimes: const <String>['07:30', '09:30', '12:00'],
     maxReasonLength: 100,

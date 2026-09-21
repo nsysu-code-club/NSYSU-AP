@@ -50,9 +50,8 @@ StudentLeaveConfirmation parseStudentLeaveConfirmation(String html) {
             return tag == 'td' || tag == 'th';
           })
           .map((dom.Element cell) => _cleanText(cell.text))
-          .where((String text) => text.isNotEmpty)
           .toList();
-      if (cells.isEmpty) continue;
+      if (cells.isEmpty || cells.every((String text) => text.isEmpty)) continue;
       if (cells.length == 1) {
         if (currentTitle.isEmpty || _isLeaveCourseSection(cells.first)) {
           currentTitle = cells.first;
@@ -81,8 +80,8 @@ StudentLeaveConfirmation parseStudentLeaveConfirmation(String html) {
       }
       for (int i = 0; i + 1 < cells.length; i += 2) {
         final String label = _cleanLabel(cells[i]);
-        final String value = cells[i + 1];
-        if (label.isEmpty || value.isEmpty || label == value) continue;
+        final String value = cells[i + 1].isEmpty ? '空' : cells[i + 1];
+        if (label.isEmpty || label == value) continue;
         final String key = '$label=$value';
         if (!seenFields.add(key)) continue;
         fields.add(StudentLeaveConfirmationField(label: label, value: value));
@@ -128,9 +127,8 @@ StudentLeaveConfirmation parseStudentLeaveConfirmation(String html) {
 List<StudentLeaveRecord> parseStudentLeaveRecords(String html) {
   final dom.Document document = parse(html, encoding: 'BIG-5');
   final List<StudentLeaveRecord> records = <StudentLeaveRecord>[];
-  for (final dom.Element table in document.getElementsByTagName('table')) {
+  for (final dom.Element table in _studentLeaveRecordTables(document)) {
     final List<dom.Element> rows = table.getElementsByTagName('tr');
-    if (rows.isEmpty || !rows.first.text.contains('請假單編號')) continue;
     for (int i = 1; i < rows.length; i++) {
       final List<dom.Element> cells = rows[i].getElementsByTagName('td');
       if (cells.length < 10) continue;
@@ -155,6 +153,16 @@ List<StudentLeaveRecord> parseStudentLeaveRecords(String html) {
     }
   }
   return records;
+}
+
+bool isRecognizedStudentLeaveRecordsPage(String html) {
+  final dom.Document document = parse(html, encoding: 'BIG-5');
+  if (_studentLeaveRecordTables(document).isNotEmpty) return true;
+  final String text = _cleanText(document.body?.text ?? document.text ?? '');
+  return text.contains('沒有合乎查詢條件的資料') ||
+      text.contains('查無請假') ||
+      text.contains('無請假紀錄') ||
+      text.contains('無請假資料');
 }
 
 StudentLeaveFormConstraints? parseStudentLeaveFormConstraints(String html) {
@@ -207,9 +215,10 @@ StudentLeaveFormConstraints? parseStudentLeaveFormConstraints(String html) {
   final DateTime? lastDate = _parseSisDate(
     startDateInput?.attributes['max'] ?? endDateInput?.attributes['max'],
   );
-  final DateTime? firstEndDate = _parseSisDate(
-    endDateInput?.attributes['min'] ?? startDateInput?.attributes['min'],
-  );
+  // SIS datechange('date', start) replaces end_date.min with the selected
+  // start date. Its initial min is not a fixed limit on retrospective leave.
+  // The picker and request validation enforce end > start separately.
+  final DateTime? firstEndDate = firstDate;
   final DateTime? lastEndDate = _parseSisDate(
     endDateInput?.attributes['max'] ?? startDateInput?.attributes['max'],
   );
@@ -558,6 +567,17 @@ bool _isLeaveCourseHeader(List<String> cells) {
       cells[1].contains('節次') &&
       cells[2].contains('任課教師') &&
       cells[3].contains('課目名稱');
+}
+
+List<dom.Element> _studentLeaveRecordTables(dom.Document document) {
+  return document.getElementsByTagName('table').where((dom.Element table) {
+    final List<dom.Element> rows = table.getElementsByTagName('tr');
+    if (rows.isEmpty) return false;
+    final String headerText = _cleanText(rows.first.text);
+    return headerText.contains('請假單編號') &&
+        headerText.contains('學年') &&
+        headerText.contains('學期');
+  }).toList();
 }
 
 String _cleanText(String text) {

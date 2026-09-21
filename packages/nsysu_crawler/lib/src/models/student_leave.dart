@@ -401,21 +401,52 @@ class StudentLeaveSubmitResult {
   final StudentLeaveConfirmation confirmation;
 
   bool? get looksSuccessful {
-    if (body.contains('不成功') ||
-        body.contains('失敗') ||
-        body.contains('錯誤') ||
-        body.contains('未完成') ||
-        body.contains('異常')) {
+    final String statusText = _submitResultStatusText(confirmation, body);
+    if (statusText.contains('不成功') ||
+        statusText.contains('失敗') ||
+        statusText.contains('錯誤') ||
+        statusText.contains('未完成') ||
+        statusText.contains('異常')) {
       return false;
     }
-    if (body.contains('成功') ||
-        body.contains('完成') ||
-        body.contains('已新增') ||
-        body.contains('存檔')) {
+    if (statusText.contains('成功') ||
+        statusText.contains('完成') ||
+        statusText.contains('已新增') ||
+        statusText.contains('存檔')) {
       return true;
     }
     return null;
   }
+}
+
+String _submitResultStatusText(
+  StudentLeaveConfirmation confirmation,
+  String body,
+) {
+  // messages is a filtered, six-line display summary. Read the complete
+  // response so a later error or a status omitted from that summary survives.
+  // Script-only SIS responses have no parsed text, so retain the body fallback.
+  final List<String> resultLines =
+      <String>[
+            confirmation.rawText.trim().isNotEmpty
+                ? confirmation.rawText
+                : body,
+            ...confirmation.messages,
+          ]
+          .expand((String text) => text.split(RegExp(r'[\r\n]+')))
+          .map((String line) => line.trim())
+          .where(
+            (String line) => line.isNotEmpty && !_isSubmitInstructionLine(line),
+          )
+          .toList();
+  return resultLines.join('\n');
+}
+
+bool _isSubmitInstructionLine(String line) {
+  final String text = line.trim();
+  return text.startsWith(RegExp(r'^\(\d+\)')) ||
+      text.startsWith('請同學') ||
+      text.contains('注意以下說明');
 }
 
 class StudentLeaveDeleteResult {
@@ -428,6 +459,9 @@ class StudentLeaveDeleteResult {
   final String body;
 
   bool? get looksSuccessful {
+    // SIS may finish the deletion before returning HTTP 503. The caller must
+    // refresh the records to determine the outcome instead of retrying it.
+    if (statusCode == 503) return null;
     if (body.contains('不成功') ||
         body.contains('失敗') ||
         body.contains('錯誤') ||

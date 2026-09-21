@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:nsysu_crawler/nsysu_crawler.dart';
+import 'package:nsysu_crawler/src/parsers/html_parser.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -357,6 +358,28 @@ void main() {
       expect(result.looksSuccessful, isTrue);
     });
 
+    test('ignores instructional notice text when result message succeeds', () {
+      const StudentLeaveSubmitResult result = StudentLeaveSubmitResult(
+        statusCode: 200,
+        body: '''
+請同學注意以下說明：
+(3)於系所導生名冊未完成安排前，系統將以系所主任代替導師。
+假單新增成功
+''',
+        confirmation: StudentLeaveConfirmation(
+          sections: <StudentLeaveConfirmationSection>[],
+          messages: <String>[
+            '請同學注意以下說明：',
+            '(3)於系所導生名冊未完成安排前，系統將以系所主任代替導師。',
+            '假單新增成功',
+          ],
+          rawText: '',
+        ),
+      );
+
+      expect(result.looksSuccessful, isTrue);
+    });
+
     test('does not treat negative success words as successful', () {
       const List<String> bodies = <String>[
         '儲存不成功',
@@ -374,6 +397,77 @@ void main() {
         );
         expect(result.looksSuccessful, isFalse);
       }
+    });
+
+    test('uses statuses omitted from the display summary', () {
+      const Map<String, bool> statuses = <String, bool>{
+        '處理異常': false,
+        '資料已新增': true,
+      };
+      for (final MapEntry<String, bool> status in statuses.entries) {
+        final String body = '<html><body>假單送出結果\n${status.key}</body></html>';
+        final StudentLeaveConfirmation parsed = parseStudentLeaveConfirmation(
+          body,
+        );
+        expect(parsed.messages, <String>['假單送出結果']);
+        final StudentLeaveSubmitResult result = StudentLeaveSubmitResult(
+          statusCode: 200,
+          body: body,
+          confirmation: parsed,
+        );
+
+        expect(result.looksSuccessful, status.value);
+      }
+    });
+
+    test('detects a failure beyond the six-line display summary', () {
+      final String body =
+          '<html><body>'
+          '${List<String>.generate(6, (int i) => '假單處理步驟 $i 完成').join('\n')}'
+          '\n假單送出失敗</body></html>';
+      final StudentLeaveConfirmation parsed = parseStudentLeaveConfirmation(
+        body,
+      );
+      expect(parsed.messages, hasLength(6));
+      expect(parsed.messages, isNot(contains('假單送出失敗')));
+      final StudentLeaveSubmitResult result = StudentLeaveSubmitResult(
+        statusCode: 200,
+        body: body,
+        confirmation: parsed,
+      );
+
+      expect(result.looksSuccessful, isFalse);
+    });
+
+    test('retains script-only SIS success responses', () {
+      const String body =
+          "<script>alert('請假單新增成功')</script>"
+          "<script>window.location.href='SLAMS_sendmail.php'</script>";
+      final StudentLeaveConfirmation parsed = parseStudentLeaveConfirmation(
+        body,
+      );
+      expect(parsed.rawText, isEmpty);
+      final StudentLeaveSubmitResult result = StudentLeaveSubmitResult(
+        statusCode: 200,
+        body: body,
+        confirmation: parsed,
+      );
+
+      expect(result.looksSuccessful, isTrue);
+    });
+
+    test('does not reintroduce notices when no result is available', () {
+      const String body = '''<html><body>
+請同學注意以下說明：
+(3)於系所導生名冊未完成安排前，系統將以系所主任代替導師。
+</body></html>''';
+      final StudentLeaveSubmitResult result = StudentLeaveSubmitResult(
+        statusCode: 200,
+        body: body,
+        confirmation: parseStudentLeaveConfirmation(body),
+      );
+
+      expect(result.looksSuccessful, isNull);
     });
 
     test('treats unrecognized submit responses as unknown', () {

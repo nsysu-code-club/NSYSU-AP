@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:ap_common/ap_common.dart';
@@ -10,7 +11,9 @@ import 'package:nsysu_crawler/nsysu_crawler.dart';
 class StudentLeavePage extends StatefulWidget {
   static const String routerName = '/studentLeave';
 
-  const StudentLeavePage({super.key});
+  const StudentLeavePage({super.key, this.helper});
+
+  final StudentLeaveHelper? helper;
 
   @override
   State<StudentLeavePage> createState() => _StudentLeavePageState();
@@ -21,9 +24,12 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
       const DataLoading<List<StudentLeaveRecord>>();
   late final List<StudentLeaveSemester> _semesterOptions;
   late StudentLeaveSemester _selectedSemester;
-  int _recordsRequestId = 0;
+  Future<void>? _recordsRefresh;
   String? _deletingRecordNumber;
   String? _openingProofUrl;
+
+  StudentLeaveHelper get _studentLeaveHelper =>
+      widget.helper ?? StudentLeaveHelper.instance;
 
   @override
   void initState() {
@@ -45,7 +51,7 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
         actions: <Widget>[
           IconButton(
             tooltip: app.studentLeaveRefresh,
-            onPressed: _getRecords,
+            onPressed: _recordsRefresh == null ? _getRecords : null,
             icon: const Icon(Icons.refresh),
           ),
         ],
@@ -152,16 +158,43 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
   }
 
   Future<void> _getRecords() async {
-    final int requestId = ++_recordsRequestId;
+    final StudentLeaveSemester semester = _selectedSemester;
+    final Future<void>? currentRefresh = _recordsRefresh;
+    if (currentRefresh != null) {
+      await currentRefresh;
+      return;
+    }
+
+    late final Future<void> refresh;
+    refresh = _drainRecordRefreshes(semester).whenComplete(() {
+      if (!identical(_recordsRefresh, refresh)) return;
+      _recordsRefresh = null;
+      if (mounted) setState(() {});
+    });
+    _recordsRefresh = refresh;
+    await refresh;
+  }
+
+  Future<void> _drainRecordRefreshes(StudentLeaveSemester semester) async {
+    StudentLeaveSemester nextSemester = semester;
+    while (mounted) {
+      await _loadRecords(nextSemester);
+      if (!mounted) return;
+      final StudentLeaveSemester selectedSemester = _selectedSemester;
+      if (selectedSemester == nextSemester) return;
+      nextSemester = selectedSemester;
+    }
+  }
+
+  Future<void> _loadRecords(StudentLeaveSemester semester) async {
     setState(() => state = const DataLoading<List<StudentLeaveRecord>>());
-    final ApiResult<List<StudentLeaveRecord>> result = await StudentLeaveHelper
-        .instance
+    final ApiResult<List<StudentLeaveRecord>> result = await _studentLeaveHelper
         .getLeaveRecords(
           username: SelcrsHelper.instance.username,
           password: SelcrsHelper.instance.password,
-          semester: _selectedSemester,
+          semester: semester,
         );
-    if (!mounted || requestId != _recordsRequestId) return;
+    if (!mounted || semester != _selectedSemester) return;
     switch (result) {
       case ApiSuccess<List<StudentLeaveRecord>>(
         :final List<StudentLeaveRecord> data,
@@ -213,8 +246,7 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
       return;
     }
 
-    final ApiResult<StudentLeaveDeleteResult> result = await StudentLeaveHelper
-        .instance
+    final ApiResult<StudentLeaveDeleteResult> result = await _studentLeaveHelper
         .checkAndDeleteLeave(
           username: SelcrsHelper.instance.username,
           password: SelcrsHelper.instance.password,
@@ -263,12 +295,11 @@ class _StudentLeavePageState extends State<StudentLeavePage> {
           PopScope(canPop: false, child: ProgressDialog(ap.loading)),
       barrierDismissible: false,
     );
-    final ApiResult<Uint8List> result = await StudentLeaveHelper.instance
-        .downloadProof(
-          username: SelcrsHelper.instance.username,
-          password: SelcrsHelper.instance.password,
-          proofUrl: proofUrl,
-        );
+    final ApiResult<Uint8List> result = await _studentLeaveHelper.downloadProof(
+      username: SelcrsHelper.instance.username,
+      password: SelcrsHelper.instance.password,
+      proofUrl: proofUrl,
+    );
     if (!mounted) return;
     Navigator.of(context, rootNavigator: true).pop();
     setState(() => _openingProofUrl = null);
@@ -1760,26 +1791,29 @@ class _StudentLeaveNotice extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Theme(
-        data: theme.copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          initiallyExpanded: true,
-          tilePadding: const EdgeInsets.symmetric(
-            horizontal: 14.0,
-            vertical: 2.0,
-          ),
-          childrenPadding: const EdgeInsets.fromLTRB(14.0, 0, 14.0, 14.0),
-          leading: Icon(Icons.info_outline, color: theme.colorScheme.primary),
-          title: Text(
-            app.studentLeaveNoticeTitle,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
+      child: Material(
+        color: Colors.transparent,
+        child: Theme(
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            initiallyExpanded: true,
+            tilePadding: const EdgeInsets.symmetric(
+              horizontal: 14.0,
+              vertical: 2.0,
             ),
+            childrenPadding: const EdgeInsets.fromLTRB(14.0, 0, 14.0, 14.0),
+            leading: Icon(Icons.info_outline, color: theme.colorScheme.primary),
+            title: Text(
+              app.studentLeaveNoticeTitle,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            children: <Widget>[
+              for (int i = 0; i < lines.length; i++)
+                _NoticeLine(text: lines[i], showDivider: i != lines.length - 1),
+            ],
           ),
-          children: <Widget>[
-            for (int i = 0; i < lines.length; i++)
-              _NoticeLine(text: lines[i], showDivider: i != lines.length - 1),
-          ],
         ),
       ),
     );
@@ -1920,24 +1954,32 @@ String _englishConfirmationText(String text) {
   };
   if (titleMap.containsKey(text)) return titleMap[text]!;
 
-  final Iterable<RegExpMatch> matches = RegExp(
-    r'\(([^()]*)\)',
-  ).allMatches(text);
-  if (matches.isNotEmpty) {
-    return matches
-        .map((RegExpMatch match) => match.group(1)!.trim())
-        .where((String value) => value.isNotEmpty)
-        .join(' ')
-        .trim();
-  }
+  final String? knownTranslation = _knownBilingualConfirmationText(
+    text,
+    preferEnglish: true,
+  );
+  if (knownTranslation != null) return knownTranslation;
   return text;
 }
 
 String _chineseConfirmationText(String text) {
-  return text
-      .replaceAll(RegExp(r'\([^()]*\)'), '')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
+  return _knownBilingualConfirmationText(text, preferEnglish: false) ?? text;
+}
+
+String? _knownBilingualConfirmationText(
+  String text, {
+  required bool preferEnglish,
+}) {
+  final RegExpMatch? match = RegExp(r'^(.+?)\s*\(([^()]*)\)$').firstMatch(text);
+  if (match == null) return null;
+  final String chinese = match.group(1)!.trim();
+  final String english = match.group(2)!.trim();
+  if (chinese.isEmpty || english.isEmpty) return null;
+  final bool isKnownServerLabel = StudentLeaveType.values.any(
+    (StudentLeaveType type) => type.name == chinese,
+  );
+  if (!isKnownServerLabel) return null;
+  return preferEnglish ? english : chinese;
 }
 
 class _DateTimeTile extends StatelessWidget {

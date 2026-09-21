@@ -134,6 +134,28 @@ void main() {
     expect(adapter.requestUri?.queryParameters['sem'], '1');
   });
 
+  test('getLeaveRecords rejects unrecognized authenticated pages', () async {
+    final StudentLeaveHelper helper = StudentLeaveHelper();
+    final _RecordingAdapter adapter = _RecordingAdapter(
+      responseFactory: (_) => _htmlResponse('<html>maintenance window</html>'),
+    );
+    helper.dio.httpClientAdapter = adapter;
+    helper
+      ..isLogin = true
+      ..username = 'student';
+    addTearDown(helper.dio.close);
+
+    final ApiResult<List<StudentLeaveRecord>> result = await helper
+        .getLeaveRecords(
+          username: 'student',
+          password: 'password',
+          semester: const StudentLeaveSemester(schoolYear: 113, semester: 1),
+        );
+
+    expect(result, isA<ApiError<List<StudentLeaveRecord>>>());
+    expect(adapter.requests, hasLength(1));
+  });
+
   test('proof downloads stay in the authenticated Dio session', () async {
     final StudentLeaveHelper helper = StudentLeaveHelper();
     final _RecordingAdapter adapter = _RecordingAdapter(
@@ -725,6 +747,222 @@ void main() {
     expect(adapter.requests, isEmpty);
   });
 
+  test(
+    'SIS F check permits check and delete POSTs with query parameters',
+    () async {
+      final StudentLeaveHelper helper = StudentLeaveHelper();
+      final _RecordingAdapter adapter = _RecordingAdapter(
+        responseFactory: (RequestOptions options) {
+          expect(options.method, 'POST');
+          expect(options.uri.path, '/SLAMS/SLAMS_stuLeave_ischecked.php');
+          expect(options.uri.queryParameters['SLA_SNO'], 'SL1130001');
+          return _htmlResponse(
+            options.uri.queryParameters['act'] == 'check'
+                ? ' \r\nF\n'
+                : '假單刪除成功!',
+          );
+        },
+      );
+      helper.dio.httpClientAdapter = adapter;
+      helper
+        ..isLogin = true
+        ..username = 'student';
+      addTearDown(helper.dio.close);
+
+      final ApiResult<StudentLeaveDeleteResult> result = await helper
+          .checkAndDeleteLeave(
+            username: 'student',
+            password: 'password',
+            leaveNumber: 'SL1130001',
+          );
+
+      expect(result, isA<ApiSuccess<StudentLeaveDeleteResult>>());
+      expect(
+        (result as ApiSuccess<StudentLeaveDeleteResult>).data.looksSuccessful,
+        isTrue,
+      );
+      expect(
+        adapter.requestUris.map((Uri uri) => uri.queryParameters['act']),
+        <String>['check', 'del'],
+      );
+      expect(adapter.requestBodies, everyElement(isEmpty));
+    },
+  );
+
+  test('SIS T check rejects deletion of an already reviewed record', () async {
+    final StudentLeaveHelper helper = StudentLeaveHelper();
+    final _RecordingAdapter adapter = _RecordingAdapter(
+      responseFactory: (_) => _htmlResponse('T'),
+    );
+    helper.dio.httpClientAdapter = adapter;
+    helper
+      ..isLogin = true
+      ..username = 'student';
+    addTearDown(helper.dio.close);
+
+    final ApiResult<StudentLeaveDeleteResult> result = await helper
+        .checkAndDeleteLeave(
+          username: 'student',
+          password: 'password',
+          leaveNumber: 'SL1130001',
+        );
+
+    expect(result, isA<ApiError<StudentLeaveDeleteResult>>());
+    final GeneralResponse error =
+        (result as ApiError<StudentLeaveDeleteResult>).response;
+    expect(error.statusCode, 409);
+    expect(error.message, contains('already reviewed'));
+    expect(adapter.requests, hasLength(1));
+    expect(adapter.requests.single.method, 'POST');
+    expect(adapter.requestUris.single.queryParameters['act'], 'check');
+  });
+
+  test(
+    'HTTP 503 after deletion is unknown and never retries the POST',
+    () async {
+      final StudentLeaveHelper helper = StudentLeaveHelper();
+      final _RecordingAdapter adapter = _RecordingAdapter(
+        responseFactory: (RequestOptions options) =>
+            options.uri.queryParameters['act'] == 'check'
+            ? _htmlResponse('F')
+            : ResponseBody.fromString('Service Unavailable', 503),
+      );
+      helper.dio.httpClientAdapter = adapter;
+      helper
+        ..isLogin = true
+        ..username = 'student';
+      addTearDown(helper.dio.close);
+
+      final ApiResult<StudentLeaveDeleteResult> result = await helper
+          .checkAndDeleteLeave(
+            username: 'student',
+            password: 'password',
+            leaveNumber: 'SL1130001',
+          );
+
+      expect(result, isA<ApiSuccess<StudentLeaveDeleteResult>>());
+      final StudentLeaveDeleteResult data =
+          (result as ApiSuccess<StudentLeaveDeleteResult>).data;
+      expect(data.statusCode, 503);
+      expect(data.looksSuccessful, isNull);
+      expect(
+        await helper.deleteLeave(leaveNumber: 'SL1130001'),
+        isA<ApiError<StudentLeaveDeleteResult>>(),
+      );
+      expect(
+        adapter.requestUris.map((Uri uri) => uri.queryParameters['act']),
+        <String>['check', 'del'],
+      );
+    },
+  );
+
+  test('HTTP 503 during the check never sends a deletion POST', () async {
+    final StudentLeaveHelper helper = StudentLeaveHelper();
+    final _RecordingAdapter adapter = _RecordingAdapter(
+      responseFactory: (_) =>
+          ResponseBody.fromString('Service Unavailable', 503),
+    );
+    helper.dio.httpClientAdapter = adapter;
+    helper
+      ..isLogin = true
+      ..username = 'student';
+    addTearDown(helper.dio.close);
+
+    final ApiResult<StudentLeaveDeleteResult> result = await helper
+        .checkAndDeleteLeave(
+          username: 'student',
+          password: 'password',
+          leaveNumber: 'SL1130001',
+        );
+
+    expect(result, isA<ApiFailure<StudentLeaveDeleteResult>>());
+    expect(adapter.requestUris, hasLength(1));
+    expect(adapter.requestUris.single.queryParameters['act'], 'check');
+  });
+
+  test(
+    'observed SIS warnings preserve the final deletion check status',
+    () async {
+      final String capturedResponse = File(
+        'test/fixtures/student_leave_delete_check_warnings.html',
+      ).readAsStringSync();
+      for (final String status in <String>['F', 'T', 'unknown', '']) {
+        final StudentLeaveHelper helper = StudentLeaveHelper();
+        final _RecordingAdapter adapter = _RecordingAdapter(
+          responseFactory: (RequestOptions options) => _htmlResponse(
+            options.uri.queryParameters['act'] == 'check'
+                ? capturedResponse.replaceFirst(RegExp(r'F\s*$'), status)
+                : '假單刪除成功!',
+          ),
+        );
+        helper.dio.httpClientAdapter = adapter;
+        helper
+          ..isLogin = true
+          ..username = 'student';
+        addTearDown(helper.dio.close);
+
+        final ApiResult<StudentLeaveDeleteResult> result = await helper
+            .checkAndDeleteLeave(
+              username: 'student',
+              password: 'password',
+              leaveNumber: 'SL1130001',
+            );
+
+        expect(
+          adapter.requests.map((RequestOptions request) => request.method),
+          everyElement('POST'),
+        );
+        if (status == 'F') {
+          expect(result, isA<ApiSuccess<StudentLeaveDeleteResult>>());
+          expect(
+            adapter.requestUris.map((Uri uri) => uri.queryParameters['act']),
+            <String>['check', 'del'],
+          );
+        } else {
+          expect(result, isA<ApiError<StudentLeaveDeleteResult>>());
+          expect(
+            (result as ApiError<StudentLeaveDeleteResult>).response.statusCode,
+            status == 'T' ? 409 : 503,
+          );
+          expect(adapter.requests, hasLength(1));
+        }
+      }
+    },
+  );
+
+  test(
+    'unrecognized PHP errors followed by F cannot authorize deletion',
+    () async {
+      final String capturedResponse = File(
+        'test/fixtures/student_leave_delete_check_warnings.html',
+      ).readAsStringSync();
+      final StudentLeaveHelper helper = StudentLeaveHelper();
+      final _RecordingAdapter adapter = _RecordingAdapter(
+        responseFactory: (_) => _htmlResponse(
+          capturedResponse.replaceFirst(
+            'Undefined global variable',
+            'Unknown database error',
+          ),
+        ),
+      );
+      helper.dio.httpClientAdapter = adapter;
+      helper
+        ..isLogin = true
+        ..username = 'student';
+      addTearDown(helper.dio.close);
+
+      final ApiResult<StudentLeaveDeleteResult> result = await helper
+          .checkAndDeleteLeave(
+            username: 'student',
+            password: 'password',
+            leaveNumber: 'SL1130001',
+          );
+
+      expect(result, isA<ApiError<StudentLeaveDeleteResult>>());
+      expect(adapter.requests, hasLength(1));
+    },
+  );
+
   test('leave deletion follows the SIS check then delete sequence', () async {
     final StudentLeaveHelper helper = StudentLeaveHelper();
     final _RecordingAdapter adapter = _RecordingAdapter();
@@ -793,8 +1031,14 @@ void main() {
     },
   );
 
-  test('leave deletion check rejects non-executable or ambiguous URLs', () async {
+  test('leave deletion check rejects HTML and ambiguous responses', () async {
     const List<String> rejectedResponses = <String>[
+      '',
+      'false',
+      'TF',
+      '<html>F</html>',
+      r'<b>Warning</b>: Undefined global variable $_SESSION<br />F',
+      '<script>location.href="SLAMS_stuLeave_ischecked.php?SLA_SNO=SL1130001&act=del";</script>',
       '<p>SLAMS_stuLeave_ischecked.php?SLA_SNO=SL1130001&amp;act=del</p>',
       '''<!-- <script>location.href="SLAMS_stuLeave_ischecked.php?SLA_SNO=SL1130001&amp;act=del";</script> -->''',
       '''<script>location.href="SLAMS_stuLeave_ischecked.php?SLA_SNO=SL1130001&amp;SLA_SNO=OTHER&amp;act=del";</script>''',
@@ -919,7 +1163,7 @@ void main() {
     final _RecordingAdapter adapter = _RecordingAdapter(
       responseFactory: (RequestOptions options) {
         if (options.uri.queryParameters['act'] == 'check') {
-          return _authorizedDeleteCheckResponse(options);
+          return _authorizedDeleteCheckResponse();
         }
         return options.uri.path == '/include/loginCheck.php'
             ? _htmlResponse(
@@ -984,6 +1228,8 @@ void main() {
           ? _htmlResponse(
               '<a href="afterCheck.php?OK=SHARED_TOKEN">continue</a>',
             )
+          : options.uri.path == '/SLAMS/SLAMS_student_view.php'
+          ? _htmlResponse(_emptyLeaveRecordsPage())
           : _htmlResponse('<html>authenticated</html>'),
     );
     helper.dio.httpClientAdapter = adapter;
@@ -1112,8 +1358,8 @@ class _RecordingAdapter implements HttpClientAdapter {
       await beforeResponse?.call(options);
       return responseFactory?.call(options) ??
           (options.uri.queryParameters['act'] == 'check'
-              ? _authorizedDeleteCheckResponse(options)
-              : _htmlResponse('<html><body></body></html>'));
+              ? _authorizedDeleteCheckResponse()
+              : _htmlResponse(_emptyLeaveRecordsPage()));
     } finally {
       _concurrentRequests--;
     }
@@ -1133,14 +1379,7 @@ ResponseBody _htmlResponse(String body) {
   );
 }
 
-ResponseBody _authorizedDeleteCheckResponse(RequestOptions options) {
-  final String? leaveNumber = options.uri.queryParameters['SLA_SNO'];
-  return _htmlResponse('''
-<script>
-location.href = "SLAMS_stuLeave_ischecked.php?SLA_SNO=$leaveNumber&amp;act=del";
-</script>
-''');
-}
+ResponseBody _authorizedDeleteCheckResponse() => _htmlResponse('F');
 
 StudentLeaveRequest _leaveRequest({
   String reason = 'private leave reason',
@@ -1209,4 +1448,25 @@ String _leaveConfirmForm({
   <input name="e_time" value="10:00">
   <textarea name="sla_cont">$reason</textarea>
 </form>
+''';
+
+String _emptyLeaveRecordsPage() => '''
+<html>
+  <body>
+    <table>
+      <tr>
+        <th>請假單編號</th>
+        <th>學年</th>
+        <th>學期</th>
+        <th>假別</th>
+        <th>請假期間</th>
+        <th>導師</th>
+        <th>系主任</th>
+        <th>任課教師</th>
+        <th>證明文件</th>
+        <th>維護</th>
+      </tr>
+    </table>
+  </body>
+</html>
 ''';

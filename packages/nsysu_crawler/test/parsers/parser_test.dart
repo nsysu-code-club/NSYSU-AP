@@ -345,7 +345,7 @@ void main() {
       );
       expect(result.firstStartDate, DateTime(2026, 2));
       expect(result.lastStartDate, DateTime(2026, 9));
-      expect(result.firstEndDate, DateTime(2026, 7, 12));
+      expect(result.firstEndDate, DateTime(2026, 2));
       expect(result.lastEndDate, DateTime(2026, 9));
       expect(result.startTimes, <String>['09:00', '09:30', '10:00']);
       expect(result.endTimes, <String>['09:00', '09:30', '10:00']);
@@ -353,6 +353,45 @@ void main() {
       expect(result.allowedAttachmentExtensions, <String>['pdf']);
       expect(result.maxAttachmentBytes, 1572864);
     });
+
+    test(
+      'allows September 10 leave when initial end minimum is September 13',
+      () {
+        final String html = _readFixture('student_leave_add_form.html')
+            .replaceAll('2026-02-01', '2026-09-01')
+            .replaceAll('2026-07-12', '2026-09-13')
+            .replaceAll('max="2026-09-01"', 'max="2027-02-01"');
+        final StudentLeaveFormConstraints constraints =
+            parseStudentLeaveFormConstraints(html)!;
+
+        StudentLeaveRequest request(DateTime start, DateTime end) =>
+            StudentLeaveRequest(
+              type: constraints.leaveTypes.first,
+              startDateTime: start,
+              endDateTime: end,
+              reason: '補請假',
+            );
+
+        expect(constraints.firstEndDate, DateTime(2026, 9, 1));
+        expect(
+          constraints.validate(
+            request(DateTime(2026, 9, 10, 9), DateTime(2026, 9, 10, 10)),
+          ),
+          isNull,
+        );
+        for (final StudentLeaveRequest invalid in <StudentLeaveRequest>[
+          request(DateTime(2026, 8, 31, 9), DateTime(2026, 8, 31, 10)),
+          request(DateTime(2027, 2, 2, 9), DateTime(2027, 2, 2, 10)),
+          request(DateTime(2026, 9, 10, 10), DateTime(2026, 9, 10, 9)),
+          request(DateTime(2026, 9, 10, 9), DateTime(2026, 9, 10, 9)),
+        ]) {
+          expect(
+            constraints.validate(invalid),
+            StudentLeaveRequestIssue.invalidDateRange,
+          );
+        }
+      },
+    );
 
     test(
       'returns null rather than guessing when required limits are absent',
@@ -534,6 +573,65 @@ void main() {
       expect(result.fields['notify'], isNull);
       expect(result.fields['courseFlag'], 'selected');
     });
+
+    test(
+      'retains blank confirmation cells before pairing labels and values',
+      () {
+        const String html = '''
+      <html>
+        <body>
+          <table>
+            <tr><td>假單資料</td></tr>
+            <tr>
+              <td>請假事由</td>
+              <td></td>
+              <td>備註</td>
+              <td>Doctor visit (follow-up)</td>
+            </tr>
+          </table>
+          <table>
+            <tr><td>請假期間課程名稱</td></tr>
+            <tr>
+              <th>日期</th><th>節次</th><th>任課教師</th><th>課目名稱</th>
+            </tr>
+            <tr>
+              <td>2026-08-11</td><td></td><td>王老師</td><td>資料結構</td>
+            </tr>
+          </table>
+        </body>
+      </html>
+      ''';
+
+        final StudentLeaveConfirmation confirmation =
+            parseStudentLeaveConfirmation(html);
+        final List<StudentLeaveConfirmationField> fields = confirmation.sections
+            .expand((StudentLeaveConfirmationSection section) => section.fields)
+            .toList();
+
+        expect(fields[0].label, '請假事由');
+        expect(fields[0].value, '空');
+        expect(fields[1].label, '備註');
+        expect(fields[1].value, 'Doctor visit (follow-up)');
+        expect(
+          fields
+              .where(
+                (StudentLeaveConfirmationField field) => field.label == '節次',
+              )
+              .single
+              .value,
+          '空',
+        );
+        expect(
+          fields
+              .where(
+                (StudentLeaveConfirmationField field) => field.label == '課目名稱',
+              )
+              .single
+              .value,
+          '資料結構',
+        );
+      },
+    );
 
     test('rejects untrusted or ambiguous confirmation forms', () {
       final String html = _readFixture('student_leave_confirm_form.html');
