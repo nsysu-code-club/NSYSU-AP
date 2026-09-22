@@ -30,7 +30,7 @@ fvm dart run tool/install_git_hooks.dart
 dart run tool/install_git_hooks.dart
 ```
 
-安裝後，每次 `git commit` 前會透過 `bin/git_hooks.dart` 執行 `tool/pre_commit.dart`。pre-commit 目前會跑：
+請只從信任的 checkout 安裝。安裝器將 `tool/pre_commit.dart` 複製到 Git hooks 目錄，並固定使用安裝時的 Dart 執行檔；每次 `git commit` 執行此副本，切換分支不會替換 hook 程式。工具流程或 SDK 路徑更新後需重新安裝。Slang 與 analyzer 仍使用目前工作目錄及其依賴。pre-commit 目前會跑：
 
 - 只有暫存區包含 `lib/l10n` 的新增、修改、刪除或移入／移出時，才執行 `dart run slang`，並確認 `lib/l10n` 沒有未暫存或未追蹤的變更
 - 沒有暫存 l10n 變更時，跳過上述兩步並在 summary 顯示 `SKIPPED`

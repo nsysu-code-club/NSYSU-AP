@@ -123,7 +123,7 @@ fvm dart run tool/install_git_hooks.dart
 dart run tool/install_git_hooks.dart
 ```
 
-安裝器只會在 Git 的 hooks 目錄建立 `pre-commit`，指向 [`bin/git_hooks.dart`](bin/git_hooks.dart)。既有的其他 hooks 會保留；若有不同的 `pre-commit` 或設定了 `core.hooksPath`，安裝器會提示手動整合並停止，不會覆寫 hook 或修改 Git 設定。
+安裝器會在 Git 的 hooks 目錄建立 `pre-commit`、`nsysu-pre-commit.dart` 與 SDK 路徑檔 `nsysu-dart-path`，執行安裝時保存的 [`tool/pre_commit.dart`](tool/pre_commit.dart) 副本，並固定使用安裝時的 Dart 執行檔。切換分支不會替換已安裝的 hook 程式；請只從信任的 checkout 執行安裝器，工具流程或 SDK 路徑更新後需重新安裝。這不會隔離專案依賴，Slang 與 analyzer 仍使用目前工作目錄。既有的其他 hooks 會保留；舊版專案管理的 wrapper 會升級，若有不同的 `pre-commit` 或設定了 `core.hooksPath`，安裝器會提示手動整合並停止，不會覆寫自訂 hook 或修改 Git 設定。
 
 之後每次 `git commit` 前會自動執行：
 
@@ -144,7 +144,7 @@ fvm dart analyze .
 pre-commit 不執行爬蟲單元測試或校務網站測試；相關測試由 CI、排程監控或開發者按需執行。
 
 pre-commit 的主要流程寫在 [`tool/pre_commit.dart`](tool/pre_commit.dart)，
-hook 入口由 [`bin/git_hooks.dart`](bin/git_hooks.dart) 管理，安裝流程寫在 [`tool/install_git_hooks.dart`](tool/install_git_hooks.dart)。
+安裝流程寫在 [`tool/install_git_hooks.dart`](tool/install_git_hooks.dart)；已安裝的 hook 不再執行工作目錄中的 `bin/git_hooks.dart`。
 
 ## 爬蟲
 
