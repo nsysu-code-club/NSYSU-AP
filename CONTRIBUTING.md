@@ -30,15 +30,15 @@ fvm dart run tool/install_git_hooks.dart
 dart run tool/install_git_hooks.dart
 ```
 
-請只從信任的 checkout 安裝。安裝器將 `tool/pre_commit.dart` 複製到 Git hooks 目錄，並固定使用安裝時的 Dart 執行檔；每次 `git commit` 執行此副本，切換分支不會替換 hook 程式。工具流程或 SDK 路徑更新後需重新安裝。Slang 與 analyzer 仍使用目前工作目錄及其依賴。pre-commit 目前會跑：
+請只從信任的 checkout 安裝。安裝器將 `tool/pre_commit.dart` 複製到 Git hooks 目錄，並固定使用安裝時的 Dart 執行檔；每次 `git commit` 執行此副本，切換分支不會替換 hook 程式。安裝時也會將已解析的 Slang 及其傳遞依賴編譯成 Git hooks 目錄中的 `nsysu-slang.dill`。Commit 直接執行快照，不使用分支的套件解析結果；缺少快照時阻擋提交，不回退執行 `dart run slang`。工具流程、Slang 版本或 SDK 更新後需重新安裝。Slang 仍讀取工作目錄的翻譯來源與設定，analyzer 仍分析目前專案。pre-commit 目前會跑：
 
-- 只有暫存區包含 `lib/l10n` 的新增、修改、刪除或移入／移出時，才執行 `dart run slang`，並確認 `lib/l10n` 沒有未暫存或未追蹤的變更
+- 只有暫存區包含 `lib/l10n` 的新增、修改、刪除或移入／移出時，才執行已安裝的 `nsysu-slang.dill`，並確認 `lib/l10n` 沒有未暫存或未追蹤的變更
 - 沒有暫存 l10n 變更時，跳過上述兩步並在 summary 顯示 `SKIPPED`
 - 每次都執行 `dart analyze .`，分析整個工作目錄（error 與 warning 都會阻擋提交）
 
 以上步驟依序執行，任一步失敗就停止提交。是否執行 l10n 檢查由暫存區決定，但執行 Slang 時仍讀取工作目錄中的所有翻譯來源，不會建立暫存區快照或自動暫存檔案。有暫存 l10n 變更時，請先整理並暫存本次要提交的 l10n 檔案，再重新提交。爬蟲單元測試與校務網站測試由 CI、排程監控或開發者按需執行，不列入 pre-commit。
 
-若需要在不 commit 的情況下手動驗證，可直接執行：
+若需要在不 commit 的情況下手動驗證，可執行以下指令（l10n 檢查同樣需要已安裝的 Slang 快照，並使用相同 SDK）：
 
 ```bash
 fvm dart run tool/pre_commit.dart

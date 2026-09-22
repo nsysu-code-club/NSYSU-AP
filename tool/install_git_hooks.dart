@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 Future<void> main() async {
@@ -9,7 +10,8 @@ Future<void> main() async {
 
   stdout.writeln(
     'Git hooks installed. pre-commit uses the installed copy of '
-    'tool/pre_commit.dart. Reinstall from a trusted checkout to update it.',
+    'tool/pre_commit.dart and the compiled Slang snapshot. '
+    'Reinstall from a trusted checkout to update them.',
   );
 }
 
@@ -77,6 +79,7 @@ Future<void> _writeStableHookWrappers() async {
       Platform.script.resolve('pre_commit.dart'),
     );
     final String payload = await source.readAsString();
+    await _installSlangSnapshot(hooksDirectory);
     await File(
       '${hooksDirectory.path}/nsysu-pre-commit.dart',
     ).writeAsString(payload);
@@ -95,6 +98,51 @@ Future<void> _writeStableHookWrappers() async {
         exit(chmod.exitCode);
       }
     }
+  }
+}
+
+/// Compile once from the explicitly trusted installation environment. The
+/// kernel contains Slang and its transitive code, not references to branch
+/// package sources. Keep using the installation SDK to execute this kernel.
+Future<void> _installSlangSnapshot(Directory hooksDirectory) async {
+  final File packageConfig = File('.dart_tool/package_config.json').absolute;
+  if (!packageConfig.existsSync()) {
+    throw StateError(
+      'Resolve dependencies in a trusted checkout before installing hooks.',
+    );
+  }
+  final Map<String, dynamic> config =
+      jsonDecode(await packageConfig.readAsString()) as Map<String, dynamic>;
+  final Map<String, dynamic> slang = (config['packages'] as List<dynamic>)
+      .cast<Map<String, dynamic>>()
+      .firstWhere(
+        (Map<String, dynamic> package) => package['name'] == 'slang',
+        orElse: () =>
+            throw StateError('Slang is missing; resolve dependencies.'),
+      );
+  final Uri entrypoint = Directory.fromUri(
+    packageConfig.uri.resolve(slang['rootUri'] as String),
+  ).uri.resolve('bin/slang.dart');
+  final Directory temporary = await hooksDirectory.createTemp('slang-install-');
+  try {
+    final File snapshot = File('${temporary.path}/slang.dill');
+    final ProcessResult compiled =
+        await Process.run(Platform.resolvedExecutable, <String>[
+          'compile',
+          'kernel',
+          '--packages=${packageConfig.path}',
+          entrypoint.toFilePath(),
+          '-o',
+          snapshot.path,
+        ], environment: _processEnvironment());
+    if (compiled.exitCode != 0) {
+      stderr.write(compiled.stdout);
+      stderr.write(compiled.stderr);
+      throw StateError('Slang compilation failed; existing hooks preserved.');
+    }
+    await snapshot.rename('${hooksDirectory.path}/nsysu-slang.dill');
+  } finally {
+    await temporary.delete(recursive: true);
   }
 }
 

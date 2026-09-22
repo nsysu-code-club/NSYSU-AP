@@ -7,20 +7,8 @@ Future<void> main() async {
   final String repoRoot = await _repoRoot();
   Directory.current = repoRoot;
 
-  final bool useFvm =
-      await _commandExists('fvm') && File('.fvmrc').existsSync();
-  final List<String> dartCommand = useFvm
-      ? <String>['fvm', 'dart']
-      : <String>['dart'];
-
   if (await hasStagedL10nChanges()) {
-    results.add(
-      await _runStep('Generate l10n', dartCommand.first, <String>[
-        ...dartCommand.skip(1),
-        'run',
-        'slang',
-      ]),
-    );
+    results.add(await _generateL10n());
     if (results.last.failed) {
       _printSummary(results);
       exit(results.last.exitCode);
@@ -44,8 +32,7 @@ Future<void> main() async {
   }
 
   results.add(
-    await _runStep('Dart analyze', dartCommand.first, <String>[
-      ...dartCommand.skip(1),
+    await _runStep('Dart analyze', Platform.resolvedExecutable, <String>[
       'analyze',
       '.',
     ]),
@@ -100,12 +87,30 @@ Future<String> _repoRoot() async {
   return File(script).parent.parent.absolute.path;
 }
 
-Future<bool> _commandExists(String command) async {
-  final String lookupCommand = Platform.isWindows ? 'where' : 'which';
-  final ProcessResult result = await Process.run(lookupCommand, <String>[
-    command,
+Future<_StepResult> _generateL10n() async {
+  final ProcessResult result = await Process.run('git', <String>[
+    'rev-parse',
+    '--git-path',
+    'hooks',
   ], environment: _processEnvironment());
-  return result.exitCode == 0;
+  if (result.exitCode != 0) {
+    stderr.write(result.stderr);
+    return _StepResult(title: 'Generate l10n', exitCode: result.exitCode);
+  }
+  final File snapshot = File(
+    '${(result.stdout as String).trim()}/nsysu-slang.dill',
+  ).absolute;
+  if (!snapshot.existsSync()) {
+    stderr.writeln(
+      'missing snapshot for git precommit, '
+      'please reinstall in the secured branch',
+    );
+    return const _StepResult(title: 'Generate l10n', exitCode: 1);
+  }
+  // Never resolve a package executable from the branch during a commit.
+  return _runStep('Generate l10n', Platform.resolvedExecutable, <String>[
+    snapshot.path,
+  ]);
 }
 
 Future<_StepResult> _runStep(

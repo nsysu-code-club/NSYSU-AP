@@ -23,7 +23,7 @@
 fvm dart run tool/install_git_hooks.dart
 ```
 
-沒有使用 FVM 的環境可改用 `dart run tool/install_git_hooks.dart`。安裝後，每次 `git commit` 前會執行 `dart analyze .`；只有暫存區包含 `lib/l10n` 變更時，才會先執行 `dart run slang` 與 l10n 產生檔暫存檢查。詳細流程請參考 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
+沒有使用 FVM 的環境可改用 `dart run tool/install_git_hooks.dart`。安裝後，每次 `git commit` 前會執行 `dart analyze .`；只有暫存區包含 `lib/l10n` 變更時，才會先執行已安裝的 Slang 快照與 l10n 產生檔暫存檢查。詳細流程請參考 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
 
 ## 功能列表
 
@@ -123,20 +123,15 @@ fvm dart run tool/install_git_hooks.dart
 dart run tool/install_git_hooks.dart
 ```
 
-安裝器會在 Git 的 hooks 目錄建立 `pre-commit`、`nsysu-pre-commit.dart` 與 SDK 路徑檔 `nsysu-dart-path`，執行安裝時保存的 [`tool/pre_commit.dart`](tool/pre_commit.dart) 副本，並固定使用安裝時的 Dart 執行檔。切換分支不會替換已安裝的 hook 程式；請只從信任的 checkout 執行安裝器，工具流程或 SDK 路徑更新後需重新安裝。這不會隔離專案依賴，Slang 與 analyzer 仍使用目前工作目錄。既有的其他 hooks 會保留；舊版專案管理的 wrapper 會升級，若有不同的 `pre-commit` 或設定了 `core.hooksPath`，安裝器會提示手動整合並停止，不會覆寫自訂 hook 或修改 Git 設定。
+安裝器會在 Git 的 hooks 目錄建立 `pre-commit`、`nsysu-pre-commit.dart` 與 SDK 路徑檔 `nsysu-dart-path`，執行安裝時保存的 [`tool/pre_commit.dart`](tool/pre_commit.dart) 副本，並固定使用安裝時的 Dart 執行檔。切換分支不會替換已安裝的 hook 程式；請只從信任的 checkout 執行安裝器，安裝時也會把已解析的 Slang 及其傳遞依賴編譯成 `nsysu-slang.dill`，commit 時直接執行快照，不再從目前分支解析 `dart run slang`。工具流程、Slang 版本或 SDK 更新後需重新安裝；缺少快照時會阻擋提交，不會回退執行分支套件。翻譯來源與設定仍讀取工作目錄，analyzer 仍分析目前專案。既有的其他 hooks 會保留；舊版專案管理的 wrapper 會升級，若有不同的 `pre-commit` 或設定了 `core.hooksPath`，安裝器會提示手動整合並停止，不會覆寫自訂 hook 或修改 Git 設定。
 
-之後每次 `git commit` 前會自動執行：
+之後每次 `git commit` 前會依序執行：
 
-```bash
-# 僅暫存區包含 lib/l10n 變更時執行以下兩步
-fvm dart run slang
-# 確認 lib/l10n 沒有未暫存或未追蹤的產生檔變更後，繼續分析
+1. 若暫存區包含 `lib/l10n` 變更，使用安裝時的 Dart 執行 `nsysu-slang.dill`。
+2. 產生後確認 `lib/l10n` 沒有未暫存或未追蹤的變更。
+3. 使用相同 Dart 執行 `analyze .`，分析整個工作目錄。
 
-# 每次提交都執行，分析範圍仍是整個工作目錄
-fvm dart analyze .
-```
-
-如果本機沒有 FVM，腳本會 fallback 使用 `dart`。
+執行 hook 時不再重新選擇 FVM 或 PATH 中的 Dart。
 沒有暫存 `lib/l10n` 變更時，Slang 與 l10n 暫存檢查會跳過，未暫存或未追蹤的 l10n 檔案不會觸發這兩步。暫存的新增、修改、刪除及移入／移出 `lib/l10n` 都會觸發檢查。
 
 有暫存 l10n 變更時，Slang 仍讀取工作目錄中的所有翻譯來源；這不是暫存區快照檢查。若 `lib/l10n` 有未暫存或未追蹤的變更，請先整理並暫存本次要提交的 l10n 檔案，再重新提交。pre-commit 不會自動暫存檔案。結束時會輸出 summary，列出每個 step 的 success / failed / skipped 狀態；任一步失敗都會阻擋 commit，靜態分析的 error 與 warning 都會阻擋提交。
