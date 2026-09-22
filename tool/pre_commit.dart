@@ -3,7 +3,6 @@ import 'dart:io';
 
 Future<void> main() async {
   final List<_StepResult> results = <_StepResult>[];
-  String crawlerLog = '';
 
   final String repoRoot = await _repoRoot();
   Directory.current = repoRoot;
@@ -22,13 +21,13 @@ Future<void> main() async {
     ]),
   );
   if (results.last.failed) {
-    _printSummary(results, crawlerLog);
+    _printSummary(results);
     exit(results.last.exitCode);
   }
 
   results.add(await _ensureL10nIsCommitted());
   if (results.last.failed) {
-    _printSummary(results, crawlerLog);
+    _printSummary(results);
     exit(results.last.exitCode);
   }
 
@@ -36,29 +35,15 @@ Future<void> main() async {
     await _runStep('Dart analyze', dartCommand.first, <String>[
       ...dartCommand.skip(1),
       'analyze',
-      '--no-fatal-warnings',
       '.',
     ]),
   );
   if (results.last.failed) {
-    _printSummary(results, crawlerLog);
+    _printSummary(results);
     exit(results.last.exitCode);
   }
 
-  final _StepResult crawlerResult = await _runStep(
-    'Crawler tests',
-    dartCommand.first,
-    <String>[...dartCommand.skip(1), 'test'],
-    workingDirectory: 'packages/nsysu_crawler',
-  );
-  results.add(crawlerResult);
-  crawlerLog = crawlerResult.combinedOutput;
-  if (crawlerResult.failed) {
-    _printSummary(results, crawlerLog);
-    exit(crawlerResult.exitCode);
-  }
-
-  _printSummary(results, crawlerLog);
+  _printSummary(results);
   stdout.writeln('\nPre-commit checks passed.');
 }
 
@@ -86,33 +71,27 @@ Future<bool> _commandExists(String command) async {
 Future<_StepResult> _runStep(
   String title,
   String executable,
-  List<String> arguments, {
-  String? workingDirectory,
-}) async {
+  List<String> arguments,
+) async {
   stdout.writeln('\n==> $title');
 
   final Process process = await Process.start(
     executable,
     arguments,
-    workingDirectory: workingDirectory,
     environment: _processEnvironment(),
   );
-  final StringBuffer outputBuffer = StringBuffer();
-  final StringBuffer errorBuffer = StringBuffer();
 
   final Future<void> stdoutDone = process.stdout
       .transform(utf8.decoder)
       .transform(const LineSplitter())
       .forEach((String line) {
         stdout.writeln(line);
-        outputBuffer.writeln(line);
       });
   final Future<void> stderrDone = process.stderr
       .transform(utf8.decoder)
       .transform(const LineSplitter())
       .forEach((String line) {
         stderr.writeln(line);
-        errorBuffer.writeln(line);
       });
 
   final int exitCode = await process.exitCode;
@@ -120,12 +99,7 @@ Future<_StepResult> _runStep(
   if (exitCode != 0) {
     stderr.writeln('\nERROR: "$title" failed with exit code $exitCode.');
   }
-  return _StepResult(
-    title: title,
-    exitCode: exitCode,
-    stdoutText: outputBuffer.toString(),
-    stderrText: errorBuffer.toString(),
-  );
+  return _StepResult(title: title, exitCode: exitCode);
 }
 
 Future<_StepResult> _ensureL10nIsCommitted() async {
@@ -163,12 +137,7 @@ Future<_StepResult> _ensureL10nIsCommitted() async {
   stderr.write(changedFiles.stdout);
   stderr.write(untracked.stdout);
   stderr.write(untracked.stderr);
-  return _StepResult(
-    title: 'Check l10n generated files',
-    exitCode: 1,
-    stdoutText: changedFiles.stdout as String,
-    stderrText: 'l10n generated files changed after generation.',
-  );
+  return const _StepResult(title: 'Check l10n generated files', exitCode: 1);
 }
 
 Map<String, String> _processEnvironment() {
@@ -192,7 +161,7 @@ Map<String, String> _processEnvironment() {
   return environment;
 }
 
-void _printSummary(List<_StepResult> results, String crawlerLog) {
+void _printSummary(List<_StepResult> results) {
   stdout.writeln('\nPre-commit summary');
   stdout.writeln('==================');
   for (final _StepResult result in results) {
@@ -206,34 +175,14 @@ void _printSummary(List<_StepResult> results, String crawlerLog) {
         ? '\nCommit blocked because at least one pre-commit check failed.'
         : '\nAll pre-commit checks succeeded. Commit can continue.',
   );
-
-  stdout.writeln('\nCrawler test log');
-  stdout.writeln('================');
-  if (crawlerLog.trim().isEmpty) {
-    stdout.writeln('Crawler tests did not run or produced no output.');
-  } else {
-    stdout.write(crawlerLog);
-  }
 }
 
 class _StepResult {
-  const _StepResult({
-    required this.title,
-    required this.exitCode,
-    this.stdoutText = '',
-    this.stderrText = '',
-  });
+  const _StepResult({required this.title, required this.exitCode});
 
   final String title;
   final int exitCode;
-  final String stdoutText;
-  final String stderrText;
 
   bool get succeeded => exitCode == 0;
   bool get failed => !succeeded;
-
-  String get combinedOutput => <String>[
-    stdoutText,
-    stderrText,
-  ].where((String text) => text.trim().isNotEmpty).join('\n');
 }

@@ -32,10 +32,11 @@ dart run tool/install_git_hooks.dart
 
 安裝後，每次 `git commit` 前會透過 `bin/git_hooks.dart` 執行 `tool/pre_commit.dart`。pre-commit 目前會跑：
 
-- `dart analyze --no-fatal-warnings .`
 - `dart run slang`
-- 確認 `lib/l10n` 產生檔沒有未提交差異
-- `packages/nsysu_crawler` 的 `dart test`
+- 確認 `lib/l10n` 產生檔沒有未暫存或未追蹤的變更
+- `dart analyze .`（error 與 warning 都會阻擋提交）
+
+以上步驟依序執行，任一步失敗就停止提交。若產生檔有變更，請先檢查並加入暫存，再重新提交。爬蟲單元測試與校務網站測試由 CI、排程監控或開發者按需執行，不列入 pre-commit。
 
 若需要在不 commit 的情況下手動驗證，可直接執行：
 
@@ -112,9 +113,7 @@ git checkout -b <type>/<issue-name>
 3. 提交前，請確認已安裝本機 pre-commit hook，或手動執行同等檢查：
 
    ```bash
-   flutter pub get
-   flutter analyze
-   flutter test
+   fvm dart run tool/pre_commit.dart
    ```
 
 4. 如果修改了 `lib/l10n/*.json` 翻譯檔，請重新產生 l10n 程式碼：
