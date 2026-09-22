@@ -126,10 +126,17 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                   context,
                   Scaffold(
                     appBar: AppBar(title: Text(item.title)),
-                    body: PdfView(
-                      state: PdfState.finish,
-                      data: data,
-                      fileName: item.title,
+                    // PdfView has two FloatingActionButtons that share the
+                    // default hero tag; disabling heroes here avoids the
+                    // "multiple heroes share the same tag" assertion during
+                    // the route transition (seen on desktop in debug builds).
+                    body: HeroMode(
+                      enabled: false,
+                      child: PdfView(
+                        state: PdfState.finish,
+                        data: data,
+                        fileName: item.title,
+                      ),
                     ),
                   ),
                 );
