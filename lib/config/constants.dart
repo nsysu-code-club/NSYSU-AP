@@ -12,8 +12,21 @@ class Constants {
   static final Key key = Key.fromUtf8('l9r1W3wcsnJTayxCXwoFt62w1i4sQ5J9');
   static final IV iv = IV.fromUtf8('auc9OV5r0nLwjCAH');
 
-  static const String defaultYear = '109';
-  static const String defaultSemester = '1';
+  /// Semester code (e.g. `1151`) for [date]. Used as the last-resort default
+  /// when Firebase Remote Config is unavailable (desktop) and nothing has
+  /// been cached yet.
+  ///
+  /// ROC academic year = AD year - 1911. August through January is semester 1
+  /// of the academic year that starts in August; February through July is
+  /// semester 2 of the academic year that started the previous August.
+  static String semesterCodeFor(DateTime date) {
+    final bool isFirstSemester = date.month >= 8 || date.month <= 1;
+    final int adYear = date.month >= 8 ? date.year : date.year - 1;
+    final int academicYear = adYear - 1911;
+    return '$academicYear${isFirstSemester ? 1 : 2}';
+  }
+
+  static String get currentSemesterCode => semesterCodeFor(DateTime.now());
 
   static const String courseSelectorUrl =
       'https://nsysu-opendev.github.io/NSYSUCourseSelectorV6/';

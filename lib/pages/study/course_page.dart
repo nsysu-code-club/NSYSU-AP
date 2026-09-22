@@ -118,7 +118,7 @@ class CoursePageState extends State<CoursePage> {
     } catch (exception) {
       defaultSemesterCode = PreferenceUtil.instance.getString(
         Constants.defaultCourseSemesterCode,
-        '${Constants.defaultYear}${Constants.defaultSemester}',
+        Constants.currentSemesterCode,
       );
       timeCodeConfig = TimeCodeConfig.fromRawJson(
         PreferenceUtil.instance.getString(
