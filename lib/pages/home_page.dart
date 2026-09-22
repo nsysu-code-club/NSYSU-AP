@@ -600,7 +600,7 @@ class HomePageState extends State<HomePage> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    isLogin ? ap.courseEmpty : ap.notLogin,
+                    isLogin ? app.courseNotLoaded : ap.notLogin,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.outline,
                     ),
