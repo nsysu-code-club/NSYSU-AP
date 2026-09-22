@@ -54,4 +54,8 @@ Future<void> migratePreferences(
     Constants.prefCurrentBuild,
     currentBuild.toString(),
   );
+  if (preferences.getString(Constants.prefCurrentBuild, '') !=
+      currentBuild.toString()) {
+    throw StateError('Could not persist migration build marker');
+  }
 }

@@ -41,4 +41,18 @@ class FileAssets {
     return jsonDecode(await rootBundle.loadString(carParkArea))
         as Map<String, dynamic>?;
   }
+
+  /// Older release notes may not include every language supported by the app.
+  static String? changelogContent(Map<String, dynamic>? entry, String locale) {
+    for (final String language in <String>{locale, 'en-US', 'zh-TW'}) {
+      final dynamic rawContent = entry?[language];
+      final String? content = switch (rawContent) {
+        final String s => s,
+        final List<dynamic> l => l.map((dynamic e) => '* $e').join('\n'),
+        _ => null,
+      };
+      if (content != null && content.trim().isNotEmpty) return content;
+    }
+    return null;
+  }
 }

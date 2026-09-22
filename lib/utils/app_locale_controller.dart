@@ -69,6 +69,9 @@ class AppLocaleController {
     return _enqueue(() async {
       try {
         await _preferences.setString(Constants.prefLanguageCode, code);
+        if (_preferences.getString(Constants.prefLanguageCode, '') != code) {
+          throw StateError('Could not persist language preference');
+        }
       } catch (_) {
         if (revision == _selectionRevision) {
           _preferenceCode = _readPreferenceCode();
@@ -127,7 +130,14 @@ class AppLocaleController {
 
   static Locale _resolveLocale(String code, List<Locale> deviceLocales) {
     if (code == ApSupportLanguageConstants.system) {
-      return deviceLocales.isEmpty ? const Locale('en') : deviceLocales.first;
+      return deviceLocales.firstWhere(
+        (Locale locale) => ap_l10n.AppLocale.values.any(
+          (ap_l10n.AppLocale supported) =>
+              supported.languageCode == locale.languageCode,
+        ),
+        orElse: () =>
+            deviceLocales.isEmpty ? const Locale('en') : deviceLocales.first,
+      );
     }
     return Locale(code, code == ApSupportLanguageConstants.zh ? 'TW' : null);
   }

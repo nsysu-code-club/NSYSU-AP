@@ -269,12 +269,10 @@ class HomePageState extends State<HomePage> {
         packageInfo.version,
       );
       if (!mounted) return;
-      final dynamic rawContent = map?[ap.locale];
-      final String? updateNoteContent = switch (rawContent) {
-        final String s => s,
-        final List<dynamic> l => l.map((dynamic e) => '* $e').join('\n'),
-        _ => null,
-      };
+      final String? updateNoteContent = FileAssets.changelogContent(
+        map,
+        ap.locale,
+      );
       final bool visible = map?['visible'] as bool? ?? true;
       if (visible &&
           updateNoteContent != null &&
@@ -285,10 +283,13 @@ class HomePageState extends State<HomePage> {
           '$updateNoteContent',
         );
       }
-      await PreferenceUtil.instance.setString(
-        Constants.prefLastChangelogVersion,
-        packageInfo.version,
-      );
+      // Retry missing notes later instead of marking unseen content as read.
+      if (!visible || updateNoteContent != null) {
+        await PreferenceUtil.instance.setString(
+          Constants.prefLastChangelogVersion,
+          packageInfo.version,
+        );
+      }
     }
     if (!Constants.isInDebugMode) {
       final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
