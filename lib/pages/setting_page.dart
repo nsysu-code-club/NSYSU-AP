@@ -1,6 +1,7 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/widgets/app_language_setting_item.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -45,15 +46,9 @@ class SettingPageState extends State<SettingPage> {
               icon: Icons.notifications_outlined,
             ),
             const SettingCard(
-              children: <Widget>[
-                CheckCourseNotifyItem(),
-                ClearAllNotifyItem(),
-              ],
+              children: <Widget>[CheckCourseNotifyItem(), ClearAllNotifyItem()],
             ),
-            SettingTitle(
-              text: ap.otherSettings,
-              icon: Icons.tune_outlined,
-            ),
+            SettingTitle(text: ap.otherSettings, icon: Icons.tune_outlined),
             SettingCard(
               children: <Widget>[
                 SettingSwitch(
@@ -71,10 +66,11 @@ class SettingPageState extends State<SettingPage> {
                     );
                   },
                 ),
-                ChangeLanguageItem(
-                  onChange: (Locale locale) {
-                    ShareDataWidget.of(context)!.data.loadLocale(locale);
-                  },
+                AppLanguageSettingItem(
+                  preferenceCode: ShareDataWidget.of(
+                    context,
+                  )!.data.languagePreference,
+                  onChanged: ShareDataWidget.of(context)!.data.loadLanguage,
                 ),
                 ChangeThemeModeItem(
                   onChange: (ThemeMode themeMode) {

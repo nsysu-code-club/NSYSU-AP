@@ -90,12 +90,6 @@ class HomePageState extends State<HomePage> {
         AppTrackingUtils.show(context: context);
       }
     });
-    if (Intl.defaultLocale != null) {
-      AnalyticsUtil.instance.setUserProperty(
-        AnalyticsConstants.language,
-        Locale(Intl.defaultLocale!).languageCode,
-      );
-    }
     FirebaseMessagingUtils.instance.init(
       onClick: (RemoteMessage message) {
         if (kDebugMode) {
