@@ -95,9 +95,7 @@ void main() {
       await controller.selectLanguage('ja');
       expect(controller.locale, const Locale('ja'));
       expect(analytics.values, <String>['zh', 'en', 'ja']);
-      // The shared UI supports Japanese; NSYSU's own messages retain their
-      // existing fallback. Analytics must keep the resolved common selection.
-      expect(LocaleSettings.currentLocale, AppLocale.en);
+      expect(LocaleSettings.currentLocale, AppLocale.ja);
     },
   );
 
@@ -407,7 +405,7 @@ void main() {
   );
 
   test(
-    'production parser preserves prior country-code fallback behavior',
+    'production parser supports Japanese and retains unsupported fallback',
     () async {
       for (final Locale requested in <Locale>[
         const Locale('ja'),
@@ -426,7 +424,11 @@ void main() {
             );
         expect(
           previousAppLocale,
-          requested.countryCode == null ? AppLocale.en : AppLocale.zhHantTw,
+          requested.languageCode == 'ja'
+              ? AppLocale.ja
+              : requested.countryCode == null
+              ? AppLocale.en
+              : AppLocale.zhHantTw,
         );
 
         await AppLocaleController.applyAppLocale(requested);
@@ -437,6 +439,58 @@ void main() {
       }
     },
   );
+
+  test('system uses the first supported preferred language', () async {
+    List<Locale> locales = <Locale>[
+      const Locale('fr', 'FR'),
+      const Locale('zh', 'TW'),
+      const Locale('en', 'US'),
+    ];
+    final _RecordingAnalytics analytics = _RecordingAnalytics();
+    final AppLocaleController controller = AppLocaleController(
+      preferences: _MemoryPreferences('system'),
+      analytics: analytics,
+      deviceLocales: () => locales,
+    );
+    await controller.initialize();
+    expect(LocaleSettings.currentLocale, AppLocale.zhHantTw);
+    locales = <Locale>[
+      const Locale('de', 'DE'),
+      const Locale('ja', 'JP'),
+      const Locale('zh', 'TW'),
+    ];
+    await controller.handleDeviceLocalesChanged(locales);
+    expect(LocaleSettings.currentLocale, AppLocale.ja);
+    await controller.selectLanguage('en');
+    await controller.selectLanguage('system');
+    expect(LocaleSettings.currentLocale, AppLocale.ja);
+    expect(analytics.values, <String>['zh', 'ja', 'en', 'ja']);
+  });
+
+  test(
+    'silent persistence failure preserves locale and allows retry',
+    () async {
+      final _MemoryPreferences preferences = _MemoryPreferences('system');
+      final _RecordingAnalytics analytics = _RecordingAnalytics();
+      final AppLocaleController controller = AppLocaleController(
+        preferences: preferences,
+        analytics: analytics,
+        deviceLocales: () => <Locale>[const Locale('en')],
+        applyLocale: (Locale locale) async => locale,
+      );
+      await controller.initialize();
+      preferences.ignoreNextWrite = true;
+      await expectLater(controller.selectLanguage('ja'), throwsStateError);
+      expect(controller.preferenceCode, 'system');
+      expect(controller.locale, const Locale('en'));
+      expect(analytics.values, <String>['en']);
+      await controller.handleDeviceLocalesChanged(<Locale>[const Locale('zh')]);
+      await controller.selectLanguage('ja');
+      expect(preferences.code, 'ja');
+      expect(controller.locale, const Locale('ja'));
+      expect(analytics.values, <String>['en', 'zh', 'ja']);
+    },
+  );
 }
 
 class _MemoryPreferences implements PreferenceUtil {
@@ -445,6 +499,7 @@ class _MemoryPreferences implements PreferenceUtil {
   String code;
   final Future<void> Function(String)? onSetString;
   bool failNextWrite = false;
+  bool ignoreNextWrite = false;
   final List<String> writes = <String>[];
 
   @override
@@ -457,6 +512,10 @@ class _MemoryPreferences implements PreferenceUtil {
   Future<void> setString(String key, String data) async {
     expect(key, Constants.prefLanguageCode);
     await onSetString?.call(data);
+    if (ignoreNextWrite) {
+      ignoreNextWrite = false;
+      return;
+    }
     if (failNextWrite) {
       failNextWrite = false;
       throw StateError('Preference write failed');
