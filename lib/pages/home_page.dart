@@ -359,7 +359,12 @@ class HomePageState extends State<HomePage> {
             DrawerMenuItem(
               icon: ApIcon.home,
               title: ap.home,
-              onTap: () => setState(() => content = null),
+              onTap: () {
+                setState(() => content = null);
+                // Desktop keeps HomePage mounted while other pages are shown
+                // in `content`, so re-read the course cache on return.
+                _loadCourseData();
+              },
             ),
           _buildStudySection(),
           DrawerMenuItem(
