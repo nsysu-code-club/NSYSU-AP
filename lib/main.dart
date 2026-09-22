@@ -59,7 +59,7 @@ Future<void> main() async {
   }
   await migratePreferences(PreferenceUtil.instance, currentBuild: currentBuild);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  if (FirebaseUtils.isSupportCore || Platform.isWindows || Platform.isLinux) {
+  if (FirebaseUtils.isSupportCore || Platform.isWindows) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
