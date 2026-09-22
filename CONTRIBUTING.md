@@ -32,11 +32,11 @@ dart run tool/install_git_hooks.dart
 
 安裝後，每次 `git commit` 前會透過 `bin/git_hooks.dart` 執行 `tool/pre_commit.dart`。pre-commit 目前會跑：
 
-- `dart run slang`
-- 確認 `lib/l10n` 產生檔沒有未暫存或未追蹤的變更
-- `dart analyze .`（error 與 warning 都會阻擋提交）
+- 只有暫存區包含 `lib/l10n` 的新增、修改、刪除或移入／移出時，才執行 `dart run slang`，並確認 `lib/l10n` 沒有未暫存或未追蹤的變更
+- 沒有暫存 l10n 變更時，跳過上述兩步並在 summary 顯示 `SKIPPED`
+- 每次都執行 `dart analyze .`，分析整個工作目錄（error 與 warning 都會阻擋提交）
 
-以上步驟依序執行，任一步失敗就停止提交。若產生檔有變更，請先檢查並加入暫存，再重新提交。爬蟲單元測試與校務網站測試由 CI、排程監控或開發者按需執行，不列入 pre-commit。
+以上步驟依序執行，任一步失敗就停止提交。是否執行 l10n 檢查由暫存區決定，但執行 Slang 時仍讀取工作目錄中的所有翻譯來源，不會建立暫存區快照或自動暫存檔案。有暫存 l10n 變更時，請先整理並暫存本次要提交的 l10n 檔案，再重新提交。爬蟲單元測試與校務網站測試由 CI、排程監控或開發者按需執行，不列入 pre-commit。
 
 若需要在不 commit 的情況下手動驗證，可直接執行：
 

@@ -23,7 +23,7 @@
 fvm dart run tool/install_git_hooks.dart
 ```
 
-沒有使用 FVM 的環境可改用 `dart run tool/install_git_hooks.dart`。安裝後，每次 `git commit` 前會依序執行 `dart run slang`、l10n 產生檔暫存檢查，以及 `dart analyze .`。詳細流程請參考 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
+沒有使用 FVM 的環境可改用 `dart run tool/install_git_hooks.dart`。安裝後，每次 `git commit` 前會執行 `dart analyze .`；只有暫存區包含 `lib/l10n` 變更時，才會先執行 `dart run slang` 與 l10n 產生檔暫存檢查。詳細流程請參考 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
 
 ## 功能列表
 
@@ -128,13 +128,18 @@ dart run tool/install_git_hooks.dart
 之後每次 `git commit` 前會自動執行：
 
 ```bash
+# 僅暫存區包含 lib/l10n 變更時執行以下兩步
 fvm dart run slang
 # 確認 lib/l10n 沒有未暫存或未追蹤的產生檔變更後，繼續分析
+
+# 每次提交都執行，分析範圍仍是整個工作目錄
 fvm dart analyze .
 ```
 
 如果本機沒有 FVM，腳本會 fallback 使用 `dart`。
-若 l10n 產生檔有未暫存或未追蹤的變更，請先檢查並加入暫存，再重新提交。pre-commit 結束時會輸出 summary，列出每個 step 的 success / failed 狀態；任一步失敗都會阻擋 commit，靜態分析的 error 與 warning 都會阻擋提交。
+沒有暫存 `lib/l10n` 變更時，Slang 與 l10n 暫存檢查會跳過，未暫存或未追蹤的 l10n 檔案不會觸發這兩步。暫存的新增、修改、刪除及移入／移出 `lib/l10n` 都會觸發檢查。
+
+有暫存 l10n 變更時，Slang 仍讀取工作目錄中的所有翻譯來源；這不是暫存區快照檢查。若 `lib/l10n` 有未暫存或未追蹤的變更，請先整理並暫存本次要提交的 l10n 檔案，再重新提交。pre-commit 不會自動暫存檔案。結束時會輸出 summary，列出每個 step 的 success / failed / skipped 狀態；任一步失敗都會阻擋 commit，靜態分析的 error 與 warning 都會阻擋提交。
 
 pre-commit 不執行爬蟲單元測試或校務網站測試；相關測試由 CI、排程監控或開發者按需執行。
 

@@ -13,22 +13,34 @@ Future<void> main() async {
       ? <String>['fvm', 'dart']
       : <String>['dart'];
 
-  results.add(
-    await _runStep('Generate l10n', dartCommand.first, <String>[
-      ...dartCommand.skip(1),
-      'run',
-      'slang',
-    ]),
-  );
-  if (results.last.failed) {
-    _printSummary(results);
-    exit(results.last.exitCode);
-  }
+  if (await hasStagedL10nChanges()) {
+    results.add(
+      await _runStep('Generate l10n', dartCommand.first, <String>[
+        ...dartCommand.skip(1),
+        'run',
+        'slang',
+      ]),
+    );
+    if (results.last.failed) {
+      _printSummary(results);
+      exit(results.last.exitCode);
+    }
 
-  results.add(await _ensureL10nIsCommitted());
-  if (results.last.failed) {
-    _printSummary(results);
-    exit(results.last.exitCode);
+    results.add(await _ensureL10nIsCommitted());
+    if (results.last.failed) {
+      _printSummary(results);
+      exit(results.last.exitCode);
+    }
+  } else {
+    stdout.writeln('\nNo staged changes in lib/l10n; skipping l10n checks.');
+    results.addAll(const <_StepResult>[
+      _StepResult(title: 'Generate l10n', exitCode: 0, skipped: true),
+      _StepResult(
+        title: 'Check l10n generated files',
+        exitCode: 0,
+        skipped: true,
+      ),
+    ]);
   }
 
   results.add(
@@ -45,6 +57,34 @@ Future<void> main() async {
 
   _printSummary(results);
   stdout.writeln('\nPre-commit checks passed.');
+}
+
+/// Includes staged additions, modifications, deletions and moves into/out of l10n.
+Future<bool> hasStagedL10nChanges({String? workingDirectory}) async {
+  final List<String> arguments = <String>[
+    'diff',
+    '--cached',
+    '--quiet',
+    '--no-ext-diff',
+    '--no-renames',
+    '--',
+    'lib/l10n',
+  ];
+  final ProcessResult result = await Process.run(
+    'git',
+    arguments,
+    workingDirectory: workingDirectory,
+    environment: _processEnvironment(),
+  );
+  if (result.exitCode == 0) return false;
+  if (result.exitCode == 1) return true;
+  // Git errors must block the hook rather than silently skipping validation.
+  throw ProcessException(
+    'git',
+    arguments,
+    result.stderr.toString().trim(),
+    result.exitCode,
+  );
 }
 
 Future<String> _repoRoot() async {
@@ -165,6 +205,10 @@ void _printSummary(List<_StepResult> results) {
   stdout.writeln('\nPre-commit summary');
   stdout.writeln('==================');
   for (final _StepResult result in results) {
+    if (result.skipped) {
+      stdout.writeln('- SKIPPED ${result.title} (no staged l10n changes)');
+      continue;
+    }
     final String status = result.succeeded ? 'SUCCESS' : 'FAILED';
     stdout.writeln('- $status ${result.title} (exit code ${result.exitCode})');
   }
@@ -178,10 +222,15 @@ void _printSummary(List<_StepResult> results) {
 }
 
 class _StepResult {
-  const _StepResult({required this.title, required this.exitCode});
+  const _StepResult({
+    required this.title,
+    required this.exitCode,
+    this.skipped = false,
+  });
 
   final String title;
   final int exitCode;
+  final bool skipped;
 
   bool get succeeded => exitCode == 0;
   bool get failed => !succeeded;
