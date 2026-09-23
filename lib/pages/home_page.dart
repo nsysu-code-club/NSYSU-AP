@@ -362,8 +362,10 @@ class HomePageState extends State<HomePage> {
               onTap: () {
                 setState(() => content = null);
                 // Desktop keeps HomePage mounted while other pages are shown
-                // in `content`, so re-read the course cache on return.
-                _loadCourseData();
+                // in `content`, so re-read the course cache on return. Skip it
+                // while logged out so a previous user's cached timetable is
+                // not shown again after logout.
+                if (isLogin) _loadCourseData();
               },
             ),
           _buildStudySection(),
@@ -558,7 +560,7 @@ class HomePageState extends State<HomePage> {
   List<Widget> _buildDashboardWidgets() {
     return <Widget>[
       const SizedBox(height: 16),
-      if (courseData != null)
+      if (courseData?.courses.isNotEmpty ?? false)
         TodayScheduleCard(
           courseData: courseData!,
           onTap: () async {
@@ -580,9 +582,12 @@ class HomePageState extends State<HomePage> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
         child: InkWell(
-          onTap: () {
+          onTap: () async {
             if (isLogin) {
-              ApUtils.pushCupertinoStyle(context, CoursePage());
+              await Navigator.of(
+                context,
+              ).push(MaterialPageRoute<void>(builder: (_) => CoursePage()));
+              _loadCourseData();
             } else {
               openLoginPage();
             }
@@ -600,7 +605,11 @@ class HomePageState extends State<HomePage> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    isLogin ? app.courseNotLoaded : ap.notLogin,
+                    !isLogin
+                        ? ap.notLogin
+                        : courseData == null
+                        ? app.courseNotLoaded
+                        : ap.courseEmpty,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.outline,
                     ),
@@ -619,15 +628,18 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadCourseData() async {
+    if (!mounted) return;
     final CourseData? cached = CourseData.load(
       PreferenceUtil.instance.getString(
         ApConstants.currentSemesterCode,
         ApConstants.semesterLatest,
       ),
     );
-    if (cached != null && cached.courses.isNotEmpty) {
-      setState(() => courseData = cached);
-    }
+    // Replace rather than keep the previous value: a missing cache (e.g.
+    // right after a semester rollover) should not leave last semester's
+    // timetable on screen, and an intentionally empty timetable is kept so
+    // the card can say "no courses" instead of "not loaded".
+    setState(() => courseData = cached);
   }
 
   Future<void> openDesktopWebViewPage(
