@@ -26,6 +26,62 @@ void main() {
     );
   }
 
+  test(
+    'records retrieval time and only reuses the matching semester',
+    () async {
+      final EnrollCertificateCache cache = createCache('B123456789');
+      final Uint8List pdf = _validPdf('semester');
+      final DateTime retrievedAt = DateTime.utc(2026, 9, 24, 1, 2, 3);
+      await cache.save(pdf, semesterCode: '1151', retrievedAt: retrievedAt);
+
+      expect(await cache.read(semesterCode: '1151'), pdf);
+      expect(await cache.read(semesterCode: '1152'), isNull);
+      expect(await cache.read(), pdf);
+      expect(
+        (await cache.readMetadata(pdf))?['retrievedAt'],
+        retrievedAt.toIso8601String(),
+      );
+      await cache.clear();
+      expect(await cache.readMetadata(pdf), isNull);
+    },
+  );
+
+  test(
+    'legacy and corrupt metadata force a refresh without deleting PDF',
+    () async {
+      final EnrollCertificateCache cache = createCache('B123456789');
+      final Uint8List pdf = _validPdf('legacy');
+      await cache.save(pdf);
+      final File file = await _cachedPdfFile(temporaryDirectory);
+      final File metadata = File('${file.path}.json');
+      await metadata.delete();
+      expect(await cache.read(semesterCode: '1151'), isNull);
+      await metadata.writeAsString('{broken');
+      expect(await cache.read(semesterCode: '1151'), isNull);
+      expect(await cache.read(), pdf);
+    },
+  );
+
+  test('metadata from another PDF cannot mark a replacement current', () async {
+    final EnrollCertificateCache cache = createCache('B123456789');
+    await cache.save(_validPdf('original'), semesterCode: '1151');
+    final File file = await _cachedPdfFile(temporaryDirectory);
+    await file.writeAsBytes(_validPdf('replacement'));
+    expect(await cache.read(semesterCode: '1151'), isNull);
+  });
+
+  test('failed refresh preserves the original semester and PDF', () async {
+    final EnrollCertificateCache cache = createCache('B123456789');
+    final Uint8List pdf = _validPdf('original');
+    await cache.save(pdf, semesterCode: '1151');
+    await expectLater(
+      cache.save(Uint8List.fromList('invalid'.codeUnits), semesterCode: '1152'),
+      throwsFormatException,
+    );
+    expect(await cache.read(semesterCode: '1151'), pdf);
+    expect(await cache.read(semesterCode: '1152'), isNull);
+  });
+
   test('normalizes a valid PDF before saving and reads it back', () async {
     final EnrollCertificateCache cache = createCache('B123456789');
     final Uint8List pdf = _validPdf('certificate');

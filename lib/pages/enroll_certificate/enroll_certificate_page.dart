@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:ap_common/ap_common.dart';
+import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
@@ -67,6 +68,7 @@ class EnrollCertificatePage extends StatefulWidget {
     this.supportDirectoryProvider,
     this.exportPdf,
     this.pdfViewBuilder,
+    this.currentSemesterCodeProvider,
   });
 
   final EnrollmentCertificateCredentialsProvider? credentialsProvider;
@@ -76,6 +78,7 @@ class EnrollCertificatePage extends StatefulWidget {
   final SupportDirectoryProvider? supportDirectoryProvider;
   final EnrollmentCertificatePdfExporter? exportPdf;
   final EnrollmentCertificatePdfViewBuilder? pdfViewBuilder;
+  final Future<String?> Function()? currentSemesterCodeProvider;
 
   @override
   State<EnrollCertificatePage> createState() => _EnrollCertificatePageState();
@@ -89,6 +92,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
   late String _status;
   String _username = '';
   String _password = '';
+  String? _semesterCode;
   Uint8List? _pdfData;
   late EnrollCertificateCache _cache;
   EnrollmentCertificateHelper? _activeHelper;
@@ -210,6 +214,8 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
       supportDirectoryProvider: widget.supportDirectoryProvider,
     );
     try {
+      _semesterCode = await _resolveSemesterCode();
+      if (!mounted) return;
       _debugLog('event=cache_read_start');
       final Uint8List? cachedPdf = await _readCachedCertificate();
       if (!mounted) return;
@@ -278,7 +284,10 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
     }
 
     try {
+      final String? semesterCode = await _resolveSemesterCode();
+      if (!mounted) return;
       final Uint8List pdf = await _fetchCertificate();
+      final DateTime retrievedAt = DateTime.now().toUtc();
       _debugLog('event=retrieve_download_complete pdfBytes=${pdf.length}');
       if (!mounted) {
         _debugLog('event=retrieve_cancelled reason=page_unmounted');
@@ -286,7 +295,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
       }
       bool cacheSaveFailed = false;
       try {
-        await _writeCachedCertificate(pdf);
+        await _writeCachedCertificate(pdf, semesterCode, retrievedAt);
         _debugLog('event=cache_write_complete pdfBytes=${pdf.length}');
       } on FormatException catch (error) {
         _debugLog(
@@ -362,17 +371,60 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
     if (reader != null) {
       return reader(username: _username);
     }
-    return _cache.read();
+    final String? semesterCode = _semesterCode;
+    if (semesterCode == null) return Future<Uint8List?>.value();
+    return _cache.read(semesterCode: semesterCode);
   }
 
-  Future<void> _writeCachedCertificate(Uint8List bytes) {
+  Future<void> _writeCachedCertificate(
+    Uint8List bytes,
+    String? semesterCode,
+    DateTime retrievedAt,
+  ) {
     final EnrollmentCertificateCacheWriter? writer =
         widget.writeCachedCertificate;
     if (writer != null) {
       return writer(username: _username, bytes: bytes);
     }
-    return _cache.save(bytes);
+    return _cache.save(
+      bytes,
+      semesterCode: semesterCode,
+      retrievedAt: retrievedAt,
+    );
   }
+
+  Future<String?> _resolveSemesterCode() async {
+    if (widget.currentSemesterCodeProvider != null) {
+      return widget.currentSemesterCodeProvider!();
+    }
+    // Use the same configured current semester as the course page, never a
+    // semester selected by the user or a hard-coded historical fallback.
+    try {
+      final FirebaseRemoteConfig? config =
+          FirebaseRemoteConfigUtils.instance.remoteConfig;
+      if (config != null) {
+        try {
+          await config.fetch();
+          await config.activate();
+        } catch (_) {
+          // A fetch failure does not invalidate previously activated values.
+        }
+        final String code = config
+            .getString(Constants.defaultCourseSemesterCode)
+            .trim();
+        if (_isSemesterCode(code)) return code;
+      }
+    } catch (_) {
+      // Previously resolved course configuration remains usable offline.
+    }
+    final String code = PreferenceUtil.instance
+        .getString(Constants.defaultCourseSemesterCode, '')
+        .trim();
+    return _isSemesterCode(code) ? code : null;
+  }
+
+  static bool _isSemesterCode(String code) =>
+      RegExp(r'^\d{3}[0-3]$').hasMatch(code);
 
   String _messageFor(EnrollmentCertificateExceptionKind kind) {
     return switch (kind) {

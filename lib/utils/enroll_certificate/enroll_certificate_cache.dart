@@ -40,10 +40,42 @@ class EnrollCertificateCache {
 
   /// Returns the current account's cached PDF, or `null` when no valid cache
   /// exists.
+  /// When [semesterCode] is supplied, matching PDF metadata is also required.
+  /// Stale PDFs remain on disk until a successful replacement or logout.
   ///
   /// Invalid primary files are deleted, and valid `.bak` / `.tmp` recovery
   /// artifacts are promoted back to the primary path when possible.
-  Future<Uint8List?> read() async {
+  Future<Uint8List?> read({String? semesterCode}) async {
+    final Uint8List? pdf = await _readPdf();
+    if (pdf == null || semesterCode == null) return pdf;
+    final Map<String, dynamic>? metadata = await readMetadata(pdf);
+    return metadata?['semesterCode'] == semesterCode ? pdf : null;
+  }
+
+  /// Returns metadata only when it belongs to the supplied PDF.
+  /// Legacy, malformed, and interrupted writes are never treated as current.
+  Future<Map<String, dynamic>?> readMetadata(Uint8List pdf) async {
+    final File file = await _cacheFile();
+    try {
+      final dynamic decoded = jsonDecode(
+        await File('${file.path}.json').readAsString(),
+      );
+      if (decoded is! Map<String, dynamic> ||
+          decoded['pdfSha256'] != sha256.convert(pdf).toString() ||
+          decoded['semesterCode'] is! String ||
+          decoded['retrievedAt'] is! String ||
+          DateTime.tryParse(decoded['retrievedAt'] as String) == null) {
+        return null;
+      }
+      return decoded;
+    } on FileSystemException {
+      return null;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  Future<Uint8List?> _readPdf() async {
     final File file = await _cacheFile();
     final File temporaryFile = File('${file.path}.tmp');
     final File backupFile = File('${file.path}.bak');
@@ -82,7 +114,11 @@ class EnrollCertificateCache {
   /// Throws [FormatException] before touching disk when the response is not a
   /// valid PDF. I/O failures during replacement restore the previous cache when
   /// possible, then rethrow the original error.
-  Future<void> save(Uint8List bytes) async {
+  Future<void> save(
+    Uint8List bytes, {
+    String? semesterCode,
+    DateTime? retrievedAt,
+  }) async {
     // Validate before touching any on-disk state so a bad response can never
     // replace a previously cached certificate.
     final Uint8List? pdf = extractPdf(bytes);
@@ -131,6 +167,22 @@ class EnrollCertificateCache {
         // Best-effort cleanup; clear() also removes this account's backup.
       }
     }
+
+    // Commit metadata last and bind it to the PDF. A crash between these two
+    // writes causes a cache miss rather than reusing another PDF's semester.
+    final File metadataFile = File('${file.path}.json');
+    final File temporaryMetadata = File('${metadataFile.path}.tmp');
+    await temporaryMetadata.writeAsString(
+      jsonEncode(<String, Object?>{
+        'semesterCode': semesterCode,
+        'retrievedAt': (retrievedAt ?? DateTime.now())
+            .toUtc()
+            .toIso8601String(),
+        'pdfSha256': sha256.convert(pdf).toString(),
+      }),
+      flush: true,
+    );
+    await temporaryMetadata.rename(metadataFile.path);
   }
 
   /// Removes the current account's primary cache and pending replacement
@@ -141,6 +193,8 @@ class EnrollCertificateCache {
       file,
       File('${file.path}.tmp'),
       File('${file.path}.bak'),
+      File('${file.path}.json'),
+      File('${file.path}.json.tmp'),
     ]) {
       if (await artifact.exists()) {
         await artifact.delete();

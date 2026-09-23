@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show DebugPrintCallback, debugPrint;
@@ -6,12 +7,107 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nsysu_ap/l10n/strings.g.dart';
 import 'package:nsysu_ap/pages/enroll_certificate/enroll_certificate_page.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/enroll_certificate_cache.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 void main() {
   setUp(() {
     LocaleSettings.setLocaleSync(AppLocale.zhHantTw);
   });
+
+  for (final String scenario in <String>[
+    'current',
+    'expired',
+    'legacy',
+    'unknown',
+    'failed',
+  ]) {
+    testWidgets('semester-aware disk cache: $scenario', (
+      WidgetTester tester,
+    ) async {
+      final Directory directory = Directory.systemTemp.createTempSync(
+        'cert_semester_',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final EnrollCertificateCache cache = EnrollCertificateCache(
+        username: 'B123456789',
+        supportDirectoryProvider: () async => directory,
+      );
+      final Uint8List oldPdf = _validPdf('old');
+      final Uint8List freshPdf = _validPdf('fresh');
+      await tester.runAsync(
+        () => cache.save(
+          oldPdf,
+          semesterCode: scenario == 'legacy' ? null : '1151',
+        ),
+      );
+      int requests = 0;
+      Uint8List? displayed;
+      final String? currentCode = scenario == 'unknown'
+          ? null
+          : scenario == 'current'
+          ? '1151'
+          : '1152';
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EnrollCertificatePage(
+            credentialsProvider: () => const EnrollmentCertificateCredentials(
+              username: 'B123456789',
+              password: 'secret',
+            ),
+            currentSemesterCodeProvider: () async => currentCode,
+            supportDirectoryProvider: () async => directory,
+            downloadCertificate:
+                ({required String username, required String password}) async {
+                  requests++;
+                  if (scenario == 'failed') throw Exception('offline');
+                  return freshPdf;
+                },
+            pdfViewBuilder:
+                (BuildContext context, Uint8List bytes, String name) {
+                  displayed = bytes;
+                  return const Text('PDF ready');
+                },
+          ),
+        ),
+      );
+      // Real filesystem operations must finish outside the fake async clock.
+      await tester.runAsync(() async {
+        for (int i = 0; i < 100; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+          await tester.pump();
+          if (displayed != null ||
+              find
+                  .byKey(const ValueKey<String>('enroll-certificate-retry'))
+                  .evaluate()
+                  .isNotEmpty) {
+            break;
+          }
+        }
+      });
+      expect(requests, scenario == 'current' ? 0 : 1);
+      if (scenario == 'failed') {
+        expect(displayed, isNull);
+        expect(find.text(app.enrollCertificate.requestFailed), findsOneWidget);
+        expect(
+          await tester.runAsync(() => cache.read(semesterCode: '1151')),
+          oldPdf,
+        );
+        expect(
+          await tester.runAsync(() => cache.read(semesterCode: '1152')),
+          isNull,
+        );
+        return;
+      }
+      expect(displayed, scenario == 'current' ? oldPdf : freshPdf);
+      if (currentCode != null) {
+        expect(
+          await tester.runAsync(() => cache.read(semesterCode: currentCode)),
+          displayed,
+        );
+      }
+    });
+  }
 
   testWidgets('uses an account cache without making a network request', (
     WidgetTester tester,
@@ -297,6 +393,7 @@ Widget _testApp({
   Uint8List? currentCachedPdf = cachedPdf;
   return MaterialApp(
     home: EnrollCertificatePage(
+      currentSemesterCodeProvider: () async => '1151',
       credentialsProvider: () => EnrollmentCertificateCredentials(
         username: username,
         password: password,
