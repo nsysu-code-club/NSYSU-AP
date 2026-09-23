@@ -17,21 +17,35 @@ void main() {
   final bool hasCreds = username.isNotEmpty && password.isNotEmpty;
   final String? skipReason = hasCreds
       ? null
-      : 'NSYSU_USER / NSYSU_PASS env vars not set';
+      : '[ALERT] NSYSU_USER / NSYSU_PASS env vars not set.';
 
   group('TuitionHelper', () {
     setUpAll(() async {
       enableHttpLogging(TuitionHelper.instance.dio);
       if (!hasCreds) {
-        print('[live] no credentials in env — tuition tests will skip');
+        logInfo('TuitionHelper', 'login', <String, dynamic>{
+          'status': 'skipped',
+          'reason': '[ALERT] NSYSU_USER / NSYSU_PASS env vars not set.',
+        });
         return;
       }
-      print('[live] login as ${redact(username)} (tfstu tuition system)');
+      logInfo('TuitionHelper', 'login', <String, dynamic>{
+        'user': redact(username),
+      });
       final ApiResult<GeneralResponse> result = await TuitionHelper.instance
           .login(username: username, password: password);
-      print(
-        '[live]   ← isLogin=${TuitionHelper.instance.isLogin} '
-        'result=${result.runtimeType}',
+      logStructured(
+        tag:
+            result is ApiSuccess<GeneralResponse> &&
+                TuitionHelper.instance.isLogin
+            ? 'SUCCESS'
+            : 'ERROR',
+        scope: 'TuitionHelper',
+        action: 'login',
+        fields: <String, dynamic>{
+          'isLogin': TuitionHelper.instance.isLogin,
+          'result': result.runtimeType.toString(),
+        },
       );
       expect(
         result,
@@ -47,17 +61,19 @@ void main() {
     test(
       'getData returns a list (possibly empty)',
       () async {
-        print('[live] GET /tfstu/tfstudata.asp?act=11 (tuition list)');
+        logTarget('TuitionHelper', 'getData', <String, dynamic>{
+          'method': 'GET',
+          'path': '/tfstu/tfstudata.asp?act=11',
+        });
         final ApiResult<List<TuitionAndFees>> result = await TuitionHelper
             .instance
             .getData();
         expect(result, isA<ApiSuccess<List<TuitionAndFees>>>());
         final List<TuitionAndFees> data =
             (result as ApiSuccess<List<TuitionAndFees>>).data;
-        print(
-          '[live]   ← ${data.length} tuition entries '
-          '(amounts/serials redacted)',
-        );
+        logSuccess('TuitionHelper', 'getData', <String, dynamic>{
+          'count': data.length,
+        });
       },
       skip: skipReason,
       timeout: const Timeout(Duration(seconds: 30)),
