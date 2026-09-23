@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/extensions/tuition_and_fees_ui_extension.dart';
+import 'package:nsysu_ap/pages/enroll_certificate/enroll_certificate_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
@@ -39,7 +40,23 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(app.tuitionAndFees)),
-      body: _body(),
+      body: Column(
+        children: <Widget>[
+          Card(
+            margin: const EdgeInsets.all(16.0),
+            child: ListTile(
+              leading: const Icon(Icons.picture_as_pdf_outlined),
+              title: Text(app.enrollCertificate.title),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => ApUtils.pushCupertinoStyle(
+                context,
+                const EnrollCertificatePage(),
+              ),
+            ),
+          ),
+          Expanded(child: _body()),
+        ],
+      ),
     );
   }
 
