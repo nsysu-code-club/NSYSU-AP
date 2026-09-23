@@ -141,3 +141,42 @@ jobs:
           # flutter_inappwebview_windows、gal 等 plugin 仍在使用。透過 CL 環境變數注入 silence macro，
           # 確保涵蓋所有 plugin 的編譯單元（在 windows/CMakeLists.txt 設 define 無法傳到 plugin sub-project）。
           CL: /D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS
+
+  build_linux:
+    name: Build Linux App
+    needs: analyze_and_test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Linux build dependencies
+        # clang/cmake/ninja/gtk are Flutter's documented Linux prerequisites.
+        # liblzma-dev is required by linux/flutter/CMakeLists.txt, lld + llvm by
+        # the native-assets build hook of the objective_c package, and
+        # libwebkit2gtk-4.1-dev by desktop_webview_window.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev \
+            liblzma-dev libwebkit2gtk-4.1-dev lld llvm
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: ${{ env.flutter_version_file }}
+          channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+      - name: Enable linux
+        run: flutter config --enable-linux-desktop
+      - run: flutter doctor -v
+      - run: flutter pub get
+      - name: Build linux release and package .deb
+        # flutter_distributor runs `flutter build linux --release` itself and
+        # reads linux/packaging/deb/make_config.yaml; output goes to dist/.
+        run: |
+          dart pub global activate flutter_distributor
+          "$HOME/.pub-cache/bin/flutter_distributor" package --platform linux --targets deb --skip-clean
+      - name: Upload .deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: nsysu-ap-linux-deb
+          path: dist/**/*.deb
+          if-no-files-found: error
