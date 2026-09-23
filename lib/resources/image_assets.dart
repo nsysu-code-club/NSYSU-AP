@@ -21,8 +21,38 @@ class FileAssets {
         as Map<String, dynamic>?;
   }
 
+  static Map<String, dynamic>? changelogForVersion(
+    Map<String, dynamic>? data,
+    String version,
+  ) {
+    final dynamic versionEntry = data?[version];
+    if (versionEntry is Map<String, dynamic>) return versionEntry;
+
+    // Accept previously bundled files that used build numbers as their keys.
+    for (final dynamic entry in data?.values ?? <dynamic>[]) {
+      if (entry is Map<String, dynamic> && entry['version'] == version) {
+        return entry;
+      }
+    }
+    return null;
+  }
+
   static Future<Map<String, dynamic>?> get carParkAreaData async {
     return jsonDecode(await rootBundle.loadString(carParkArea))
         as Map<String, dynamic>?;
+  }
+
+  /// Older release notes may not include every language supported by the app.
+  static String? changelogContent(Map<String, dynamic>? entry, String locale) {
+    for (final String language in <String>{locale, 'en-US', 'zh-TW'}) {
+      final dynamic rawContent = entry?[language];
+      final String? content = switch (rawContent) {
+        final String s => s,
+        final List<dynamic> l => l.map((dynamic e) => '* $e').join('\n'),
+        _ => null,
+      };
+      if (content != null && content.trim().isNotEmpty) return content;
+    }
+    return null;
   }
 }

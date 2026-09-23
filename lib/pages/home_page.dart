@@ -92,12 +92,6 @@ class HomePageState extends State<HomePage> {
         AppTrackingUtils.show(context: context);
       }
     });
-    if (Intl.defaultLocale != null) {
-      AnalyticsUtil.instance.setUserProperty(
-        AnalyticsConstants.language,
-        Locale(Intl.defaultLocale!).languageCode,
-      );
-    }
     FirebaseMessagingUtils.instance.init(
       onClick: (RemoteMessage message) {
         if (kDebugMode) {
@@ -266,32 +260,38 @@ class HomePageState extends State<HomePage> {
   Future<void> _checkUpdate() async {
     if (kIsWeb) return;
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    final String currentVersion = PreferenceUtil.instance.getString(
-      Constants.prefCurrentVersion,
+    final String lastChangelogVersion = PreferenceUtil.instance.getString(
+      Constants.prefLastChangelogVersion,
       '',
     );
-    if (currentVersion != packageInfo.buildNumber) {
+    if (lastChangelogVersion != packageInfo.version) {
       final Map<String, dynamic>? rawData = await FileAssets.changelogData;
-      //TODO: improve by object
-      final Map<String, dynamic>? map =
-          rawData?[packageInfo.buildNumber] as Map<String, dynamic>?;
-      if (map == null) return;
-      final dynamic rawContent = map[ap.locale];
-      final String? updateNoteContent = switch (rawContent) {
-        final String s => s,
-        final List<dynamic> l => l.map((dynamic e) => '* $e').join('\n'),
-        _ => null,
-      };
+      final Map<String, dynamic>? map = FileAssets.changelogForVersion(
+        rawData,
+        packageInfo.version,
+      );
       if (!mounted) return;
-      DialogUtils.showUpdateContent(
-        context,
-        'v${packageInfo.version}\n'
-        '$updateNoteContent',
+      final String? updateNoteContent = FileAssets.changelogContent(
+        map,
+        ap.locale,
       );
-      PreferenceUtil.instance.setString(
-        Constants.prefCurrentVersion,
-        packageInfo.buildNumber,
-      );
+      final bool visible = map?['visible'] as bool? ?? true;
+      if (visible &&
+          updateNoteContent != null &&
+          updateNoteContent.isNotEmpty) {
+        DialogUtils.showUpdateContent(
+          context,
+          'v${packageInfo.version}\n'
+          '$updateNoteContent',
+        );
+      }
+      // Retry missing notes later instead of marking unseen content as read.
+      if (!visible || updateNoteContent != null) {
+        await PreferenceUtil.instance.setString(
+          Constants.prefLastChangelogVersion,
+          packageInfo.version,
+        );
+      }
     }
     if (!Constants.isInDebugMode) {
       final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;

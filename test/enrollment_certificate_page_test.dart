@@ -294,6 +294,7 @@ Widget _testApp({
   Object? saveError,
   EnrollmentCertificatePdfExporter? exportPdf,
 }) {
+  Uint8List? currentCachedPdf = cachedPdf;
   return MaterialApp(
     home: EnrollCertificatePage(
       credentialsProvider: () => EnrollmentCertificateCredentials(
@@ -301,11 +302,12 @@ Widget _testApp({
         password: password,
       ),
       downloadCertificate: download,
-      readCachedCertificate: ({required String username}) async => cachedPdf,
+      readCachedCertificate: ({required String username}) async =>
+          currentCachedPdf,
       writeCachedCertificate:
           ({required String username, required Uint8List bytes}) async {
             if (saveError != null) throw saveError;
-            cachedPdf = bytes;
+            currentCachedPdf = bytes;
             onSavePdf?.call(bytes);
           },
       exportPdf: exportPdf,

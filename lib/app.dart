@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:developer' as developer;
+
 import 'package:ap_common/ap_common.dart'
     hide AppLocale, AppLocaleUtils, LocaleSettings, TranslationProvider;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
-import 'package:ap_common_flutter_core/ap_common_flutter_core.dart' as ap_l10n
+import 'package:ap_common_flutter_core/ap_common_flutter_core.dart'
+    as ap_l10n
     show TranslationProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +16,9 @@ import 'package:nsysu_ap/pages/home_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/pages/study/course_page.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
+import 'package:nsysu_ap/utils/app_locale_controller.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/widgets/locale_initialization_gate.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
@@ -25,6 +31,10 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   FirebaseAnalytics? _analytics;
+  late final AppLocaleController _localeController;
+  late Future<void> _localeInitialization;
+
+  String get languagePreference => _localeController.preferenceCode;
 
   ThemeMode themeMode = ThemeMode.system;
   int currentColorIndex = 0;
@@ -45,18 +55,27 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    super.initState();
     _analytics = FirebaseUtils.init();
-    themeMode = ThemeMode.values[
-        PreferenceUtil.instance.getInt(Constants.prefThemeModeIndex, 0)];
-    currentColorIndex =
-        PreferenceUtil.instance.getInt(ApTheme.PREF_COLOR_INDEX, 0);
-    final int customColorValue =
-        PreferenceUtil.instance.getInt(ApTheme.PREF_CUSTOM_COLOR, 0);
+    _localeController = AppLocaleController();
+    themeMode =
+        ThemeMode.values[PreferenceUtil.instance.getInt(
+          Constants.prefThemeModeIndex,
+          0,
+        )];
+    currentColorIndex = PreferenceUtil.instance.getInt(
+      ApTheme.PREF_COLOR_INDEX,
+      0,
+    );
+    final int customColorValue = PreferenceUtil.instance.getInt(
+      ApTheme.PREF_CUSTOM_COLOR,
+      0,
+    );
     if (currentColorIndex == ApTheme.customColorIndex &&
         customColorValue != 0) {
       customColor = Color(customColorValue);
     }
-    _initLocale();
+    _localeInitialization = _initializeLocale();
     (AnalyticsUtil.instance as FirebaseAnalyticsUtils).logThemeEvent(themeMode);
     WidgetsBinding.instance.addObserver(this);
     Future<void>.microtask(() {
@@ -68,31 +87,51 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ),
       );
     });
-    super.initState();
   }
 
-  Future<void> _initLocale() async {
-    final String languageCode = PreferenceUtil.instance.getString(
-      Constants.prefLanguageCode,
-      ApSupportLanguageConstants.system,
-    );
-    if (languageCode == ApSupportLanguageConstants.system) {
-      await useApDeviceLocale();
-      await LocaleSettings.useDeviceLocale();
-    } else {
-      final Locale locale = Locale(
-        languageCode,
-        languageCode == ApSupportLanguageConstants.zh ? 'TW' : null,
+  Future<void> _initializeLocale() async {
+    try {
+      await _localeController.initialize();
+      _updateLocale();
+    } catch (error, stackTrace) {
+      developer.log(
+        'Locale initialization failed',
+        name: 'nsysu_ap.locale',
+        error: error,
+        stackTrace: stackTrace,
       );
-      await setApLocaleFromFlutter(locale);
-      final AppLocale appLocale = AppLocaleUtils.instance.parseLocaleParts(
-        languageCode: locale.languageCode,
-        scriptCode: locale.scriptCode,
-        countryCode: locale.countryCode,
-      );
-      await LocaleSettings.setLocale(appLocale);
+      rethrow;
     }
-    if (mounted) setState(() {});
+  }
+
+  void _retryLocaleInitialization() {
+    setState(() => _localeInitialization = _initializeLocale());
+  }
+
+  void _updateLocale() {
+    if (!mounted) return;
+    locale = _localeController.locale;
+    if (locale != null) AnnouncementHelper.instance.setLocale(locale!);
+    setState(() {});
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    unawaited(_handleDeviceLocalesChanged(locales));
+  }
+
+  Future<void> _handleDeviceLocalesChanged(List<Locale>? locales) async {
+    try {
+      await _localeController.handleDeviceLocalesChanged(locales);
+      _updateLocale();
+    } catch (error, stackTrace) {
+      developer.log(
+        'System locale update failed',
+        name: 'nsysu_ap.locale',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   @override
@@ -120,49 +159,52 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         child: Builder(
           builder: (BuildContext context) {
             final Color seedColor = ApTheme.of(context).seedColor;
-            return ap_l10n.TranslationProvider(
-              child: TranslationProvider(
-                child: Builder(
-                  builder: (BuildContext context) {
-                    return MaterialApp(
-                      onGenerateTitle: (BuildContext context) =>
-                          context.app.appName,
-                      debugShowCheckedModeBanner: false,
-                      routes: <String, WidgetBuilder>{
-                        Navigator.defaultRouteName: (BuildContext context) =>
-                            HomePage(),
-                        HomePage.routerName: (BuildContext context) =>
-                            HomePage(),
-                        CoursePage.routerName: (BuildContext context) =>
-                            CoursePage(),
-                        ScorePage.routerName: (BuildContext context) =>
-                            ScorePage(),
-                        GraduationReportPage.routerName:
-                            (BuildContext context) =>
-                                const GraduationReportPage(),
-                        SettingPage.routerName: (BuildContext context) =>
-                            SettingPage(),
-                      },
-                      theme: ApTheme.light(seedColor),
-                      darkTheme: ApTheme.dark(seedColor),
-                      themeMode: themeMode,
-                      locale: TranslationProvider.of(context).flutterLocale,
-                      navigatorObservers: <NavigatorObserver>[
-                        if (FirebaseAnalyticsUtils.isSupported &&
-                            _analytics != null)
-                          FirebaseAnalyticsObserver(analytics: _analytics!),
-                      ],
-                      localizationsDelegates:
-                          const <LocalizationsDelegate<dynamic>>[
-                        GlobalMaterialLocalizations.delegate,
-                        GlobalWidgetsLocalizations.delegate,
-                        GlobalCupertinoLocalizations.delegate,
-                      ],
-                      supportedLocales: AppLocaleUtils.supportedLocales,
-                    );
-                  },
-                ),
-              ),
+            return LocaleInitializationGate(
+              initialization: _localeInitialization,
+              onRetry: _retryLocaleInitialization,
+              theme: ApTheme.light(seedColor),
+              darkTheme: ApTheme.dark(seedColor),
+              themeMode: themeMode,
+              builder: (_) => _buildLocalizedApp(seedColor),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocalizedApp(Color seedColor) {
+    return ap_l10n.TranslationProvider(
+      child: TranslationProvider(
+        child: Builder(
+          builder: (BuildContext context) {
+            return MaterialApp(
+              onGenerateTitle: (BuildContext context) => context.app.appName,
+              debugShowCheckedModeBanner: false,
+              routes: <String, WidgetBuilder>{
+                Navigator.defaultRouteName: (BuildContext context) =>
+                    HomePage(),
+                HomePage.routerName: (BuildContext context) => HomePage(),
+                CoursePage.routerName: (BuildContext context) => CoursePage(),
+                ScorePage.routerName: (BuildContext context) => ScorePage(),
+                GraduationReportPage.routerName: (BuildContext context) =>
+                    const GraduationReportPage(),
+                SettingPage.routerName: (BuildContext context) => SettingPage(),
+              },
+              theme: ApTheme.light(seedColor),
+              darkTheme: ApTheme.dark(seedColor),
+              themeMode: themeMode,
+              locale: TranslationProvider.of(context).flutterLocale,
+              navigatorObservers: <NavigatorObserver>[
+                if (FirebaseAnalyticsUtils.isSupported && _analytics != null)
+                  FirebaseAnalyticsObserver(analytics: _analytics!),
+              ],
+              localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: AppLocaleUtils.supportedLocales,
             );
           },
         ),
@@ -187,21 +229,14 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     });
   }
 
-  void loadLocale(Locale locale) {
-    this.locale = locale;
-    AnnouncementHelper.instance.setLocale(this.locale!);
-    setApLocaleFromFlutter(locale);
-    final AppLocale appLocale = AppLocaleUtils.instance.parseLocaleParts(
-      languageCode: locale.languageCode,
-      scriptCode: locale.scriptCode,
-      countryCode: locale.countryCode,
-    );
-    LocaleSettings.setLocale(appLocale);
+  Future<void> loadLanguage(String preferenceCode) async {
+    await _localeController.selectLanguage(preferenceCode);
+    _updateLocale();
   }
 
   Future<void> getUserInfo() async {
-    final ApiResult<UserInfo> result =
-        await SelcrsHelper.instance.getUserInfo();
+    final ApiResult<UserInfo> result = await SelcrsHelper.instance
+        .getUserInfo();
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<UserInfo>(:final UserInfo data):

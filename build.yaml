@@ -12,6 +12,8 @@ targets:
           key_map_case: camel
           translate_var: app
           class_name: AppLocalizations
+          timestamp: false
+          statistics: false
       json_serializable:
         options:
           # Options configure how source code is generated for every
