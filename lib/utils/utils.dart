@@ -87,5 +87,13 @@ class Utils {
     return '${academicYearStart - rocYearOffset}${isFirstSemester ? 1 : 2}';
   }
 
-  static String get currentSemesterCode => semesterCodeFor(DateTime.now());
+  /// [semesterCodeFor] at [instant] in Taiwan time (UTC+8, no DST), so the
+  /// Aug 1 / Feb 1 boundaries do not move with the device's time zone, e.g.
+  /// for students who are abroad.
+  static String semesterCodeAt(DateTime instant) {
+    const Duration taiwanOffset = Duration(hours: 8);
+    return semesterCodeFor(instant.toUtc().add(taiwanOffset));
+  }
+
+  static String get currentSemesterCode => semesterCodeAt(DateTime.now());
 }

@@ -38,4 +38,24 @@ void main() {
       expect(Utils.currentSemesterCode, matches(RegExp(r'^\d{3}[12]$')));
     });
   });
+
+  group('Utils.semesterCodeAt', () {
+    test('switches at midnight Taiwan time on August 1', () {
+      // 2026-07-31 23:59 and 2026-08-01 00:00 in Taiwan (UTC+8).
+      expect(Utils.semesterCodeAt(DateTime.utc(2026, 7, 31, 15, 59)), '1142');
+      expect(Utils.semesterCodeAt(DateTime.utc(2026, 7, 31, 16)), '1151');
+    });
+
+    test('switches at midnight Taiwan time on February 1', () {
+      // 2027-01-31 23:59 and 2027-02-01 00:00 in Taiwan (UTC+8).
+      expect(Utils.semesterCodeAt(DateTime.utc(2027, 1, 31, 15, 59)), '1151');
+      expect(Utils.semesterCodeAt(DateTime.utc(2027, 1, 31, 16)), '1152');
+    });
+
+    test('does not depend on the device time zone', () {
+      // The same instant in UTC and as a local DateTime gives the same code.
+      final DateTime instant = DateTime.utc(2026, 7, 31, 16);
+      expect(Utils.semesterCodeAt(instant.toLocal()), '1151');
+    });
+  });
 }
