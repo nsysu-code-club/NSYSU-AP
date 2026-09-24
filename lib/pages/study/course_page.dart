@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/study/semester_picker_config.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class CoursePage extends StatefulWidget {
@@ -118,7 +119,7 @@ class CoursePageState extends State<CoursePage> {
     } catch (exception) {
       defaultSemesterCode = PreferenceUtil.instance.getString(
         Constants.defaultCourseSemesterCode,
-        Constants.currentSemesterCode,
+        Utils.currentSemesterCode,
       );
       timeCodeConfig = TimeCodeConfig.fromRawJson(
         PreferenceUtil.instance.getString(

@@ -66,4 +66,26 @@ class Utils {
         longitude >= longLeft &&
         longitude <= lonRight;
   }
+
+  /// Semester code (e.g. `1151`) for [date]. Used as the last-resort default
+  /// when Firebase Remote Config is unavailable (desktop) and nothing has
+  /// been cached yet.
+  ///
+  /// Boundaries follow 各級學校學生學年學期假期辦法 §2–3: the academic year
+  /// starts on August 1; semester 1 runs Aug 1 – Jan 31 and semester 2 runs
+  /// Feb 1 – Jul 31. Only the regular semesters (`1`, `2`) are returned;
+  /// summer sessions (`0` 碩專暑, `3` 暑修) stay selectable in the picker but
+  /// are never guessed as the default.
+  static String semesterCodeFor(DateTime date) {
+    const int rocYearOffset = 1911;
+    const int academicYearStartMonth = DateTime.august;
+    final bool isFirstSemester =
+        date.month >= academicYearStartMonth || date.month == DateTime.january;
+    final int academicYearStart = date.month >= academicYearStartMonth
+        ? date.year
+        : date.year - 1;
+    return '${academicYearStart - rocYearOffset}${isFirstSemester ? 1 : 2}';
+  }
+
+  static String get currentSemesterCode => semesterCodeFor(DateTime.now());
 }
