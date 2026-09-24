@@ -247,12 +247,20 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
       supportDirectoryProvider: widget.supportDirectoryProvider,
     );
     try {
-      _semesterCode = await _resolveSemesterCode();
+      final String? initialSemesterCode = await _resolveSemesterCode();
+      _semesterCode = initialSemesterCode;
       if (!_isActive) return;
       unawaited(_refreshSemesterCode());
       _debugLog('event=cache_read_start');
-      final Uint8List? cachedPdf = await _readCachedCertificate();
+      final Uint8List? cachedPdf = await _readCachedCertificate(
+        semesterCode: initialSemesterCode,
+      );
       if (!_isActive) return;
+      if (_semesterCode != initialSemesterCode) {
+        _debugLog('event=cache_invalidated reason=semester_changed');
+        await _retrieve();
+        return;
+      }
       if (cachedPdf != null) {
         _debugLog('event=cache_hit pdfBytes=${cachedPdf.length}');
         setState(() {
@@ -441,13 +449,12 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
     }
   }
 
-  Future<Uint8List?> _readCachedCertificate() {
+  Future<Uint8List?> _readCachedCertificate({String? semesterCode}) {
     final EnrollmentCertificateCacheReader? reader =
         widget.readCachedCertificate;
     if (reader != null) {
       return reader(username: _username);
     }
-    final String? semesterCode = _semesterCode;
     if (semesterCode == null) return Future<Uint8List?>.value();
     return _cache.read(semesterCode: semesterCode);
   }
@@ -505,6 +512,38 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
           if (_isActive) await config.activate();
         }
       }
+      if (!_isActive) return;
+      final String? refreshedSemesterCode = await _resolveSemesterCode();
+      if (!_isActive ||
+          refreshedSemesterCode == null ||
+          refreshedSemesterCode == _semesterCode) {
+        return;
+      }
+      final String? previousSemesterCode = _semesterCode;
+      _semesterCode = refreshedSemesterCode;
+      _debugLog(
+        'event=semester_changed from=${previousSemesterCode ?? 'unknown'} '
+        'to=$refreshedSemesterCode',
+      );
+
+      // If initialization is still reading the old cache, it will observe the
+      // changed code and retrieve the current certificate itself.
+      if (_pdfData == null) return;
+
+      final Uint8List? refreshedCache = widget.readCachedCertificate == null
+          ? await _readCachedCertificate(semesterCode: refreshedSemesterCode)
+          : null;
+      if (!_isActive) return;
+      if (refreshedCache != null) {
+        setState(() => _pdfData = refreshedCache);
+        return;
+      }
+      setState(() {
+        _pdfData = null;
+        _isRunning = true;
+        _status = app.enrollCertificate.retrieving;
+      });
+      await _retrieve();
     } catch (_) {
       // Refresh never blocks disk reads or invalidates activated values.
     }

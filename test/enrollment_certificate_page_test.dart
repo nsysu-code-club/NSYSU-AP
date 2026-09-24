@@ -40,6 +40,39 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('semester rollover replaces an already displayed cached PDF', (
+    WidgetTester tester,
+  ) async {
+    String semesterCode = '1151';
+    final Completer<void> refresh = Completer<void>();
+    final Uint8List oldPdf = _validPdf('old-semester');
+    final Uint8List freshPdf = _validPdf('new-semester');
+    Uint8List? displayedPdf;
+    int requests = 0;
+    await tester.pumpWidget(
+      _testApp(
+        cachedPdf: oldPdf,
+        currentSemesterCodeProvider: () async => semesterCode,
+        refreshSemesterCode: () => refresh.future,
+        onBuildPdf: (Uint8List bytes) => displayedPdf = bytes,
+        download: ({required String username, required String password}) async {
+          requests++;
+          return freshPdf;
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(displayedPdf, orderedEquals(oldPdf));
+    expect(requests, 0);
+
+    semesterCode = '1152';
+    refresh.complete();
+    await tester.pumpAndSettle();
+
+    expect(requests, 1);
+    expect(displayedPdf, orderedEquals(freshPdf));
+  });
+
   testWidgets('logout prevents a mounted page from saving a late download', (
     WidgetTester tester,
   ) async {
@@ -644,12 +677,14 @@ Widget _testApp({
   Object? saveError,
   EnrollmentCertificatePdfExporter? exportPdf,
   EnrollmentCertificateRegistrationPageBuilder? registrationPageBuilder,
+  Future<String?> Function()? currentSemesterCodeProvider,
   Future<void> Function()? refreshSemesterCode,
 }) {
   Uint8List? currentCachedPdf = cachedPdf;
   return MaterialApp(
     home: EnrollCertificatePage(
-      currentSemesterCodeProvider: () async => '1151',
+      currentSemesterCodeProvider:
+          currentSemesterCodeProvider ?? () async => '1151',
       refreshSemesterCode: refreshSemesterCode,
       credentialsProvider: () => EnrollmentCertificateCredentials(
         username: username,
