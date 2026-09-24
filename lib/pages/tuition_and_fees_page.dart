@@ -39,7 +39,7 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(app.tuitionAndFees)),
+      appBar: AppBar(title: Text(app.tuitionAndCert)),
       body: Column(
         children: <Widget>[
           Card(

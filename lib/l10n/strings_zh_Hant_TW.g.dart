@@ -95,6 +95,9 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '學雜費繳費狀況查詢'
 	String get tuitionAndFees => '學雜費繳費狀況查詢';
 
+	/// zh-Hant-TW: '學雜費與在學證明'
+	String get tuitionAndCert => '學雜費與在學證明';
+
 	/// zh-Hant-TW: '金額：${amount} 繳費日期：${date}'
 	String tuitionAndFeesItemTitleFormat({required Object amount, required Object date}) => '金額：${amount}\n繳費日期：${date}';
 
@@ -334,6 +337,7 @@ extension on AppLocalizations {
 			'graduationCheckChecklistSummary' => '總結',
 			'firstLoginHint' => '首次登入密碼預設為身分證末六碼',
 			'tuitionAndFees' => '學雜費繳費狀況查詢',
+			'tuitionAndCert' => '學雜費與在學證明',
 			'tuitionAndFeesItemTitleFormat' => ({required Object amount, required Object date}) => '金額：${amount}\n繳費日期：${date}',
 			'admissionGuide' => '入學指南',
 			'tuitionAndFeesPageHint' => '點擊可查看收據或繳費單',

@@ -5,11 +5,13 @@
     "date": "2026/09/08",
     "zh-TW": [
       "修正自訂課程在重新開啟 App 後消失的問題",
-      "改善 iOS 課表小工具顯示"
+      "改善 iOS 課表小工具顯示",
+      "加入在學證明頁面"
     ],
     "en-US": [
       "Fix custom courses disappearing after reopening the app.",
-      "Improve the iOS course widget display."
+      "Improve the iOS course widget display.",
+      "Add enrollment certificate page."
     ]
   },
   "20001": {

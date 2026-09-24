@@ -378,7 +378,7 @@ class HomePageState extends State<HomePage> {
           ),
           DrawerMenuItem(
             icon: ApIcon.monetizationOn,
-            title: app.tuitionAndFees,
+            title: app.tuitionAndCert,
             onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
           ),
           DrawerMenuItem(

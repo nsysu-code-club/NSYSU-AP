@@ -17,6 +17,7 @@
   "graduationCheckChecklistSummary": "Summary",
   "firstLoginHint": "For first-time login, please fill in the last six number of your ID as your password",
   "tuitionAndFees": "Tuition Payment Status",
+  "tuitionAndCert": "Tuition & Enrollment Cert",
   "tuitionAndFeesItemTitleFormat": "Amount：${amount}\nDate of Payment：${date}",
   "admissionGuide": "Admission Guide",
   "tuitionAndFeesPageHint": "Click to view the receipt or fees bill",

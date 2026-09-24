@@ -17,6 +17,7 @@
   "graduationCheckChecklistSummary": "總結",
   "firstLoginHint": "首次登入密碼預設為身分證末六碼",
   "tuitionAndFees": "學雜費繳費狀況查詢",
+  "tuitionAndCert": "學雜費與在學證明",
   "tuitionAndFeesItemTitleFormat": "金額：${amount}\n繳費日期：${date}",
   "admissionGuide": "入學指南",
   "tuitionAndFeesPageHint": "點擊可查看收據或繳費單",

@@ -57,6 +57,7 @@ class AppLocalizationsJa extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get graduationCheckChecklistSummary => '概要';
 	@override String get firstLoginHint => '初回ログイン時のパスワードは、身分証番号の下6桁です';
 	@override String get tuitionAndFees => '学費・諸費用の納付状況';
+	@override String get tuitionAndCert => '学費・諸費用と在学証明書';
 	@override String tuitionAndFeesItemTitleFormat({required Object amount, required Object date}) => '金額：${amount}\n納付日：${date}';
 	@override String get admissionGuide => '入学案内';
 	@override String get tuitionAndFeesPageHint => 'タップすると領収書または納付書を確認できます';
@@ -162,6 +163,7 @@ extension on AppLocalizationsJa {
 			'graduationCheckChecklistSummary' => '概要',
 			'firstLoginHint' => '初回ログイン時のパスワードは、身分証番号の下6桁です',
 			'tuitionAndFees' => '学費・諸費用の納付状況',
+			'tuitionAndCert' => '学費・諸費用と在学証明書',
 			'tuitionAndFeesItemTitleFormat' => ({required Object amount, required Object date}) => '金額：${amount}\n納付日：${date}',
 			'admissionGuide' => '入学案内',
 			'tuitionAndFeesPageHint' => 'タップすると領収書または納付書を確認できます',

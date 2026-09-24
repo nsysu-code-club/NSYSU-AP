@@ -57,6 +57,7 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get graduationCheckChecklistSummary => 'Summary';
 	@override String get firstLoginHint => 'For first-time login, please fill in the last six number of your ID as your password';
 	@override String get tuitionAndFees => 'Tuition Payment Status';
+	@override String get tuitionAndCert => 'Tuition & Enrollment Cert';
 	@override String tuitionAndFeesItemTitleFormat({required Object amount, required Object date}) => 'Amount：${amount}\nDate of Payment：${date}';
 	@override String get admissionGuide => 'Admission Guide';
 	@override String get tuitionAndFeesPageHint => 'Click to view the receipt or fees bill';
@@ -162,6 +163,7 @@ extension on AppLocalizationsEn {
 			'graduationCheckChecklistSummary' => 'Summary',
 			'firstLoginHint' => 'For first-time login, please fill in the last six number of your ID as your password',
 			'tuitionAndFees' => 'Tuition Payment Status',
+			'tuitionAndCert' => 'Tuition & Enrollment Cert',
 			'tuitionAndFeesItemTitleFormat' => ({required Object amount, required Object date}) => 'Amount：${amount}\nDate of Payment：${date}',
 			'admissionGuide' => 'Admission Guide',
 			'tuitionAndFeesPageHint' => 'Click to view the receipt or fees bill',
