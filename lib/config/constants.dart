@@ -15,10 +15,12 @@ class Constants {
   static const String defaultYear = '109';
   static const String defaultSemester = '1';
 
-  static const String courseSelectorUrl = 'https://nsysu-opendev.github.io/NSYSUCourseSelectorV6/';
+  static const String courseSelectorUrl =
+      'https://nsysu-opendev.github.io/NSYSUCourseSelectorV6/';
 
   static const String prefFirstEnterApp = 'pref_first_enter_app';
-  static const String prefCurrentVersion = 'pref_current_version';
+  static const String prefCurrentBuild = 'pref_current_version';
+  static const String prefLastChangelogVersion = 'pref_last_changelog_version';
   static const String prefRememberPassword = 'pref_remember_password';
   static const String prefAutoLogin = 'pref_auto_login';
   static const String prefUsername = 'pref_username';

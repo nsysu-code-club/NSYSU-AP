@@ -15,12 +15,13 @@ on:
       - 'linux/**'
       - 'windows/**'
       - 'assets/**'
+      - '.fvmrc'
       - '.github/workflows/cd.yml'
       - '.github/scripts/**'
   workflow_dispatch:
 
 env:
-  flutter_version: '3.41.x'
+  flutter_version_file: '.fvmrc'
   java_version: '21'
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -45,16 +46,32 @@ jobs:
           VERSION=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
-      - name: Get version code and bump VERSION_CODE for next run
+      - name: Get version code and reserve the next build number
         id: get_version_code
         env:
+          APP_VERSION: ${{ steps.get_version.outputs.version }}
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          STORED_VERSION_CODE: ${{ vars.VERSION_CODE }}
         run: |
-          CURRENT="${{ vars.VERSION_CODE }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$APP_VERSION"
+          if [[ ! "$MAJOR" =~ ^[0-9]+$ || ! "$MINOR" =~ ^[0-9]+$ ]]; then
+            echo "Invalid app version: $APP_VERSION"
+            exit 1
+          fi
+          if [[ ! "$STORED_VERSION_CODE" =~ ^[0-9]+$ ]]; then
+            echo "VERSION_CODE must be a positive integer"
+            exit 1
+          fi
+
+          BASE=$((10#$MAJOR * 10000 + 10#$MINOR * 100))
+          CURRENT=$((10#$STORED_VERSION_CODE))
+          if (( CURRENT < BASE )); then
+            CURRENT=$BASE
+          fi
           NEXT=$((CURRENT + 1))
           echo "version_code=$CURRENT" >> $GITHUB_OUTPUT
           gh variable set VERSION_CODE --body "$NEXT" --repo "${{ github.repository }}"
-          echo "Using version code: $CURRENT (VERSION_CODE bumped to $NEXT for next run)"
+          echo "Version $APP_VERSION uses build $CURRENT; reserved $NEXT for the next run"
       - name: Aggregate changelog from merged PRs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,7 +83,6 @@ jobs:
         with:
           name: changelog-aggregated
           path: changelog_aggregated.json
-
   deploy_android:
     name: Android Play Store
     needs: prepare
@@ -88,14 +104,14 @@ jobs:
         with:
           name: changelog-aggregated
       - name: Format changelog for Android
-        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} android
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" android
         working-directory: ./android/fastlane
         env:
           AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter_version }}
+          flutter-version-file: ${{ env.flutter_version_file }}
           channel: 'stable'
           cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
@@ -106,11 +122,13 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
-      - name: Install Fastlane
-        run: gem install fastlane fastlane-plugin-flutter_version
+      - name: Install Ruby dependencies
+        run: |
+          bundle config set path vendor/bundle
+          bundle install
         working-directory: ./android
       - name: Run Fastlane
-        run: fastlane ${{ needs.prepare.outputs.is_production == 'true' && 'playstore' || 'beta' }}
+        run: bundle exec fastlane ${{ needs.prepare.outputs.is_production == 'true' && 'playstore' || 'beta' }}
         working-directory: ./android
 
   deploy_ios:
@@ -133,18 +151,27 @@ jobs:
         with:
           name: changelog-aggregated
       - name: Format changelog for iOS
-        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} ios
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ios
         working-directory: ./ios/fastlane
         env:
           AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter_version }}
+          flutter-version-file: ${{ env.flutter_version_file }}
           channel: 'stable'
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Flutter Initialize
         run: flutter doctor -v
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - name: Install Ruby dependencies
+        run: |
+          bundle config set path vendor/bundle
+          bundle install
+        working-directory: ./ios
       - name: Unlock keychain for code signing
         run: |
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$HOME/Library/Keychains/login.keychain-db"
@@ -159,7 +186,7 @@ jobs:
         run: |
           echo "${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}" | base64 --decode > ios/AuthKey.p8
       - name: Deploy iOS Beta to TestFlight via Fastlane
-        run: fastlane ios release key_id:"${{ env.KEY_ID }}" issuer_id:"${{ env.ISSUER_ID }}"
+        run: bundle exec fastlane ios release key_id:"${{ env.KEY_ID }}" issuer_id:"${{ env.ISSUER_ID }}"
         working-directory: ./ios
         env:
           APP_STORE_CONNECT_TEAM_ID: '${{ secrets.APP_STORE_CONNECT_TEAM_ID }}'
@@ -181,7 +208,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter_version }}
+          flutter-version-file: ${{ env.flutter_version_file }}
           channel: 'stable'
           cache: true
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
@@ -217,7 +244,7 @@ jobs:
         with:
           name: changelog-aggregated
       - name: Format changelog for GitHub Release
-        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ${{ needs.prepare.outputs.version_code }} github
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" github
         env:
           AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
           RELEASE_VERSION: ${{ needs.prepare.outputs.version }}

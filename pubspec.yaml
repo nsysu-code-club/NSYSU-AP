@@ -1,7 +1,8 @@
 name: nsysu_ap
 description: NSYSU AP
 
-version: 2.0.1+20001
+version: 2.1.0+20100
+publish_to: none
 
 environment:
   sdk: '>=3.10.0 <4.0.0'
@@ -41,7 +42,6 @@ dependencies:
   json_annotation: ^4.6.0
   package_info_plus: ^8.0.3
   printing: 5.13.4
-  icalendar_parser: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -51,12 +51,12 @@ dev_dependencies:
   build_runner: ^2.1.5
   json_serializable: ^6.0.1
   slang_build_runner: ^4.5.0
+  git_hooks: ^1.0.2
 
 dependency_overrides:
   web: 0.5.1
   google_sign_in: 6.2.1
   google_sign_in_ios: 5.7.6
-  dio: 5.9.1
 
 flutter:
 
@@ -69,5 +69,3 @@ flutter:
     - changelog.json
     - assets/car_park_area.json
     - assets/ca/
-
-

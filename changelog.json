@@ -1,4 +1,17 @@
 {
+  "20100": {
+    "version": "2.1.0",
+    "visible": true,
+    "date": "2026/09/08",
+    "zh-TW": [
+      "修正自訂課程在重新開啟 App 後消失的問題",
+      "改善 iOS 課表小工具顯示"
+    ],
+    "en-US": [
+      "Fix custom courses disappearing after reopening the app.",
+      "Improve the iOS course widget display."
+    ]
+  },
   "20001": {
     "version": "2.0.1",
     "visible": true,

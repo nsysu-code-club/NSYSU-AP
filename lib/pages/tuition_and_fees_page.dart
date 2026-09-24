@@ -120,9 +120,25 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
             Navigator.of(context, rootNavigator: true).pop();
             switch (result) {
               case ApiSuccess<Uint8List?>(:final Uint8List? data):
+                // PdfView has no AppBar of its own; wrap it so desktop users
+                // (no hardware back button / swipe gesture) can navigate back.
                 ApUtils.pushCupertinoStyle(
                   context,
-                  PdfView(state: PdfState.finish, data: data),
+                  Scaffold(
+                    appBar: AppBar(title: Text(item.title)),
+                    // PdfView has two FloatingActionButtons that share the
+                    // default hero tag; disabling heroes here avoids the
+                    // "multiple heroes share the same tag" assertion during
+                    // the route transition (seen on desktop in debug builds).
+                    body: HeroMode(
+                      enabled: false,
+                      child: PdfView(
+                        state: PdfState.finish,
+                        data: data,
+                        fileName: item.title,
+                      ),
+                    ),
+                  ),
                 );
               case ApiFailure<Uint8List?>(:final DioException exception):
                 if (exception.i18nMessage != null) {

@@ -45,11 +45,13 @@ void main() {
     test(
       'Health Check ${entry.key} is reachable',
       () async {
-        print('[live] GET ${entry.value}');
+        logTarget('HealthCheck', 'getEndpoint', <String, dynamic>{
+          'name': entry.key,
+          'url': entry.value,
+        });
         final Response<dynamic> response = await healthDio.get<dynamic>(
           entry.value,
         );
-        print('[live]   ← HTTP ${response.statusCode}');
         expect(
           response.statusCode,
           isNotNull,
@@ -62,6 +64,10 @@ void main() {
               '${entry.key} returned HTTP ${response.statusCode} (server '
               'error / outage)',
         );
+        logSuccess('HealthCheck', 'getEndpoint', <String, dynamic>{
+          'name': entry.key,
+          'statusCode': response.statusCode,
+        });
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
@@ -71,16 +77,22 @@ void main() {
     'Health Check iBus (campus bus realtime) is reachable',
     () async {
       const String endpoint = 'https://ibus.tbkc.gov.tw/ibus/graphql';
-      print('[live] POST $endpoint');
+      logTarget('HealthCheck', 'postEndpoint', <String, dynamic>{
+        'name': 'iBus (campus bus realtime)',
+        'url': endpoint,
+      });
       final Response<dynamic> response = await healthDio.post<dynamic>(
         endpoint,
         data: <String, dynamic>{
           'query': 'query { route(xno: 901, lang: "zh") { name } }',
         },
       );
-      print('[live]   ← HTTP ${response.statusCode}');
       expect(response.statusCode, 200);
       expect(response.data, isA<Map<String, dynamic>>());
+      logSuccess('HealthCheck', 'postEndpoint', <String, dynamic>{
+        'name': 'iBus (campus bus realtime)',
+        'statusCode': response.statusCode,
+      });
     },
     timeout: const Timeout(Duration(seconds: 30)),
   );
