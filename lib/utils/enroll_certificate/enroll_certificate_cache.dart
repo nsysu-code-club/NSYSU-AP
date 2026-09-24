@@ -66,11 +66,14 @@ class EnrollCertificateCache {
   static Future<Map<String, dynamic>?> _readMetadata(
     File file,
     Uint8List pdf,
+  ) => _readMetadataFile(File('${file.path}.json'), pdf);
+
+  static Future<Map<String, dynamic>?> _readMetadataFile(
+    File metadataFile,
+    Uint8List pdf,
   ) async {
     try {
-      final dynamic decoded = jsonDecode(
-        await File('${file.path}.json').readAsString(),
-      );
+      final dynamic decoded = jsonDecode(await metadataFile.readAsString());
       if (decoded is! Map<String, dynamic> ||
           decoded['pdfSha256'] != sha256.convert(pdf).toString() ||
           (decoded['semesterCode'] != null &&
@@ -91,28 +94,46 @@ class EnrollCertificateCache {
     final File file = await _cacheFile();
     final File temporaryFile = File('${file.path}.tmp');
     final File backupFile = File('${file.path}.bak');
+    final File metadataFile = File('${file.path}.json');
     final File temporaryMetadata = File('${file.path}.json.tmp');
 
     final Uint8List? cachedPdf = await _readValidPdf(file);
     final Uint8List? backupPdf = await _readValidPdf(backupFile);
     if (cachedPdf != null) {
+      final Map<String, dynamic>? cachedMetadata = await _readMetadata(
+        file,
+        cachedPdf,
+      );
+      final Map<String, dynamic>? stagedMetadata = await _readMetadataFile(
+        temporaryMetadata,
+        cachedPdf,
+      );
       // A valid PDF alone does not commit a replacement: its metadata must
       // match too. A crash before metadata promotion leaves the old metadata
       // and backup available, or a staged metadata file for a legacy cache.
       if (backupPdf != null &&
-          await _readMetadata(file, cachedPdf) == null &&
+          cachedMetadata == null &&
           (await _readMetadata(file, backupPdf) != null ||
-              await temporaryMetadata.exists())) {
+              stagedMetadata != null)) {
         await _restoreArtifact(source: backupFile, destination: file);
         await _deleteBestEffort(temporaryFile);
         await _deleteBestEffort(temporaryMetadata);
         return backupPdf;
       }
+      final bool keepStagedMetadata =
+          cachedMetadata == null &&
+          stagedMetadata != null &&
+          !await _restoreArtifact(
+            source: temporaryMetadata,
+            destination: metadataFile,
+          );
       // A committed cache always wins. Cleanup is intentionally best-effort:
       // stale crash artifacts must never make a valid certificate unreadable.
       await _deleteBestEffort(backupFile);
       await _deleteBestEffort(temporaryFile);
-      await _deleteBestEffort(temporaryMetadata);
+      if (!keepStagedMetadata) {
+        await _deleteBestEffort(temporaryMetadata);
+      }
       return cachedPdf;
     }
     await _deleteBestEffort(file);
@@ -129,10 +150,30 @@ class EnrollCertificateCache {
 
     final Uint8List? temporaryPdf = await _readValidPdf(temporaryFile);
     if (temporaryPdf != null) {
-      await _restoreArtifact(source: temporaryFile, destination: file);
-      return temporaryPdf;
+      final Map<String, dynamic>? cachedMetadata = await _readMetadata(
+        file,
+        temporaryPdf,
+      );
+      final Map<String, dynamic>? stagedMetadata = await _readMetadataFile(
+        temporaryMetadata,
+        temporaryPdf,
+      );
+      if (cachedMetadata != null || stagedMetadata != null) {
+        final bool pdfPromoted = await _restoreArtifact(
+          source: temporaryFile,
+          destination: file,
+        );
+        if (pdfPromoted && stagedMetadata != null) {
+          await _restoreArtifact(
+            source: temporaryMetadata,
+            destination: metadataFile,
+          );
+        }
+        return temporaryPdf;
+      }
     }
     await _deleteBestEffort(temporaryFile);
+    await _deleteBestEffort(temporaryMetadata);
     return null;
   }
 
@@ -310,7 +351,7 @@ class EnrollCertificateCache {
     }
   }
 
-  static Future<void> _restoreArtifact({
+  static Future<bool> _restoreArtifact({
     required File source,
     required File destination,
   }) async {
@@ -319,9 +360,11 @@ class EnrollCertificateCache {
         await destination.delete();
       }
       await source.rename(destination.path);
+      return true;
     } on FileSystemException {
       // The validated source remains readable even if cleanup or promotion is
       // denied. A later read can retry recovery without losing the cache.
+      return false;
     }
   }
 

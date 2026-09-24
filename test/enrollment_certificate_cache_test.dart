@@ -42,6 +42,22 @@ void main() {
     expect(await cache.read(semesterCode: '1152'), isNull);
   });
 
+  test('recovers a staged initial PDF together with its metadata', () async {
+    final EnrollCertificateCache cache = createCache('A1');
+    final Uint8List pdf = _validPdf('initial');
+    await cache.save(pdf, semesterCode: '1151');
+    final File file = await _cachedPdfFile(temporaryDirectory);
+    final File stagedPdf = await file.rename('${file.path}.tmp');
+    final File metadata = File('${file.path}.json');
+    final File stagedMetadata = await metadata.rename('${metadata.path}.tmp');
+
+    expect(await cache.read(semesterCode: '1151'), pdf);
+    expect(await file.readAsBytes(), pdf);
+    expect(await metadata.exists(), isTrue);
+    expect(await stagedPdf.exists(), isFalse);
+    expect(await stagedMetadata.exists(), isFalse);
+  });
+
   for (final String stage in <String>['backup', 'PDF', 'metadata']) {
     test('recovers the committed pair after interruption at $stage', () async {
       final EnrollCertificateCache cache = createCache('A1');
