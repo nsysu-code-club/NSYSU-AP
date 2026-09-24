@@ -58,4 +58,21 @@ void main() {
       expect(Utils.semesterCodeAt(instant.toLocal()), '1151');
     });
   });
+
+  group('Utils.semesterCodeOrCurrent', () {
+    test('keeps a valid four-digit code', () {
+      expect(Utils.semesterCodeOrCurrent('1151'), '1151');
+      expect(Utils.semesterCodeOrCurrent('0992'), '0992');
+    });
+
+    test('falls back to the current semester for empty or malformed codes', () {
+      for (final String code in <String>['', '  ', '115', '11511', '115上']) {
+        expect(
+          Utils.semesterCodeOrCurrent(code),
+          Utils.currentSemesterCode,
+          reason: '"$code"',
+        );
+      }
+    });
+  });
 }

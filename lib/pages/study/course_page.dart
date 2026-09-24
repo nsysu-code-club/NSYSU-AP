@@ -129,6 +129,9 @@ class CoursePageState extends State<CoursePage> {
         ),
       );
     }
+    // Never build a Semester from an empty or malformed code: a missing Remote
+    // Config parameter does not throw, so it would skip the catch fallback.
+    defaultSemesterCode = Utils.semesterCodeOrCurrent(defaultSemesterCode);
     final Semester defaultSemester = Semester(
       year: defaultSemesterCode.substring(0, 3),
       value: defaultSemesterCode.substring(3),

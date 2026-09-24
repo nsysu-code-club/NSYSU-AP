@@ -96,4 +96,10 @@ class Utils {
   }
 
   static String get currentSemesterCode => semesterCodeAt(DateTime.now());
+
+  /// [code] if it is a four-digit semester code such as `1151`, otherwise
+  /// [currentSemesterCode]. Remote Config returns an empty string when the
+  /// parameter is missing, and that value may also have been cached.
+  static String semesterCodeOrCurrent(String code) =>
+      RegExp(r'^\d{4}$').hasMatch(code) ? code : currentSemesterCode;
 }
