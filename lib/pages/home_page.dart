@@ -427,6 +427,9 @@ class HomePageState extends State<HomePage> {
                   Constants.prefAutoLogin,
                   false,
                 );
+                // Timetable caches are keyed by semester only, not by account;
+                // clear them so the next login cannot see this user's courses.
+                await Utils.clearCourseCache(PreferenceUtil.instance);
                 SelcrsHelper.instance.logout();
                 GraduationHelper.instance.logout();
                 TuitionHelper.instance.logout();

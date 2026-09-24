@@ -102,4 +102,22 @@ class Utils {
   /// parameter is missing, and that value may also have been cached.
   static String semesterCodeOrCurrent(String code) =>
       RegExp(r'^\d{4}$').hasMatch(code) ? code : currentSemesterCode;
+
+  /// Removes the cached official timetables for every semester, e.g. on
+  /// logout, so the next account on this device cannot see them. Uses the
+  /// same key rule as preference_migrations.dart: custom courses
+  /// (`custom_course_data_*`) are user-created and are kept.
+  static Future<void> clearCourseCache(PreferenceUtil preferences) async {
+    final List<String> keys = preferences
+        .getKeys()
+        .where(
+          (String key) =>
+              key == Constants.prefCourseData ||
+              key.startsWith('${ApConstants.packageName}.course_data_'),
+        )
+        .toList();
+    for (final String key in keys) {
+      await preferences.remove(key);
+    }
+  }
 }
