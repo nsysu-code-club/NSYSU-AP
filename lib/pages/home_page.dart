@@ -322,6 +322,9 @@ class HomePageState extends State<HomePage> {
       if (!mounted) return;
       ShareDataWidget.of(context)!.data.isLogin = true;
       ShareDataWidget.of(context)!.data.getUserInfo();
+      // Same as the auto-login path in _login(): logout cleared courseData, so
+      // re-read the cache or the card stays on "not loaded".
+      _loadCourseData();
       _homeKey.currentState!.hideSnackBar();
     } else {
       _checkLoginState();
