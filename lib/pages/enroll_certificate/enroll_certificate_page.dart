@@ -129,26 +129,32 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(app.enrollCertificate.title),
-        actions: <Widget>[
-          if (_pdfData != null) ...<Widget>[
-            IconButton(
-              key: const ValueKey<String>('enroll-certificate-download'),
-              onPressed: _download,
-              tooltip: app.enrollCertificate.download,
-              icon: const Icon(Icons.download_rounded),
-            ),
-            TextButton.icon(
-              key: const ValueKey<String>('enroll-certificate-regenerate'),
-              onPressed: _isRunning || _isOpeningRegistration
-                  ? null
-                  : _retrieve,
-              icon: const Icon(Icons.autorenew_rounded),
-              label: Text(app.enrollCertificate.regenerate),
-            ),
-          ],
-        ],
       ),
       body: _buildBody(),
+      floatingActionButton: _pdfData == null
+          ? null
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                FloatingActionButton(
+                  key: const ValueKey<String>('enroll-certificate-download'),
+                  heroTag: 'enroll-certificate-download',
+                  onPressed: _download,
+                  tooltip: app.enrollCertificate.download,
+                  child: const Icon(Icons.download_rounded),
+                ),
+                const SizedBox(height: 16),
+                FloatingActionButton(
+                  key: const ValueKey<String>('enroll-certificate-regenerate'),
+                  heroTag: 'enroll-certificate-regenerate',
+                  onPressed: _isRunning || _isOpeningRegistration
+                      ? null
+                      : _retrieve,
+                  tooltip: app.enrollCertificate.regenerate,
+                  child: const Icon(Icons.autorenew_rounded),
+                ),
+              ],
+            ),
     );
   }
 
@@ -160,14 +166,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
         key: const ValueKey<String>('enroll-certificate-pdf'),
         child:
             widget.pdfViewBuilder?.call(context, pdf, fileName) ??
-            HeroMode(
-              enabled: false,
-              child: PdfView(
-                state: PdfState.finish,
-                data: pdf,
-                fileName: fileName,
-              ),
-            ),
+            PdfPreview(build: (_) => pdf, useActions: false),
       );
     }
 

@@ -511,6 +511,41 @@ void main() {
     expect(exportedFileName, '${app.enrollCertificate.fileName}.pdf');
   });
 
+  testWidgets('PDF actions are floating download and regenerate buttons', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _testApp(
+        cachedPdf: _validPdf('cached'),
+        download:
+            ({required String username, required String password}) async =>
+                _validPdf('unused'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<AppBar>(find.byType(AppBar)).actions, isNull);
+    expect(find.byType(FloatingActionButton), findsNWidgets(2));
+    expect(
+      find.descendant(
+        of: find.byKey(
+          const ValueKey<String>('enroll-certificate-download'),
+        ),
+        matching: find.byIcon(Icons.download_rounded),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(
+          const ValueKey<String>('enroll-certificate-regenerate'),
+        ),
+        matching: find.byIcon(Icons.autorenew_rounded),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('shows an error when the platform cannot export the PDF', (
     WidgetTester tester,
   ) async {
