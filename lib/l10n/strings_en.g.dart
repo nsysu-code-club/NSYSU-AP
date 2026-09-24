@@ -132,7 +132,7 @@ class _AppLocalizationsEnrollCertificateEn extends AppLocalizationsEnrollCertifi
 	@override String get invalidResponse => 'The university system did not return a valid certificate PDF. Check your credentials or try again later.';
 	@override String get downloadFailed => 'The certificate could not be downloaded or exported. Please try again later.';
 	@override String get registrationTitle => 'Online Registration';
-	@override String get registrationRequired => 'The university did not issue a certificate. Sign in to the registration system, check and complete any required information, then retrieve the certificate again.';
+	@override String get registrationRequired => 'The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.';
 	@override String get registrationComplete => 'Finished — Retrieve Again';
 }
 
@@ -227,7 +227,7 @@ extension on AppLocalizationsEn {
 			'enrollCertificate.invalidResponse' => 'The university system did not return a valid certificate PDF. Check your credentials or try again later.',
 			'enrollCertificate.downloadFailed' => 'The certificate could not be downloaded or exported. Please try again later.',
 			'enrollCertificate.registrationTitle' => 'Online Registration',
-			'enrollCertificate.registrationRequired' => 'The university did not issue a certificate. Sign in to the registration system, check and complete any required information, then retrieve the certificate again.',
+			'enrollCertificate.registrationRequired' => 'The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.',
 			'enrollCertificate.registrationComplete' => 'Finished — Retrieve Again',
 			_ => null,
 		};

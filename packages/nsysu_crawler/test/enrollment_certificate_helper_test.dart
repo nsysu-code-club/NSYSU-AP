@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:test/test.dart';
@@ -17,6 +18,109 @@ const String _mainReferer = 'https://regweb.nsysu.edu.tw/webreg/WRegMain3.asp';
 const int _maxResponseBytes = 10 * 1024 * 1024;
 
 void main() {
+  group('EnrollmentCertificateHelper registration session', () {
+    test('hands off the latest scoped cookies before helper closure', () async {
+      final CookieJar jar = CookieJar();
+      final Uri sessionUri = EnrollmentCertificateHelper.registrationSessionUri;
+      await jar.saveFromResponse(
+        Uri.parse('https://selcrs.nsysu.edu.tw/stu_enroll/'),
+        <Cookie>[Cookie('SELCRS_ONLY', 'unrelated')],
+      );
+      await jar.saveFromResponse(sessionUri, <Cookie>[
+        Cookie('OTHER_PATH', 'unrelated')..path = '/other',
+        Cookie('PRINT_ONLY', 'unrelated')..path = '/webreg/print',
+      ]);
+      final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(<_Reply>[
+        _Reply.text(
+          'login',
+          headers: <String, List<String>>{
+            HttpHeaders.setCookieHeader: <String>[
+              'ASPSESSIONID=first; Path=/webreg/; Secure; HttpOnly',
+              'DEFAULT_PATH=path-cookie',
+            ],
+          },
+        ),
+        _Reply.text(
+          'context',
+          headers: <String, List<String>>{
+            HttpHeaders.setCookieHeader: <String>[
+              'ASPSESSIONID=current; Path=/webreg/; Secure; HttpOnly',
+            ],
+          },
+        ),
+        _Reply.text('<script>alert("Complete registration");</script>'),
+      ]);
+      final Dio dio = Dio()..httpClientAdapter = adapter;
+      final EnrollmentCertificateHelper helper = EnrollmentCertificateHelper(
+        dio: dio,
+        cookieJar: jar,
+      );
+      addTearDown(helper.close);
+
+      EnrollmentCertificateException? failure;
+      try {
+        await helper.download(username: 'A1', password: 'secret');
+      } on EnrollmentCertificateException catch (error) {
+        failure = error;
+      }
+      helper.close();
+      expect(
+        failure?.kind,
+        EnrollmentCertificateExceptionKind.registrationRequired,
+      );
+      final List<Cookie> cookies = failure!.registrationCookies;
+      expect(
+        cookies.map((Cookie cookie) => cookie.name),
+        unorderedEquals(<String>['ASPSESSIONID', 'DEFAULT_PATH']),
+      );
+      final Cookie session = cookies.singleWhere(
+        (Cookie cookie) => cookie.name == 'ASPSESSIONID',
+      );
+      expect(session.value, 'current');
+      expect(session.path, '/webreg/');
+      expect(session.domain, isNull);
+      expect(session.secure, isTrue);
+      expect(session.httpOnly, isTrue);
+      expect(
+        cookies
+            .singleWhere((Cookie cookie) => cookie.name == 'DEFAULT_PATH')
+            .path,
+        '/webreg',
+      );
+      expect(failure.toString(), isNot(contains('current')));
+      expect(failure.toString(), isNot(contains('path-cookie')));
+      // Snapshot must survive closing/clearing the original request's jar.
+      await jar.deleteAll();
+      expect(session.value, 'current');
+    });
+
+    test('ordinary failures do not expose session cookies', () async {
+      final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(<_Reply>[
+        _Reply.text(
+          'login',
+          headers: <String, List<String>>{
+            HttpHeaders.setCookieHeader: <String>[
+              'ASPSESSIONID=private; Path=/',
+            ],
+          },
+        ),
+        _Reply.text('server error', statusCode: 503),
+      ]);
+      final EnrollmentCertificateHelper helper = _helper(adapter);
+      addTearDown(helper.close);
+      await expectLater(
+        helper.download(username: 'A1', password: 'secret'),
+        throwsA(
+          isA<EnrollmentCertificateException>().having(
+            (EnrollmentCertificateException error) => error.registrationCookies,
+            'registrationCookies',
+            isEmpty,
+          ),
+        ),
+      );
+    });
+  });
+
   group('EnrollmentCertificateHelper flow', () {
     test(
       'uses the exact three-request session and normalizes the PDF',

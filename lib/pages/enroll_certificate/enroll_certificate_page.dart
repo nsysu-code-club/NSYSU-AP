@@ -1,3 +1,4 @@
+import 'dart:io' show Cookie;
 import 'dart:typed_data';
 
 import 'package:ap_common/ap_common.dart';
@@ -37,6 +38,10 @@ typedef EnrollmentCertificatePdfExporter =
 /// Builds the PDF viewer for a validated enrollment certificate.
 typedef EnrollmentCertificatePdfViewBuilder =
     Widget Function(BuildContext context, Uint8List bytes, String fileName);
+
+/// Builds the recovery page with only the current download's RegWeb cookies.
+typedef EnrollmentCertificateRegistrationPageBuilder =
+    Widget Function(BuildContext context, List<Cookie> cookies);
 
 /// Username/password pair used to retrieve an enrollment certificate.
 class EnrollmentCertificateCredentials {
@@ -81,7 +86,7 @@ class EnrollCertificatePage extends StatefulWidget {
   final EnrollmentCertificatePdfExporter? exportPdf;
   final EnrollmentCertificatePdfViewBuilder? pdfViewBuilder;
   final Future<String?> Function()? currentSemesterCodeProvider;
-  final WidgetBuilder? registrationPageBuilder;
+  final EnrollmentCertificateRegistrationPageBuilder? registrationPageBuilder;
 
   @override
   State<EnrollCertificatePage> createState() => _EnrollCertificatePageState();
@@ -281,6 +286,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
 
     final String mode = _pdfData == null ? 'initial' : 'regenerate';
     bool needsRegistration = false;
+    List<Cookie> registrationCookies = const <Cookie>[];
     _debugLog('event=retrieve_start mode=$mode');
     _isFetching = true;
     if (mounted) {
@@ -340,6 +346,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
       _handleRetrievalFailure(_messageFor(error.kind));
       needsRegistration =
           error.kind == EnrollmentCertificateExceptionKind.registrationRequired;
+      registrationCookies = error.registrationCookies;
     } catch (error) {
       _debugLog(
         'event=retrieve_failure kind=unexpected '
@@ -351,11 +358,11 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
       _debugLog('event=retrieve_end mode=$mode');
     }
     if (mounted && needsRegistration && openRegistrationOnFailure) {
-      await _openRegistration();
+      await _openRegistration(registrationCookies);
     }
   }
 
-  Future<void> _openRegistration() async {
+  Future<void> _openRegistration(List<Cookie> cookies) async {
     if (!mounted || _isOpeningRegistration) return;
     setState(() => _isOpeningRegistration = true);
     bool retry = false;
@@ -364,9 +371,13 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
           await Navigator.of(context).push<bool>(
             MaterialPageRoute<bool>(
               fullscreenDialog: true,
-              builder:
-                  widget.registrationPageBuilder ??
-                  (_) => const EnrollmentRegistrationPage(),
+              builder: (BuildContext context) =>
+                  widget.registrationPageBuilder?.call(context, cookies) ??
+                  EnrollmentRegistrationPage(
+                    username: _username,
+                    password: _password,
+                    registrationCookies: cookies,
+                  ),
             ),
           ) ??
           false;

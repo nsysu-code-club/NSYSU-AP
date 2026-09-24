@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show DebugPrintCallback, debugPrint;
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart' show URLRequest;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nsysu_ap/l10n/strings.g.dart';
 import 'package:nsysu_ap/pages/enroll_certificate/enroll_certificate_page.dart';
@@ -14,6 +15,33 @@ import 'package:nsysu_crawler/nsysu_crawler.dart';
 void main() {
   setUp(() {
     LocaleSettings.setLocaleSync(AppLocale.zhHantTw);
+  });
+
+  testWidgets('passes only the failed request session to registration', (
+    WidgetTester tester,
+  ) async {
+    final List<Cookie> cookies = <Cookie>[
+      Cookie('ASPSESSIONID', 'current-session')..path = '/webreg/',
+    ];
+    List<Cookie>? received;
+    await tester.pumpWidget(
+      _testApp(
+        download: ({required String username, required String password}) {
+          throw EnrollmentCertificateException(
+            EnrollmentCertificateExceptionKind.registrationRequired,
+            'Registration required',
+            registrationCookies: cookies,
+          );
+        },
+        registrationPageBuilder: (_, List<Cookie> session) {
+          received = session;
+          return const Scaffold(body: Text('Registration'));
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(received, same(cookies));
+    expect(find.text('Registration'), findsOneWidget);
   });
 
   for (final String scenario in <String>[
@@ -47,12 +75,14 @@ void main() {
                 }
                 return freshPdf;
               },
-          registrationPageBuilder: (BuildContext context) {
-            windows++;
-            return EnrollmentRegistrationPage(
-              webViewBuilder: (_) => const Text('School registration form'),
-            );
-          },
+          registrationPageBuilder:
+              (BuildContext context, List<Cookie> cookies) {
+                windows++;
+                return EnrollmentRegistrationPage(
+                  webViewBuilder: (_, URLRequest request, _) =>
+                      const Text('School registration form'),
+                );
+              },
         ),
       );
       await tester.pumpAndSettle();
@@ -126,7 +156,7 @@ void main() {
           download:
               ({required String username, required String password}) async =>
                   throw EnrollmentCertificateException(kind, 'Test failure'),
-          registrationPageBuilder: (_) {
+          registrationPageBuilder: (_, List<Cookie> cookies) {
             windows++;
             return const Text('Unexpected registration');
           },
@@ -515,7 +545,7 @@ Widget _testApp({
   void Function(Uint8List bytes)? onSavePdf,
   Object? saveError,
   EnrollmentCertificatePdfExporter? exportPdf,
-  WidgetBuilder? registrationPageBuilder,
+  EnrollmentCertificateRegistrationPageBuilder? registrationPageBuilder,
 }) {
   Uint8List? currentCachedPdf = cachedPdf;
   return MaterialApp(

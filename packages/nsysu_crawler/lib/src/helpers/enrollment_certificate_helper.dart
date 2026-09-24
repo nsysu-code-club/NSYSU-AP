@@ -49,6 +49,7 @@ class EnrollmentCertificateException implements Exception {
     this.message, {
     this.statusCode,
     this.cause,
+    this.registrationCookies = const <Cookie>[],
   });
 
   /// Machine-readable category used by app UI to choose a user message.
@@ -62,6 +63,10 @@ class EnrollmentCertificateException implements Exception {
 
   /// Original transport/parser error, when this exception wraps one.
   final Object? cause;
+
+  /// Ephemeral RegWeb cookies for the registration web view. Never log these
+  /// values, persist them in the PDF cache, or send them to a different host.
+  final List<Cookie> registrationCookies;
 
   @override
   String toString() {
@@ -92,10 +97,16 @@ class EnrollmentCertificateHelper {
     'https://regweb.nsysu.edu.tw/webreg/wregloginchk2.asp',
   );
 
+  /// Fixed HTTPS endpoint for establishing a session inside the web view.
+  static Uri get registrationLoginUri => _loginUri;
+
   /// Official portal where students can complete registration requirements.
   static final Uri registrationUri = Uri.parse(
     'https://selcrs.nsysu.edu.tw/stu_enroll/',
   );
+
+  /// Authenticated registration entry on the same host as the download session.
+  static final Uri registrationSessionUri = Uri.parse(_mainReferer);
   static final Uri _contextUri = Uri.parse(
     'https://regweb.nsysu.edu.tw/webreg/'
     'WRegMain3.asp?act=71&out=print/enrollcert.asp',
@@ -226,6 +237,38 @@ class EnrollmentCertificateHelper {
         'event=download_failure kind=${error.kind.name} '
         'status=${_debugStatus(error.statusCode)}',
       );
+      if (error.kind ==
+          EnrollmentCertificateExceptionKind.registrationRequired) {
+        // Snapshot before the caller closes this helper. The cookie jar filters
+        // by origin and path; never transplant RegWeb cookies onto Selcrs.
+        final List<Cookie> cookies = await _cookieJar.loadForRequest(
+          registrationSessionUri,
+        );
+        final DateTime now = DateTime.now().toUtc();
+        throw EnrollmentCertificateException(
+          error.kind,
+          error.message,
+          statusCode: error.statusCode,
+          cause: error.cause,
+          registrationCookies: List<Cookie>.unmodifiable(
+            cookies
+                .where(
+                  (Cookie cookie) =>
+                      (cookie.expires == null ||
+                          cookie.expires!.isAfter(now)) &&
+                      (cookie.maxAge == null || cookie.maxAge! > 0),
+                )
+                .map((Cookie cookie) {
+                  final Cookie copy = Cookie.fromSetCookieValue(
+                    cookie.toString(),
+                  );
+                  // Match CookieJar's default path rules for this login URL.
+                  copy.path ??= cookie.domain == null ? '/webreg' : '/';
+                  return copy;
+                }),
+          ),
+        );
+      }
       rethrow;
     } on DioException catch (error) {
       final EnrollmentCertificateException mapped = _fromDioException(error);
