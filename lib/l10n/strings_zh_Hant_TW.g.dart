@@ -140,6 +140,9 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: 'Oops！查無任何學雜費資料哦～😋'
 	String get tuitionAndFeesEmpty => 'Oops！查無任何學雜費資料哦～😋';
 
+	/// zh-Hant-TW: '尚未載入課表，點擊查看'
+	String get courseNotLoaded => '尚未載入課表，點擊查看';
+
 	/// zh-Hant-TW: '部分科目為授課老師開放成績查詢 並非最終成績'
 	String get hasPreScoreHint => '部分科目為授課老師開放成績查詢 並非最終成績';
 
@@ -284,6 +287,7 @@ extension on AppLocalizations {
 			'springSemesterShort' => '下',
 			'summerSemesterShort' => '暑',
 			'tuitionAndFeesEmpty' => 'Oops！查無任何學雜費資料哦～😋',
+			'courseNotLoaded' => '尚未載入課表，點擊查看',
 			'hasPreScoreHint' => '部分科目為授課老師開放成績查詢 並非最終成績',
 			'pleaseConfirmForm' => '請先填寫確認表單再進行登入\n若填寫完畢仍無法登入 點擊右上角透過其他瀏覽器填寫(ex. Chrome)',
 			'openBrowserToFill' => '開啟瀏覽器填寫',

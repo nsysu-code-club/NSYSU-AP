@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/study/semester_picker_config.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class CoursePage extends StatefulWidget {
@@ -118,7 +119,7 @@ class CoursePageState extends State<CoursePage> {
     } catch (exception) {
       defaultSemesterCode = PreferenceUtil.instance.getString(
         Constants.defaultCourseSemesterCode,
-        '${Constants.defaultYear}${Constants.defaultSemester}',
+        Utils.currentSemesterCode,
       );
       timeCodeConfig = TimeCodeConfig.fromRawJson(
         PreferenceUtil.instance.getString(
@@ -128,6 +129,9 @@ class CoursePageState extends State<CoursePage> {
         ),
       );
     }
+    // Never build a Semester from an empty or malformed code: a missing Remote
+    // Config parameter does not throw, so it would skip the catch fallback.
+    defaultSemesterCode = Utils.semesterCodeOrCurrent(defaultSemesterCode);
     final Semester defaultSemester = Semester(
       year: defaultSemesterCode.substring(0, 3),
       value: defaultSemesterCode.substring(3),

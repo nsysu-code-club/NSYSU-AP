@@ -66,4 +66,40 @@ class Utils {
         longitude >= longLeft &&
         longitude <= lonRight;
   }
+
+  /// Semester code (e.g. `1151`) for [date]. Used as the last-resort default
+  /// when Firebase Remote Config is unavailable (desktop) and nothing has
+  /// been cached yet.
+  ///
+  /// Boundaries follow 各級學校學生學年學期假期辦法 §2–3: the academic year
+  /// starts on August 1; semester 1 runs Aug 1 – Jan 31 and semester 2 runs
+  /// Feb 1 – Jul 31. Only the regular semesters (`1`, `2`) are returned;
+  /// summer sessions (`0` 碩專暑, `3` 暑修) stay selectable in the picker but
+  /// are never guessed as the default.
+  static String semesterCodeFor(DateTime date) {
+    const int rocYearOffset = 1911;
+    const int academicYearStartMonth = DateTime.august;
+    final bool isFirstSemester =
+        date.month >= academicYearStartMonth || date.month == DateTime.january;
+    final int academicYearStart = date.month >= academicYearStartMonth
+        ? date.year
+        : date.year - 1;
+    return '${academicYearStart - rocYearOffset}${isFirstSemester ? 1 : 2}';
+  }
+
+  /// [semesterCodeFor] at [instant] in Taiwan time (UTC+8, no DST), so the
+  /// Aug 1 / Feb 1 boundaries do not move with the device's time zone, e.g.
+  /// for students who are abroad.
+  static String semesterCodeAt(DateTime instant) {
+    const Duration taiwanOffset = Duration(hours: 8);
+    return semesterCodeFor(instant.toUtc().add(taiwanOffset));
+  }
+
+  static String get currentSemesterCode => semesterCodeAt(DateTime.now());
+
+  /// [code] if it is a four-digit semester code such as `1151`, otherwise
+  /// [currentSemesterCode]. Remote Config returns an empty string when the
+  /// parameter is missing, and that value may also have been cached.
+  static String semesterCodeOrCurrent(String code) =>
+      RegExp(r'^\d{4}$').hasMatch(code) ? code : currentSemesterCode;
 }

@@ -72,6 +72,7 @@ class AppLocalizationsJa extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get springSemesterShort => '後期';
 	@override String get summerSemesterShort => '夏';
 	@override String get tuitionAndFeesEmpty => '学費・諸費用の情報が見つかりませんでした😋';
+	@override String get courseNotLoaded => '時間割がまだ読み込まれていません。タップして表示';
 	@override String get hasPreScoreHint => '一部の科目では担当教員が成績の事前確認を許可していますが、最終成績ではありません';
 	@override String get pleaseConfirmForm => 'ログインする前に確認フォームに入力してください。\n入力後もログインできない場合は、右上のボタンから別のブラウザー（Chromeなど）でフォームを開いて入力してください';
 	@override String get openBrowserToFill => 'ブラウザーで開いて入力';
@@ -149,6 +150,7 @@ extension on AppLocalizationsJa {
 			'springSemesterShort' => '後期',
 			'summerSemesterShort' => '夏',
 			'tuitionAndFeesEmpty' => '学費・諸費用の情報が見つかりませんでした😋',
+			'courseNotLoaded' => '時間割がまだ読み込まれていません。タップして表示',
 			'hasPreScoreHint' => '一部の科目では担当教員が成績の事前確認を許可していますが、最終成績ではありません',
 			'pleaseConfirmForm' => 'ログインする前に確認フォームに入力してください。\n入力後もログインできない場合は、右上のボタンから別のブラウザー（Chromeなど）でフォームを開いて入力してください',
 			'openBrowserToFill' => 'ブラウザーで開いて入力',
