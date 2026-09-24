@@ -65,5 +65,14 @@
   "optionCancel": "取消",
   "openingBrowserContent": "將使用瀏覽器開啟外部網站，是否繼續？",
   "openingBrowserTitle": "開啟外部網站",
-  "visitingUnSafeLink": "不安全的連結，請確認網址是否正確"
+  "visitingUnSafeLink": "不安全的連結，請確認網址是否正確",
+  "calendarPage": "校園行事曆",
+  "calendarSortAscending": "時間 : 由近到遠",
+  "calendarSortDescending": "時間 : 由遠到近",
+  "calendarNextPage": "下一頁",
+  "calendarPreviousPage": "上一頁",
+  "calendarEventIsEmpty": "沒有任何活動資料",
+  "calendarPageFormat": "第 ${current} / ${total} 頁",
+  "calendarEventCounts": "共 ${allEvents} 筆校園行程",
+  "calendarSearchBarHint": "搜尋活動名稱"
 }

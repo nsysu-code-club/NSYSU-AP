@@ -61,9 +61,17 @@
   "locationNotNearSchool": "Your location not in school, can't publish.",
   "unknownTime": "Unknown Time",
   "success": "Success",
-  "optionComfirm": "Confirm",
+  "optionConfirm": "Confirm",
   "optionCancel": "Cancel",
   "openingBrowserContent": "This will open an external website in your browser. Continue?",
   "openingBrowserTitle": "Open External Website",
-  "visitingUnSafeLink": "Unsafe link. Please confirm the URL is correct."
+  "visitingUnSafeLink": "Unsafe link. Please confirm the URL is correct.",
+  "calendarPage": "Schedule",
+  "calendarSortAscending": "Time : Ascending",
+  "calendarSortDescending": "Time : Descending",
+  "calendarNextPage": "Next",
+  "calendarPreviousPage": "Previous",
+  "calendarEventIsEmpty": "No event data found",
+  "calendarEventCounts": "Total events : ${allEvents}",
+  "calendarSearchBarHint": "Search event name"
 }

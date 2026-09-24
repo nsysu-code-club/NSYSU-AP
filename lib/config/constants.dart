@@ -64,6 +64,7 @@ class Constants {
       'default_course_semester_code';
   static const String timeCodeConfig = 'time_code_config';
   static const String schedulePdfUrl = 'schedule_pdf_url';
+  static const String scheduleIcsUrl = 'schedule_ics_url';
 
   static const String tagStudentPicture = 'tag_student_picture';
   static const String tagNewsPicture = 'tag_news_picture';

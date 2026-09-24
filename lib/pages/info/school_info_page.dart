@@ -1,12 +1,9 @@
-import 'dart:typed_data';
-
 import 'package:ap_common/ap_common.dart';
-import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/pages/info/calendar_info_page.dart';
 
 class SchoolInfoPage extends StatefulWidget {
-  static const String routerName = '/ShcoolInfo';
+  static const String routerName = '/SchoolInfo';
 
   @override
   SchoolInfoPageState createState() => SchoolInfoPageState();
@@ -30,20 +27,15 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
 
   PhoneState phoneState = PhoneState.finish;
 
-  PdfState pdfState = PdfState.loading;
-
   late TabController controller;
 
   int _currentIndex = 0;
-
-  Uint8List? data;
 
   @override
   void initState() {
     AnalyticsUtil.instance
         .setCurrentScreen('SchoolInfoPage', 'school_info_page.dart');
     controller = TabController(length: 2, vsync: this);
-    _getSchedules();
     super.initState();
   }
 
@@ -67,14 +59,7 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
             state: phoneState,
             phoneModelList: phoneModelList,
           ),
-          PdfView(
-            state: pdfState,
-            data: data,
-            onRefresh: () {
-              setState(() => pdfState = PdfState.loading);
-              _getSchedules();
-            },
-          ),
+          const CalendarPage(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -87,10 +72,6 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
         },
         fixedColor: Theme.of(context).colorScheme.primary,
         items: <BottomNavigationBarItem>[
-//          BottomNavigationBarItem(
-//            icon: Icon(ApIcon.fiberNew),
-//            title: Text(ap.notifications),
-//          ),
           BottomNavigationBarItem(
             icon: Icon(ApIcon.phone),
             label: ap.phones,
@@ -102,41 +83,5 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
         ],
       ),
     );
-  }
-
-  Future<void> _getSchedules() async {
-    String pdfUrl =
-        'https://raw.githubusercontent.com/abc873693/NSYSU-AP/master/school_schedule.pdf';
-    if (FirebaseRemoteConfigUtils.isSupported) {
-      try {
-        final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
-        await remoteConfig.fetch();
-        await remoteConfig.activate();
-        pdfUrl = remoteConfig.getString(Constants.schedulePdfUrl);
-        downloadFdf(pdfUrl);
-      } catch (exception) {
-        downloadFdf(pdfUrl);
-      }
-    } else {
-      downloadFdf(pdfUrl);
-    }
-  }
-
-  Future<void> downloadFdf(String url) async {
-    try {
-      final Response<Uint8List> response = await Dio().get<Uint8List>(
-        url,
-        options: Options(responseType: ResponseType.bytes),
-      );
-      setState(() {
-        pdfState = PdfState.finish;
-        data = response.data;
-      });
-    } catch (e) {
-      setState(() {
-        pdfState = PdfState.error;
-      });
-      rethrow;
-    }
   }
 }

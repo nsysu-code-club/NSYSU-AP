@@ -16,22 +16,22 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	AppLocalizationsEn({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, AppLocalizations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  $meta = meta ?? TranslationMetadata(
+		  _meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.en,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ),
 		  super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-		super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
-		$meta.setFlatMapFunction(_flatMapFunction);
+		_meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <en>.
-	@override final TranslationMetadata<AppLocale, AppLocalizations> $meta;
+	final TranslationMetadata<AppLocale, AppLocalizations> _meta;
+	@override TranslationMetadata<AppLocale, AppLocalizations> get $meta => _meta;
 
 	/// Access flat map
-	@override dynamic operator[](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
+	@override dynamic operator[](String key) => _meta.getTranslation(key) ?? super[key];
 
 	late final AppLocalizationsEn _root = this; // ignore: unused_field
 
@@ -101,11 +101,19 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get locationNotNearSchool => 'Your location not in school, can\'t publish.';
 	@override String get unknownTime => 'Unknown Time';
 	@override String get success => 'Success';
-	@override String get optionComfirm => 'Confirm';
+	@override String get optionConfirm => 'Confirm';
 	@override String get optionCancel => 'Cancel';
 	@override String get openingBrowserContent => 'This will open an external website in your browser. Continue?';
 	@override String get openingBrowserTitle => 'Open External Website';
 	@override String get visitingUnSafeLink => 'Unsafe link. Please confirm the URL is correct.';
+	@override String get calendarPage => 'Schedule';
+	@override String get calendarSortAscending => 'Time : Ascending';
+	@override String get calendarSortDescending => 'Time : Descending';
+	@override String get calendarNextPage => 'Next';
+	@override String get calendarPreviousPage => 'Previous';
+	@override String get calendarEventIsEmpty => 'No event data found';
+	@override String calendarEventCounts({required Object allEvents}) => 'Total events : ${allEvents}';
+	@override String get calendarSearchBarHint => 'Search event name';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -178,11 +186,19 @@ extension on AppLocalizationsEn {
 			'locationNotNearSchool' => 'Your location not in school, can\'t publish.',
 			'unknownTime' => 'Unknown Time',
 			'success' => 'Success',
-			'optionComfirm' => 'Confirm',
+			'optionConfirm' => 'Confirm',
 			'optionCancel' => 'Cancel',
 			'openingBrowserContent' => 'This will open an external website in your browser. Continue?',
 			'openingBrowserTitle' => 'Open External Website',
 			'visitingUnSafeLink' => 'Unsafe link. Please confirm the URL is correct.',
+			'calendarPage' => 'Schedule',
+			'calendarSortAscending' => 'Time : Ascending',
+			'calendarSortDescending' => 'Time : Descending',
+			'calendarNextPage' => 'Next',
+			'calendarPreviousPage' => 'Previous',
+			'calendarEventIsEmpty' => 'No event data found',
+			'calendarEventCounts' => ({required Object allEvents}) => 'Total events : ${allEvents}',
+			'calendarSearchBarHint' => 'Search event name',
 			_ => null,
 		};
 	}
