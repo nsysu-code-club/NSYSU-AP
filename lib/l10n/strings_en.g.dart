@@ -57,6 +57,7 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get graduationCheckChecklistSummary => 'Summary';
 	@override String get firstLoginHint => 'For first-time login, please fill in the last six number of your ID as your password';
 	@override String get tuitionAndFees => 'Tuition Payment Status';
+	@override String get tuitionAndCert => 'Tuition & Enrollment Cert';
 	@override String tuitionAndFeesItemTitleFormat({required Object amount, required Object date}) => 'Amount：${amount}\nDate of Payment：${date}';
 	@override String get admissionGuide => 'Admission Guide';
 	@override String get tuitionAndFeesPageHint => 'Click to view the receipt or fees bill';
@@ -107,6 +108,36 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get openingBrowserContent => 'This will open an external website in your browser. Continue?';
 	@override String get openingBrowserTitle => 'Open External Website';
 	@override String get visitingUnSafeLink => 'Unsafe link. Please confirm the URL is correct.';
+	@override late final _AppLocalizationsEnrollCertificateEn enrollCertificate = _AppLocalizationsEnrollCertificateEn._(_root);
+}
+
+// Path: enrollCertificate
+class _AppLocalizationsEnrollCertificateEn extends AppLocalizationsEnrollCertificateZhHantTw {
+	_AppLocalizationsEnrollCertificateEn._(AppLocalizationsEn root) : this._root = root, super.internal(root);
+
+	final AppLocalizationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Certificate of Enrollment';
+	@override String get regenerate => 'Retrieve Again';
+	@override String get retry => 'Try Again';
+	@override String get download => 'Download / Export';
+	@override String get fileName => 'Certificate of Enrollment';
+	@override String get loadingCached => 'Loading the saved certificate...';
+	@override String get retrieving => 'Retrieving the certificate from the university system...';
+	@override String get missingAccount => 'No account was found. Sign in to the app before obtaining a certificate.';
+	@override String get missingCredentials => 'No saved credentials were found. Sign in to the app again before retrieving a new certificate.';
+	@override String get saveFailed => 'The document was retrieved, but the local cache could not be updated.';
+	@override String get notObtained => 'The certificate has not been obtained. Please try again.';
+	@override String get requestTimedOut => 'The university system timed out. Please try retrieving the certificate later.';
+	@override String get requestFailed => 'The certificate could not be retrieved. Check your connection and try again.';
+	@override String get invalidResponse => 'The university system did not return a valid certificate PDF. Check your credentials or try again later.';
+	@override String get downloadFailed => 'The certificate could not be downloaded or exported. Please try again later.';
+	@override String get openBrowserFailed => 'Could not open the browser. Please try again.';
+	@override String get registrationTitle => 'Online Registration';
+	@override String get registrationRequired => 'The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.';
+	@override String get registrationSessionUnavailable => 'The previous registration session could not be cleared safely. To protect your account, close this page and try again, or use an external browser.';
+	@override String get registrationComplete => 'Finished — Retrieve Again';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -135,6 +166,7 @@ extension on AppLocalizationsEn {
 			'graduationCheckChecklistSummary' => 'Summary',
 			'firstLoginHint' => 'For first-time login, please fill in the last six number of your ID as your password',
 			'tuitionAndFees' => 'Tuition Payment Status',
+			'tuitionAndCert' => 'Tuition & Enrollment Cert',
 			'tuitionAndFeesItemTitleFormat' => ({required Object amount, required Object date}) => 'Amount：${amount}\nDate of Payment：${date}',
 			'admissionGuide' => 'Admission Guide',
 			'tuitionAndFeesPageHint' => 'Click to view the receipt or fees bill',
@@ -185,6 +217,26 @@ extension on AppLocalizationsEn {
 			'openingBrowserContent' => 'This will open an external website in your browser. Continue?',
 			'openingBrowserTitle' => 'Open External Website',
 			'visitingUnSafeLink' => 'Unsafe link. Please confirm the URL is correct.',
+			'enrollCertificate.title' => 'Certificate of Enrollment',
+			'enrollCertificate.regenerate' => 'Retrieve Again',
+			'enrollCertificate.retry' => 'Try Again',
+			'enrollCertificate.download' => 'Download / Export',
+			'enrollCertificate.fileName' => 'Certificate of Enrollment',
+			'enrollCertificate.loadingCached' => 'Loading the saved certificate...',
+			'enrollCertificate.retrieving' => 'Retrieving the certificate from the university system...',
+			'enrollCertificate.missingAccount' => 'No account was found. Sign in to the app before obtaining a certificate.',
+			'enrollCertificate.missingCredentials' => 'No saved credentials were found. Sign in to the app again before retrieving a new certificate.',
+			'enrollCertificate.saveFailed' => 'The document was retrieved, but the local cache could not be updated.',
+			'enrollCertificate.notObtained' => 'The certificate has not been obtained. Please try again.',
+			'enrollCertificate.requestTimedOut' => 'The university system timed out. Please try retrieving the certificate later.',
+			'enrollCertificate.requestFailed' => 'The certificate could not be retrieved. Check your connection and try again.',
+			'enrollCertificate.invalidResponse' => 'The university system did not return a valid certificate PDF. Check your credentials or try again later.',
+			'enrollCertificate.downloadFailed' => 'The certificate could not be downloaded or exported. Please try again later.',
+			'enrollCertificate.openBrowserFailed' => 'Could not open the browser. Please try again.',
+			'enrollCertificate.registrationTitle' => 'Online Registration',
+			'enrollCertificate.registrationRequired' => 'The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.',
+			'enrollCertificate.registrationSessionUnavailable' => 'The previous registration session could not be cleared safely. To protect your account, close this page and try again, or use an external browser.',
+			'enrollCertificate.registrationComplete' => 'Finished — Retrieve Again',
 			_ => null,
 		};
 	}

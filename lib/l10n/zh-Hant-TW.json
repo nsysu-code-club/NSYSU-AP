@@ -17,6 +17,7 @@
   "graduationCheckChecklistSummary": "總結",
   "firstLoginHint": "首次登入密碼預設為身分證末六碼",
   "tuitionAndFees": "學雜費繳費狀況查詢",
+  "tuitionAndCert": "學雜費與在學證明",
   "tuitionAndFeesItemTitleFormat": "金額：${amount}\n繳費日期：${date}",
   "admissionGuide": "入學指南",
   "tuitionAndFeesPageHint": "點擊可查看收據或繳費單",
@@ -66,5 +67,27 @@
   "optionCancel": "取消",
   "openingBrowserContent": "將使用瀏覽器開啟外部網站，是否繼續？",
   "openingBrowserTitle": "開啟外部網站",
-  "visitingUnSafeLink": "不安全的連結，請確認網址是否正確"
+  "visitingUnSafeLink": "不安全的連結，請確認網址是否正確",
+  "enrollCertificate": {
+    "title": "在學證明",
+    "regenerate": "重新提取",
+    "retry": "重新執行",
+    "download": "下載／匯出",
+    "fileName": "在學證明",
+    "loadingCached": "正在讀取已儲存的在學證明...",
+    "retrieving": "正在向校方系統提取在學證明...",
+    "missingAccount": "找不到目前帳號，請先登入 App 後再取得在學證明。",
+    "missingCredentials": "找不到目前登入帳密，請先重新登入 App 後再重新提取。",
+    "saveFailed": "已取得文件，但無法更新本機快取。",
+    "notObtained": "尚未取得在學證明，請重新執行。",
+    "requestTimedOut": "校方系統回應逾時，請稍後重新提取。",
+    "requestFailed": "無法從校方系統取得在學證明，請確認網路後重試。",
+    "invalidResponse": "校方系統未回傳有效的在學證明 PDF，請確認帳密或稍後重試。",
+    "downloadFailed": "無法下載／匯出在學證明，請稍後再試。",
+    "openBrowserFailed": "無法開啟瀏覽器，請再試一次。",
+    "registrationTitle": "網路註冊",
+    "registrationRequired": "校方未提供在學證明。請在註冊系統確認並補填必要資料，完成後再重新提取。",
+    "registrationSessionUnavailable": "無法安全地清除先前的註冊系統工作階段。為保護帳號資料，請關閉此頁後再試一次，或改用外部瀏覽器。",
+    "registrationComplete": "完成填寫，重新提取"
+  }
 }

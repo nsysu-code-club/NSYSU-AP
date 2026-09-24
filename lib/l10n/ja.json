@@ -17,6 +17,7 @@
   "graduationCheckChecklistSummary": "概要",
   "firstLoginHint": "初回ログイン時のパスワードは、身分証番号の下6桁です",
   "tuitionAndFees": "学費・諸費用の納付状況",
+  "tuitionAndCert": "学費・諸費用と在学証明書",
   "tuitionAndFeesItemTitleFormat": "金額：${amount}\n納付日：${date}",
   "admissionGuide": "入学案内",
   "tuitionAndFeesPageHint": "タップすると領収書または納付書を確認できます",
@@ -66,5 +67,27 @@
   "optionCancel": "キャンセル",
   "openingBrowserContent": "ブラウザーで外部サイトを開きます。続行しますか？",
   "openingBrowserTitle": "外部サイトを開く",
-  "visitingUnSafeLink": "安全でないリンクです。URLが正しいか確認してください"
+  "visitingUnSafeLink": "安全でないリンクです。URLが正しいか確認してください",
+  "enrollCertificate": {
+    "title": "在学証明書",
+    "regenerate": "再取得",
+    "retry": "再試行",
+    "download": "ダウンロード／エクスポート",
+    "fileName": "在学証明書",
+    "loadingCached": "保存済みの在学証明書を読み込んでいます...",
+    "retrieving": "大学のシステムから在学証明書を取得しています...",
+    "missingAccount": "アカウントが見つかりません。在学証明書を取得する前に、アプリにログインしてください。",
+    "missingCredentials": "保存済みのログイン情報が見つかりません。再取得する前に、アプリにログインし直してください。",
+    "saveFailed": "書類は取得できましたが、端末のキャッシュを更新できませんでした。",
+    "notObtained": "在学証明書をまだ取得できていません。もう一度お試しください。",
+    "requestTimedOut": "大学のシステムからの応答がタイムアウトしました。しばらくしてから再取得してください。",
+    "requestFailed": "大学のシステムから在学証明書を取得できませんでした。ネットワーク接続を確認して、もう一度お試しください。",
+    "invalidResponse": "大学のシステムから有効な在学証明書のPDFが返されませんでした。ログイン情報を確認するか、しばらくしてからもう一度お試しください。",
+    "downloadFailed": "在学証明書をダウンロード／エクスポートできませんでした。しばらくしてからもう一度お試しください。",
+    "openBrowserFailed": "ブラウザーを開けませんでした。もう一度お試しください。",
+    "registrationTitle": "オンライン学籍登録",
+    "registrationRequired": "大学から在学証明書が発行されませんでした。学籍登録システムで必要事項を確認・入力してから再取得してください。",
+    "registrationSessionUnavailable": "以前の学籍登録セッションを安全に削除できませんでした。アカウントを保護するため、このページを閉じて再試行するか、外部ブラウザーを使用してください。",
+    "registrationComplete": "入力を完了して再取得"
+  }
 }

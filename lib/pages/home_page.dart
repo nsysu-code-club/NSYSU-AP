@@ -19,6 +19,9 @@ import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/pages/user_info_page.dart';
 import 'package:nsysu_ap/resources/image_assets.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/enroll_certificate_cache.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/enrollment_certificate_session.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/registration_cookie_store.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
@@ -384,7 +387,7 @@ class HomePageState extends State<HomePage> {
           ),
           DrawerMenuItem(
             icon: ApIcon.monetizationOn,
-            title: app.tuitionAndFees,
+            title: app.tuitionAndCert,
             onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
           ),
           DrawerMenuItem(
@@ -420,21 +423,39 @@ class HomePageState extends State<HomePage> {
               title: ap.logout,
               iconColor: colorScheme.error,
               onTap: () async {
-                await PreferenceUtil.instance.setBool(
-                  Constants.prefAutoLogin,
-                  false,
-                );
+                final String activeUsername = SelcrsHelper.instance.username
+                    .trim();
+                final String username = activeUsername.isNotEmpty
+                    ? activeUsername
+                    : PreferenceUtil.instance
+                          .getString(Constants.prefUsername, '')
+                          .trim();
+                // Revoke active pages before the first await, then drain any
+                // write already in progress before removing account data.
+                final Future<void> enrollmentStopped =
+                    EnrollmentCertificateSession.cancelAll();
+                final Future<void> cookiesCleared =
+                    RegistrationCookieStore.clear(
+                      beforeClear: () => enrollmentStopped,
+                    );
                 SelcrsHelper.instance.logout();
                 GraduationHelper.instance.logout();
                 TuitionHelper.instance.logout();
-                await ApCommonPlugin.clearCourseWidget();
-                if (!mounted) return;
                 setState(() {
                   ShareDataWidget.of(context)!.data.isLogin = false;
                   ShareDataWidget.of(context)!.data.userInfo = null;
                   courseData = null;
+                  content = null;
                 });
-                content = null;
+                await PreferenceUtil.instance.setBool(
+                  Constants.prefAutoLogin,
+                  false,
+                );
+                await enrollmentStopped;
+                await cookiesCleared;
+                await _clearEnrollmentCertificateCache(username);
+                await ApCommonPlugin.clearCourseWidget();
+                if (!mounted) return;
                 if (!isTablet) {
                   Navigator.of(context).pop();
                 }
@@ -445,6 +466,19 @@ class HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  Future<void> _clearEnrollmentCertificateCache(String username) async {
+    if (username.isEmpty) return;
+
+    try {
+      await EnrollCertificateCache(username: username).clear();
+    } on Exception catch (error) {
+      debugPrint(
+        'Failed to clear enrollment certificate cache during logout: '
+        '${error.runtimeType}',
+      );
+    }
   }
 
   Widget _buildStudySection() {

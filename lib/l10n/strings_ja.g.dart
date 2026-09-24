@@ -57,6 +57,7 @@ class AppLocalizationsJa extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get graduationCheckChecklistSummary => '概要';
 	@override String get firstLoginHint => '初回ログイン時のパスワードは、身分証番号の下6桁です';
 	@override String get tuitionAndFees => '学費・諸費用の納付状況';
+	@override String get tuitionAndCert => '学費・諸費用と在学証明書';
 	@override String tuitionAndFeesItemTitleFormat({required Object amount, required Object date}) => '金額：${amount}\n納付日：${date}';
 	@override String get admissionGuide => '入学案内';
 	@override String get tuitionAndFeesPageHint => 'タップすると領収書または納付書を確認できます';
@@ -107,6 +108,36 @@ class AppLocalizationsJa extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get openingBrowserContent => 'ブラウザーで外部サイトを開きます。続行しますか？';
 	@override String get openingBrowserTitle => '外部サイトを開く';
 	@override String get visitingUnSafeLink => '安全でないリンクです。URLが正しいか確認してください';
+	@override late final _AppLocalizationsEnrollCertificateJa enrollCertificate = _AppLocalizationsEnrollCertificateJa._(_root);
+}
+
+// Path: enrollCertificate
+class _AppLocalizationsEnrollCertificateJa extends AppLocalizationsEnrollCertificateZhHantTw {
+	_AppLocalizationsEnrollCertificateJa._(AppLocalizationsJa root) : this._root = root, super.internal(root);
+
+	final AppLocalizationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '在学証明書';
+	@override String get regenerate => '再取得';
+	@override String get retry => '再試行';
+	@override String get download => 'ダウンロード／エクスポート';
+	@override String get fileName => '在学証明書';
+	@override String get loadingCached => '保存済みの在学証明書を読み込んでいます...';
+	@override String get retrieving => '大学のシステムから在学証明書を取得しています...';
+	@override String get missingAccount => 'アカウントが見つかりません。在学証明書を取得する前に、アプリにログインしてください。';
+	@override String get missingCredentials => '保存済みのログイン情報が見つかりません。再取得する前に、アプリにログインし直してください。';
+	@override String get saveFailed => '書類は取得できましたが、端末のキャッシュを更新できませんでした。';
+	@override String get notObtained => '在学証明書をまだ取得できていません。もう一度お試しください。';
+	@override String get requestTimedOut => '大学のシステムからの応答がタイムアウトしました。しばらくしてから再取得してください。';
+	@override String get requestFailed => '大学のシステムから在学証明書を取得できませんでした。ネットワーク接続を確認して、もう一度お試しください。';
+	@override String get invalidResponse => '大学のシステムから有効な在学証明書のPDFが返されませんでした。ログイン情報を確認するか、しばらくしてからもう一度お試しください。';
+	@override String get downloadFailed => '在学証明書をダウンロード／エクスポートできませんでした。しばらくしてからもう一度お試しください。';
+	@override String get openBrowserFailed => 'ブラウザーを開けませんでした。もう一度お試しください。';
+	@override String get registrationTitle => 'オンライン学籍登録';
+	@override String get registrationRequired => '大学から在学証明書が発行されませんでした。学籍登録システムで必要事項を確認・入力してから再取得してください。';
+	@override String get registrationSessionUnavailable => '以前の学籍登録セッションを安全に削除できませんでした。アカウントを保護するため、このページを閉じて再試行するか、外部ブラウザーを使用してください。';
+	@override String get registrationComplete => '入力を完了して再取得';
 }
 
 /// The flat map containing all translations for locale <ja>.
@@ -135,6 +166,7 @@ extension on AppLocalizationsJa {
 			'graduationCheckChecklistSummary' => '概要',
 			'firstLoginHint' => '初回ログイン時のパスワードは、身分証番号の下6桁です',
 			'tuitionAndFees' => '学費・諸費用の納付状況',
+			'tuitionAndCert' => '学費・諸費用と在学証明書',
 			'tuitionAndFeesItemTitleFormat' => ({required Object amount, required Object date}) => '金額：${amount}\n納付日：${date}',
 			'admissionGuide' => '入学案内',
 			'tuitionAndFeesPageHint' => 'タップすると領収書または納付書を確認できます',
@@ -185,6 +217,26 @@ extension on AppLocalizationsJa {
 			'openingBrowserContent' => 'ブラウザーで外部サイトを開きます。続行しますか？',
 			'openingBrowserTitle' => '外部サイトを開く',
 			'visitingUnSafeLink' => '安全でないリンクです。URLが正しいか確認してください',
+			'enrollCertificate.title' => '在学証明書',
+			'enrollCertificate.regenerate' => '再取得',
+			'enrollCertificate.retry' => '再試行',
+			'enrollCertificate.download' => 'ダウンロード／エクスポート',
+			'enrollCertificate.fileName' => '在学証明書',
+			'enrollCertificate.loadingCached' => '保存済みの在学証明書を読み込んでいます...',
+			'enrollCertificate.retrieving' => '大学のシステムから在学証明書を取得しています...',
+			'enrollCertificate.missingAccount' => 'アカウントが見つかりません。在学証明書を取得する前に、アプリにログインしてください。',
+			'enrollCertificate.missingCredentials' => '保存済みのログイン情報が見つかりません。再取得する前に、アプリにログインし直してください。',
+			'enrollCertificate.saveFailed' => '書類は取得できましたが、端末のキャッシュを更新できませんでした。',
+			'enrollCertificate.notObtained' => '在学証明書をまだ取得できていません。もう一度お試しください。',
+			'enrollCertificate.requestTimedOut' => '大学のシステムからの応答がタイムアウトしました。しばらくしてから再取得してください。',
+			'enrollCertificate.requestFailed' => '大学のシステムから在学証明書を取得できませんでした。ネットワーク接続を確認して、もう一度お試しください。',
+			'enrollCertificate.invalidResponse' => '大学のシステムから有効な在学証明書のPDFが返されませんでした。ログイン情報を確認するか、しばらくしてからもう一度お試しください。',
+			'enrollCertificate.downloadFailed' => '在学証明書をダウンロード／エクスポートできませんでした。しばらくしてからもう一度お試しください。',
+			'enrollCertificate.openBrowserFailed' => 'ブラウザーを開けませんでした。もう一度お試しください。',
+			'enrollCertificate.registrationTitle' => 'オンライン学籍登録',
+			'enrollCertificate.registrationRequired' => '大学から在学証明書が発行されませんでした。学籍登録システムで必要事項を確認・入力してから再取得してください。',
+			'enrollCertificate.registrationSessionUnavailable' => '以前の学籍登録セッションを安全に削除できませんでした。アカウントを保護するため、このページを閉じて再試行するか、外部ブラウザーを使用してください。',
+			'enrollCertificate.registrationComplete' => '入力を完了して再取得',
 			_ => null,
 		};
 	}
