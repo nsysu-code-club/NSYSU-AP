@@ -31,6 +31,7 @@ class EnrollCertificateCache {
 
   static const int minimumPdfLength = 1024;
   static const int maximumPdfLength = 10 * 1024 * 1024;
+  static final Map<String, Future<void>> _operations = <String, Future<void>>{};
 
   static const List<int> _pdfHeader = <int>[0x25, 0x50, 0x44, 0x46, 0x2d];
   static const List<int> _pdfEof = <int>[0x25, 0x25, 0x45, 0x4f, 0x46];
@@ -45,24 +46,35 @@ class EnrollCertificateCache {
   ///
   /// Invalid primary files are deleted, and valid `.bak` / `.tmp` recovery
   /// artifacts are promoted back to the primary path when possible.
-  Future<Uint8List?> read({String? semesterCode}) async {
+  Future<Uint8List?> read({String? semesterCode}) => _serialize(() async {
     final Uint8List? pdf = await _readPdf();
     if (pdf == null || semesterCode == null) return pdf;
-    final Map<String, dynamic>? metadata = await readMetadata(pdf);
+    final File file = await _cacheFile();
+    final Map<String, dynamic>? metadata = await _readMetadata(file, pdf);
     return metadata?['semesterCode'] == semesterCode ? pdf : null;
-  }
+  });
 
   /// Returns metadata only when it belongs to the supplied PDF.
   /// Legacy, malformed, and interrupted writes are never treated as current.
-  Future<Map<String, dynamic>?> readMetadata(Uint8List pdf) async {
-    final File file = await _cacheFile();
+  Future<Map<String, dynamic>?> readMetadata(Uint8List pdf) =>
+      _serialize(() async {
+        final File file = await _cacheFile();
+        final Map<String, dynamic>? metadata = await _readMetadata(file, pdf);
+        return metadata?['semesterCode'] is String ? metadata : null;
+      });
+
+  static Future<Map<String, dynamic>?> _readMetadata(
+    File file,
+    Uint8List pdf,
+  ) async {
     try {
       final dynamic decoded = jsonDecode(
         await File('${file.path}.json').readAsString(),
       );
       if (decoded is! Map<String, dynamic> ||
           decoded['pdfSha256'] != sha256.convert(pdf).toString() ||
-          decoded['semesterCode'] is! String ||
+          (decoded['semesterCode'] != null &&
+              decoded['semesterCode'] is! String) ||
           decoded['retrievedAt'] is! String ||
           DateTime.tryParse(decoded['retrievedAt'] as String) == null) {
         return null;
@@ -79,23 +91,38 @@ class EnrollCertificateCache {
     final File file = await _cacheFile();
     final File temporaryFile = File('${file.path}.tmp');
     final File backupFile = File('${file.path}.bak');
+    final File temporaryMetadata = File('${file.path}.json.tmp');
 
     final Uint8List? cachedPdf = await _readValidPdf(file);
+    final Uint8List? backupPdf = await _readValidPdf(backupFile);
     if (cachedPdf != null) {
+      // A valid PDF alone does not commit a replacement: its metadata must
+      // match too. A crash before metadata promotion leaves the old metadata
+      // and backup available, or a staged metadata file for a legacy cache.
+      if (backupPdf != null &&
+          await _readMetadata(file, cachedPdf) == null &&
+          (await _readMetadata(file, backupPdf) != null ||
+              await temporaryMetadata.exists())) {
+        await _restoreArtifact(source: backupFile, destination: file);
+        await _deleteBestEffort(temporaryFile);
+        await _deleteBestEffort(temporaryMetadata);
+        return backupPdf;
+      }
       // A committed cache always wins. Cleanup is intentionally best-effort:
       // stale crash artifacts must never make a valid certificate unreadable.
       await _deleteBestEffort(backupFile);
       await _deleteBestEffort(temporaryFile);
+      await _deleteBestEffort(temporaryMetadata);
       return cachedPdf;
     }
     await _deleteBestEffort(file);
 
     // A backup is the last committed value, so prefer it over a temporary
     // replacement if both survived an interrupted save.
-    final Uint8List? backupPdf = await _readValidPdf(backupFile);
     if (backupPdf != null) {
       await _restoreArtifact(source: backupFile, destination: file);
       await _deleteBestEffort(temporaryFile);
+      await _deleteBestEffort(temporaryMetadata);
       return backupPdf;
     }
     await _deleteBestEffort(backupFile);
@@ -118,7 +145,13 @@ class EnrollCertificateCache {
     Uint8List bytes, {
     String? semesterCode,
     DateTime? retrievedAt,
-  }) async {
+  }) => _serialize(() => _save(bytes, semesterCode, retrievedAt));
+
+  Future<void> _save(
+    Uint8List bytes,
+    String? semesterCode,
+    DateTime? retrievedAt,
+  ) async {
     // Validate before touching any on-disk state so a bad response can never
     // replace a previously cached certificate.
     final Uint8List? pdf = extractPdf(bytes);
@@ -126,17 +159,29 @@ class EnrollCertificateCache {
       throw const FormatException('The certificate response is not a PDF.');
     }
 
+    // Recover an interrupted transaction before beginning another one.
+    await _readPdf();
+
     final File file = await _cacheFile(createDirectory: true);
     final File temporaryFile = File('${file.path}.tmp');
     final File backupFile = File('${file.path}.bak');
-
-    if (await temporaryFile.exists()) {
-      await temporaryFile.delete();
-    }
-    await temporaryFile.writeAsBytes(pdf, flush: true);
+    final File metadataFile = File('${file.path}.json');
+    final File temporaryMetadata = File('${metadataFile.path}.tmp');
 
     bool existingFileWasMoved = false;
+    bool replacementInstalled = false;
     try {
+      await temporaryFile.writeAsBytes(pdf, flush: true);
+      await temporaryMetadata.writeAsString(
+        jsonEncode(<String, Object?>{
+          'semesterCode': semesterCode,
+          'retrievedAt': (retrievedAt ?? DateTime.now())
+              .toUtc()
+              .toIso8601String(),
+          'pdfSha256': sha256.convert(pdf).toString(),
+        }),
+        flush: true,
+      );
       if (await backupFile.exists()) {
         await backupFile.delete();
       }
@@ -146,48 +191,26 @@ class EnrollCertificateCache {
       }
 
       await temporaryFile.rename(file.path);
+      replacementInstalled = true;
+      // Keep the previous PDF and metadata until BOTH replacements commit.
+      await temporaryMetadata.rename(metadataFile.path);
     } catch (error, stackTrace) {
-      if (existingFileWasMoved &&
-          !await file.exists() &&
-          await backupFile.exists()) {
-        await backupFile.rename(file.path);
+      if (existingFileWasMoved) {
+        await _restoreArtifact(source: backupFile, destination: file);
+      } else if (replacementInstalled) {
+        await _deleteBestEffort(file);
       }
-      if (await temporaryFile.exists()) {
-        await temporaryFile.delete();
-      }
+      await _deleteBestEffort(temporaryFile);
+      await _deleteBestEffort(temporaryMetadata);
       Error.throwWithStackTrace(error, stackTrace);
     }
 
-    // The replacement is already complete. A stale backup is harmless and
-    // must not turn a successful, atomic replacement into an apparent error.
-    if (await backupFile.exists()) {
-      try {
-        await backupFile.delete();
-      } on FileSystemException {
-        // Best-effort cleanup; clear() also removes this account's backup.
-      }
-    }
-
-    // Commit metadata last and bind it to the PDF. A crash between these two
-    // writes causes a cache miss rather than reusing another PDF's semester.
-    final File metadataFile = File('${file.path}.json');
-    final File temporaryMetadata = File('${metadataFile.path}.tmp');
-    await temporaryMetadata.writeAsString(
-      jsonEncode(<String, Object?>{
-        'semesterCode': semesterCode,
-        'retrievedAt': (retrievedAt ?? DateTime.now())
-            .toUtc()
-            .toIso8601String(),
-        'pdfSha256': sha256.convert(pdf).toString(),
-      }),
-      flush: true,
-    );
-    await temporaryMetadata.rename(metadataFile.path);
+    await _deleteBestEffort(backupFile);
   }
 
   /// Removes the current account's primary cache and pending replacement
   /// artifacts.
-  Future<void> clear() async {
+  Future<void> clear() => _serialize(() async {
     final File file = await _cacheFile();
     for (final File artifact in <File>[
       file,
@@ -196,10 +219,24 @@ class EnrollCertificateCache {
       File('${file.path}.json'),
       File('${file.path}.json.tmp'),
     ]) {
-      if (await artifact.exists()) {
-        await artifact.delete();
-      }
+      await _deleteBestEffort(artifact);
     }
+  });
+
+  Future<T> _serialize<T>(Future<T> Function() action) {
+    final Future<T> result = (_operations[_accountKey] ?? Future<void>.value())
+        .then((_) => action());
+    final Future<void> settled = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    _operations[_accountKey] = settled;
+    settled.then((_) {
+      if (identical(_operations[_accountKey], settled)) {
+        _operations.remove(_accountKey);
+      }
+    });
+    return result;
   }
 
   /// Extracts a single PDF from a RegWeb response.
@@ -224,6 +261,9 @@ class EnrollCertificateCache {
       return null;
     }
     final int end = eofStart + _pdfEof.length;
+    for (int index = end; index < bytes.length; index++) {
+      if (!_isAsciiWhitespace(bytes[index])) return null;
+    }
     final int pdfLength = end - start;
     if (pdfLength < minimumPdfLength || pdfLength > maximumPdfLength) {
       return null;

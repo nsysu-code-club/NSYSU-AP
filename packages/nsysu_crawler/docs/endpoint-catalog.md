@@ -90,7 +90,7 @@ PDF 序號從 `<a onclick="javascript:window.location.href='...'">` 解出。
 
 | Path | Method | Body | Encoding | Sentinel |
 |---|---|---|---|---|
-| `/webreg/wregloginchk2.asp` | POST | `ID=<學號>`, `passwd=<明文>` | response bytes | 2xx after same-host redirect chain |
+| `/webreg/wregloginchk2.asp` | POST | `ID=<學號>`, `passwd=<明文>` | response bytes | 2xx；排除登入錯誤導向及登入表單 |
 | `/webreg/WRegMain3.asp?act=71&out=print/enrollcert.asp` | GET | — | response bytes | 2xx |
 | `/webreg/print/enrollcert.asp` | POST | `ssn1=idno`, `idno=<學號>` | bytes (PDF) | `%PDF-` header + `%%EOF` trailer |
 
@@ -100,7 +100,10 @@ PDF 序號從 `<a onclick="javascript:window.location.href='...'">` 解出。
 
 - redirect 只允許留在 `https://regweb.nsysu.edu.tw:443/webreg/`，避免把登入狀態或表單送到站外。
 - response body 上限 10 MiB；過大的 `Content-Length` 或 stream 都會被取消。
-- PDF cache 在 app 端依帳號 hash 分檔，登出時會清除該帳號的 `.pdf` / `.tmp` / `.bak`。
+- 登入階段導向 `show_error.asp` 或回傳登入失敗頁時，回報帳密錯誤；明確的註冊資料填寫提示才會開啟註冊視窗，未知 HTML 視為無效回應。
+- PDF cache 在 app 端依帳號 hash 分檔，PDF 與學期／雜湊 metadata 都完成替換後才移除備份；中斷時保留上一份可用資料。
+- 登出先取消提取並等待進行中的寫入，再逐一嘗試清除 `.pdf` / `.tmp` / `.bak` / `.json` / `.json.tmp`。
+- 註冊視窗關閉與登出時清除原生 WebView 的 RegWeb cookies；清除與匯入依序執行，避免跨帳號沿用登入狀態。
 
 ---
 

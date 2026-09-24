@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
@@ -5,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/enrollment_certificate_session.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/registration_cookie_store.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -59,6 +62,12 @@ class _EnrollmentRegistrationPageState
   double _progress = 0;
   URLRequest? _initialRequest;
   bool _loginNavigationPending = false;
+  late final EnrollmentCertificateSession _session;
+  Future<void>? _preparing;
+  InAppWebViewController? _controller;
+  bool _disposed = false;
+
+  bool get _isActive => mounted && !_session.isCancelled;
 
   bool get _supportsWebView =>
       !kIsWeb &&
@@ -67,6 +76,7 @@ class _EnrollmentRegistrationPageState
   @override
   void initState() {
     super.initState();
+    _session = EnrollmentCertificateSession(onCancel: _clearSession);
     // Plugin navigation logs include request bodies. Silence them while any
     // registration view is alive so neither POST credentials nor form data
     // can appear in debug output. Restore the prior settings on final close.
@@ -82,12 +92,14 @@ class _EnrollmentRegistrationPageState
         if (mounted) _openBrowser();
       });
     } else {
-      _prepareSession();
+      _preparing = _prepareSession();
     }
   }
 
   @override
   void dispose() {
+    _disposed = true;
+    unawaited(_session.close());
     if (--_activeViews == 0) {
       if (identical(
         PlatformInAppWebViewController.debugLoggingSettings,
@@ -100,9 +112,29 @@ class _EnrollmentRegistrationPageState
     super.dispose();
   }
 
+  Future<void> _clearSession() {
+    _loginNavigationPending = false;
+    final bool removeView = !_disposed && mounted;
+    if (removeView) setState(() => _initialRequest = null);
+    // Reserve cleanup before awaiting native teardown, so a newly opened
+    // view cannot import its session before this view finishes deleting it.
+    return RegistrationCookieStore.clear(
+      manager: widget.cookieManager,
+      beforeClear: () async {
+        try {
+          await _controller?.stopLoading();
+        } catch (_) {
+          // The native view may already have been disposed.
+        }
+        if (removeView) await WidgetsBinding.instance.endOfFrame;
+        await _preparing;
+      },
+    );
+  }
+
   Future<void> _prepareSession() async {
     final bool synchronized = await _synchronizeCookies();
-    if (!mounted) return;
+    if (!_isActive) return;
     final String username = widget.username.trim();
     final bool canLogin = username.isNotEmpty && widget.password.isNotEmpty;
     setState(() {
@@ -139,7 +171,7 @@ class _EnrollmentRegistrationPageState
     InAppWebViewController controller,
     WebUri? url,
   ) async {
-    if (!mounted ||
+    if (!_isActive ||
         !_loginNavigationPending ||
         url == null ||
         url.scheme == 'about') {
@@ -173,8 +205,7 @@ class _EnrollmentRegistrationPageState
     }
   }
 
-  Future<bool> _synchronizeCookies() async {
-    if (widget.registrationCookies.isEmpty) return false;
+  Future<bool> _synchronizeCookies() => RegistrationCookieStore.run(() async {
     try {
       final CookieManager manager =
           widget.cookieManager ?? CookieManager.instance();
@@ -191,13 +222,14 @@ class _EnrollmentRegistrationPageState
           (io.Cookie cookie) => cookie.path ?? '/webreg',
         ),
       };
+      RegistrationCookieStore.paths.addAll(paths);
       for (final String path in paths) {
-        if (!mounted || !await manager.deleteCookies(url: url, path: path)) {
+        if (!_isActive || !await manager.deleteCookies(url: url, path: path)) {
           return false;
         }
       }
       for (final io.Cookie cookie in widget.registrationCookies) {
-        if (!mounted) return false;
+        if (!_isActive) return false;
         if (cookie.expires?.isBefore(DateTime.now()) ?? false) return false;
         final bool saved = await manager.setCookie(
           url: url,
@@ -213,13 +245,13 @@ class _EnrollmentRegistrationPageState
         );
         if (!saved) return false;
       }
-      return true;
+      return widget.registrationCookies.isNotEmpty;
     } catch (_) {
       // A native cookie-store failure must still leave manual login usable.
       // Cookie values and platform errors may contain secrets; do not log them.
       return false;
     }
-  }
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -264,6 +296,7 @@ class _EnrollmentRegistrationPageState
   }
 
   Widget _buildWebView(BuildContext context) {
+    if (_session.isCancelled) return const SizedBox.shrink();
     final URLRequest? initialRequest = _initialRequest;
     if (initialRequest == null) {
       return const Center(child: CircularProgressIndicator());
@@ -281,6 +314,9 @@ class _EnrollmentRegistrationPageState
     }
     return InAppWebView(
       initialUrlRequest: initialRequest,
+      onWebViewCreated: (InAppWebViewController controller) {
+        _controller = controller;
+      },
       initialSettings: InAppWebViewSettings(useShouldOverrideUrlLoading: true),
       shouldOverrideUrlLoading:
           (InAppWebViewController controller, NavigationAction action) async {
@@ -327,7 +363,7 @@ class _EnrollmentRegistrationPageState
     }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(app.enrollCertificate.requestFailed)),
+      SnackBar(content: Text(app.enrollCertificate.openBrowserFailed)),
     );
   }
 }

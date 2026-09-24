@@ -83,6 +83,7 @@
     "requestFailed": "The certificate could not be retrieved. Check your connection and try again.",
     "invalidResponse": "The university system did not return a valid certificate PDF. Check your credentials or try again later.",
     "downloadFailed": "The certificate could not be downloaded or exported. Please try again later.",
+    "openBrowserFailed": "Could not open the browser. Please try again.",
     "registrationTitle": "Online Registration",
     "registrationRequired": "The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.",
     "registrationComplete": "Finished — Retrieve Again"

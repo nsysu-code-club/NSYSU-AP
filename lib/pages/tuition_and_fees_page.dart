@@ -49,8 +49,20 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
               title: Text(app.enrollCertificate.title),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => ApUtils.pushCupertinoStyle(
-                context,
-                const EnrollCertificatePage(),
+                context, 
+                const EnrollCertificatePage()
+// Testing the webview of the enrollment certificate page when no available testing account //
+//              EnrollCertificatePage(
+//                downloadCertificate: ({
+//                  required String username,
+//                  required String password,
+//                }) {
+//                  throw const EnrollmentCertificateException(
+//                    EnrollmentCertificateExceptionKind.registrationRequired,
+//                    '模擬校方要求補填資料',
+//                  );
+//                },
+//              ),
               ),
             ),
           ),

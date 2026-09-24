@@ -18,6 +18,72 @@ const String _mainReferer = 'https://regweb.nsysu.edu.tw/webreg/WRegMain3.asp';
 const int _maxResponseBytes = 10 * 1024 * 1024;
 
 void main() {
+  group('EnrollmentCertificateHelper login failures', () {
+    for (final int status in <int>[301, 302, 303, 307, 308]) {
+      test(
+        'rejects login error redirect $status before following it',
+        () async {
+          final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(
+            <_Reply>[
+              _Reply.text(
+                '',
+                statusCode: status,
+                headers: <String, List<String>>{
+                  HttpHeaders.locationHeader: <String>[
+                    'show_error.asp?Errmsg=private',
+                  ],
+                },
+              ),
+            ],
+          );
+          final EnrollmentCertificateHelper helper = _helper(adapter);
+          addTearDown(helper.close);
+          await _expectKind(
+            helper.download(username: 'A1', password: 'password'),
+            EnrollmentCertificateExceptionKind.credentials,
+          );
+          expect(adapter.requests, hasLength(1));
+        },
+      );
+    }
+
+    for (final String html in <String>[
+      '<script>location.href="show_error.asp?Errmsg=private";</script>',
+      '<form action="wregloginchk2.asp"><input name="ID"></form>',
+      '<html><input name="passwd" type="password"></html>',
+    ]) {
+      test(
+        'rejects a 200 login failure before requesting a certificate: $html',
+        () async {
+          final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(
+            <_Reply>[_Reply.text(html)],
+          );
+          final EnrollmentCertificateHelper helper = _helper(adapter);
+          addTearDown(helper.close);
+          await _expectKind(
+            helper.download(username: 'A1', password: 'password'),
+            EnrollmentCertificateExceptionKind.credentials,
+          );
+          expect(adapter.requests, hasLength(1));
+        },
+      );
+    }
+
+    test('unknown HTML does not claim registration is required', () async {
+      final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(<_Reply>[
+        _Reply.text('login'),
+        _Reply.text('context'),
+        _Reply.text('<html>Service unavailable</html>'),
+      ]);
+      final EnrollmentCertificateHelper helper = _helper(adapter);
+      addTearDown(helper.close);
+      await _expectKind(
+        helper.download(username: 'A1', password: 'password'),
+        EnrollmentCertificateExceptionKind.invalidPdf,
+      );
+    });
+  });
+
   group('EnrollmentCertificateHelper registration session', () {
     test('hands off the latest scoped cookies before helper closure', () async {
       final CookieJar jar = CookieJar();
@@ -483,25 +549,28 @@ void main() {
   });
 
   group('EnrollmentCertificateHelper response validation', () {
-    test('HTML requires registration even with a PDF Content-Type', () async {
-      final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(<_Reply>[
-        _Reply.text('login'),
-        _Reply.text('context'),
-        _Reply.text(
-          '<html>login expired</html>',
-          headers: <String, List<String>>{
-            HttpHeaders.contentTypeHeader: <String>['application/pdf'],
-          },
-        ),
-      ]);
-      final EnrollmentCertificateHelper helper = _helper(adapter);
-      addTearDown(helper.close);
+    test(
+      'expired login HTML is credentials even with a PDF Content-Type',
+      () async {
+        final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(<_Reply>[
+          _Reply.text('login'),
+          _Reply.text('context'),
+          _Reply.text(
+            '<html>login expired</html>',
+            headers: <String, List<String>>{
+              HttpHeaders.contentTypeHeader: <String>['application/pdf'],
+            },
+          ),
+        ]);
+        final EnrollmentCertificateHelper helper = _helper(adapter);
+        addTearDown(helper.close);
 
-      await _expectKind(
-        helper.download(username: 'A1', password: 'password'),
-        EnrollmentCertificateExceptionKind.registrationRequired,
-      );
-    });
+        await _expectKind(
+          helper.download(username: 'A1', password: 'password'),
+          EnrollmentCertificateExceptionKind.credentials,
+        );
+      },
+    );
 
     for (final int status in <int>[200, 403, 500, 503]) {
       test('classifies a school HTML response with status $status', () async {
@@ -531,7 +600,7 @@ void main() {
         _Reply.text('context'),
         _Reply.bytes(<int>[
           ...ascii.encode('<html><body>'),
-          0xbd, 0xd0, 0xb6, 0xf1, // Big5: 請填
+          ...big5.encode('請先完成註冊資料填寫'),
           ...ascii.encode('</body></html>'),
         ]),
       ]);

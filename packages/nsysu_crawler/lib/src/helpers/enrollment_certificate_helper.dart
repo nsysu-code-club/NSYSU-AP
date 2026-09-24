@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:nsysu_crawler/src/build_mode.dart';
+import 'package:nsysu_crawler/src/utils/big5/big5.dart';
 
 /// Categories of recoverable enrollment-certificate failures.
 enum EnrollmentCertificateExceptionKind {
@@ -402,7 +403,11 @@ class EnrollmentCertificateHelper {
             statusCode: statusCode,
           );
         }
-        return _BufferedResponse(statusCode, bytes);
+        final _BufferedResponse result = _BufferedResponse(statusCode, bytes);
+        if (statusCode >= 200 && statusCode < 300) {
+          _checkCredentialsResponse(result);
+        }
+        return result;
       }
 
       if (redirectCount >= _maxRedirects) {
@@ -467,6 +472,15 @@ class EnrollmentCertificateHelper {
           'status=$statusCode redirectHop=$redirectCount',
         );
         rethrow;
+      }
+
+      if (stage == 'login' &&
+          nextUri.path.toLowerCase() == '/webreg/show_error.asp') {
+        throw EnrollmentCertificateException(
+          EnrollmentCertificateExceptionKind.credentials,
+          'RegWeb rejected the supplied credentials.',
+          statusCode: statusCode,
+        );
       }
 
       final String previousMethod = currentMethod;
@@ -679,18 +693,46 @@ class EnrollmentCertificateHelper {
     );
   }
 
+  static String _htmlPrefix(_BufferedResponse response) {
+    final List<int> bytes = response.bytes.take(4096).toList();
+    try {
+      return utf8.decode(bytes).trimLeft();
+    } on FormatException {
+      return big5.decode(bytes).trimLeft();
+    }
+  }
+
+  static void _checkCredentialsResponse(_BufferedResponse response) {
+    final String prefix = _htmlPrefix(response);
+    if (prefix.startsWith('%PDF-')) return;
+    if (RegExp(
+      r'''show_error\.asp|<form\b[^>]*wregloginchk2\.asp|<input\b[^>]*type\s*=\s*["']?password\b|login\s+expired''',
+      caseSensitive: false,
+    ).hasMatch(prefix)) {
+      throw EnrollmentCertificateException(
+        EnrollmentCertificateExceptionKind.credentials,
+        'RegWeb returned a login failure or an expired login form.',
+        statusCode: response.statusCode,
+      );
+    }
+  }
+
   static void _checkRegistrationRequired(_BufferedResponse response) {
-    // Inspect markup only. ASCII tags work for both UTF-8 and legacy Big5
-    // pages, without logging or retaining the school's personal information.
-    final String prefix = latin1
-        .decode(response.bytes.take(1024).toList())
-        .trimLeft();
+    // Unknown HTML is an invalid response, not evidence that personal data
+    // needs confirmation. Recognize explicit registration instructions only.
+    final String prefix = _htmlPrefix(response);
     if (prefix.startsWith('%PDF-')) return;
     final bool isSchoolPage = RegExp(
       r'<(?:!doctype\s+html|html|head|body|script|form)\b',
       caseSensitive: false,
     ).hasMatch(prefix);
-    if (isSchoolPage) {
+    final bool requiresRegistration = RegExp(
+      r'(?:完成|確認|補填|填寫)[^<>\r\n]{0,40}(?:註冊|資料)|'
+      r'(?:註冊|資料)[^<>\r\n]{0,40}(?:未完成|未確認|未填寫)|'
+      r'(?:complete|confirm|update)\s+(?:your\s+)?registration',
+      caseSensitive: false,
+    ).hasMatch(prefix);
+    if (isSchoolPage && requiresRegistration) {
       throw EnrollmentCertificateException(
         EnrollmentCertificateExceptionKind.registrationRequired,
         'RegWeb did not issue a certificate. Check the registration portal.',

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Cookie;
 import 'dart:typed_data';
 
@@ -9,6 +10,7 @@ import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/enroll_certificate/enrollment_registration_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/enroll_certificate/enroll_certificate_cache.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/enrollment_certificate_session.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:printing/printing.dart';
 
@@ -75,6 +77,7 @@ class EnrollCertificatePage extends StatefulWidget {
     this.exportPdf,
     this.pdfViewBuilder,
     this.currentSemesterCodeProvider,
+    this.refreshSemesterCode,
     this.registrationPageBuilder,
   });
 
@@ -86,6 +89,7 @@ class EnrollCertificatePage extends StatefulWidget {
   final EnrollmentCertificatePdfExporter? exportPdf;
   final EnrollmentCertificatePdfViewBuilder? pdfViewBuilder;
   final Future<String?> Function()? currentSemesterCodeProvider;
+  final Future<void> Function()? refreshSemesterCode;
   final EnrollmentCertificateRegistrationPageBuilder? registrationPageBuilder;
 
   @override
@@ -105,10 +109,15 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
   Uint8List? _pdfData;
   late EnrollCertificateCache _cache;
   EnrollmentCertificateHelper? _activeHelper;
+  late final EnrollmentCertificateSession _session;
+  bool _disposed = false;
+
+  bool get _isActive => mounted && !_session.isCancelled;
 
   @override
   void initState() {
     super.initState();
+    _session = EnrollmentCertificateSession(onCancel: _cancelSession);
     _status = app.enrollCertificate.loadingCached;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initialize();
@@ -117,19 +126,32 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
 
   @override
   void dispose() {
+    _disposed = true;
+    unawaited(_session.close());
+    super.dispose();
+  }
+
+  Future<void>? _cancelSession() {
     final EnrollmentCertificateHelper? helper = _activeHelper;
     _debugLog('event=dispose activeHelper=${helper != null}');
     _activeHelper = null;
     helper?.close();
-    super.dispose();
+    _username = '';
+    _password = '';
+    _pdfData = null;
+    if (!_disposed && mounted) {
+      setState(() {
+        _isRunning = false;
+        _status = app.enrollCertificate.missingCredentials;
+      });
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(app.enrollCertificate.title),
-      ),
+      appBar: AppBar(title: Text(app.enrollCertificate.title)),
       body: _buildBody(),
       floatingActionButton: _pdfData == null
           ? null
@@ -200,6 +222,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
   }
 
   Future<void> _initialize() async {
+    if (!_isActive) return;
     final EnrollmentCertificateCredentials credentials =
         widget.credentialsProvider?.call() ?? _loadCredentials();
     _username = credentials.username.replaceAll(' ', '').trim().toUpperCase();
@@ -211,7 +234,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
 
     if (_username.isEmpty) {
       _debugLog('event=initialize_blocked reason=missing_account');
-      if (!mounted) return;
+      if (!_isActive) return;
       setState(() {
         _isRunning = false;
         _status = app.enrollCertificate.missingAccount;
@@ -225,10 +248,11 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
     );
     try {
       _semesterCode = await _resolveSemesterCode();
-      if (!mounted) return;
+      if (!_isActive) return;
+      unawaited(_refreshSemesterCode());
       _debugLog('event=cache_read_start');
       final Uint8List? cachedPdf = await _readCachedCertificate();
-      if (!mounted) return;
+      if (!_isActive) return;
       if (cachedPdf != null) {
         _debugLog('event=cache_hit pdfBytes=${cachedPdf.length}');
         setState(() {
@@ -248,6 +272,9 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
   }
 
   EnrollmentCertificateCredentials _loadCredentials() {
+    if (!SelcrsHelper.instance.isLogin) {
+      return const EnrollmentCertificateCredentials(username: '', password: '');
+    }
     String username = SelcrsHelper.instance.username.trim();
     String password = SelcrsHelper.instance.password;
     username = username.isNotEmpty
@@ -263,7 +290,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
   }
 
   Future<void> _retrieve({bool openRegistrationOnFailure = true}) async {
-    if (!mounted || _isFetching || _isOpeningRegistration) {
+    if (!_isActive || _isFetching || _isOpeningRegistration) {
       if (_isFetching) {
         _debugLog('event=retrieve_ignored reason=already_running');
       }
@@ -275,7 +302,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
         'usernamePresent=${_username.isNotEmpty} '
         'passwordPresent=${_password.isNotEmpty}',
       );
-      if (!mounted) return;
+      if (!_isActive) return;
       setState(() {
         _isRunning = false;
         _status = app.enrollCertificate.missingCredentials;
@@ -297,17 +324,19 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
 
     try {
       final String? semesterCode = await _resolveSemesterCode();
-      if (!mounted) return;
+      if (!_isActive) return;
       final Uint8List pdf = await _fetchCertificate();
       final DateTime retrievedAt = DateTime.now().toUtc();
       _debugLog('event=retrieve_download_complete pdfBytes=${pdf.length}');
-      if (!mounted) {
+      if (!_isActive) {
         _debugLog('event=retrieve_cancelled reason=page_unmounted');
         return;
       }
       bool cacheSaveFailed = false;
       try {
-        await _writeCachedCertificate(pdf, semesterCode, retrievedAt);
+        await _session.write(
+          () => _writeCachedCertificate(pdf, semesterCode, retrievedAt),
+        );
         _debugLog('event=cache_write_complete pdfBytes=${pdf.length}');
       } on FormatException catch (error) {
         _debugLog(
@@ -322,7 +351,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
         );
         cacheSaveFailed = true;
       }
-      if (!mounted) {
+      if (!_isActive) {
         _debugLog('event=retrieve_cancelled reason=page_unmounted');
         return;
       }
@@ -356,13 +385,13 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
       _isFetching = false;
       _debugLog('event=retrieve_end mode=$mode');
     }
-    if (mounted && needsRegistration && openRegistrationOnFailure) {
+    if (_isActive && needsRegistration && openRegistrationOnFailure) {
       await _openRegistration(registrationCookies);
     }
   }
 
   Future<void> _openRegistration(List<Cookie> cookies) async {
-    if (!mounted || _isOpeningRegistration) return;
+    if (!_isActive || _isOpeningRegistration) return;
     setState(() => _isOpeningRegistration = true);
     bool retry = false;
     try {
@@ -383,7 +412,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
     } finally {
       if (mounted) setState(() => _isOpeningRegistration = false);
     }
-    if (mounted && retry) {
+    if (_isActive && retry) {
       // A still-blocked response remains visible instead of reopening the
       // window in a loop. The student can retry manually when ready.
       await _retrieve(openRegistrationOnFailure: false);
@@ -450,12 +479,6 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
       final FirebaseRemoteConfig? config =
           FirebaseRemoteConfigUtils.instance.remoteConfig;
       if (config != null) {
-        try {
-          await config.fetch();
-          await config.activate();
-        } catch (_) {
-          // A fetch failure does not invalidate previously activated values.
-        }
         final String code = config
             .getString(Constants.defaultCourseSemesterCode)
             .trim();
@@ -468,6 +491,23 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
         .getString(Constants.defaultCourseSemesterCode, '')
         .trim();
     return _isSemesterCode(code) ? code : null;
+  }
+
+  Future<void> _refreshSemesterCode() async {
+    try {
+      if (widget.refreshSemesterCode != null) {
+        await widget.refreshSemesterCode!().timeout(const Duration(seconds: 3));
+      } else if (widget.currentSemesterCodeProvider == null) {
+        final FirebaseRemoteConfig? config =
+            FirebaseRemoteConfigUtils.instance.remoteConfig;
+        if (config != null) {
+          await config.fetch().timeout(const Duration(seconds: 3));
+          if (_isActive) await config.activate();
+        }
+      }
+    } catch (_) {
+      // Refresh never blocks disk reads or invalidates activated values.
+    }
   }
 
   static bool _isSemesterCode(String code) =>
@@ -493,7 +533,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
   }
 
   void _handleRetrievalFailure(String message) {
-    if (!mounted) return;
+    if (!_isActive) return;
     setState(() {
       _isRunning = false;
       _status = _pdfData == null ? message : '';
@@ -504,6 +544,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
   }
 
   Future<void> _download() async {
+    if (!_isActive) return;
     final Uint8List? pdf = _pdfData;
     if (pdf == null) return;
     _debugLog('event=export_start pdfBytes=${pdf.length}');
@@ -522,7 +563,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
       }
     } catch (error) {
       _debugLog('event=export_failure sourceType=${error.runtimeType}');
-      if (!mounted) return;
+      if (!_isActive) return;
       _showMessage(app.enrollCertificate.downloadFailed);
     }
   }

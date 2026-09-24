@@ -7,10 +7,82 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nsysu_ap/l10n/strings.g.dart';
 import 'package:nsysu_ap/pages/enroll_certificate/enrollment_registration_page.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/enrollment_certificate_session.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/registration_cookie_store.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 void main() {
   setUp(() => LocaleSettings.setLocaleSync(AppLocale.zhHantTw));
+
+  for (final bool logout in <bool>[false, true]) {
+    testWidgets('removes RegWeb cookies after ${logout ? 'logout' : 'close'}', (
+      WidgetTester tester,
+    ) async {
+      final _TestCookieManager manager = _TestCookieManager();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EnrollmentRegistrationPage(
+            registrationCookies: <io.Cookie>[
+              io.Cookie('ASPSESSIONID', 'account-a'),
+            ],
+            cookieManager: manager,
+            webViewBuilder: (_, URLRequest request, _) =>
+                const Text('Private form'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(manager.hasSession, isTrue);
+      if (logout) {
+        final Future<void> cleanup = EnrollmentCertificateSession.cancelAll();
+        await tester.pump();
+        await tester.pump();
+        await cleanup;
+      } else {
+        await tester.pumpWidget(const SizedBox.shrink());
+      }
+      await tester.pumpAndSettle();
+      expect(manager.hasSession, isFalse);
+      expect(manager.origins.toSet(), <String>{'regweb.nsysu.edu.tw'});
+      expect(find.text('Private form'), findsNothing);
+    });
+  }
+
+  test(
+    'logout cleanup tries remaining paths after a native deletion fails',
+    () async {
+      final _TestCookieManager manager = _TestCookieManager(
+        failDeletePath: '/',
+      );
+      await RegistrationCookieStore.clear(manager: manager);
+      expect(
+        manager.deletedPaths,
+        containsAll(<String>['/', '/webreg', '/webreg/']),
+      );
+    },
+  );
+
+  test('a new session waits for the previous native view cleanup', () async {
+    final Completer<void> stopped = Completer<void>();
+    final _TestCookieManager manager = _TestCookieManager();
+    final Future<void> closing = RegistrationCookieStore.clear(
+      manager: manager,
+      beforeClear: () => stopped.future,
+    );
+    final Future<bool> opening = RegistrationCookieStore.run(
+      () => manager.setCookie(
+        url: WebUri.uri(EnrollmentCertificateHelper.registrationSessionUri),
+        name: 'ASPSESSIONID',
+        value: 'account-b',
+      ),
+    );
+    await Future<void>.delayed(Duration.zero);
+    expect(manager.writes, isEmpty);
+    stopped.complete();
+    await closing;
+    await opening;
+    expect(manager.hasSession, isTrue);
+  });
 
   testWidgets('keeps native navigation payloads out of debug logs', (
     WidgetTester tester,
@@ -20,6 +92,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: EnrollmentRegistrationPage(
+          cookieManager: _TestCookieManager(),
           username: 'A123456789',
           password: 'test password',
           webViewBuilder: (_, URLRequest request, _) => const SizedBox.shrink(),
@@ -43,6 +116,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: EnrollmentRegistrationPage(
+            cookieManager: _TestCookieManager(),
             username: 'A123456789',
             password: 'test password',
             webViewBuilder:
@@ -140,6 +214,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: EnrollmentRegistrationPage(
+          cookieManager: _TestCookieManager(),
           username: 'A123456789',
           password: 'test password',
           webViewBuilder: (_, URLRequest request, _) {
@@ -258,6 +333,8 @@ void main() {
     write.complete(true);
     await tester.pumpAndSettle();
     expect(webViews, 0);
+    expect(manager.hasSession, isFalse);
+    expect(manager.deletedPaths.length, 6);
     expect(tester.takeException(), isNull);
   });
 }
@@ -280,11 +357,14 @@ class _TestCookieManager extends Fake implements CookieManager {
     this.write,
     this.result = true,
     this.shouldThrow = false,
+    this.failDeletePath,
   });
 
   final Completer<bool>? write;
   final bool result;
   final bool shouldThrow;
+  final String? failDeletePath;
+  bool hasSession = false;
   final List<String> deletedPaths = <String>[];
   final List<String> origins = <String>[];
   final List<Map<String, Object?>> writes = <Map<String, Object?>>[];
@@ -299,6 +379,8 @@ class _TestCookieManager extends Fake implements CookieManager {
   }) async {
     origins.add(url.host);
     deletedPaths.add(path);
+    if (path == failDeletePath) throw StateError('Cookie deletion failed');
+    hasSession = false;
     return true;
   }
 
@@ -329,6 +411,8 @@ class _TestCookieManager extends Fake implements CookieManager {
       'maxAge': maxAge,
     });
     if (shouldThrow) throw StateError('Native cookie store unavailable');
-    return write?.future ?? result;
+    final bool saved = await (write?.future ?? Future<bool>.value(result));
+    hasSession = saved;
+    return saved;
   }
 }

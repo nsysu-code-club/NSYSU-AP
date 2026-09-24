@@ -4,17 +4,83 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show DebugPrintCallback, debugPrint;
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart' show URLRequest;
+import 'package:flutter_inappwebview/flutter_inappwebview.dart'
+    show CookieManager, InAppWebViewController, URLRequest, WebUri;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nsysu_ap/l10n/strings.g.dart';
 import 'package:nsysu_ap/pages/enroll_certificate/enroll_certificate_page.dart';
 import 'package:nsysu_ap/pages/enroll_certificate/enrollment_registration_page.dart';
 import 'package:nsysu_ap/utils/enroll_certificate/enroll_certificate_cache.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/enrollment_certificate_session.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 void main() {
   setUp(() {
     LocaleSettings.setLocaleSync(AppLocale.zhHantTw);
+  });
+
+  testWidgets('cached PDF is available while semester refresh is pending', (
+    WidgetTester tester,
+  ) async {
+    final Completer<void> refresh = Completer<void>();
+    await tester.pumpWidget(
+      _testApp(
+        cachedPdf: _validPdf('offline'),
+        refreshSemesterCode: () => refresh.future,
+        download: ({required String username, required String password}) {
+          fail('A valid local cache must not need the network');
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('PDF ready'), findsOneWidget);
+    refresh.completeError(StateError('offline'));
+    await tester.pump();
+    expect(find.text('PDF ready'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('logout prevents a mounted page from saving a late download', (
+    WidgetTester tester,
+  ) async {
+    final Completer<Uint8List> request = Completer<Uint8List>();
+    int writes = 0;
+    await tester.pumpWidget(
+      _testApp(
+        download: ({required String username, required String password}) =>
+            request.future,
+        onSavePdf: (_) => writes++,
+      ),
+    );
+    await tester.pump();
+    await EnrollmentCertificateSession.cancelAll();
+    request.complete(_validPdf('late'));
+    await tester.pumpAndSettle();
+    expect(writes, 0);
+    expect(find.text('PDF ready'), findsNothing);
+    expect(find.text(app.enrollCertificate.missingCredentials), findsOneWidget);
+  });
+
+  testWidgets('logout hides an already displayed certificate', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _testApp(
+        cachedPdf: _validPdf('cached'),
+        download:
+            ({required String username, required String password}) async =>
+                _validPdf('unused'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('PDF ready'), findsOneWidget);
+    await EnrollmentCertificateSession.cancelAll();
+    await tester.pumpAndSettle();
+    expect(find.text('PDF ready'), findsNothing);
+    expect(
+      find.byKey(const ValueKey<String>('enroll-certificate-download')),
+      findsNothing,
+    );
   });
 
   testWidgets('passes only the failed request session to registration', (
@@ -79,6 +145,7 @@ void main() {
               (BuildContext context, List<Cookie> cookies) {
                 windows++;
                 return EnrollmentRegistrationPage(
+                  cookieManager: _NoopCookieManager(),
                   webViewBuilder: (_, URLRequest request, _) =>
                       const Text('School registration form'),
                 );
@@ -528,18 +595,14 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNWidgets(2));
     expect(
       find.descendant(
-        of: find.byKey(
-          const ValueKey<String>('enroll-certificate-download'),
-        ),
+        of: find.byKey(const ValueKey<String>('enroll-certificate-download')),
         matching: find.byIcon(Icons.download_rounded),
       ),
       findsOneWidget,
     );
     expect(
       find.descendant(
-        of: find.byKey(
-          const ValueKey<String>('enroll-certificate-regenerate'),
-        ),
+        of: find.byKey(const ValueKey<String>('enroll-certificate-regenerate')),
         matching: find.byIcon(Icons.autorenew_rounded),
       ),
       findsOneWidget,
@@ -581,11 +644,13 @@ Widget _testApp({
   Object? saveError,
   EnrollmentCertificatePdfExporter? exportPdf,
   EnrollmentCertificateRegistrationPageBuilder? registrationPageBuilder,
+  Future<void> Function()? refreshSemesterCode,
 }) {
   Uint8List? currentCachedPdf = cachedPdf;
   return MaterialApp(
     home: EnrollCertificatePage(
       currentSemesterCodeProvider: () async => '1151',
+      refreshSemesterCode: refreshSemesterCode,
       credentialsProvider: () => EnrollmentCertificateCredentials(
         username: username,
         password: password,
@@ -615,4 +680,15 @@ Uint8List _validPdf(String marker) {
     ...List<int>.filled(1100, 0x20),
     ...'\n%%EOF'.codeUnits,
   ]);
+}
+
+class _NoopCookieManager extends Fake implements CookieManager {
+  @override
+  Future<bool> deleteCookies({
+    required WebUri url,
+    String path = '/',
+    String? domain,
+    InAppWebViewController? iosBelow11WebViewController,
+    InAppWebViewController? webViewController,
+  }) async => true;
 }

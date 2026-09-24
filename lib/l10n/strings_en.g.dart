@@ -132,6 +132,7 @@ class _AppLocalizationsEnrollCertificateEn extends AppLocalizationsEnrollCertifi
 	@override String get requestFailed => 'The certificate could not be retrieved. Check your connection and try again.';
 	@override String get invalidResponse => 'The university system did not return a valid certificate PDF. Check your credentials or try again later.';
 	@override String get downloadFailed => 'The certificate could not be downloaded or exported. Please try again later.';
+	@override String get openBrowserFailed => 'Could not open the browser. Please try again.';
 	@override String get registrationTitle => 'Online Registration';
 	@override String get registrationRequired => 'The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.';
 	@override String get registrationComplete => 'Finished — Retrieve Again';
@@ -228,6 +229,7 @@ extension on AppLocalizationsEn {
 			'enrollCertificate.requestFailed' => 'The certificate could not be retrieved. Check your connection and try again.',
 			'enrollCertificate.invalidResponse' => 'The university system did not return a valid certificate PDF. Check your credentials or try again later.',
 			'enrollCertificate.downloadFailed' => 'The certificate could not be downloaded or exported. Please try again later.',
+			'enrollCertificate.openBrowserFailed' => 'Could not open the browser. Please try again.',
 			'enrollCertificate.registrationTitle' => 'Online Registration',
 			'enrollCertificate.registrationRequired' => 'The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.',
 			'enrollCertificate.registrationComplete' => 'Finished — Retrieve Again',
