@@ -210,9 +210,51 @@ void main() {
         ),
       );
     });
+
+    test(
+      'opens registration for a context refusal before requesting PDF',
+      () async {
+        final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(<_Reply>[
+          _Reply.text('login'),
+          _Reply.text('Forbidden', statusCode: 403),
+        ]);
+        final EnrollmentCertificateHelper helper = _helper(adapter);
+        addTearDown(helper.close);
+
+        await _expectKind(
+          helper.download(username: 'A1', password: 'password'),
+          EnrollmentCertificateExceptionKind.registrationRequired,
+        );
+        expect(adapter.requests, hasLength(2));
+      },
+    );
   });
 
   group('EnrollmentCertificateHelper redirects', () {
+    for (final int statusCode in <int>[302, 307, 308]) {
+      test(
+        'hands off a $statusCode registration redirect without credentials',
+        () async {
+          final _FakeHttpClientAdapter adapter =
+              _FakeHttpClientAdapter(<_Reply>[
+                _Reply.redirect(
+                  statusCode,
+                  EnrollmentCertificateHelper.registrationUri.toString(),
+                ),
+              ]);
+          final EnrollmentCertificateHelper helper = _helper(adapter);
+          addTearDown(helper.close);
+
+          await _expectKind(
+            helper.download(username: 'A1', password: 'password'),
+            EnrollmentCertificateExceptionKind.registrationRequired,
+          );
+          expect(adapter.requests, hasLength(1));
+          expect(adapter.requests.single.uri, Uri.parse(_loginUrl));
+        },
+      );
+    }
+
     for (final int statusCode in <int>[301, 302, 303, 307, 308]) {
       test(
         'follows $statusCode manually with browser method semantics',
@@ -285,6 +327,10 @@ void main() {
       'https://regweb.nsysu.edu.tw/outside.asp',
       'https://regweb.nsysu.edu.tw:444/webreg/wrong-port.asp',
       'https://regweb.nsysu.edu.tw/webreg/%2e%2e/outside.asp',
+      'http://selcrs.nsysu.edu.tw/stu_enroll/',
+      'https://selcrs.nsysu.edu.tw:444/stu_enroll/',
+      'https://selcrs.nsysu.edu.tw/other/',
+      'https://user@selcrs.nsysu.edu.tw/stu_enroll/',
     ]) {
       test('rejects redirect target $location', () async {
         final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(<_Reply>[
@@ -333,7 +379,7 @@ void main() {
   });
 
   group('EnrollmentCertificateHelper response validation', () {
-    test('does not trust an application/pdf Content-Type', () async {
+    test('HTML requires registration even with a PDF Content-Type', () async {
       final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(<_Reply>[
         _Reply.text('login'),
         _Reply.text('context'),
@@ -349,9 +395,68 @@ void main() {
 
       await _expectKind(
         helper.download(username: 'A1', password: 'password'),
-        EnrollmentCertificateExceptionKind.invalidPdf,
+        EnrollmentCertificateExceptionKind.registrationRequired,
       );
     });
+
+    for (final int status in <int>[200, 403, 500, 503]) {
+      test('classifies a school HTML response with status $status', () async {
+        final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(<_Reply>[
+          _Reply.text('login'),
+          _Reply.text('context'),
+          _Reply.text(
+            '<script>alert("請先完成註冊資料填寫");</script>',
+            statusCode: status,
+          ),
+        ]);
+        final EnrollmentCertificateHelper helper = _helper(adapter);
+        addTearDown(helper.close);
+
+        await _expectKind(
+          helper.download(username: 'A1', password: 'password'),
+          status == 200 || status == 403
+              ? EnrollmentCertificateExceptionKind.registrationRequired
+              : EnrollmentCertificateExceptionKind.http,
+        );
+      });
+    }
+
+    test('recognizes markup in a legacy Big5 school response', () async {
+      final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(<_Reply>[
+        _Reply.text('login'),
+        _Reply.text('context'),
+        _Reply.bytes(<int>[
+          ...ascii.encode('<html><body>'),
+          0xbd, 0xd0, 0xb6, 0xf1, // Big5: 請填
+          ...ascii.encode('</body></html>'),
+        ]),
+      ]);
+      final EnrollmentCertificateHelper helper = _helper(adapter);
+      addTearDown(helper.close);
+
+      await _expectKind(
+        helper.download(username: 'A1', password: 'password'),
+        EnrollmentCertificateExceptionKind.registrationRequired,
+      );
+    });
+
+    test(
+      'an explicit certificate refusal can have a plain text body',
+      () async {
+        final _FakeHttpClientAdapter adapter = _FakeHttpClientAdapter(<_Reply>[
+          _Reply.text('login'),
+          _Reply.text('context'),
+          _Reply.text('Forbidden', statusCode: 403),
+        ]);
+        final EnrollmentCertificateHelper helper = _helper(adapter);
+        addTearDown(helper.close);
+
+        await _expectKind(
+          helper.download(username: 'A1', password: 'password'),
+          EnrollmentCertificateExceptionKind.registrationRequired,
+        );
+      },
+    );
 
     test('requires a complete PDF of at least 1024 bytes', () async {
       for (final Uint8List invalidPdf in <Uint8List>[

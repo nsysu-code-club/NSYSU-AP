@@ -131,6 +131,9 @@ class _AppLocalizationsEnrollCertificateEn extends AppLocalizationsEnrollCertifi
 	@override String get requestFailed => 'The certificate could not be retrieved. Check your connection and try again.';
 	@override String get invalidResponse => 'The university system did not return a valid certificate PDF. Check your credentials or try again later.';
 	@override String get downloadFailed => 'The certificate could not be downloaded or exported. Please try again later.';
+	@override String get registrationTitle => 'Online Registration';
+	@override String get registrationRequired => 'The university did not issue a certificate. Sign in to the registration system, check and complete any required information, then retrieve the certificate again.';
+	@override String get registrationComplete => 'Finished — Retrieve Again';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -223,6 +226,9 @@ extension on AppLocalizationsEn {
 			'enrollCertificate.requestFailed' => 'The certificate could not be retrieved. Check your connection and try again.',
 			'enrollCertificate.invalidResponse' => 'The university system did not return a valid certificate PDF. Check your credentials or try again later.',
 			'enrollCertificate.downloadFailed' => 'The certificate could not be downloaded or exported. Please try again later.',
+			'enrollCertificate.registrationTitle' => 'Online Registration',
+			'enrollCertificate.registrationRequired' => 'The university did not issue a certificate. Sign in to the registration system, check and complete any required information, then retrieve the certificate again.',
+			'enrollCertificate.registrationComplete' => 'Finished — Retrieve Again',
 			_ => null,
 		};
 	}

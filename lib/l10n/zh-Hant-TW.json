@@ -81,6 +81,9 @@
     "requestTimedOut": "校方系統回應逾時，請稍後重新提取。",
     "requestFailed": "無法從校方系統取得在學證明，請確認網路後重試。",
     "invalidResponse": "校方系統未回傳有效的在學證明 PDF，請確認帳密或稍後重試。",
-    "downloadFailed": "無法下載／匯出在學證明，請稍後再試。"
+    "downloadFailed": "無法下載／匯出在學證明，請稍後再試。",
+    "registrationTitle": "網路註冊",
+    "registrationRequired": "校方未提供在學證明。請登入註冊系統，確認並補填必要資料，完成後再重新提取。",
+    "registrationComplete": "完成填寫，重新提取"
   }
 }

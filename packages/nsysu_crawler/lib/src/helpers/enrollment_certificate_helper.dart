@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:typed_data';
@@ -29,6 +30,10 @@ enum EnrollmentCertificateExceptionKind {
 
   /// The final response was not a bounded PDF payload.
   invalidPdf,
+
+  /// RegWeb returned a school web page instead of issuing a certificate.
+  /// The student may need to complete required registration information.
+  registrationRequired,
 
   /// The helper was closed or the underlying Dio request was cancelled.
   cancelled,
@@ -85,6 +90,11 @@ class EnrollmentCertificateHelper {
 
   static final Uri _loginUri = Uri.parse(
     'https://regweb.nsysu.edu.tw/webreg/wregloginchk2.asp',
+  );
+
+  /// Official portal where students can complete registration requirements.
+  static final Uri registrationUri = Uri.parse(
+    'https://selcrs.nsysu.edu.tw/stu_enroll/',
   );
   static final Uri _contextUri = Uri.parse(
     'https://regweb.nsysu.edu.tw/webreg/'
@@ -202,6 +212,7 @@ class EnrollmentCertificateHelper {
         form: <String, String>{'ssn1': 'idno', 'idno': normalizedUsername},
       );
       _requireSuccess(certificateResponse);
+      _checkRegistrationRequired(certificateResponse);
       _debugLog(
         'event=stage_complete stage=certificate '
         'status=${certificateResponse.statusCode} '
@@ -390,6 +401,19 @@ class EnrollmentCertificateHelper {
           'RegWeb returned an invalid redirect target.',
           statusCode: statusCode,
           cause: error,
+        );
+      }
+      if (nextUri.scheme == registrationUri.scheme &&
+          nextUri.host == registrationUri.host &&
+          nextUri.port == registrationUri.port &&
+          nextUri.userInfo.isEmpty &&
+          nextUri.path == registrationUri.path) {
+        // Hand off to the UI without following this cross-host redirect or
+        // forwarding the login POST and its credentials to another endpoint.
+        throw EnrollmentCertificateException(
+          EnrollmentCertificateExceptionKind.registrationRequired,
+          'RegWeb redirected to the registration portal.',
+          statusCode: statusCode,
         );
       }
       try {
@@ -598,11 +622,38 @@ class EnrollmentCertificateHelper {
         statusCode: response.statusCode,
       );
     }
+    if (response.statusCode == 403) {
+      throw EnrollmentCertificateException(
+        EnrollmentCertificateExceptionKind.registrationRequired,
+        'RegWeb refused to issue a certificate. Check registration.',
+        statusCode: response.statusCode,
+      );
+    }
     throw EnrollmentCertificateException(
       EnrollmentCertificateExceptionKind.http,
       'RegWeb returned an unsuccessful HTTP status.',
       statusCode: response.statusCode,
     );
+  }
+
+  static void _checkRegistrationRequired(_BufferedResponse response) {
+    // Inspect markup only. ASCII tags work for both UTF-8 and legacy Big5
+    // pages, without logging or retaining the school's personal information.
+    final String prefix = latin1
+        .decode(response.bytes.take(1024).toList())
+        .trimLeft();
+    if (prefix.startsWith('%PDF-')) return;
+    final bool isSchoolPage = RegExp(
+      r'<(?:!doctype\s+html|html|head|body|script|form)\b',
+      caseSensitive: false,
+    ).hasMatch(prefix);
+    if (isSchoolPage) {
+      throw EnrollmentCertificateException(
+        EnrollmentCertificateExceptionKind.registrationRequired,
+        'RegWeb did not issue a certificate. Check the registration portal.',
+        statusCode: response.statusCode,
+      );
+    }
   }
 
   static Uint8List _normalizePdf(Uint8List bytes) {

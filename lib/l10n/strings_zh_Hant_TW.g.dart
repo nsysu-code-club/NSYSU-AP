@@ -297,6 +297,15 @@ class AppLocalizationsEnrollCertificateZhHantTw {
 
 	/// zh-Hant-TW: '無法下載／匯出在學證明，請稍後再試。'
 	String get downloadFailed => '無法下載／匯出在學證明，請稍後再試。';
+
+	/// zh-Hant-TW: '網路註冊'
+	String get registrationTitle => '網路註冊';
+
+	/// zh-Hant-TW: '校方未提供在學證明。請登入註冊系統，確認並補填必要資料，完成後再重新提取。'
+	String get registrationRequired => '校方未提供在學證明。請登入註冊系統，確認並補填必要資料，完成後再重新提取。';
+
+	/// zh-Hant-TW: '完成填寫，重新提取'
+	String get registrationComplete => '完成填寫，重新提取';
 }
 
 /// The flat map containing all translations for locale <zh-Hant-TW>.
@@ -389,6 +398,9 @@ extension on AppLocalizations {
 			'enrollCertificate.requestFailed' => '無法從校方系統取得在學證明，請確認網路後重試。',
 			'enrollCertificate.invalidResponse' => '校方系統未回傳有效的在學證明 PDF，請確認帳密或稍後重試。',
 			'enrollCertificate.downloadFailed' => '無法下載／匯出在學證明，請稍後再試。',
+			'enrollCertificate.registrationTitle' => '網路註冊',
+			'enrollCertificate.registrationRequired' => '校方未提供在學證明。請登入註冊系統，確認並補填必要資料，完成後再重新提取。',
+			'enrollCertificate.registrationComplete' => '完成填寫，重新提取',
 			_ => null,
 		};
 	}

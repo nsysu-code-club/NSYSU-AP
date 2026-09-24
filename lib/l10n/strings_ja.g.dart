@@ -131,6 +131,9 @@ class _AppLocalizationsEnrollCertificateJa extends AppLocalizationsEnrollCertifi
 	@override String get requestFailed => '大学のシステムから在学証明書を取得できませんでした。ネットワーク接続を確認して、もう一度お試しください。';
 	@override String get invalidResponse => '大学のシステムから有効な在学証明書のPDFが返されませんでした。ログイン情報を確認するか、しばらくしてからもう一度お試しください。';
 	@override String get downloadFailed => '在学証明書をダウンロード／エクスポートできませんでした。しばらくしてからもう一度お試しください。';
+	@override String get registrationTitle => 'オンライン学籍登録';
+	@override String get registrationRequired => '大学から在学証明書が発行されませんでした。学籍登録システムにログインし、必要事項を確認・入力してから再取得してください。';
+	@override String get registrationComplete => '入力を完了して再取得';
 }
 
 /// The flat map containing all translations for locale <ja>.
@@ -223,6 +226,9 @@ extension on AppLocalizationsJa {
 			'enrollCertificate.requestFailed' => '大学のシステムから在学証明書を取得できませんでした。ネットワーク接続を確認して、もう一度お試しください。',
 			'enrollCertificate.invalidResponse' => '大学のシステムから有効な在学証明書のPDFが返されませんでした。ログイン情報を確認するか、しばらくしてからもう一度お試しください。',
 			'enrollCertificate.downloadFailed' => '在学証明書をダウンロード／エクスポートできませんでした。しばらくしてからもう一度お試しください。',
+			'enrollCertificate.registrationTitle' => 'オンライン学籍登録',
+			'enrollCertificate.registrationRequired' => '大学から在学証明書が発行されませんでした。学籍登録システムにログインし、必要事項を確認・入力してから再取得してください。',
+			'enrollCertificate.registrationComplete' => '入力を完了して再取得',
 			_ => null,
 		};
 	}

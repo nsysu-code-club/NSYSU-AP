@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nsysu_ap/l10n/strings.g.dart';
 import 'package:nsysu_ap/pages/enroll_certificate/enroll_certificate_page.dart';
+import 'package:nsysu_ap/pages/enroll_certificate/enrollment_registration_page.dart';
 import 'package:nsysu_ap/utils/enroll_certificate/enroll_certificate_cache.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
@@ -14,6 +15,131 @@ void main() {
   setUp(() {
     LocaleSettings.setLocaleSync(AppLocale.zhHantTw);
   });
+
+  for (final String scenario in <String>[
+    'complete',
+    'cancel',
+    'still blocked',
+    'cached',
+  ]) {
+    testWidgets('registration recovery: $scenario', (
+      WidgetTester tester,
+    ) async {
+      int requests = 0;
+      int windows = 0;
+      int writes = 0;
+      final Uint8List oldPdf = _validPdf('old');
+      final Uint8List freshPdf = _validPdf('fresh');
+      Uint8List? displayed;
+      await tester.pumpWidget(
+        _testApp(
+          cachedPdf: scenario == 'cached' ? oldPdf : null,
+          onBuildPdf: (Uint8List bytes) => displayed = bytes,
+          onSavePdf: (Uint8List bytes) => writes++,
+          download:
+              ({required String username, required String password}) async {
+                requests++;
+                if (requests == 1 || scenario == 'still blocked') {
+                  throw const EnrollmentCertificateException(
+                    EnrollmentCertificateExceptionKind.registrationRequired,
+                    'School requires registration information.',
+                  );
+                }
+                return freshPdf;
+              },
+          registrationPageBuilder: (BuildContext context) {
+            windows++;
+            return EnrollmentRegistrationPage(
+              webViewBuilder: (_) => const Text('School registration form'),
+            );
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+      if (scenario == 'cached') {
+        await tester.tap(
+          find.byKey(const ValueKey<String>('enroll-certificate-regenerate')),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      expect(find.text('School registration form'), findsOneWidget);
+      expect(
+        find.text(app.enrollCertificate.registrationTitle),
+        findsOneWidget,
+      );
+      expect(windows, 1);
+      expect(requests, 1);
+      expect(writes, 0);
+
+      if (scenario == 'cancel' || scenario == 'cached') {
+        await tester.tap(find.byType(CloseButton));
+      } else {
+        await tester.tap(
+          find.byKey(const ValueKey<String>('enroll-registration-complete')),
+        );
+      }
+      await tester.pumpAndSettle();
+
+      expect(find.text('School registration form'), findsNothing);
+      expect(windows, 1);
+      if (scenario == 'complete') {
+        expect(requests, 2);
+        expect(writes, 1);
+        expect(displayed, orderedEquals(freshPdf));
+      } else if (scenario == 'cached') {
+        expect(requests, 1);
+        expect(writes, 0);
+        expect(displayed, orderedEquals(oldPdf));
+      } else {
+        expect(requests, scenario == 'still blocked' ? 2 : 1);
+        expect(writes, 0);
+        expect(
+          find.text(app.enrollCertificate.registrationRequired),
+          findsOneWidget,
+        );
+        // A subsequent explicit retry can reopen registration if needed.
+        if (scenario == 'still blocked') {
+          await tester.tap(
+            find.byKey(const ValueKey<String>('enroll-certificate-retry')),
+          );
+          await tester.pumpAndSettle();
+          expect(find.text('School registration form'), findsOneWidget);
+          expect(requests, 3);
+          expect(windows, 2);
+        }
+      }
+    });
+  }
+
+  for (final EnrollmentCertificateExceptionKind kind
+      in EnrollmentCertificateExceptionKind.values.where(
+        (EnrollmentCertificateExceptionKind value) =>
+            value != EnrollmentCertificateExceptionKind.registrationRequired,
+      )) {
+    testWidgets('${kind.name} does not open registration', (
+      WidgetTester tester,
+    ) async {
+      int windows = 0;
+      await tester.pumpWidget(
+        _testApp(
+          download:
+              ({required String username, required String password}) async =>
+                  throw EnrollmentCertificateException(kind, 'Test failure'),
+          registrationPageBuilder: (_) {
+            windows++;
+            return const Text('Unexpected registration');
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(windows, 0);
+      expect(
+        find.byKey(const ValueKey<String>('enroll-certificate-retry')),
+        findsOneWidget,
+      );
+    });
+  }
 
   for (final String scenario in <String>[
     'current',
@@ -389,6 +515,7 @@ Widget _testApp({
   void Function(Uint8List bytes)? onSavePdf,
   Object? saveError,
   EnrollmentCertificatePdfExporter? exportPdf,
+  WidgetBuilder? registrationPageBuilder,
 }) {
   Uint8List? currentCachedPdf = cachedPdf;
   return MaterialApp(
@@ -408,6 +535,7 @@ Widget _testApp({
             onSavePdf?.call(bytes);
           },
       exportPdf: exportPdf,
+      registrationPageBuilder: registrationPageBuilder,
       pdfViewBuilder: (BuildContext context, Uint8List bytes, String fileName) {
         onBuildPdf?.call(bytes);
         return const Center(child: Text('PDF ready'));

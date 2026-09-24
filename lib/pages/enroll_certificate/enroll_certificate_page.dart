@@ -5,6 +5,7 @@ import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/pages/enroll_certificate/enrollment_registration_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/enroll_certificate/enroll_certificate_cache.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
@@ -69,6 +70,7 @@ class EnrollCertificatePage extends StatefulWidget {
     this.exportPdf,
     this.pdfViewBuilder,
     this.currentSemesterCodeProvider,
+    this.registrationPageBuilder,
   });
 
   final EnrollmentCertificateCredentialsProvider? credentialsProvider;
@@ -79,6 +81,7 @@ class EnrollCertificatePage extends StatefulWidget {
   final EnrollmentCertificatePdfExporter? exportPdf;
   final EnrollmentCertificatePdfViewBuilder? pdfViewBuilder;
   final Future<String?> Function()? currentSemesterCodeProvider;
+  final WidgetBuilder? registrationPageBuilder;
 
   @override
   State<EnrollCertificatePage> createState() => _EnrollCertificatePageState();
@@ -89,6 +92,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
 
   bool _isRunning = true;
   bool _isFetching = false;
+  bool _isOpeningRegistration = false;
   late String _status;
   String _username = '';
   String _password = '';
@@ -130,7 +134,9 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
             ),
             TextButton.icon(
               key: const ValueKey<String>('enroll-certificate-regenerate'),
-              onPressed: _isRunning ? null : _retrieve,
+              onPressed: _isRunning || _isOpeningRegistration
+                  ? null
+                  : _retrieve,
               icon: const Icon(Icons.autorenew_rounded),
               label: Text(app.enrollCertificate.regenerate),
             ),
@@ -178,7 +184,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
               const SizedBox(height: 20),
               FilledButton.icon(
                 key: const ValueKey<String>('enroll-certificate-retry'),
-                onPressed: _retrieve,
+                onPressed: _isOpeningRegistration ? null : _retrieve,
                 icon: const Icon(Icons.refresh_rounded),
                 label: Text(app.enrollCertificate.retry),
               ),
@@ -252,8 +258,8 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
     );
   }
 
-  Future<void> _retrieve() async {
-    if (!mounted || _isFetching) {
+  Future<void> _retrieve({bool openRegistrationOnFailure = true}) async {
+    if (!mounted || _isFetching || _isOpeningRegistration) {
       if (_isFetching) {
         _debugLog('event=retrieve_ignored reason=already_running');
       }
@@ -274,6 +280,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
     }
 
     final String mode = _pdfData == null ? 'initial' : 'regenerate';
+    bool needsRegistration = false;
     _debugLog('event=retrieve_start mode=$mode');
     _isFetching = true;
     if (mounted) {
@@ -331,6 +338,8 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
         'status=${error.statusCode ?? 'none'}',
       );
       _handleRetrievalFailure(_messageFor(error.kind));
+      needsRegistration =
+          error.kind == EnrollmentCertificateExceptionKind.registrationRequired;
     } catch (error) {
       _debugLog(
         'event=retrieve_failure kind=unexpected '
@@ -340,6 +349,34 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
     } finally {
       _isFetching = false;
       _debugLog('event=retrieve_end mode=$mode');
+    }
+    if (mounted && needsRegistration && openRegistrationOnFailure) {
+      await _openRegistration();
+    }
+  }
+
+  Future<void> _openRegistration() async {
+    if (!mounted || _isOpeningRegistration) return;
+    setState(() => _isOpeningRegistration = true);
+    bool retry = false;
+    try {
+      retry =
+          await Navigator.of(context).push<bool>(
+            MaterialPageRoute<bool>(
+              fullscreenDialog: true,
+              builder:
+                  widget.registrationPageBuilder ??
+                  (_) => const EnrollmentRegistrationPage(),
+            ),
+          ) ??
+          false;
+    } finally {
+      if (mounted) setState(() => _isOpeningRegistration = false);
+    }
+    if (mounted && retry) {
+      // A still-blocked response remains visible instead of reopening the
+      // window in a loop. The student can retry manually when ready.
+      await _retrieve(openRegistrationOnFailure: false);
     }
   }
 
@@ -432,6 +469,8 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
         app.enrollCertificate.missingCredentials,
       EnrollmentCertificateExceptionKind.timeout =>
         app.enrollCertificate.requestTimedOut,
+      EnrollmentCertificateExceptionKind.registrationRequired =>
+        app.enrollCertificate.registrationRequired,
       EnrollmentCertificateExceptionKind.tooLarge ||
       EnrollmentCertificateExceptionKind.invalidPdf =>
         app.enrollCertificate.invalidResponse,
