@@ -86,6 +86,7 @@
     "openBrowserFailed": "ブラウザーを開けませんでした。もう一度お試しください。",
     "registrationTitle": "オンライン学籍登録",
     "registrationRequired": "大学から在学証明書が発行されませんでした。学籍登録システムで必要事項を確認・入力してから再取得してください。",
+    "registrationSessionUnavailable": "以前の学籍登録セッションを安全に削除できませんでした。アカウントを保護するため、このページを閉じて再試行するか、外部ブラウザーを使用してください。",
     "registrationComplete": "入力を完了して再取得"
   }
 }

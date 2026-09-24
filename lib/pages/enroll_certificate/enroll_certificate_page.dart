@@ -455,7 +455,7 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
     if (reader != null) {
       return reader(username: _username);
     }
-    if (semesterCode == null) return Future<Uint8List?>.value();
+    if (semesterCode == null) return _cache.read();
     return _cache.read(semesterCode: semesterCode);
   }
 

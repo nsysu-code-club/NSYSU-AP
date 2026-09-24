@@ -86,6 +86,7 @@
     "openBrowserFailed": "Could not open the browser. Please try again.",
     "registrationTitle": "Online Registration",
     "registrationRequired": "The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.",
+    "registrationSessionUnavailable": "The previous registration session could not be cleared safely. To protect your account, close this page and try again, or use an external browser.",
     "registrationComplete": "Finished — Retrieve Again"
   }
 }

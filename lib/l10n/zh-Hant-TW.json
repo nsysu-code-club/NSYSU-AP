@@ -86,6 +86,7 @@
     "openBrowserFailed": "無法開啟瀏覽器，請再試一次。",
     "registrationTitle": "網路註冊",
     "registrationRequired": "校方未提供在學證明。請在註冊系統確認並補填必要資料，完成後再重新提取。",
+    "registrationSessionUnavailable": "無法安全地清除先前的註冊系統工作階段。為保護帳號資料，請關閉此頁後再試一次，或改用外部瀏覽器。",
     "registrationComplete": "完成填寫，重新提取"
   }
 }

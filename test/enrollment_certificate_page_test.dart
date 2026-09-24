@@ -341,7 +341,7 @@ void main() {
           }
         }
       });
-      expect(requests, scenario == 'current' ? 0 : 1);
+      expect(requests, scenario == 'current' || scenario == 'unknown' ? 0 : 1);
       if (scenario == 'failed') {
         expect(displayed, isNull);
         expect(find.text(app.enrollCertificate.requestFailed), findsOneWidget);
@@ -355,7 +355,10 @@ void main() {
         );
         return;
       }
-      expect(displayed, scenario == 'current' ? oldPdf : freshPdf);
+      expect(
+        displayed,
+        scenario == 'current' || scenario == 'unknown' ? oldPdf : freshPdf,
+      );
       if (currentCode != null) {
         expect(
           await tester.runAsync(() => cache.read(semesterCode: currentCode)),

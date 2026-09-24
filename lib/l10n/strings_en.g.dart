@@ -135,6 +135,7 @@ class _AppLocalizationsEnrollCertificateEn extends AppLocalizationsEnrollCertifi
 	@override String get openBrowserFailed => 'Could not open the browser. Please try again.';
 	@override String get registrationTitle => 'Online Registration';
 	@override String get registrationRequired => 'The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.';
+	@override String get registrationSessionUnavailable => 'The previous registration session could not be cleared safely. To protect your account, close this page and try again, or use an external browser.';
 	@override String get registrationComplete => 'Finished — Retrieve Again';
 }
 
@@ -232,6 +233,7 @@ extension on AppLocalizationsEn {
 			'enrollCertificate.openBrowserFailed' => 'Could not open the browser. Please try again.',
 			'enrollCertificate.registrationTitle' => 'Online Registration',
 			'enrollCertificate.registrationRequired' => 'The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.',
+			'enrollCertificate.registrationSessionUnavailable' => 'The previous registration session could not be cleared safely. To protect your account, close this page and try again, or use an external browser.',
 			'enrollCertificate.registrationComplete' => 'Finished — Retrieve Again',
 			_ => null,
 		};

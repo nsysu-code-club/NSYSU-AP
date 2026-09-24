@@ -135,6 +135,7 @@ class _AppLocalizationsEnrollCertificateJa extends AppLocalizationsEnrollCertifi
 	@override String get openBrowserFailed => 'ブラウザーを開けませんでした。もう一度お試しください。';
 	@override String get registrationTitle => 'オンライン学籍登録';
 	@override String get registrationRequired => '大学から在学証明書が発行されませんでした。学籍登録システムで必要事項を確認・入力してから再取得してください。';
+	@override String get registrationSessionUnavailable => '以前の学籍登録セッションを安全に削除できませんでした。アカウントを保護するため、このページを閉じて再試行するか、外部ブラウザーを使用してください。';
 	@override String get registrationComplete => '入力を完了して再取得';
 }
 
@@ -232,6 +233,7 @@ extension on AppLocalizationsJa {
 			'enrollCertificate.openBrowserFailed' => 'ブラウザーを開けませんでした。もう一度お試しください。',
 			'enrollCertificate.registrationTitle' => 'オンライン学籍登録',
 			'enrollCertificate.registrationRequired' => '大学から在学証明書が発行されませんでした。学籍登録システムで必要事項を確認・入力してから再取得してください。',
+			'enrollCertificate.registrationSessionUnavailable' => '以前の学籍登録セッションを安全に削除できませんでした。アカウントを保護するため、このページを閉じて再試行するか、外部ブラウザーを使用してください。',
 			'enrollCertificate.registrationComplete' => '入力を完了して再取得',
 			_ => null,
 		};

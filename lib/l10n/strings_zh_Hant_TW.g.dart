@@ -310,6 +310,9 @@ class AppLocalizationsEnrollCertificateZhHantTw {
 	/// zh-Hant-TW: '校方未提供在學證明。請在註冊系統確認並補填必要資料，完成後再重新提取。'
 	String get registrationRequired => '校方未提供在學證明。請在註冊系統確認並補填必要資料，完成後再重新提取。';
 
+	/// zh-Hant-TW: '無法安全地清除先前的註冊系統工作階段。為保護帳號資料，請關閉此頁後再試一次，或改用外部瀏覽器。'
+	String get registrationSessionUnavailable => '無法安全地清除先前的註冊系統工作階段。為保護帳號資料，請關閉此頁後再試一次，或改用外部瀏覽器。';
+
 	/// zh-Hant-TW: '完成填寫，重新提取'
 	String get registrationComplete => '完成填寫，重新提取';
 }
@@ -408,6 +411,7 @@ extension on AppLocalizations {
 			'enrollCertificate.openBrowserFailed' => '無法開啟瀏覽器，請再試一次。',
 			'enrollCertificate.registrationTitle' => '網路註冊',
 			'enrollCertificate.registrationRequired' => '校方未提供在學證明。請在註冊系統確認並補填必要資料，完成後再重新提取。',
+			'enrollCertificate.registrationSessionUnavailable' => '無法安全地清除先前的註冊系統工作階段。為保護帳號資料，請關閉此頁後再試一次，或改用外部瀏覽器。',
 			'enrollCertificate.registrationComplete' => '完成填寫，重新提取',
 			_ => null,
 		};

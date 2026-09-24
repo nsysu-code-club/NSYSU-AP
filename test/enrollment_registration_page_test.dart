@@ -84,6 +84,44 @@ void main() {
     expect(manager.hasSession, isTrue);
   });
 
+  for (final bool throws in <bool>[false, true]) {
+    final String outcome = throws ? 'throws' : 'fails';
+    testWidgets('blocks credential login when cookie deletion $outcome', (
+      WidgetTester tester,
+    ) async {
+      final _TestCookieManager manager = _TestCookieManager(
+        failDeletePath: '/',
+        throwOnDeleteFailure: throws,
+      );
+      URLRequest? opened;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EnrollmentRegistrationPage(
+            username: 'B123456789',
+            password: 'secret',
+            cookieManager: manager,
+            webViewBuilder: (_, URLRequest request, _) {
+              opened = request;
+              return const Text('Unsafe web view');
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(opened, isNull);
+      expect(manager.writes, isEmpty);
+      expect(
+        manager.deletedPaths,
+        containsAll(<String>['/', '/webreg', '/webreg/']),
+      );
+      expect(
+        find.text(app.enrollCertificate.registrationSessionUnavailable),
+        findsOneWidget,
+      );
+    });
+  }
+
   testWidgets('keeps native navigation payloads out of debug logs', (
     WidgetTester tester,
   ) async {
@@ -358,12 +396,14 @@ class _TestCookieManager extends Fake implements CookieManager {
     this.result = true,
     this.shouldThrow = false,
     this.failDeletePath,
+    this.throwOnDeleteFailure = true,
   });
 
   final Completer<bool>? write;
   final bool result;
   final bool shouldThrow;
   final String? failDeletePath;
+  final bool throwOnDeleteFailure;
   bool hasSession = false;
   final List<String> deletedPaths = <String>[];
   final List<String> origins = <String>[];
@@ -379,7 +419,10 @@ class _TestCookieManager extends Fake implements CookieManager {
   }) async {
     origins.add(url.host);
     deletedPaths.add(path);
-    if (path == failDeletePath) throw StateError('Cookie deletion failed');
+    if (path == failDeletePath) {
+      if (throwOnDeleteFailure) throw StateError('Cookie deletion failed');
+      return false;
+    }
     hasSession = false;
     return true;
   }

@@ -62,6 +62,7 @@ class _EnrollmentRegistrationPageState
   double _progress = 0;
   URLRequest? _initialRequest;
   bool _loginNavigationPending = false;
+  bool _preparationFailed = false;
   late final EnrollmentCertificateSession _session;
   Future<void>? _preparing;
   InAppWebViewController? _controller;
@@ -133,13 +134,20 @@ class _EnrollmentRegistrationPageState
   }
 
   Future<void> _prepareSession() async {
-    final bool synchronized = await _synchronizeCookies();
+    final ({bool cleared, bool imported}) synchronization =
+        await _synchronizeCookies();
     if (!_isActive) return;
     final String username = widget.username.trim();
-    final bool canLogin = username.isNotEmpty && widget.password.isNotEmpty;
+    final bool canLogin =
+        synchronization.cleared &&
+        username.isNotEmpty &&
+        widget.password.isNotEmpty;
     setState(() {
+      _preparationFailed = !synchronization.cleared;
       _loginNavigationPending = canLogin;
-      _initialRequest = canLogin
+      _initialRequest = _preparationFailed
+          ? null
+          : canLogin
           ? URLRequest(
               url: WebUri.uri(EnrollmentCertificateHelper.registrationLoginUri),
               method: 'POST',
@@ -159,7 +167,7 @@ class _EnrollmentRegistrationPageState
             )
           : URLRequest(
               url: WebUri.uri(
-                synchronized
+                synchronization.imported
                     ? EnrollmentCertificateHelper.registrationSessionUri
                     : EnrollmentCertificateHelper.registrationUri,
               ),
@@ -205,32 +213,46 @@ class _EnrollmentRegistrationPageState
     }
   }
 
-  Future<bool> _synchronizeCookies() => RegistrationCookieStore.run(() async {
+  Future<({bool cleared, bool imported})>
+  _synchronizeCookies() => RegistrationCookieStore.run(() async {
+    final CookieManager manager;
     try {
-      final CookieManager manager =
-          widget.cookieManager ?? CookieManager.instance();
-      final WebUri url = WebUri.uri(
-        EnrollmentCertificateHelper.registrationSessionUri,
-      );
-      // Clear only this origin's relevant paths so a prior account's ASP
-      // session cannot compete with the current request. Other hosts are kept.
-      final Set<String> paths = <String>{
-        '/',
-        '/webreg',
-        '/webreg/',
-        ...widget.registrationCookies.map(
-          (io.Cookie cookie) => cookie.path ?? '/webreg',
-        ),
-      };
-      RegistrationCookieStore.paths.addAll(paths);
-      for (final String path in paths) {
-        if (!_isActive || !await manager.deleteCookies(url: url, path: path)) {
-          return false;
+      manager = widget.cookieManager ?? CookieManager.instance();
+    } catch (_) {
+      return (cleared: false, imported: false);
+    }
+    final WebUri url = WebUri.uri(
+      EnrollmentCertificateHelper.registrationSessionUri,
+    );
+    // Clear only this origin's relevant paths so a prior account's ASP
+    // session cannot compete with the current request. Other hosts are kept.
+    final Set<String> paths = <String>{
+      '/',
+      '/webreg',
+      '/webreg/',
+      ...widget.registrationCookies.map(
+        (io.Cookie cookie) => cookie.path ?? '/webreg',
+      ),
+    };
+    RegistrationCookieStore.paths.addAll(paths);
+    bool cleared = true;
+    for (final String path in paths) {
+      if (!_isActive) return (cleared: false, imported: false);
+      try {
+        if (!await manager.deleteCookies(url: url, path: path)) {
+          cleared = false;
         }
+      } catch (_) {
+        cleared = false;
       }
-      for (final io.Cookie cookie in widget.registrationCookies) {
-        if (!_isActive) return false;
-        if (cookie.expires?.isBefore(DateTime.now()) ?? false) return false;
+    }
+    if (!cleared) return (cleared: false, imported: false);
+    for (final io.Cookie cookie in widget.registrationCookies) {
+      if (!_isActive) return (cleared: false, imported: false);
+      if (cookie.expires?.isBefore(DateTime.now()) ?? false) {
+        return (cleared: true, imported: false);
+      }
+      try {
         final bool saved = await manager.setCookie(
           url: url,
           name: cookie.name,
@@ -243,14 +265,14 @@ class _EnrollmentRegistrationPageState
           expiresDate: cookie.expires?.millisecondsSinceEpoch,
           maxAge: cookie.maxAge,
         );
-        if (!saved) return false;
+        if (!saved) return (cleared: true, imported: false);
+      } catch (_) {
+        // The old session is gone, so a credential login remains isolated even
+        // if the current request's session cookie could not be imported.
+        return (cleared: true, imported: false);
       }
-      return widget.registrationCookies.isNotEmpty;
-    } catch (_) {
-      // A native cookie-store failure must still leave manual login usable.
-      // Cookie values and platform errors may contain secrets; do not log them.
-      return false;
     }
+    return (cleared: true, imported: widget.registrationCookies.isNotEmpty);
   });
 
   @override
@@ -299,6 +321,17 @@ class _EnrollmentRegistrationPageState
     if (_session.isCancelled) return const SizedBox.shrink();
     final URLRequest? initialRequest = _initialRequest;
     if (initialRequest == null) {
+      if (_preparationFailed) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              app.enrollCertificate.registrationSessionUnavailable,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      }
       return const Center(child: CircularProgressIndicator());
     }
     final EnrollmentRegistrationWebViewBuilder? builder = widget.webViewBuilder;
