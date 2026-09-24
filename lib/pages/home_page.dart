@@ -322,9 +322,6 @@ class HomePageState extends State<HomePage> {
       if (!mounted) return;
       ShareDataWidget.of(context)!.data.isLogin = true;
       ShareDataWidget.of(context)!.data.getUserInfo();
-      // Same as the auto-login path in _login(): logout cleared courseData, so
-      // re-read the cache or the card stays on "not loaded".
-      _loadCourseData();
       _homeKey.currentState!.hideSnackBar();
     } else {
       _checkLoginState();
@@ -427,9 +424,6 @@ class HomePageState extends State<HomePage> {
                   Constants.prefAutoLogin,
                   false,
                 );
-                // Timetable caches are keyed by semester only, not by account;
-                // clear them so the next login cannot see this user's courses.
-                await Utils.clearCourseCache(PreferenceUtil.instance);
                 SelcrsHelper.instance.logout();
                 GraduationHelper.instance.logout();
                 TuitionHelper.instance.logout();

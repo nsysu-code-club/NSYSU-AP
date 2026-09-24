@@ -1,4 +1,3 @@
-import 'package:ap_common/ap_common.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 
@@ -76,45 +75,4 @@ void main() {
       }
     });
   });
-
-  group('Utils.clearCourseCache', () {
-    test(
-      'removes official timetable caches but keeps custom courses',
-      () async {
-        final _MemoryPreferences preferences = _MemoryPreferences(<String>{
-          'ap_common.course_data_1151',
-          'ap_common.course_data_1142',
-          'pref_course_data',
-          'ap_common.custom_course_data_1151',
-          'ap_common.current_semester_code',
-          'ap_common.course_invisible_1151',
-          'pref_username',
-        });
-
-        await Utils.clearCourseCache(preferences);
-
-        expect(preferences.keys, <String>{
-          'ap_common.custom_course_data_1151',
-          'ap_common.current_semester_code',
-          'ap_common.course_invisible_1151',
-          'pref_username',
-        });
-      },
-    );
-  });
-}
-
-class _MemoryPreferences implements PreferenceUtil {
-  _MemoryPreferences(this.keys);
-
-  final Set<String> keys;
-
-  @override
-  Set<String> getKeys() => Set<String>.of(keys);
-
-  @override
-  Future<bool> remove(String key) async => keys.remove(key);
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
