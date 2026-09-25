@@ -42,6 +42,7 @@ dependencies:
   json_annotation: ^4.6.0
   package_info_plus: ^8.0.3
   printing: 5.13.4
+  icalendar_parser: ^2.1.0
 
 dev_dependencies:
   flutter_test:
