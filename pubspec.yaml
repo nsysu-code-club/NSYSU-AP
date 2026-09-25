@@ -32,7 +32,7 @@ dependencies:
   encrypt: ^5.0.0
   sprintf: ^7.0.0
   crypto: ^3.0.1
-  dio: ^5.0.0
+  dio: ^5.11.1
   dio_cookie_manager: ^3.0.0
   cookie_jar: ^4.0.3
   flutter_inappwebview: ^6.1.5
