@@ -42,7 +42,7 @@ dependencies:
   json_annotation: ^4.6.0
   package_info_plus: ^8.0.3
   path_provider: ^2.1.5
-  printing: 5.13.4
+  printing: 5.15.1
 
 dev_dependencies:
   flutter_test:
