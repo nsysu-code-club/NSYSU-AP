@@ -36,7 +36,7 @@ dependencies:
   dio_cookie_manager: ^3.0.0
   cookie_jar: ^4.0.3
   flutter_inappwebview: ^6.1.5
-  desktop_webview_window: ^0.2.3
+  desktop_webview_window: ^0.3.0
   timeago: ^3.0.2
   google_sign_in_dartio: ^0.3.0
   json_annotation: ^4.6.0
