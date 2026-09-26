@@ -385,7 +385,7 @@ void main() {
   });
 
   test(
-    'empty and unsupported system locales resolve to the existing fallback',
+    'empty and unsupported system locales consistently resolve to English',
     () async {
       final _RecordingAnalytics analytics = _RecordingAnalytics();
       final AppLocaleController controller = AppLocaleController(
@@ -397,43 +397,48 @@ void main() {
       await controller.initialize();
       expect(controller.locale, const Locale('en'));
       expect(LocaleSettings.currentLocale, AppLocale.en);
-      await controller.handleDeviceLocalesChanged(<Locale>[const Locale('fr')]);
-      expect(controller.locale, const Locale('en'));
-      expect(LocaleSettings.currentLocale, AppLocale.en);
-      expect(analytics.values, <String>['en', 'en']);
+      for (final Locale unsupported in <Locale>[
+        const Locale('fr'),
+        const Locale('fr', 'FR'),
+        const Locale('fr', 'TW'),
+      ]) {
+        await controller.handleDeviceLocalesChanged(<Locale>[unsupported]);
+        expect(controller.locale, const Locale('en'));
+        expect(LocaleSettings.currentLocale, AppLocale.en);
+        expect(ap_l10n.LocaleSettings.currentLocale, ap_l10n.AppLocale.en);
+        expect(ap_l10n.Intl.defaultLocale, 'en');
+      }
+      expect(analytics.values, <String>['en', 'en', 'en', 'en']);
     },
   );
 
   test(
-    'production parser supports Japanese and retains unsupported fallback',
+    'both translation packages use Japanese or an explicit English fallback',
     () async {
       for (final Locale requested in <Locale>[
         const Locale('ja'),
         const Locale('fr'),
         const Locale('ja', 'JP'),
         const Locale('fr', 'FR'),
+        const Locale('fr', 'TW'),
+        const Locale('fr', 'JP'),
+        const Locale.fromSubtags(languageCode: 'fr', scriptCode: 'Hant'),
       ]) {
-        // This is the parser used by the previous _initLocale/loadLocale paths.
-        // An unmatched language with a null country matches English's null
-        // country; a nonmatching country falls back to the app's base Chinese.
-        final AppLocale previousAppLocale = AppLocaleUtils.instance
-            .parseLocaleParts(
-              languageCode: requested.languageCode,
-              scriptCode: requested.scriptCode,
-              countryCode: requested.countryCode,
-            );
-        expect(
-          previousAppLocale,
-          requested.languageCode == 'ja'
-              ? AppLocale.ja
-              : requested.countryCode == null
-              ? AppLocale.en
-              : AppLocale.zhHantTw,
+        final bool isJapanese = requested.languageCode == 'ja';
+        final Locale resolved = await AppLocaleController.applyAppLocale(
+          requested,
         );
 
-        await AppLocaleController.applyAppLocale(requested);
-
-        expect(LocaleSettings.currentLocale, previousAppLocale);
+        expect(resolved, Locale(isJapanese ? 'ja' : 'en'));
+        expect(
+          LocaleSettings.currentLocale,
+          isJapanese ? AppLocale.ja : AppLocale.en,
+        );
+        expect(
+          ap_l10n.LocaleSettings.currentLocale,
+          isJapanese ? ap_l10n.AppLocale.ja : ap_l10n.AppLocale.en,
+        );
+        expect(ap_l10n.Intl.defaultLocale, isJapanese ? 'ja' : 'en');
         expect(LocaleSettings.instance.listenToDeviceLocale, isFalse);
         expect(ap_l10n.LocaleSettings.instance.listenToDeviceLocale, isFalse);
       }

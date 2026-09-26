@@ -135,8 +135,7 @@ class AppLocaleController {
           (ap_l10n.AppLocale supported) =>
               supported.languageCode == locale.languageCode,
         ),
-        orElse: () =>
-            deviceLocales.isEmpty ? const Locale('en') : deviceLocales.first,
+        orElse: () => const Locale('en'),
       );
     }
     return Locale(code, code == ApSupportLanguageConstants.zh ? 'TW' : null);
@@ -144,18 +143,25 @@ class AppLocaleController {
 
   /// Keeps both translation packages ready before exposing the selected locale.
   static Future<Locale> applyAppLocale(Locale locale) async {
+    // Resolve unsupported languages explicitly, regardless of region or script.
+    final Locale supportedLocale =
+        ap_l10n.AppLocale.values.any(
+          (ap_l10n.AppLocale supported) =>
+              supported.languageCode == locale.languageCode,
+        )
+        ? locale
+        : const Locale('en');
     final ap_l10n.AppLocale commonLocale = await ap_l10n.setApLocaleFromFlutter(
-      locale,
+      supportedLocale,
     );
     final AppLocale appLocale = AppLocaleUtils.instance.parseLocaleParts(
-      languageCode: locale.languageCode,
-      scriptCode: locale.scriptCode,
-      countryCode: locale.countryCode,
+      languageCode: commonLocale.languageCode,
+      scriptCode: commonLocale.scriptCode,
+      countryCode: commonLocale.countryCode,
     );
     // Both setters disable device listeners by default; the app owns updates.
     await LocaleSettings.setLocale(appLocale);
-    // Slang shares global state across packages. Preserve the resolved common
-    // locale here, including Japanese when the app translations fall back.
+    // Use the same resolved locale for the controller and Analytics.
     return commonLocale.flutterLocale;
   }
 

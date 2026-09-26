@@ -2,6 +2,7 @@ include: package:lint/strict.yaml
 
 analyzer:
   exclude:
+    - '**/vendor/bundle/**'
     - lib/generated_plugin_registrant.dart
     - lib/l10n/intl/*.dart
     - lib/firebase_options.dart
