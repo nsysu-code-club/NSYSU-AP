@@ -744,6 +744,8 @@ void main() {
         <DioExceptionType, EnrollmentCertificateExceptionKind>{
           DioExceptionType.connectionTimeout:
               EnrollmentCertificateExceptionKind.timeout,
+          DioExceptionType.transformTimeout:
+              EnrollmentCertificateExceptionKind.timeout,
           DioExceptionType.cancel: EnrollmentCertificateExceptionKind.cancelled,
           DioExceptionType.connectionError:
               EnrollmentCertificateExceptionKind.network,
@@ -967,6 +969,11 @@ class _Reply {
         throw DioException.connectionTimeout(
           timeout: const Duration(seconds: 30),
           requestOptions: options,
+        );
+      case DioExceptionType.transformTimeout:
+        throw DioException(
+          requestOptions: options,
+          type: DioExceptionType.transformTimeout,
         );
       case DioExceptionType.cancel:
         throw DioException.requestCancelled(
