@@ -12,6 +12,8 @@ on:
       - 'test/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
+      - 'Gemfile'
+      - 'Gemfile.lock'
       - 'android/**'
       - 'ios/**'
       - 'macos/**'
@@ -29,6 +31,8 @@ on:
       - 'test/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
+      - 'Gemfile'
+      - 'Gemfile.lock'
       - 'android/**'
       - 'ios/**'
       - 'macos/**'
@@ -96,6 +100,8 @@ jobs:
     name: Build iOS App
     needs: analyze_and_test
     runs-on: [self-hosted, macOS]
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/Gemfile
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -113,8 +119,15 @@ jobs:
       - name: Flutter Initialize
         run: flutter doctor -v
       - run: flutter pub get
+      - name: Setup Ruby
+        run: echo "/opt/homebrew/opt/ruby/bin" >> "$GITHUB_PATH"
+      - name: Install CocoaPods
+        run: |
+          bundle config set --local path vendor/bundle
+          bundle install
+          bundle exec pod --version
       - name: Build iOS
-        run: flutter build ios --release --no-codesign
+        run: bundle exec flutter build ios --release --no-codesign
 
   build_windows:
     name: Build Windows App

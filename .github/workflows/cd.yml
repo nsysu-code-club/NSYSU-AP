@@ -163,10 +163,10 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Flutter Initialize
         run: flutter doctor -v
+      # ruby/setup-ruby prebuilt Rubies are hardcoded to /Users/runner/hostedtoolcache on macOS,
+      # which is not writable on this self-hosted runner, so use the preinstalled Homebrew Ruby.
       - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
+        run: echo "/opt/homebrew/opt/ruby/bin" >> "$GITHUB_PATH"
       - name: Install Ruby dependencies
         run: |
           bundle config set path vendor/bundle
@@ -178,7 +178,16 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$HOME/Library/Keychains/login.keychain-db"
         env:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-      - run: flutter build ipa --release --build-number=${{ needs.prepare.outputs.version_code }}
+      - name: Install CocoaPods
+        run: |
+          bundle config set --local path vendor/bundle
+          bundle install
+          bundle exec pod --version
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/Gemfile
+      - run: bundle exec flutter build ipa --release --build-number=${{ needs.prepare.outputs.version_code }}
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/Gemfile
       - name: Zip dSYM
         run: zip Runner.app.dSYM.zip -r ../archive/Runner.xcarchive/dSYMs/
         working-directory: ./build/ios/ipa

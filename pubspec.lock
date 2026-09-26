@@ -68,10 +68,9 @@ packages:
   ap_common_flutter_core:
     dependency: "direct main"
     description:
-      name: ap_common_flutter_core
-      sha256: "88bd91948263cf9d346cbe4d02d3eda61f4ce0354989835e48f68f1a49e5ca8e"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../ap_common/packages/ap_common_flutter_core"
+      relative: true
+    source: path
     version: "1.1.0-dev.15"
   ap_common_flutter_platform:
     dependency: transitive
@@ -365,18 +364,18 @@ packages:
     dependency: "direct main"
     description:
       name: desktop_webview_window
-      sha256: "57cf20d81689d5cbb1adfd0017e96b669398a669d927906073b0e42fc64111c0"
+      sha256: b6fdae2cbf9571879b1761c12f27facaf82e22d0bdc74d049907c2a09a432957
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.3"
+    version: "0.3.0"
   dio:
     dependency: "direct main"
     description:
       name: dio
-      sha256: b9d46faecab38fc8cc286f80bc4d61a3bb5d4ac49e51ed877b4d6706efe57b25
+      sha256: "852ec3b48cc431ac04fff978413c541502b67ffc3e26921e74e3d994694192c1"
       url: "https://pub.dev"
     source: hosted
-    version: "5.9.1"
+    version: "5.11.1"
   dio_cookie_manager:
     dependency: "direct main"
     description:
@@ -1517,26 +1516,26 @@ packages:
     dependency: "direct main"
     description:
       name: slang
-      sha256: ea6702ed6b1c82065fb2de906fe34ac9298117342e3c2ea2567132efdc81bd17
+      sha256: "6091c2b4cd9f663080ede24fde6bcb9ee43f9fad1f9eaa66e2801eee47684e24"
       url: "https://pub.dev"
     source: hosted
-    version: "4.14.0"
+    version: "4.19.2"
   slang_build_runner:
     dependency: "direct dev"
     description:
       name: slang_build_runner
-      sha256: "1db59254041026aec97df5aca30a602e09e9d1546c3d16b55c3c7cf4c16cdb6c"
+      sha256: f2b6c5fc1f5bc41de80b05e95e7d5d03b5c3041082877ce931fc7ba61cd08afe
       url: "https://pub.dev"
     source: hosted
-    version: "4.14.0"
+    version: "4.19.0"
   slang_flutter:
     dependency: "direct main"
     description:
       name: slang_flutter
-      sha256: dcc4e77527c91b12348fc8bdd43d3eb92d8cea37c12a23a1f9719cdc12c804c6
+      sha256: "2348a39432c48d7c890a2a1e3409b9faae3e49f117fe56d390d4236de8d064f4"
       url: "https://pub.dev"
     source: hosted
-    version: "4.14.0"
+    version: "4.19.0"
   source_gen:
     dependency: transitive
     description:

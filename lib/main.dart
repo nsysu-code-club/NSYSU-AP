@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ap_common/ap_common.dart';
 import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:ap_common_plugin/ap_common_plugin.dart';
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,8 +22,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // WebView title bars run in a separate engine without the app's plugins.
+  if (runWebViewTitleBarWidget(args)) return;
 
   final ByteData data = await PlatformAssetBundle().load(
     'assets/ca/twca_nsysu.cer',
