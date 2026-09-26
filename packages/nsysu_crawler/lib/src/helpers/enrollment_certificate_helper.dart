@@ -828,6 +828,7 @@ class EnrollmentCertificateHelper {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
+      case DioExceptionType.transformTimeout:
         return EnrollmentCertificateException(
           EnrollmentCertificateExceptionKind.timeout,
           'The RegWeb request timed out.',

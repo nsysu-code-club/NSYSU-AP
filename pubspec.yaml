@@ -58,6 +58,10 @@ dependency_overrides:
   web: 0.5.1
   google_sign_in: 6.2.1
   google_sign_in_ios: 5.7.6
+  # Temporary Dio 5.11.1 compatibility fix; see README local setup.
+  # Remove after upgrading to a released package containing the fix.
+  ap_common_flutter_core:
+    path: ../ap_common/packages/ap_common_flutter_core
 
 flutter:
 

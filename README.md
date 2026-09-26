@@ -17,6 +17,33 @@
 ## 開發環境
  - Flutter 穩定版本 v3.44.8
 
+### 暫時使用本機 ap_common（僅限 chore/devops-and-deps-update 分支）
+
+**只有在 `chore/devops-and-deps-update` 分支進行開發時，才需要依照本節設定暫時的本機方案。其他分支可直接使用 `pubspec.yaml` 安裝依賴。本異常將最晚在2.2.X修正**
+
+此開發分支的 `pubspec.yaml` 透過 `dependency_overrides` 使用本機的 `ap_common_flutter_core`，以修正 Dio 5.11.1 新增 `DioExceptionType.transformTimeout` 所造成的編譯錯誤。請將包含此修正的 `ap_common` checkout 放在本專案的同層目錄：
+
+```text
+工作目錄/
+├── NSYSU-AP/
+└── ap_common/
+    └── packages/ap_common_flutter_core/
+```
+
+共用套件必須包含以下修正：`lib/src/l10n/ap_localizations.dart` 的 `i18nMessage` 將 `DioExceptionType.transformTimeout` 歸類為 `ap.timeoutMessage`，且套件的 `pubspec.yaml` 將 Dio 最低版本提高至 `^5.11.1`。僅取得尚未包含修正的 checkout 仍會編譯失敗；共用套件的變更需在 `ap_common` repository 另行提交並分享。
+
+在 `NSYSU-AP` 根目錄執行：
+
+```bash
+fvm flutter pub get
+```
+
+此設定已直接寫入 `pubspec.yaml`，不需要另建 `pubspec_overrides.yaml`。此分支的 CI 若只 checkout 本專案，會因缺少相鄰的 `ap_common` 目錄而無法解析依賴；使用此暫時方案的建置環境也必須準備相同目錄及修正版本。
+
+待共用套件發布修正版後，請更新 `dependencies.ap_common_flutter_core`、移除該套件的 path override，再執行 `fvm flutter pub get` 並提交更新的 `pubspec.lock`。
+
+### iOS / macOS 工具鏈
+
 iOS 與 macOS 的 CocoaPods 由根目錄的 `Gemfile`／`Gemfile.lock` 固定為 **1.17.0**。在專案根目錄透過 Bundler 啟動 Flutter，讓 Flutter 呼叫的 `pod` 使用固定版本：
 
 ```bash
