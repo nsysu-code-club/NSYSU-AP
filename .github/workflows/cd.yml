@@ -178,7 +178,16 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$HOME/Library/Keychains/login.keychain-db"
         env:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-      - run: flutter build ipa --release --build-number=${{ needs.prepare.outputs.version_code }}
+      - name: Install CocoaPods
+        run: |
+          bundle config set --local path vendor/bundle
+          bundle install
+          bundle exec pod --version
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/Gemfile
+      - run: bundle exec flutter build ipa --release --build-number=${{ needs.prepare.outputs.version_code }}
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/Gemfile
       - name: Zip dSYM
         run: zip Runner.app.dSYM.zip -r ../archive/Runner.xcarchive/dSYMs/
         working-directory: ./build/ios/ipa
