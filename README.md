@@ -17,6 +17,19 @@
 ## 開發環境
  - Flutter 穩定版本 v3.44.8
 
+iOS 與 macOS 的 CocoaPods 由根目錄的 `Gemfile`／`Gemfile.lock` 固定為 **1.17.0**。在專案根目錄透過 Bundler 啟動 Flutter，讓 Flutter 呼叫的 `pod` 使用固定版本：
+
+```bash
+export PATH="/opt/homebrew/opt/ruby/bin:$PATH" # Apple Silicon / Homebrew Ruby
+export BUNDLE_GEMFILE="$PWD/Gemfile"
+bundle config set --local path vendor/bundle
+bundle install
+bundle exec pod --version # 1.17.0
+bundle exec fvm flutter run -d macos
+```
+
+iOS 同樣使用 `bundle exec fvm flutter build ios`。直接執行 `fvm flutter` 仍會使用環境中的 CocoaPods；`Podfile.lock` 的 `COCOAPODS` 欄位不會替你切換工具版本。執行既有的 Fastlane 流程時，請另外指定平台的 `BUNDLE_GEMFILE`（例如 `"$PWD/ios/Gemfile"`）。
+
 第一次設定本機開發環境時，建議安裝專案提供的 pre-commit hook：
 
 ```bash
