@@ -933,6 +933,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  icalendar_parser:
+    dependency: "direct main"
+    description:
+      name: icalendar_parser
+      sha256: "107f936d286723346660df88191888562fc44c2def46ed8858a301a4777ad821"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   image:
     dependency: transitive
     description:
@@ -1229,7 +1237,7 @@ packages:
     source: hosted
     version: "1.1.0"
   path_provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path_provider
       sha256: "50c5dd5b6e1aaf6fb3a78b33f6aa3afca52bf903a8a5298f53101fdaee55bbcd"

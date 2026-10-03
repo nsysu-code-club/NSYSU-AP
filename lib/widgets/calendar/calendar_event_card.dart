@@ -13,8 +13,7 @@ class CalendarEventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final String startStr = CalendarParsing.formatEventDate(event.dtstart);
-    final String endStr = CalendarParsing.formatEventDate(event.dtend);
+    final String dateDisplay = CalendarParsing.formatEventDisplayDate(event);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -76,7 +75,7 @@ class CalendarEventCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          '$startStr ~ $endStr',
+                          dateDisplay,
                           style: TextStyle(
                             color: colorScheme.onSurfaceVariant,
                             fontSize: 13,

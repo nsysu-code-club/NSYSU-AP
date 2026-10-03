@@ -12,9 +12,6 @@ class Constants {
   static final Key key = Key.fromUtf8('l9r1W3wcsnJTayxCXwoFt62w1i4sQ5J9');
   static final IV iv = IV.fromUtf8('auc9OV5r0nLwjCAH');
 
-  static const String defaultYear = '109';
-  static const String defaultSemester = '1';
-
   static const String courseSelectorUrl =
       'https://nsysu-opendev.github.io/NSYSUCourseSelectorV6/';
 

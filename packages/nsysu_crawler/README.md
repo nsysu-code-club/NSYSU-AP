@@ -17,13 +17,14 @@ second native client without dragging Flutter SDK dependencies along.
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 ```
 
-### 4 個 helper（皆為 singleton，透過 `.instance` 取用）
+### 5 個 helper
 
 | Helper | 主要方法 | 是否需登入 |
 |---|---|---|
 | `SelcrsHelper` | `login`, `getUserInfo`, `getCourseSemesterData`, `getCourseData`, `getScoreSemesterData`, `getScoreData`, `changeMail`, `getUsername`,`getPreScoreData` | ✅ |
 | `GraduationHelper` | `login`, `getGraduationReport` | ✅（獨立 session）|
 | `TuitionHelper` | `login`, `getData`, `downloadFdf` | ✅（明文密碼，學校系統限制）|
+| `EnrollmentCertificateHelper` | `download` | ✅（RegWeb 獨立 session；每次下載建立 helper 後 close）|
 | `BusHelper` | `getBusInfoList(languageCode:)`, `getBusTime(languageCode:, busInfo:)` | ❌ |
 
 ### 2 個抽象介面（NoOp 預設，host app 注入真實實作）
@@ -78,7 +79,7 @@ void bootstrapCrawler() {
 
 | 層 | 命令 | 跑哪些 | 何時跑 |
 |---|---|---|---|
-| Hermetic | `dart test` | abstractions、codec、model JSON、`redact()`、`currentAcademicSemester()` | 每次 `dart test` |
+| Hermetic | `dart test` | abstractions、codec、model JSON、`redact()`、`currentAcademicSemester()`、在學證明 RegWeb redirect / PDF validation | 每次 `dart test` |
 | Live (anonymous) | `dart test -P live-anonymous -r expanded` | 3 個 health check probe + bus（不需 creds）| 本機 debug bus、CI 排程 |
 | Live (authenticated) | `NSYSU_USER=… NSYSU_PASS=… dart test -P live -r expanded` | selcrs + graduation + tuition 全套 | 本機需要打真站 / CI 排程 |
 
@@ -117,7 +118,7 @@ nsysu_crawler/
 │   ├── nsysu_crawler.dart                # 公開 barrel
 │   └── src/
 │       ├── abstractions/                 # CrashReporter / AnalyticsLogger 介面
-│       ├── helpers/                      # 4 個 helper（dio + cookie + 解析串接）
+│       ├── helpers/                      # 5 個 helper（dio + cookie + 解析串接）
 │       ├── models/                       # Bus / Score / Tuition / Graduation 等
 │       ├── parsers/                      # pure HTML parser（fixture-testable）
 │       └── utils/

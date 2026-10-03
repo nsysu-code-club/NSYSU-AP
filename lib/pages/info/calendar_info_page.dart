@@ -26,6 +26,7 @@ class _CalendarPageState extends State<CalendarPage> {
   List<CalendarEvent> _allEvents = <CalendarEvent>[];
   List<CalendarEvent> _filteredEvents = <CalendarEvent>[];
   bool _isLoading = true;
+  bool _hasError = false;
   bool _ascending = true;
   String _searchKeyword = '';
   final TextEditingController _searchController = TextEditingController();
@@ -48,11 +49,23 @@ class _CalendarPageState extends State<CalendarPage> {
   Future<void> _loadEvents() async {
     setState(() {
       _isLoading = true;
+      _hasError = false;
     });
-    final List<CalendarEvent> events = await CalendarParsing.getCleanEvents();
+    final List<CalendarEvent>? events = await CalendarParsing.getCleanEvents();
+    if (!mounted) {
+      return;
+    }
+    if (events == null) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+      return;
+    }
     setState(() {
       _allEvents = events;
       _isLoading = false;
+      _hasError = false;
     });
     _applyFilters();
   }
@@ -99,6 +112,10 @@ class _CalendarPageState extends State<CalendarPage> {
         );
       },
     );
+
+    if (!mounted) {
+      return;
+    }
 
     if (picked != null) {
       _selectedDateRange = picked;
@@ -181,6 +198,10 @@ class _CalendarPageState extends State<CalendarPage> {
           valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
         ),
       );
+    }
+
+    if (_hasError) {
+      return _wErrorView(colorScheme);
     }
 
     final int totalPages = CalendarParsing.getTotalPages(
@@ -270,6 +291,50 @@ class _CalendarPageState extends State<CalendarPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _wErrorView(ColorScheme colorScheme) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.wifi_off_rounded,
+              size: 64,
+              color: colorScheme.error.withValues(alpha: 0.8),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              app.calendarLoadFailed,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+              onPressed: _loadEvents,
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+              label: Text(app.calendarRetry),
+            ),
+          ],
+        ),
       ),
     );
   }
