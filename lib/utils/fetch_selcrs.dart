@@ -48,7 +48,7 @@ List<Map<String, String>> parseCourseEvents(
       dtend = parseRocDateToIcs(parts[1]);
     } else {
       dtstart = parseRocDateToIcs(timeRaw);
-      dtend = dtstart;
+      dtend = '';
     }
 
     if (dtstart.isEmpty) {
@@ -70,7 +70,7 @@ List<Map<String, String>> parseCourseEvents(
       'rawName': name,
       'timeRaw': timeRaw,
       'dtstart': dtstart,
-      'dtend': dtend.isNotEmpty ? dtend : dtstart,
+      'dtend': dtend,
     });
   }
 
@@ -119,7 +119,10 @@ String generateIcsBlocks(
     buf.writeln('UID:selcrs-${e['dtstart']}-${e['index']}@nsysu.edu.tw');
     buf.writeln('DTSTAMP:$nowStamp');
     buf.writeln('DTSTART:${e['dtstart']}');
-    buf.writeln('DTEND:${e['dtend']}');
+    final String dtend = e['dtend'] ?? '';
+    if (dtend.isNotEmpty) {
+      buf.writeln('DTEND:$dtend');
+    }
     buf.writeln('SUMMARY:${e['summary']}');
     buf.writeln('DESCRIPTION:$descPrefix${e['timeRaw']}');
     buf.writeln('STATUS:CONFIRMED');
@@ -137,7 +140,7 @@ String mergeIcsContent(String baseIcs, String newBlocks) {
 
   final RegExp oldEventsRegex = RegExp(
     r'BEGIN:VEVENT\r?\n(?:(?!BEGIN:VEVENT)[\s\S])*?'
-    r'UID:selcrs-[\s\S]*?END:VEVENT\r?\n?',
+    r'UID:selcrs-(?:(?!BEGIN:VEVENT)[\s\S])*?END:VEVENT\r?\n?',
   );
   final String cleaned = baseIcs.replaceAll(oldEventsRegex, '');
 

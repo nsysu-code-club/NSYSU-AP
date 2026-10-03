@@ -163,10 +163,10 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       - name: Flutter Initialize
         run: flutter doctor -v
+      # ruby/setup-ruby prebuilt Rubies are hardcoded to /Users/runner/hostedtoolcache on macOS,
+      # which is not writable on this self-hosted runner, so use the preinstalled Homebrew Ruby.
       - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
+        run: echo "/opt/homebrew/opt/ruby/bin" >> "$GITHUB_PATH"
       - name: Install Ruby dependencies
         run: |
           bundle config set path vendor/bundle

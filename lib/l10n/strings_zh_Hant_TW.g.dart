@@ -95,6 +95,9 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '學雜費繳費狀況查詢'
 	String get tuitionAndFees => '學雜費繳費狀況查詢';
 
+	/// zh-Hant-TW: '學雜費與在學證明'
+	String get tuitionAndCert => '學雜費與在學證明';
+
 	/// zh-Hant-TW: '金額：${amount} 繳費日期：${date}'
 	String tuitionAndFeesItemTitleFormat({required Object amount, required Object date}) => '金額：${amount}\n繳費日期：${date}';
 
@@ -139,6 +142,9 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 
 	/// zh-Hant-TW: 'Oops！查無任何學雜費資料哦～😋'
 	String get tuitionAndFeesEmpty => 'Oops！查無任何學雜費資料哦～😋';
+
+	/// zh-Hant-TW: '尚未載入課表，點擊查看'
+	String get courseNotLoaded => '尚未載入課表，點擊查看';
 
 	/// zh-Hant-TW: '部分科目為授課老師開放成績查詢 並非最終成績'
 	String get hasPreScoreHint => '部分科目為授課老師開放成績查詢 並非最終成績';
@@ -289,6 +295,83 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 
 	/// zh-Hant-TW: '未知'
 	String get calendarUnknownSummaryOrTime => '未知';
+
+	/// zh-Hant-TW: '載入行事曆失敗，請檢查網路連線'
+	String get calendarLoadFailed => '載入行事曆失敗，請檢查網路連線';
+
+	/// zh-Hant-TW: '重新載入'
+	String get calendarRetry => '重新載入';
+
+	late final AppLocalizationsEnrollCertificateZhHantTw enrollCertificate = AppLocalizationsEnrollCertificateZhHantTw.internal(_root);
+}
+
+// Path: enrollCertificate
+class AppLocalizationsEnrollCertificateZhHantTw {
+	AppLocalizationsEnrollCertificateZhHantTw.internal(this._root);
+
+	final AppLocalizations _root; // ignore: unused_field
+
+	// Translations
+
+	/// zh-Hant-TW: '在學證明'
+	String get title => '在學證明';
+
+	/// zh-Hant-TW: '重新提取'
+	String get regenerate => '重新提取';
+
+	/// zh-Hant-TW: '重新執行'
+	String get retry => '重新執行';
+
+	/// zh-Hant-TW: '下載／匯出'
+	String get download => '下載／匯出';
+
+	/// zh-Hant-TW: '在學證明'
+	String get fileName => '在學證明';
+
+	/// zh-Hant-TW: '正在讀取已儲存的在學證明...'
+	String get loadingCached => '正在讀取已儲存的在學證明...';
+
+	/// zh-Hant-TW: '正在向校方系統提取在學證明...'
+	String get retrieving => '正在向校方系統提取在學證明...';
+
+	/// zh-Hant-TW: '找不到目前帳號，請先登入 App 後再取得在學證明。'
+	String get missingAccount => '找不到目前帳號，請先登入 App 後再取得在學證明。';
+
+	/// zh-Hant-TW: '找不到目前登入帳密，請先重新登入 App 後再重新提取。'
+	String get missingCredentials => '找不到目前登入帳密，請先重新登入 App 後再重新提取。';
+
+	/// zh-Hant-TW: '已取得文件，但無法更新本機快取。'
+	String get saveFailed => '已取得文件，但無法更新本機快取。';
+
+	/// zh-Hant-TW: '尚未取得在學證明，請重新執行。'
+	String get notObtained => '尚未取得在學證明，請重新執行。';
+
+	/// zh-Hant-TW: '校方系統回應逾時，請稍後重新提取。'
+	String get requestTimedOut => '校方系統回應逾時，請稍後重新提取。';
+
+	/// zh-Hant-TW: '無法從校方系統取得在學證明，請確認網路後重試。'
+	String get requestFailed => '無法從校方系統取得在學證明，請確認網路後重試。';
+
+	/// zh-Hant-TW: '校方系統未回傳有效的在學證明 PDF，請確認帳密或稍後重試。'
+	String get invalidResponse => '校方系統未回傳有效的在學證明 PDF，請確認帳密或稍後重試。';
+
+	/// zh-Hant-TW: '無法下載／匯出在學證明，請稍後再試。'
+	String get downloadFailed => '無法下載／匯出在學證明，請稍後再試。';
+
+	/// zh-Hant-TW: '無法開啟瀏覽器，請再試一次。'
+	String get openBrowserFailed => '無法開啟瀏覽器，請再試一次。';
+
+	/// zh-Hant-TW: '網路註冊'
+	String get registrationTitle => '網路註冊';
+
+	/// zh-Hant-TW: '校方未提供在學證明。請在註冊系統確認並補填必要資料，完成後再重新提取。'
+	String get registrationRequired => '校方未提供在學證明。請在註冊系統確認並補填必要資料，完成後再重新提取。';
+
+	/// zh-Hant-TW: '無法安全地清除先前的註冊系統工作階段。為保護帳號資料，請關閉此頁後再試一次，或改用外部瀏覽器。'
+	String get registrationSessionUnavailable => '無法安全地清除先前的註冊系統工作階段。為保護帳號資料，請關閉此頁後再試一次，或改用外部瀏覽器。';
+
+	/// zh-Hant-TW: '完成填寫，重新提取'
+	String get registrationComplete => '完成填寫，重新提取';
 }
 
 /// The flat map containing all translations for locale <zh-Hant-TW>.
@@ -317,6 +400,7 @@ extension on AppLocalizations {
 			'graduationCheckChecklistSummary' => '總結',
 			'firstLoginHint' => '首次登入密碼預設為身分證末六碼',
 			'tuitionAndFees' => '學雜費繳費狀況查詢',
+			'tuitionAndCert' => '學雜費與在學證明',
 			'tuitionAndFeesItemTitleFormat' => ({required Object amount, required Object date}) => '金額：${amount}\n繳費日期：${date}',
 			'admissionGuide' => '入學指南',
 			'tuitionAndFeesPageHint' => '點擊可查看收據或繳費單',
@@ -332,6 +416,7 @@ extension on AppLocalizations {
 			'springSemesterShort' => '下',
 			'summerSemesterShort' => '暑',
 			'tuitionAndFeesEmpty' => 'Oops！查無任何學雜費資料哦～😋',
+			'courseNotLoaded' => '尚未載入課表，點擊查看',
 			'hasPreScoreHint' => '部分科目為授課老師開放成績查詢 並非最終成績',
 			'pleaseConfirmForm' => '請先填寫確認表單再進行登入\n若填寫完畢仍無法登入 點擊右上角透過其他瀏覽器填寫(ex. Chrome)',
 			'openBrowserToFill' => '開啟瀏覽器填寫',
@@ -382,6 +467,28 @@ extension on AppLocalizations {
 			'calendarFilterDate' => '篩選日期區間',
 			'calendarClearDateFilter' => '清除日期篩選',
 			'calendarUnknownSummaryOrTime' => '未知',
+			'calendarLoadFailed' => '載入行事曆失敗，請檢查網路連線',
+			'calendarRetry' => '重新載入',
+			'enrollCertificate.title' => '在學證明',
+			'enrollCertificate.regenerate' => '重新提取',
+			'enrollCertificate.retry' => '重新執行',
+			'enrollCertificate.download' => '下載／匯出',
+			'enrollCertificate.fileName' => '在學證明',
+			'enrollCertificate.loadingCached' => '正在讀取已儲存的在學證明...',
+			'enrollCertificate.retrieving' => '正在向校方系統提取在學證明...',
+			'enrollCertificate.missingAccount' => '找不到目前帳號，請先登入 App 後再取得在學證明。',
+			'enrollCertificate.missingCredentials' => '找不到目前登入帳密，請先重新登入 App 後再重新提取。',
+			'enrollCertificate.saveFailed' => '已取得文件，但無法更新本機快取。',
+			'enrollCertificate.notObtained' => '尚未取得在學證明，請重新執行。',
+			'enrollCertificate.requestTimedOut' => '校方系統回應逾時，請稍後重新提取。',
+			'enrollCertificate.requestFailed' => '無法從校方系統取得在學證明，請確認網路後重試。',
+			'enrollCertificate.invalidResponse' => '校方系統未回傳有效的在學證明 PDF，請確認帳密或稍後重試。',
+			'enrollCertificate.downloadFailed' => '無法下載／匯出在學證明，請稍後再試。',
+			'enrollCertificate.openBrowserFailed' => '無法開啟瀏覽器，請再試一次。',
+			'enrollCertificate.registrationTitle' => '網路註冊',
+			'enrollCertificate.registrationRequired' => '校方未提供在學證明。請在註冊系統確認並補填必要資料，完成後再重新提取。',
+			'enrollCertificate.registrationSessionUnavailable' => '無法安全地清除先前的註冊系統工作階段。為保護帳號資料，請關閉此頁後再試一次，或改用外部瀏覽器。',
+			'enrollCertificate.registrationComplete' => '完成填寫，重新提取',
 			_ => null,
 		};
 	}

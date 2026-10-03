@@ -35,66 +35,81 @@ class CalendarPaginationBar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                disabledBackgroundColor:
-                    colorScheme.onSurface.withValues(alpha: 0.12),
-                disabledForegroundColor:
-                    colorScheme.onSurface.withValues(alpha: 0.38),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Flexible(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  disabledBackgroundColor:
+                      colorScheme.onSurface.withValues(alpha: 0.12),
+                  disabledForegroundColor:
+                      colorScheme.onSurface.withValues(alpha: 0.38),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
+                onPressed: onPrevious,
+                icon: const Icon(Icons.chevron_left_rounded, size: 18),
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(app.calendarPreviousPage),
                 ),
               ),
-              onPressed: onPrevious,
-              icon: const Icon(Icons.chevron_left_rounded, size: 20),
-              label: Text(app.calendarPreviousPage),
             ),
+            const SizedBox(width: 6),
             Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 14,
+                horizontal: 10,
                 vertical: 6,
               ),
               decoration: BoxDecoration(
                 color: colorScheme.primaryContainer.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Text(
-                app.calendarPageFormat(
-                  current: currentPage,
-                  total: totalPages,
-                ),
-                style: TextStyle(
-                  color: colorScheme.primary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  app.calendarPageFormat(
+                    current: currentPage,
+                    total: totalPages,
+                  ),
+                  style: TextStyle(
+                    color: colorScheme.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                disabledBackgroundColor:
-                    colorScheme.onSurface.withValues(alpha: 0.12),
-                disabledForegroundColor:
-                    colorScheme.onSurface.withValues(alpha: 0.38),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            const SizedBox(width: 6),
+            Flexible(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  disabledBackgroundColor:
+                      colorScheme.onSurface.withValues(alpha: 0.12),
+                  disabledForegroundColor:
+                      colorScheme.onSurface.withValues(alpha: 0.38),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
+                onPressed: onNext,
+                icon: const Icon(Icons.chevron_right_rounded, size: 18),
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(app.calendarNextPage),
                 ),
               ),
-              onPressed: onNext,
-              icon: const Icon(Icons.chevron_right_rounded, size: 20),
-              label: Text(app.calendarNextPage),
             ),
           ],
         ),

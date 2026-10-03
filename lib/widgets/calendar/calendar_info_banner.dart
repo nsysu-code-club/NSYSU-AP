@@ -24,24 +24,30 @@ class CalendarInfoBanner extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Icon(
-                Icons.school_rounded,
-                size: 20,
-                color: colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                app.calendarEventCounts(allEvents: eventCount),
-                style: TextStyle(
+          Expanded(
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.school_rounded,
+                  size: 20,
                   color: colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    app.calendarEventCounts(allEvents: eventCount),
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           InkWell(
             onTap: onToggleSort,
             borderRadius: BorderRadius.circular(20),

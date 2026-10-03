@@ -15,7 +15,7 @@ class CalendarParsing {
     }
     try {
       if (raw.length >= 8 && !raw.contains('-')) {
-        final String clean = raw.replaceAll(RegExp('[^0-9T]'), '');
+        final String clean = raw.replaceAll(RegExp('[^0-9TZ]'), '');
         final String y = clean.substring(0, 4);
         final String m = clean.substring(4, 6);
         final String d = clean.substring(6, 8);
@@ -25,26 +25,32 @@ class CalendarParsing {
           final String min = clean.substring(11, 13);
           final String s = clean.substring(13, 15);
           formatted += 'T$h:$min:$s';
+          if (clean.endsWith('Z')) {
+            formatted += 'Z';
+          }
         }
-        return DateTime.tryParse(formatted);
+        return DateTime.tryParse(formatted)?.toLocal();
       }
     } catch (_) {}
-    return DateTime.tryParse(raw);
+    return DateTime.tryParse(raw)?.toLocal();
   }
 
-  static Future<List<CalendarEvent>> getCleanEvents({
-    bool ascending = true
+  static Future<List<CalendarEvent>?> getCleanEvents({
+    bool ascending = true,
   }) async {
     try {
       final String icsUrl = await _getCalendarIcsUrl();
       final String content = await _downloadIcs(icsUrl);
+      if (content.isEmpty) {
+        return null;
+      }
       final ICalendar icp = ICalendar.fromString(content);
       final List<Map<String, dynamic>> events = icp.data
           .where((Map<String, dynamic> item) => item['type'] == 'VEVENT')
           .toList();
 
       final List<CalendarEvent> result =
-      events.map((Map<String, dynamic> event) {
+          events.map((Map<String, dynamic> event) {
         final dynamic summary = event['summary'] ?? '無標題';
         final Object? dtstart = event['dtstart'];
         final Object? dtend = event['dtend'];
@@ -63,18 +69,55 @@ class CalendarParsing {
           endTime = dtend.toString();
         }
         final CalendarEvent calendarEvent = CalendarEvent(
-            summary: summary.toString(),
-            dtstart: startTime,
-            dtend: endTime
+          summary: summary.toString(),
+          dtstart: startTime,
+          dtend: endTime,
         );
-        return calendarEvent;
+        return _normalizeEventDates(calendarEvent);
       }).toList();
 
       CalendarParsing.sortEvents(result, ascending: ascending);
       return result;
     } catch (e) {
-      return <CalendarEvent>[];
+      return null;
     }
+  }
+
+  static CalendarEvent _normalizeEventDates(CalendarEvent event) {
+    final DateTime? start = parseEventDate(event.dtstart);
+    if (start == null) {
+      return event;
+    }
+    final DateTime? end = parseEventDate(event.dtend);
+    final bool isOneDayOrLess =
+        end == null || end.difference(start).inDays <= 1;
+    if (isOneDayOrLess) {
+      final RegExp matchRange = RegExp(
+        r'\((\d{1,2})/(\d{1,2})[~～](\d{1,2})/(\d{1,2})\)',
+      );
+      final RegExpMatch? match = matchRange.firstMatch(event.summary);
+      if (match != null) {
+        final int sm = int.parse(match.group(1)!);
+        final int em = int.parse(match.group(3)!);
+        final int ed = int.parse(match.group(4)!);
+        if (sm == start.month) {
+          final int endYear = (em >= sm) ? start.year : start.year + 1;
+          final DateTime endDate = DateTime(endYear, em, ed).add(
+            const Duration(days: 1),
+          );
+          final String newEnd =
+              '${endDate.year.toString().padLeft(4, '0')}'
+              '${endDate.month.toString().padLeft(2, '0')}'
+              '${endDate.day.toString().padLeft(2, '0')}';
+          return CalendarEvent(
+            summary: event.summary,
+            dtstart: event.dtstart,
+            dtend: newEnd,
+          );
+        }
+      }
+    }
+    return event;
   }
 
   static void sortEvents(
@@ -110,22 +153,33 @@ class CalendarParsing {
     List<CalendarEvent> events,
     DateTimeRange range,
   ) {
-    final DateTime endOfDay = DateTime(
+    final DateTime rangeStart = DateTime(
+      range.start.year,
+      range.start.month,
+      range.start.day,
+    );
+    final DateTime rangeEndExclusive = DateTime(
       range.end.year,
       range.end.month,
       range.end.day,
-      23,
-      59,
-      59,
-    );
+    ).add(const Duration(days: 1));
 
     return events.where((CalendarEvent event) {
       final DateTime? start = parseEventDate(event.dtstart);
       if (start == null) {
         return false;
       }
-      final DateTime end = parseEventDate(event.dtend) ?? start;
-      return !start.isAfter(endOfDay) && !end.isBefore(range.start);
+      DateTime? end = parseEventDate(event.dtend);
+      final bool isAllDay = !event.dtstart.contains('T');
+      if (end == null || end == start) {
+        if (isAllDay) {
+          end = start.add(const Duration(days: 1));
+        } else {
+          return !start.isBefore(rangeStart) &&
+              start.isBefore(rangeEndExclusive);
+        }
+      }
+      return start.isBefore(rangeEndExclusive) && end.isAfter(rangeStart);
     }).toList();
   }
 
@@ -164,13 +218,49 @@ class CalendarParsing {
   }
 
   static String formatEventDate(String raw) {
-    if (raw.length >= 8) {
-      final String y = raw.substring(0, 4);
-      final String m = raw.substring(4, 6);
-      final String d = raw.substring(6, 8);
+    if (raw.isEmpty || raw == '未知') {
+      return raw;
+    }
+    final DateTime? parsed = parseEventDate(raw);
+    if (parsed != null) {
+      final String y = parsed.year.toString().padLeft(4, '0');
+      final String m = parsed.month.toString().padLeft(2, '0');
+      final String d = parsed.day.toString().padLeft(2, '0');
       return '$y-$m-$d';
     }
     return raw;
+  }
+
+  static String formatEventDisplayDate(CalendarEvent event) {
+    final DateTime? start = parseEventDate(event.dtstart);
+    if (start == null) {
+      return event.dtstart;
+    }
+    final String startStr = formatEventDate(event.dtstart);
+    final DateTime? end = parseEventDate(event.dtend);
+    if (end == null || event.dtend.isEmpty || event.dtend == '未知') {
+      return startStr;
+    }
+
+    final bool isAllDay = !event.dtstart.contains('T');
+    if (isAllDay) {
+      if (end.isBefore(start) || end.difference(start).inDays <= 1) {
+        return startStr;
+      }
+      final DateTime lastIncluded = end.subtract(const Duration(days: 1));
+      final String endStr = formatEventDate(
+        '${lastIncluded.year.toString().padLeft(4, '0')}'
+        '${lastIncluded.month.toString().padLeft(2, '0')}'
+        '${lastIncluded.day.toString().padLeft(2, '0')}',
+      );
+      return '$startStr ~ $endStr';
+    } else {
+      final String endStr = formatEventDate(event.dtend);
+      if (startStr == endStr) {
+        return startStr;
+      }
+      return '$startStr ~ $endStr';
+    }
   }
 
   static String formatDateRange(DateTimeRange range) {
@@ -214,7 +304,11 @@ class CalendarParsing {
     try {
       final Response<String> response = await Dio().get<String>(
         icsUrl,
-        options: Options(responseType: ResponseType.plain),
+        options: Options(
+          responseType: ResponseType.plain,
+          sendTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
       );
       final String content = response.data ?? '';
       final String selcrsBlocks = await _fetchSelcrsIcsBlocks();
