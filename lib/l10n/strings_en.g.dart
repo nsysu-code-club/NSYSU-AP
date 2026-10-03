@@ -16,22 +16,22 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	AppLocalizationsEn({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, AppLocalizations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  _meta = meta ?? TranslationMetadata(
+		  $meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.en,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ),
 		  super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-		_meta.setFlatMapFunction(_flatMapFunction);
+		super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
+		$meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <en>.
-	final TranslationMetadata<AppLocale, AppLocalizations> _meta;
-	@override TranslationMetadata<AppLocale, AppLocalizations> get $meta => _meta;
+	@override final TranslationMetadata<AppLocale, AppLocalizations> $meta;
 
 	/// Access flat map
-	@override dynamic operator[](String key) => _meta.getTranslation(key) ?? super[key];
+	@override dynamic operator[](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
 
 	late final AppLocalizationsEn _root = this; // ignore: unused_field
 
@@ -101,7 +101,7 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get locationNotNearSchool => 'Your location not in school, can\'t publish.';
 	@override String get unknownTime => 'Unknown Time';
 	@override String get success => 'Success';
-	@override String get optionConfirm => 'Confirm';
+	@override String get optionComfirm => 'Confirm';
 	@override String get optionCancel => 'Cancel';
 	@override String get openingBrowserContent => 'This will open an external website in your browser. Continue?';
 	@override String get openingBrowserTitle => 'Open External Website';
@@ -112,8 +112,16 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get calendarNextPage => 'Next';
 	@override String get calendarPreviousPage => 'Previous';
 	@override String get calendarEventIsEmpty => 'No event data found';
+	@override String calendarPageFormat({required Object current, required Object total}) => 'Page ${current} of ${total}';
 	@override String calendarEventCounts({required Object allEvents}) => 'Total events : ${allEvents}';
 	@override String get calendarSearchBarHint => 'Search event name';
+	@override String get calendarSelcrsPrefix => 'Course Selection Schedule';
+	@override String get calendarCourseSelectionPrefix => '[Course Selection] ';
+	@override String get calendarCourseSelectionPeriod => 'Schedule: ';
+	@override String calendarCourseSelectionStartSuffix({required Object time}) => ' (${time})';
+	@override String get calendarFilterDate => 'Filter date range';
+	@override String get calendarClearDateFilter => 'Clear date filter';
+	@override String get calendarUnknownSummaryOrTime => 'Unknown';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -186,7 +194,7 @@ extension on AppLocalizationsEn {
 			'locationNotNearSchool' => 'Your location not in school, can\'t publish.',
 			'unknownTime' => 'Unknown Time',
 			'success' => 'Success',
-			'optionConfirm' => 'Confirm',
+			'optionComfirm' => 'Confirm',
 			'optionCancel' => 'Cancel',
 			'openingBrowserContent' => 'This will open an external website in your browser. Continue?',
 			'openingBrowserTitle' => 'Open External Website',
@@ -197,8 +205,16 @@ extension on AppLocalizationsEn {
 			'calendarNextPage' => 'Next',
 			'calendarPreviousPage' => 'Previous',
 			'calendarEventIsEmpty' => 'No event data found',
+			'calendarPageFormat' => ({required Object current, required Object total}) => 'Page ${current} of ${total}',
 			'calendarEventCounts' => ({required Object allEvents}) => 'Total events : ${allEvents}',
 			'calendarSearchBarHint' => 'Search event name',
+			'calendarSelcrsPrefix' => 'Course Selection Schedule',
+			'calendarCourseSelectionPrefix' => '[Course Selection] ',
+			'calendarCourseSelectionPeriod' => 'Schedule: ',
+			'calendarCourseSelectionStartSuffix' => ({required Object time}) => ' (${time})',
+			'calendarFilterDate' => 'Filter date range',
+			'calendarClearDateFilter' => 'Clear date filter',
+			'calendarUnknownSummaryOrTime' => 'Unknown',
 			_ => null,
 		};
 	}

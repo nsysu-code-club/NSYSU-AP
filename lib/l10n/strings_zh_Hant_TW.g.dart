@@ -20,21 +20,20 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	AppLocalizations({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, AppLocalizations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  _meta = meta ?? TranslationMetadata(
+		  $meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.zhHantTw,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ) {
-		_meta.setFlatMapFunction(_flatMapFunction);
+		$meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <zh-Hant-TW>.
-	final TranslationMetadata<AppLocale, AppLocalizations> _meta;
-	@override TranslationMetadata<AppLocale, AppLocalizations> get $meta => _meta;
+	@override final TranslationMetadata<AppLocale, AppLocalizations> $meta;
 
 	/// Access flat map
-	dynamic operator[](String key) => _meta.getTranslation(key);
+	dynamic operator[](String key) => $meta.getTranslation(key);
 
 	late final AppLocalizations _root = this; // ignore: unused_field
 
@@ -269,6 +268,27 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 
 	/// zh-Hant-TW: '搜尋活動名稱'
 	String get calendarSearchBarHint => '搜尋活動名稱';
+
+	/// zh-Hant-TW: '選課時程'
+	String get calendarSelcrsPrefix => '選課時程';
+
+	/// zh-Hant-TW: '【選課】'
+	String get calendarCourseSelectionPrefix => '【選課】';
+
+	/// zh-Hant-TW: '選課時段：'
+	String get calendarCourseSelectionPeriod => '選課時段：';
+
+	/// zh-Hant-TW: ' (${time}開始)'
+	String calendarCourseSelectionStartSuffix({required Object time}) => ' (${time}開始)';
+
+	/// zh-Hant-TW: '篩選日期區間'
+	String get calendarFilterDate => '篩選日期區間';
+
+	/// zh-Hant-TW: '清除日期篩選'
+	String get calendarClearDateFilter => '清除日期篩選';
+
+	/// zh-Hant-TW: '未知'
+	String get calendarUnknownSummaryOrTime => '未知';
 }
 
 /// The flat map containing all translations for locale <zh-Hant-TW>.
@@ -355,6 +375,13 @@ extension on AppLocalizations {
 			'calendarPageFormat' => ({required Object current, required Object total}) => '第 ${current} / ${total} 頁',
 			'calendarEventCounts' => ({required Object allEvents}) => '共 ${allEvents} 筆校園行程',
 			'calendarSearchBarHint' => '搜尋活動名稱',
+			'calendarSelcrsPrefix' => '選課時程',
+			'calendarCourseSelectionPrefix' => '【選課】',
+			'calendarCourseSelectionPeriod' => '選課時段：',
+			'calendarCourseSelectionStartSuffix' => ({required Object time}) => ' (${time}開始)',
+			'calendarFilterDate' => '篩選日期區間',
+			'calendarClearDateFilter' => '清除日期篩選',
+			'calendarUnknownSummaryOrTime' => '未知',
 			_ => null,
 		};
 	}

@@ -74,5 +74,12 @@
   "calendarEventIsEmpty": "沒有任何活動資料",
   "calendarPageFormat": "第 ${current} / ${total} 頁",
   "calendarEventCounts": "共 ${allEvents} 筆校園行程",
-  "calendarSearchBarHint": "搜尋活動名稱"
+  "calendarSearchBarHint": "搜尋活動名稱",
+  "calendarSelcrsPrefix": "選課時程",
+  "calendarCourseSelectionPrefix": "【選課】",
+  "calendarCourseSelectionPeriod": "選課時段：",
+  "calendarCourseSelectionStartSuffix": " (${time}開始)",
+  "calendarFilterDate": "篩選日期區間",
+  "calendarClearDateFilter": "清除日期篩選",
+  "calendarUnknownSummaryOrTime" : "未知"
 }

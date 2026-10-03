@@ -65,5 +65,20 @@
   "optionCancel": "キャンセル",
   "openingBrowserContent": "ブラウザーで外部サイトを開きます。続行しますか？",
   "openingBrowserTitle": "外部サイトを開く",
-  "visitingUnSafeLink": "安全でないリンクです。URLが正しいか確認してください"
+  "visitingUnSafeLink": "安全でないリンクです。URLが正しいか確認してください",
+  "calendarSortAscending": "日時：近い順",
+  "calendarSortDescending": "日時：遠い順",
+  "calendarNextPage": "次へ",
+  "calendarPreviousPage": "前へ",
+  "calendarEventIsEmpty": "イベント情報はありません",
+  "calendarPageFormat": "${total} ページ中 ${current} ページ目",
+  "calendarEventCounts": "全 ${allEvents} 件のキャンパススケジュール",
+  "calendarSearchBarHint": "イベント名で検索",
+  "calendarSelcrsPrefix": "履修登録日程",
+  "calendarCourseSelectionPrefix": "【履修登録】",
+  "calendarCourseSelectionPeriod": "履修登録期間：",
+  "calendarCourseSelectionStartSuffix": " (${time}開始)",
+  "calendarFilterDate": "日付範囲で絞り込む",
+  "calendarClearDateFilter": "日付フィルターをクリア",
+  "calendarUnknownSummaryOrTime": "不明"
 }

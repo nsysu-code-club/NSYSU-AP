@@ -61,7 +61,7 @@
   "locationNotNearSchool": "Your location not in school, can't publish.",
   "unknownTime": "Unknown Time",
   "success": "Success",
-  "optionConfirm": "Confirm",
+  "optionComfirm": "Confirm",
   "optionCancel": "Cancel",
   "openingBrowserContent": "This will open an external website in your browser. Continue?",
   "openingBrowserTitle": "Open External Website",
@@ -72,6 +72,14 @@
   "calendarNextPage": "Next",
   "calendarPreviousPage": "Previous",
   "calendarEventIsEmpty": "No event data found",
+  "calendarPageFormat": "Page ${current} of ${total}",
   "calendarEventCounts": "Total events : ${allEvents}",
-  "calendarSearchBarHint": "Search event name"
+  "calendarSearchBarHint": "Search event name",
+  "calendarSelcrsPrefix": "Course Selection Schedule",
+  "calendarCourseSelectionPrefix": "[Course Selection] ",
+  "calendarCourseSelectionPeriod": "Schedule: ",
+  "calendarCourseSelectionStartSuffix": " (${time})",
+  "calendarFilterDate": "Filter date range",
+  "calendarClearDateFilter": "Clear date filter",
+  "calendarUnknownSummaryOrTime": "Unknown"
 }
