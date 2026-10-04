@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:ap_common/ap_common.dart';
 import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:ap_common_plugin/ap_common_plugin.dart';
@@ -8,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/bus/bus_list_page.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
@@ -22,8 +19,12 @@ import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/pages/user_info_page.dart';
 import 'package:nsysu_ap/resources/image_assets.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/enroll_certificate_cache.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/enrollment_certificate_session.dart';
+import 'package:nsysu_ap/utils/enroll_certificate/registration_cookie_store.dart';
 import 'package:nsysu_ap/utils/utils.dart';
 import 'package:nsysu_ap/widgets/share_data_widget.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class HomePage extends StatefulWidget {
@@ -59,7 +60,6 @@ class HomePageState extends State<HomePage> {
       case Brightness.light:
         return ImageAssets.nsysu;
       case Brightness.dark:
-      default:
         return ImageAssets.nsysu;
     }
   }
@@ -93,12 +93,6 @@ class HomePageState extends State<HomePage> {
         AppTrackingUtils.show(context: context);
       }
     });
-    if (Intl.defaultLocale != null) {
-      AnalyticsUtil.instance.setUserProperty(
-        AnalyticsConstants.language,
-        Locale(Intl.defaultLocale!).languageCode,
-      );
-    }
     FirebaseMessagingUtils.instance.init(
       onClick: (RemoteMessage message) {
         if (kDebugMode) {
@@ -195,12 +189,12 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _getAllAnnouncement() async {
-    final result = await AnnouncementHelper.instance.getAnnouncements(
-      tags: <String>['nsysu'],
-    );
+    final ApiResult<List<Announcement>> result = await AnnouncementHelper
+        .instance
+        .getAnnouncements(tags: <String>['nsysu']);
     if (!mounted) return;
     switch (result) {
-      case ApiSuccess<List<Announcement>>(:final data):
+      case ApiSuccess<List<Announcement>>(:final List<Announcement> data):
         announcements = data;
         setState(() {
           state = announcements.isEmpty ? HomeState.empty : HomeState.finish;
@@ -267,33 +261,38 @@ class HomePageState extends State<HomePage> {
   Future<void> _checkUpdate() async {
     if (kIsWeb) return;
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    final String currentVersion = PreferenceUtil.instance.getString(
-      Constants.prefCurrentVersion,
+    final String lastChangelogVersion = PreferenceUtil.instance.getString(
+      Constants.prefLastChangelogVersion,
       '',
     );
-    if (currentVersion != packageInfo.buildNumber) {
+    if (lastChangelogVersion != packageInfo.version) {
       final Map<String, dynamic>? rawData = await FileAssets.changelogData;
-      //TODO: improve by object
-      final Map<String, dynamic>? map =
-          rawData?[packageInfo.buildNumber] as Map<String, dynamic>?;
-      if (map == null) return;
-      final dynamic rawContent = map[ap.locale];
-      final String? updateNoteContent = switch (rawContent) {
-        final String s => s,
-        final List<dynamic> l =>
-          l.map((dynamic e) => '* $e').join('\n'),
-        _ => null,
-      };
+      final Map<String, dynamic>? map = FileAssets.changelogForVersion(
+        rawData,
+        packageInfo.version,
+      );
       if (!mounted) return;
-      DialogUtils.showUpdateContent(
-        context,
-        'v${packageInfo.version}\n'
-        '$updateNoteContent',
+      final String? updateNoteContent = FileAssets.changelogContent(
+        map,
+        ap.locale,
       );
-      PreferenceUtil.instance.setString(
-        Constants.prefCurrentVersion,
-        packageInfo.buildNumber,
-      );
+      final bool visible = map?['visible'] as bool? ?? true;
+      if (visible &&
+          updateNoteContent != null &&
+          updateNoteContent.isNotEmpty) {
+        DialogUtils.showUpdateContent(
+          context,
+          'v${packageInfo.version}\n'
+          '$updateNoteContent',
+        );
+      }
+      // Retry missing notes later instead of marking unseen content as read.
+      if (!visible || updateNoteContent != null) {
+        await PreferenceUtil.instance.setString(
+          Constants.prefLastChangelogVersion,
+          packageInfo.version,
+        );
+      }
     }
     if (!Constants.isInDebugMode) {
       final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
@@ -345,102 +344,141 @@ class HomePageState extends State<HomePage> {
           Constants.prefDisplayPicture,
           true,
         ),
-      onTapHeader: () {
-        if (isLogin) {
-          if (userInfo != null) {
-            ApUtils.pushCupertinoStyle(
-              context,
-              UserInfoPage(userInfo: userInfo!),
-            );
+        onTapHeader: () {
+          if (isLogin) {
+            if (userInfo != null) {
+              ApUtils.pushCupertinoStyle(
+                context,
+                UserInfoPage(userInfo: userInfo!),
+              );
+            }
+          } else {
+            if (!isTablet) Navigator.of(context).pop();
+            openLoginPage();
           }
-        } else {
-          if (!isTablet) Navigator.of(context).pop();
-          openLoginPage();
-        }
-      },
-      widgets: <Widget>[
-        if (isTablet)
+        },
+        widgets: <Widget>[
+          if (isTablet)
+            DrawerMenuItem(
+              icon: ApIcon.home,
+              title: ap.home,
+              onTap: () {
+                setState(() => content = null);
+                // Desktop keeps HomePage mounted while other pages are shown
+                // in `content`, so re-read the course cache on return. Skip it
+                // while logged out so a previous user's cached timetable is
+                // not shown again after logout.
+                if (isLogin) _loadCourseData();
+              },
+            ),
+          _buildStudySection(),
           DrawerMenuItem(
-            icon: ApIcon.home,
-            title: ap.home,
-            onTap: () => setState(() => content = null),
+            icon: ApIcon.directionsBus,
+            title: ap.bus,
+            onTap: () =>
+                _openPage(BusListPage(locale: Locale(Intl.defaultLocale!))),
           ),
-        _buildStudySection(),
-        DrawerMenuItem(
-          icon: ApIcon.directionsBus,
-          title: ap.bus,
-          onTap: () =>
-              _openPage(BusListPage(locale: Locale(Intl.defaultLocale!))),
-        ),
-        _buildSchoolNavigationSection(),
-        DrawerMenuItem(
-          icon: ApIcon.school,
-          title: app.graduationCheckChecklist,
-          onTap: () => _openPage(const GraduationReportPage(), needLogin: true),
-        ),
-        DrawerMenuItem(
-          icon: ApIcon.monetizationOn,
-          title: app.tuitionAndFees,
-          onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
-        ),
-        DrawerMenuItem(
-          icon: ApIcon.info,
-          title: ap.schoolInfo,
-          onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
-        ),
-        DrawerMenuItem(
-          icon: ApIcon.face,
-          title: ap.about,
-          onTap: () => _openPage(
-            AboutUsPage(
-              assetImage: ImageAssets.nsysu,
-              githubName: 'nsysu-code-club',
-              email: 'nsysu.gdsc@gmail.com',
-              appLicense: app.aboutOpenSourceContent,
-              fbFanPageId: '100906232372556',
-              instagramUsername: 'gdsc_nsysu',
-              fbFanPageUrl: 'https://www.facebook.com/NSYSUGDSC',
-              githubUrl: 'https://github.com/nsysu-code-club',
+          _buildSchoolNavigationSection(),
+          DrawerMenuItem(
+            icon: ApIcon.school,
+            title: app.graduationCheckChecklist,
+            onTap: () =>
+                _openPage(const GraduationReportPage(), needLogin: true),
+          ),
+          DrawerMenuItem(
+            icon: ApIcon.monetizationOn,
+            title: app.tuitionAndCert,
+            onTap: () => _openPage(const TuitionAndFeesPage(), needLogin: true),
+          ),
+          DrawerMenuItem(
+            icon: ApIcon.info,
+            title: ap.schoolInfo,
+            onTap: () => _openPage(SchoolInfoPage(), useCupertinoRoute: false),
+          ),
+          DrawerMenuItem(
+            icon: ApIcon.face,
+            title: ap.about,
+            onTap: () => _openPage(
+              AboutUsPage(
+                assetImage: ImageAssets.nsysu,
+                githubName: 'nsysu-code-club',
+                email: 'nsysu.gdsc@gmail.com',
+                appLicense: app.aboutOpenSourceContent,
+                fbFanPageId: '100906232372556',
+                instagramUsername: 'gdsc_nsysu',
+                fbFanPageUrl: 'https://www.facebook.com/NSYSUGDSC',
+                githubUrl: 'https://github.com/nsysu-code-club',
+              ),
             ),
           ),
-        ),
-        DrawerMenuItem(
-          icon: ApIcon.settings,
-          title: ap.settings,
-          onTap: () => _openPage(SettingPage()),
-        ),
-        if (isLogin) ...<Widget>[
-          const DrawerDivider(),
           DrawerMenuItem(
-            icon: ApIcon.powerSettingsNew,
-            title: ap.logout,
-            iconColor: colorScheme.error,
-            onTap: () async {
-              await PreferenceUtil.instance.setBool(
-                Constants.prefAutoLogin,
-                false,
-              );
-              SelcrsHelper.instance.logout();
-              GraduationHelper.instance.logout();
-              TuitionHelper.instance.logout();
-              await ApCommonPlugin.clearCourseWidget();
-              setState(() {
-                ShareDataWidget.of(context)!.data.isLogin = false;
-                ShareDataWidget.of(context)!.data.userInfo = null;
-                courseData = null;
-              });
-              content = null;
-              if (!isTablet) {
-                if (!context.mounted) return;
-                Navigator.of(context).pop();
-              }
-              _checkLoginState();
-            },
+            icon: ApIcon.settings,
+            title: ap.settings,
+            onTap: () => _openPage(SettingPage()),
           ),
+          if (isLogin) ...<Widget>[
+            const DrawerDivider(),
+            DrawerMenuItem(
+              icon: ApIcon.powerSettingsNew,
+              title: ap.logout,
+              iconColor: colorScheme.error,
+              onTap: () async {
+                final String activeUsername = SelcrsHelper.instance.username
+                    .trim();
+                final String username = activeUsername.isNotEmpty
+                    ? activeUsername
+                    : PreferenceUtil.instance
+                          .getString(Constants.prefUsername, '')
+                          .trim();
+                // Revoke active pages before the first await, then drain any
+                // write already in progress before removing account data.
+                final Future<void> enrollmentStopped =
+                    EnrollmentCertificateSession.cancelAll();
+                final Future<void> cookiesCleared =
+                    RegistrationCookieStore.clear(
+                      beforeClear: () => enrollmentStopped,
+                    );
+                SelcrsHelper.instance.logout();
+                GraduationHelper.instance.logout();
+                TuitionHelper.instance.logout();
+                setState(() {
+                  ShareDataWidget.of(context)!.data.isLogin = false;
+                  ShareDataWidget.of(context)!.data.userInfo = null;
+                  courseData = null;
+                  content = null;
+                });
+                await PreferenceUtil.instance.setBool(
+                  Constants.prefAutoLogin,
+                  false,
+                );
+                await enrollmentStopped;
+                await cookiesCleared;
+                await _clearEnrollmentCertificateCache(username);
+                await ApCommonPlugin.clearCourseWidget();
+                if (!mounted) return;
+                if (!isTablet) {
+                  Navigator.of(context).pop();
+                }
+                _checkLoginState();
+              },
+            ),
+          ],
         ],
-      ],
-    ),
+      ),
     );
+  }
+
+  Future<void> _clearEnrollmentCertificateCache(String username) async {
+    if (username.isEmpty) return;
+
+    try {
+      await EnrollCertificateCache(username: username).clear();
+    } on Exception catch (error) {
+      debugPrint(
+        'Failed to clear enrollment certificate cache during logout: '
+        '${error.runtimeType}',
+      );
+    }
   }
 
   Widget _buildStudySection() {
@@ -476,8 +514,8 @@ class HomePageState extends State<HomePage> {
                   title: Text(app.openingBrowserTitle),
                   content: Text(
                     '${app.openingBrowserContent}:\n'
-                    '${Constants.courseSelectorUrl}'
-                    ),
+                    '${Constants.courseSelectorUrl}',
+                  ),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -494,7 +532,10 @@ class HomePageState extends State<HomePage> {
               PlatformUtil.instance.launchUrl(uri.toString());
             } else {
               UiUtil.instance.showToast(context, app.visitingUnSafeLink);
-              debugPrint('Attempted to launch an insecure URL: ${Constants.courseSelectorUrl}');
+              debugPrint(
+                'Attempted to launch an insecure URL: '
+                '${Constants.courseSelectorUrl}',
+              );
             }
           },
         ),
@@ -553,7 +594,7 @@ class HomePageState extends State<HomePage> {
   List<Widget> _buildDashboardWidgets() {
     return <Widget>[
       const SizedBox(height: 16),
-      if (courseData != null)
+      if (courseData?.courses.isNotEmpty ?? false)
         TodayScheduleCard(
           courseData: courseData!,
           onTap: () async {
@@ -575,9 +616,12 @@ class HomePageState extends State<HomePage> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
         child: InkWell(
-          onTap: () {
+          onTap: () async {
             if (isLogin) {
-              ApUtils.pushCupertinoStyle(context, CoursePage());
+              await Navigator.of(
+                context,
+              ).push(MaterialPageRoute<void>(builder: (_) => CoursePage()));
+              _loadCourseData();
             } else {
               openLoginPage();
             }
@@ -595,7 +639,11 @@ class HomePageState extends State<HomePage> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    isLogin ? ap.courseEmpty : ap.notLogin,
+                    !isLogin
+                        ? ap.notLogin
+                        : courseData == null
+                        ? app.courseNotLoaded
+                        : ap.courseEmpty,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.outline,
                     ),
@@ -614,15 +662,18 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadCourseData() async {
+    if (!mounted) return;
     final CourseData? cached = CourseData.load(
       PreferenceUtil.instance.getString(
         ApConstants.currentSemesterCode,
         ApConstants.semesterLatest,
       ),
     );
-    if (cached != null && cached.courses.isNotEmpty) {
-      setState(() => courseData = cached);
-    }
+    // Replace rather than keep the previous value: a missing cache (e.g.
+    // right after a semester rollover) should not leave last semester's
+    // timetable on screen, and an intentionally empty timetable is kept so
+    // the card can say "no courses" instead of "not loaded".
+    setState(() => courseData = cached);
   }
 
   Future<void> openDesktopWebViewPage(

@@ -1,6 +1,5 @@
-import 'package:nsysu_crawler/nsysu_crawler.dart';
-
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 extension TuitionAndFeesUiExtension on TuitionAndFees {
   String get title =>

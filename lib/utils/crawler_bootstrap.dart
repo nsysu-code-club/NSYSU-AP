@@ -1,5 +1,5 @@
 import 'package:ap_common/ap_common.dart'
-    hide LocaleSettings, AppLocale, AppLocaleUtils, TranslationProvider;
+    hide AppLocale, AppLocaleUtils, LocaleSettings, TranslationProvider;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';

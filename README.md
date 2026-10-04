@@ -1,4 +1,4 @@
-[![Build Test](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/workflow.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/workflow.yml)
+[![CI](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/ci.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/ci.yml) [![Store CD](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/cd.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/cd.yml) [![Crawler Monitor](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/crawler-monitor.yml/badge.svg)](https://github.com/nsysu-code-club/NSYSU-AP/actions/workflows/crawler-monitor.yml)
 # 中山校務通
 
  提供中山學生更方便的校務系統查詢入口，由 Google 開源跨平台框架 [Flutter](https://flutter.dev) 開發
@@ -15,15 +15,25 @@
 - [ ] Linux
 
 ## 開發環境
- - Flutter 穩定版本 v3.29
+ - Flutter 穩定版本 v3.44.8
+
+第一次設定本機開發環境時，建議安裝專案提供的 pre-commit hook：
+
+```bash
+fvm dart run tool/install_git_hooks.dart
+```
+
+沒有使用 FVM 的環境可改用 `dart run tool/install_git_hooks.dart`。安裝後，每次 `git commit` 前會執行 `dart analyze .`；只有暫存區包含 `lib/l10n` 變更時，才會先執行已安裝的 Slang 快照與 l10n 產生檔暫存檢查。詳細流程請參考 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
+
 ## 功能列表
 
 - 首頁最新消息
-    - 前端 [ap_common](https://github.com/abc873693/ap_common/blob/master/lib/scaffold/home_page_scaffold.dart)
+    - 前端 [ap_common](https://github.com/abc873693/ap_common)
     - 後端 [announcements_service](https://github.com/takidog/announcements_service)
 - 課程學習
     - [x] 學期成績查詢(選課系統)
     - [x] 學期課表查詢(成績查詢系統)
+    - [x] 請假系統(學生請假系統)
 - 校車系統
     - [x] 校園公車列表
     - [x] 公車時刻查詢
@@ -32,6 +42,8 @@
 - 畢業生審查系統
     - [ ] 歷年成績單
     - [x] 應屆畢業生成績檢核表
+- 教務處註冊系統
+    - [x] 在學證明 PDF 提取與匯出
 - 各類所得劃帳暨歸戶查詢
     - [ ] 各類所得郵局劃帳暨歸戶查詢系統
 - 設定
@@ -47,6 +59,89 @@
 - [ap_common](https://pub.dev/packages/ap_common)：提供校務通系列共用的介面與程式碼工程
 - [ap_common_firebase](https://pub.dev/packages/ap_common_firebase)：串接 Firebase 中校務通會使用到的功能
 - [ap_common_plugin](https://pub.dev/packages/ap_common_plugin)：校務通系列的原生套件，目前支援 Android 的 課堂桌面小工具
+
+## 文件索引
+
+第一次接觸專案的人從這裡開始：
+
+| 文件 | 內容 |
+|---|---|
+| [`packages/nsysu_crawler/README.md`](packages/nsysu_crawler/README.md) | 純 Dart 爬蟲 package 的公開 API、bootstrap 範例、測試方式 |
+| [`packages/nsysu_crawler/docs/endpoint-catalog.md`](packages/nsysu_crawler/docs/endpoint-catalog.md) | 所有 NSYSU endpoint 的 method / encoding / 成功 sentinel / 已知坑 |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | 如何參與 NSYSU_AP 的開發（如要貢獻，請詳閱） |
+
+## 測試
+
+### Flutter app 測試
+
+```bash
+flutter test test/
+```
+
+目前 app 端的 widget test 還少（見 #97），歡迎補。
+
+### 爬蟲測試（純 Dart，不需 flutter）
+
+爬蟲已抽成獨立 package `packages/nsysu_crawler/`，分三層測試：
+
+```bash
+cd packages/nsysu_crawler
+
+# 1. Hermetic — 單元測試 + JSON 序列化 + 工具函式，預設、不打網路
+dart test
+
+# 2. live-anonymous — 連到真站做連線檢查 + 校車（不需帳密）
+dart test -P live-anonymous -r expanded
+
+# 3. live — 含 selcrs / 畢業審查 / 學雜費，需要學生帳密
+NSYSU_USER=B12345678 NSYSU_PASS=xxx dart test -P live -r expanded
+```
+
+完整命令、PII redact、`NSYSU_HTTP_LOG=1` 等選項見 [package README 的 Tests 段](packages/nsysu_crawler/README.md#tests)。
+
+### CI 自動化
+
+| Workflow | 觸發 | 功能 |
+|---|---|---|
+| [`CI`](.github/workflows/ci.yml) | PR / push to master | Android / iOS / Windows 建置驗證 |
+| [`Crawler Tests`](.github/workflows/test.yml) | PR / push to master | 跑 nsysu_crawler 的 hermetic dart test，亞秒級 |
+| [`Crawler Monitor`](.github/workflows/crawler-monitor.yml) | 每天 08:00 TPE + 手動觸發 | 打真站跑 live tests，失敗發 Discord 通知並分類「網站異常」🔴 / 「結構異常」🟡 |
+
+設 secrets：repo Settings → Secrets and variables → Actions
+- `NSYSU_USERNAME` / `NSYSU_PASSWORD`：跑 cron 的測試帳號（**用 alt account，不要日常帳號**）
+- `DISCORD_WEBHOOK_URL`：失敗通知用
+
+### 本地 pre-commit
+
+第一次設定本機 Git hooks：
+
+```bash
+fvm dart run tool/install_git_hooks.dart
+```
+
+沒有使用 FVM 的環境可改用：
+
+```bash
+dart run tool/install_git_hooks.dart
+```
+
+安裝器會在 Git 的 hooks 目錄建立 `pre-commit`、`nsysu-pre-commit.dart` 與 SDK 路徑檔 `nsysu-dart-path`，執行安裝時保存的 [`tool/pre_commit.dart`](tool/pre_commit.dart) 副本，並固定使用安裝時的 Dart 執行檔。切換分支不會替換已安裝的 hook 程式；請只從信任的 checkout 執行安裝器，安裝時也會把已解析的 Slang 及其傳遞依賴編譯成 `nsysu-slang.dill`，commit 時直接執行快照，不再從目前分支解析 `dart run slang`。工具流程、Slang 版本或 SDK 更新後需重新安裝；缺少快照時會阻擋提交，不會回退執行分支套件。翻譯來源與設定仍讀取工作目錄，analyzer 仍分析目前專案。既有的其他 hooks 會保留；舊版專案管理的 wrapper 會升級，若有不同的 `pre-commit` 或設定了 `core.hooksPath`，安裝器會提示手動整合並停止，不會覆寫自訂 hook 或修改 Git 設定。
+
+之後每次 `git commit` 前會依序執行：
+
+1. 若暫存區包含 `lib/l10n` 變更，使用安裝時的 Dart 執行 `nsysu-slang.dill`。
+2. 產生後確認 `lib/l10n` 沒有未暫存或未追蹤的變更。
+3. 使用相同 Dart 執行 `analyze .`，分析整個工作目錄。
+
+執行 hook 時不再重新選擇 FVM 或 PATH 中的 Dart。
+沒有暫存 `lib/l10n` 變更時，Slang 與 l10n 暫存檢查會跳過，未暫存或未追蹤的 l10n 檔案不會觸發這兩步。暫存的新增、修改、刪除及移入／移出 `lib/l10n` 都會觸發檢查。
+
+有暫存 l10n 變更時，Slang 仍讀取工作目錄中的所有翻譯來源；這不是暫存區快照檢查。若 `lib/l10n` 有未暫存或未追蹤的變更，請先整理並暫存本次要提交的 l10n 檔案，再重新提交。pre-commit 不會自動暫存檔案。結束時會輸出 summary，列出每個 step 的 success / failed / skipped 狀態；任一步失敗都會阻擋 commit，靜態分析的 error 與 warning 都會阻擋提交。
+
+pre-commit 不執行爬蟲單元測試或校務網站測試；相關測試由 CI、排程監控或開發者按需執行。
+
+pre-commit 的主要流程寫在 [`tool/pre_commit.dart`](tool/pre_commit.dart)，
+安裝流程寫在 [`tool/install_git_hooks.dart`](tool/install_git_hooks.dart)；已安裝的 hook 不再執行工作目錄中的 `bin/git_hooks.dart`。
 
 ## 爬蟲
 
@@ -64,15 +159,19 @@
       - [ ] 學生預警查詢
       - [x] 學期成績查詢
       - [ ] 歷年成績查詢
-  - [x] [畢業審查系統](https://selcrs.nsysu.edu.tw/gadchk/)
+  - [x] [畢業審查系統](https://sis.nsysu.edu.tw/SLAMS/SLAMS_student_view.php)
+  - [x] [教務處註冊系統](https://regweb.nsysu.edu.tw/webreg/)
+      - [x] 在學證明 PDF 提取
   - [ ] 總務處維修系統
+  - [x] [學生請假系統](https://sso.nsysu.edu.tw/index.php/home/applisturl/0H00/0051)
+  - [ ] 新網路大學 To-Do 提示
   - [x] [學雜費繳費單列印暨繳費狀況查詢系統](https://tfstu.nsysu.edu.tw/)
   - [x] [校車系統](https://selcrs.nsysu.edu.tw/scoreqry/)
 
 ## 維護團隊
 
 校務通源於高科校務通，後續衍伸出中山校務通，又因套件獨立而產生AP Common，讓校務通開發更加統一與高效。  
-目前由中山大學程式研習社做維護， App 商店託管由 [OCF 財團法人開放文化基金會](https://ocf.tw)管理。  
-開發人員：房志剛（Rainvisitor），胡智強（JohnHuCC），張柏瑄（Ryan Chang），蔡明軒（Yukimura），高聖傑（JasonZzz）
+目前由 [中山大學程式研習社xGoogle開發者社群](https://www.instagram.com/gdg.nsysu/) 做主要維護，App 商店託管由 [OCF 財團法人開放文化基金會](https://ocf.tw)管理。  
+開發人員：房志剛（Rainvisitor），胡智強（JohnHuCC），張柏瑄（Ryan Chang），蔡明軒（Yukimura），高聖傑（JasonZzz），陳展皝（David），吳楷鈞 （TWCKaijin）
 
 OCF 由多個台灣開源社群共同發起，在開放源碼、開放資料、開放政府等領域，提供社群支援、組織合作、海外交流、顧問諮詢等服務。期待以法人組織的力量激起開放協作的火花。

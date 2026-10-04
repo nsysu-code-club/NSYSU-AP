@@ -1,7 +1,7 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class GraduationReportPage extends StatefulWidget {
   static const String routerName = '/graduationReport';
@@ -14,7 +14,8 @@ class GraduationReportPage extends StatefulWidget {
 
 class GraduationReportPageState extends State<GraduationReportPage>
     with SingleTickerProviderStateMixin {
-  DataState<GraduationReportData> state = const DataLoading<GraduationReportData>();
+  DataState<GraduationReportData> state =
+      const DataLoading<GraduationReportData>();
   bool isOffline = false;
 
   List<TableRow> scoreWeightList = <TableRow>[];
@@ -37,11 +38,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(app.graduationCheckChecklist),
-      ),
+      appBar: AppBar(title: Text(app.graduationCheckChecklist)),
       body: Flex(
         direction: Axis.vertical,
         mainAxisSize: MainAxisSize.min,
@@ -51,7 +49,9 @@ class GraduationReportPageState extends State<GraduationReportPage>
             child: isOffline
                 ? Text(
                     ap.offlineScore,
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   )
                 : null,
           ),
@@ -81,16 +81,10 @@ class GraduationReportPageState extends State<GraduationReportPage>
           _getGraduationReport();
           AnalyticsUtil.instance.logEvent('click_retry');
         },
-        child: HintContent(
-          icon: Icons.assignment,
-          content: ap.clickToRetry,
-        ),
+        child: HintContent(icon: Icons.assignment, content: ap.clickToRetry),
       ),
       empty: (String? hint) => hint == ap.noOfflineData
-          ? HintContent(
-              icon: Icons.class_,
-              content: ap.noOfflineData,
-            )
+          ? HintContent(icon: Icons.class_, content: ap.noOfflineData)
           : InkWell(
               onTap: () {
                 _getGraduationReport();
@@ -101,216 +95,233 @@ class GraduationReportPageState extends State<GraduationReportPage>
                 content: app.graduationCheckChecklistEmpty,
               ),
             ),
-      loaded: (GraduationReportData data, String? hint) => SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-          child: Column(
-            children: <Widget>[
-              Text(
-                app.graduationCheckChecklistHint,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 16.0,
-                ),
+      loaded: (GraduationReportData data, String? hint) =>
+          SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8,
               ),
-              const SizedBox(height: 8.0),
-              Text(
-                app.missingRequiredCourses,
-                textAlign: TextAlign.start,
-                style: _textBlueStyle(),
-              ),
-              if (data.missingRequiredCourse.isEmpty)
-                Text(
-                  ap.noData,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 14.0,
-                  ),
-                )
-              else
-                BorderContainer(
-                  child: Table(
-                    columnWidths: const <int, TableColumnWidth>{
-                      0: FlexColumnWidth(2.5),
-                      1: FlexColumnWidth(),
-                      2: FlexColumnWidth(),
-                    },
-                    defaultVerticalAlignment:
-                        TableCellVerticalAlignment.middle,
-                    border: TableBorder.symmetric(
-                      inside: BorderSide(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        width: 0.5,
-                      ),
-                    ),
-                    children: <TableRow>[
-                      TableRow(
-                        children: <Widget>[
-                          _scoreTextBorder(ap.subject, true),
-                          _scoreTextBorder(ap.credits, true),
-                          _scoreTextBorder(ap.description, true),
-                        ],
-                      ),
-                      for (final MissingRequiredCourse missingRequiredCourse
-                          in data.missingRequiredCourse)
-                        TableRow(
-                          children: <Widget>[
-                            _scoreTextBorder(
-                              missingRequiredCourse.name,
-                              false,
-                            ),
-                            _scoreTextBorder(
-                              missingRequiredCourse.credit,
-                              false,
-                            ),
-                            _scoreTextBorder(
-                              missingRequiredCourse.description,
-                              false,
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
-                ),
-              Text(
-                data.missingRequiredCoursesCredit,
-                style: _textBlueStyle(),
-              ),
-              Divider(color: Theme.of(context).colorScheme.onSurfaceVariant),
-              Text(
-                app.generalEducationCourse,
-                textAlign: TextAlign.start,
-                style: _textBlueStyle(),
-              ),
-              Text(
-                data.generalEducationCourse.isNotEmpty
-                    ? app.courseClickHint
-                    : ap.noData,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 14.0,
-                ),
-              ),
-              for (final GeneralEducationCourse generalEducationCourse
-                  in data
-                      .generalEducationCourse) ...<Widget>[
-                Text(
-                  generalEducationCourse.type ?? '',
-                  textAlign: TextAlign.start,
-                  style: _textBlueStyle(),
-                ),
-                BorderContainer(
-                  child: Table(
-                    columnWidths: const <int, TableColumnWidth>{
-                      0: FlexColumnWidth(2.5),
-                      1: FlexColumnWidth(),
-                    },
-                    defaultVerticalAlignment:
-                        TableCellVerticalAlignment.middle,
-                    border: TableBorder.symmetric(
-                      inside: BorderSide(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        width: 0.5,
-                      ),
-                    ),
-                    children: <TableRow>[
-                      TableRow(
-                        children: <Widget>[
-                          _scoreTextBorder(ap.subject, true),
-                          _scoreTextBorder(app.check, true),
-                        ],
-                      ),
-                      for (final GeneralEducationItem item
-                          in generalEducationCourse.generalEducationItem!)
-                        TableRow(
-                          children: <Widget>[
-                            InkWell(
-                              child: _scoreTextBorder(item.name, false),
-                              onTap: () {
-                                _showGeneralEducationCourseDetail(item);
-                              },
-                            ),
-                            _scoreTextBorder(item.check, false),
-                          ],
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-              if (data.generalEducationCourse.isNotEmpty)
-                Text(
-                  data.generalEducationCourseDescription,
-                  style: _textBlueStyle(),
-                )
-              else
-                const SizedBox(),
-              Divider(color: Theme.of(context).colorScheme.onSurfaceVariant),
-              Text(
-                app.otherEducationsCourse,
-                textAlign: TextAlign.start,
-                style: _textBlueStyle(),
-              ),
-              BorderContainer(
-                child: Table(
-                  columnWidths: const <int, TableColumnWidth>{
-                    0: FlexColumnWidth(2.5),
-                    1: FlexColumnWidth(),
-                    2: FlexColumnWidth(),
-                  },
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: TableBorder.symmetric(
-                    inside: BorderSide(
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    app.graduationCheckChecklistHint,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      width: 0.5,
+                      fontSize: 16.0,
                     ),
                   ),
-                  children: <TableRow>[
-                    TableRow(
-                      children: <Widget>[
-                        _scoreTextBorder(ap.subject, true),
-                        _scoreTextBorder(ap.semester, true),
-                        _scoreTextBorder(ap.credits, true),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    app.missingRequiredCourses,
+                    textAlign: TextAlign.start,
+                    style: _textBlueStyle(),
+                  ),
+                  if (data.missingRequiredCourse.isEmpty)
+                    Text(
+                      ap.noData,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 14.0,
+                      ),
+                    )
+                  else
+                    BorderContainer(
+                      child: Table(
+                        columnWidths: const <int, TableColumnWidth>{
+                          0: FlexColumnWidth(2.5),
+                          1: FlexColumnWidth(),
+                          2: FlexColumnWidth(),
+                        },
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.middle,
+                        border: TableBorder.symmetric(
+                          inside: BorderSide(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                            width: 0.5,
+                          ),
+                        ),
+                        children: <TableRow>[
+                          TableRow(
+                            children: <Widget>[
+                              _scoreTextBorder(ap.subject, true),
+                              _scoreTextBorder(ap.credits, true),
+                              _scoreTextBorder(ap.description, true),
+                            ],
+                          ),
+                          for (final MissingRequiredCourse missingRequiredCourse
+                              in data.missingRequiredCourse)
+                            TableRow(
+                              children: <Widget>[
+                                _scoreTextBorder(
+                                  missingRequiredCourse.name,
+                                  false,
+                                ),
+                                _scoreTextBorder(
+                                  missingRequiredCourse.credit,
+                                  false,
+                                ),
+                                _scoreTextBorder(
+                                  missingRequiredCourse.description,
+                                  false,
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                  Text(
+                    data.missingRequiredCoursesCredit,
+                    style: _textBlueStyle(),
+                  ),
+                  Divider(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  Text(
+                    app.generalEducationCourse,
+                    textAlign: TextAlign.start,
+                    style: _textBlueStyle(),
+                  ),
+                  Text(
+                    data.generalEducationCourse.isNotEmpty
+                        ? app.courseClickHint
+                        : ap.noData,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: 14.0,
+                    ),
+                  ),
+                  for (final GeneralEducationCourse generalEducationCourse
+                      in data.generalEducationCourse) ...<Widget>[
+                    Text(
+                      generalEducationCourse.type ?? '',
+                      textAlign: TextAlign.start,
+                      style: _textBlueStyle(),
+                    ),
+                    BorderContainer(
+                      child: Table(
+                        columnWidths: const <int, TableColumnWidth>{
+                          0: FlexColumnWidth(2.5),
+                          1: FlexColumnWidth(),
+                        },
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.middle,
+                        border: TableBorder.symmetric(
+                          inside: BorderSide(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                            width: 0.5,
+                          ),
+                        ),
+                        children: <TableRow>[
+                          TableRow(
+                            children: <Widget>[
+                              _scoreTextBorder(ap.subject, true),
+                              _scoreTextBorder(app.check, true),
+                            ],
+                          ),
+                          for (final GeneralEducationItem item
+                              in generalEducationCourse.generalEducationItem!)
+                            TableRow(
+                              children: <Widget>[
+                                InkWell(
+                                  child: _scoreTextBorder(item.name, false),
+                                  onTap: () {
+                                    _showGeneralEducationCourseDetail(item);
+                                  },
+                                ),
+                                _scoreTextBorder(item.check, false),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (data.generalEducationCourse.isNotEmpty)
+                    Text(
+                      data.generalEducationCourseDescription,
+                      style: _textBlueStyle(),
+                    )
+                  else
+                    const SizedBox(),
+                  Divider(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  Text(
+                    app.otherEducationsCourse,
+                    textAlign: TextAlign.start,
+                    style: _textBlueStyle(),
+                  ),
+                  BorderContainer(
+                    child: Table(
+                      columnWidths: const <int, TableColumnWidth>{
+                        0: FlexColumnWidth(2.5),
+                        1: FlexColumnWidth(),
+                        2: FlexColumnWidth(),
+                      },
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.middle,
+                      border: TableBorder.symmetric(
+                        inside: BorderSide(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          width: 0.5,
+                        ),
+                      ),
+                      children: <TableRow>[
+                        TableRow(
+                          children: <Widget>[
+                            _scoreTextBorder(ap.subject, true),
+                            _scoreTextBorder(ap.semester, true),
+                            _scoreTextBorder(ap.credits, true),
+                          ],
+                        ),
+                        for (final OtherEducationsCourse course
+                            in data.otherEducationsCourse)
+                          TableRow(
+                            children: <Widget>[
+                              _scoreTextBorder(course.name, false),
+                              _scoreTextBorder(course.semester, false),
+                              _scoreTextBorder(course.credit, false),
+                            ],
+                          ),
                       ],
                     ),
-                    for (final OtherEducationsCourse course
-                        in data.otherEducationsCourse)
-                      TableRow(
-                        children: <Widget>[
-                          _scoreTextBorder(course.name, false),
-                          _scoreTextBorder(course.semester, false),
-                          _scoreTextBorder(course.credit, false),
-                        ],
-                      ),
-                  ],
-                ),
+                  ),
+                  Text(
+                    data.otherEducationsCourseCredit,
+                    style: _textBlueStyle(),
+                  ),
+                  Divider(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  Text(
+                    app.graduationCheckChecklistSummary,
+                    style: const TextStyle(fontSize: 16.0),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    data.totalDescription,
+                    textAlign: TextAlign.start,
+                    style: _textBlueStyle(),
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
-              Text(
-                data.otherEducationsCourseCredit,
-                style: _textBlueStyle(),
-              ),
-              Divider(color: Theme.of(context).colorScheme.onSurfaceVariant),
-              Text(
-                app.graduationCheckChecklistSummary,
-                style: const TextStyle(fontSize: 16.0),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                data.totalDescription,
-                textAlign: TextAlign.start,
-                style: _textBlueStyle(),
-              ),
-              const SizedBox(height: 16),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
   TextStyle _textBlueStyle() {
-    return TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 16.0);
+    return TextStyle(
+      color: Theme.of(context).colorScheme.primary,
+      fontSize: 16.0,
+    );
   }
 
   TextStyle _textStyle() {
@@ -331,11 +342,11 @@ class GraduationReportPageState extends State<GraduationReportPage>
   }
 
   Future<void> _login() async {
-    final ApiResult<GeneralResponse> result =
-        await GraduationHelper.instance.login(
-      username: SelcrsHelper.instance.username,
-      password: SelcrsHelper.instance.password,
-    );
+    final ApiResult<GeneralResponse> result = await GraduationHelper.instance
+        .login(
+          username: SelcrsHelper.instance.username,
+          password: SelcrsHelper.instance.password,
+        );
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<GeneralResponse>():
@@ -348,10 +359,9 @@ class GraduationReportPageState extends State<GraduationReportPage>
   }
 
   Future<void> _getGraduationReport() async {
-    final ApiResult<GraduationReportData?> result =
-        await GraduationHelper.instance.getGraduationReport(
-      username: SelcrsHelper.instance.username,
-    );
+    final ApiResult<GraduationReportData?> result = await GraduationHelper
+        .instance
+        .getGraduationReport(username: SelcrsHelper.instance.username);
     if (!mounted) return;
     switch (result) {
       case ApiSuccess<GraduationReportData?>(:final GraduationReportData? data):
@@ -421,22 +431,18 @@ class GraduationReportPageState extends State<GraduationReportPage>
 class BorderContainer extends StatelessWidget {
   final Widget child;
 
-  const BorderContainer({
-    super.key,
-    required this.child,
-  });
+  const BorderContainer({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(
-          Radius.circular(
-            10.0,
-          ),
+        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          width: 1.5,
         ),
-        border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant, width: 1.5),
       ),
       child: child,
     );
