@@ -10,7 +10,7 @@ import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/bus/bus_list_page.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/guide/school_map_page.dart';
-import 'package:nsysu_ap/pages/info/shcool_info_page.dart';
+import 'package:nsysu_ap/pages/info/school_info_page.dart';
 import 'package:nsysu_ap/pages/login/login_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/pages/study/course_page.dart';
