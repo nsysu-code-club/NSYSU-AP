@@ -11,10 +11,7 @@ import 'package:nsysu_ap/widgets/calendar/calendar_search_bar.dart';
 class CalendarPage extends StatefulWidget {
   final bool showAppBar;
 
-  const CalendarPage({
-    super.key,
-    this.showAppBar = false,
-  });
+  const CalendarPage({super.key, this.showAppBar = false});
 
   @override
   State<CalendarPage> createState() => _CalendarPageState();
@@ -34,8 +31,10 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   void initState() {
-    AnalyticsUtil.instance
-        .setCurrentScreen('CalendarInfoPage', 'calendar_info_page.dart');
+    AnalyticsUtil.instance.setCurrentScreen(
+      'CalendarInfoPage',
+      'calendar_info_page.dart',
+    );
     super.initState();
     _loadEvents();
   }
@@ -105,9 +104,7 @@ class _CalendarPageState extends State<CalendarPage> {
       builder: (BuildContext context, Widget? child) {
         final ThemeData theme = Theme.of(context);
         return Theme(
-          data: theme.copyWith(
-            colorScheme: theme.colorScheme,
-          ),
+          data: theme.copyWith(colorScheme: theme.colorScheme),
           child: child!,
         );
       },
@@ -138,10 +135,7 @@ class _CalendarPageState extends State<CalendarPage> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     if (!widget.showAppBar) {
-      return ColoredBox(
-        color: colorScheme.surface,
-        child: _wContent(),
-      );
+      return Material(color: colorScheme.surface, child: _wContent());
     }
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -285,10 +279,7 @@ class _CalendarPageState extends State<CalendarPage> {
           const SizedBox(height: 12),
           Text(
             app.calendarEventIsEmpty,
-            style: TextStyle(
-              fontSize: 16,
-              color: colorScheme.onSurfaceVariant,
-            ),
+            style: TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),

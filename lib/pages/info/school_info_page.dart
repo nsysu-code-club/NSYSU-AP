@@ -1,6 +1,6 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/pages/info/calendar_info_page.dart';
+import 'package:nsysu_ap/pages/guide/school_map_page.dart';
 
 class SchoolInfoPage extends StatefulWidget {
   static const String routerName = '/SchoolInfo';
@@ -33,8 +33,10 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
 
   @override
   void initState() {
-    AnalyticsUtil.instance
-        .setCurrentScreen('SchoolInfoPage', 'school_info_page.dart');
+    AnalyticsUtil.instance.setCurrentScreen(
+      'SchoolInfoPage',
+      'school_info_page.dart',
+    );
     controller = TabController(length: 2, vsync: this);
     super.initState();
   }
@@ -48,18 +50,13 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(ap.schoolInfo),
-      ),
+      appBar: AppBar(title: Text(ap.schoolInfo)),
       body: TabBarView(
         controller: controller,
         physics: const NeverScrollableScrollPhysics(),
         children: <Widget>[
-          PhoneListView(
-            state: phoneState,
-            phoneModelList: phoneModelList,
-          ),
-          const CalendarPage(),
+          PhoneListView(state: phoneState, phoneModelList: phoneModelList),
+          const SchoolMapViewer(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -72,14 +69,8 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
         },
         fixedColor: Theme.of(context).colorScheme.primary,
         items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(ApIcon.phone),
-            label: ap.phones,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(ApIcon.dateRange),
-            label: ap.events,
-          ),
+          BottomNavigationBarItem(icon: Icon(ApIcon.phone), label: ap.phones),
+          BottomNavigationBarItem(icon: Icon(ApIcon.map), label: ap.schoolMap),
         ],
       ),
     );

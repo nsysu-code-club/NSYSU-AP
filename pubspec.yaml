@@ -44,6 +44,7 @@ dependencies:
   path_provider: ^2.1.5
   printing: 5.13.4
   icalendar_parser: ^2.1.0
+  photo_view: ^0.15.0
 
 dev_dependencies:
   flutter_test:
