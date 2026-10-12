@@ -148,6 +148,7 @@ class _CalendarPageState extends State<CalendarPage> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return AppBar(
       backgroundColor: colorScheme.primary,
+      foregroundColor: colorScheme.onPrimary,
       elevation: 0,
       title: Text(app.calendarPage),
       titleTextStyle: TextStyle(
@@ -157,14 +158,6 @@ class _CalendarPageState extends State<CalendarPage> {
         letterSpacing: 0.8,
       ),
       centerTitle: true,
-      leading: IconButton(
-        icon: Icon(
-          Icons.arrow_back_ios_new_rounded,
-          color: colorScheme.onPrimary,
-          size: 20,
-        ),
-        onPressed: () => Navigator.pop(context),
-      ),
       actions: <Widget>[
         IconButton(
           tooltip: _ascending
