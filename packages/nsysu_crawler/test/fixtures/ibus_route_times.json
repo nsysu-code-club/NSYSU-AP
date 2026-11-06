@@ -1,121 +1,114 @@
 {
-  "data": {
-    "route": {
-      "estimateTimes": {
-        "edges": [
-          {
-            "node": {
-              "id": "go-arriving",
-              "goBack": 1,
-              "comeTime": "",
-              "etas": [
-                {
-                  "busId": "BUS-1",
-                  "etaTime": 0
-                }
-              ]
-            }
-          },
-          {
-            "node": {
-              "id": "shared",
-              "goBack": 1,
-              "comeTime": "",
-              "etas": [
-                {
-                  "busId": "BUS-2",
-                  "etaTime": 1
-                }
-              ]
-            }
-          },
-          {
-            "node": {
-              "id": "go-minutes",
-              "goBack": 1,
-              "comeTime": "",
-              "etas": [
-                {
-                  "busId": "BUS-3",
-                  "etaTime": 5
-                },
-                {
-                  "busId": "BUS-4",
-                  "etaTime": 3
-                }
-              ]
-            }
-          },
-          {
-            "node": {
-              "id": "go-scheduled",
-              "goBack": 1,
-              "comeTime": "13:00",
-              "etas": []
-            }
-          },
-          {
-            "node": {
-              "id": "shared",
-              "goBack": 2,
-              "comeTime": "11:30",
-              "etas": []
-            }
-          }
-        ]
+  "status": 0,
+  "data": [
+    [
+      {
+        "routeid": "901",
+        "direction": "1",
+        "stopsequence": 1,
+        "stopID": "shared",
+        "stopname_Zh_Tw": "返程共用站",
+        "etas": [],
+        "nextbustime": "11:50"
       },
-      "stations": {
-        "edges": [
+      {
+        "routeid": "901",
+        "direction": "1",
+        "stopsequence": 2,
+        "stopID": "2",
+        "stopname_Zh_Tw": "無資料",
+        "estimatetime": "null",
+        "nextbustime": "24:00"
+      },
+      {
+        "routeid": "901",
+        "direction": "1",
+        "stopsequence": 3,
+        "stopID": "3",
+        "stopname_Zh_Tw": "施工",
+        "etas": [
           {
-            "goBack": 1,
-            "orderNo": 3,
-            "node": {
-              "id": "go-minutes",
-              "name": "三分鐘站"
-            }
-          },
-          {
-            "goBack": 2,
-            "orderNo": 2,
-            "node": {
-              "id": "back-not-operating",
-              "name": "未行駛站"
-            }
-          },
-          {
-            "goBack": 1,
-            "orderNo": 1,
-            "node": {
-              "id": "go-arriving",
-              "name": "進站中站"
-            }
-          },
-          {
-            "goBack": 2,
-            "orderNo": 1,
-            "node": {
-              "id": "shared",
-              "name": "返程共用站"
-            }
-          },
-          {
-            "goBack": 1,
-            "orderNo": 4,
-            "node": {
-              "id": "go-scheduled",
-              "name": "表定站"
-            }
-          },
-          {
-            "goBack": 1,
-            "orderNo": 2,
-            "node": {
-              "id": "shared",
-              "name": "去程共用站"
-            }
+            "etaTime": 0
           }
-        ]
+        ],
+        "nextbustime": "13:00",
+        "isConstruction": 1
       }
-    }
-  }
+    ],
+    [],
+    [
+      {
+        "routeid": "901",
+        "direction": "0",
+        "stopsequence": 6,
+        "stopname_Zh_Tw": "缺少ID",
+        "stationId": "123"
+      },
+      {
+        "routeid": "901",
+        "direction": "2",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "無效方向"
+      },
+      {
+        "routeid": "901",
+        "direction": "0",
+        "stopsequence": 4,
+        "stopID": "4",
+        "stopname_Zh_Tw": "表定",
+        "estimatetime": -1,
+        "nextbustime": "13:00"
+      },
+      {
+        "routeid": "901",
+        "direction": "0",
+        "stopsequence": 3,
+        "stopID": "3",
+        "stopname_Zh_Tw": "三分鐘",
+        "etas": [
+          {
+            "etaTime": 5
+          },
+          {
+            "etaTime": "3"
+          }
+        ],
+        "estimatetime": 2
+      },
+      {
+        "routeid": "901",
+        "direction": "0",
+        "stopsequence": 2,
+        "stopID": "shared",
+        "stopname_Zh_Tw": "去程共用站",
+        "stopname_En": "Outbound shared stop",
+        "etas": [
+          {
+            "etaTime": "null"
+          }
+        ],
+        "estimatetime": "1"
+      },
+      {
+        "routeid": "901",
+        "direction": "0",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "去程起點",
+        "etas": [
+          {
+            "etaTime": "3"
+          },
+          {
+            "etaTime": -1
+          },
+          {
+            "etaTime": 0
+          }
+        ],
+        "estimatetime": "9"
+      }
+    ]
+  ]
 }
