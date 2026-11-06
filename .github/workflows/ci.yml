@@ -104,6 +104,18 @@ jobs:
         with:
           distribution: 'zulu'
           java-version:  ${{ env.java_version }}
+      - name: Inspect Xcode installations
+        shell: bash
+        run: |
+          echo "Runner: $RUNNER_NAME"
+          echo "DEVELOPER_DIR=${DEVELOPER_DIR:-<unset>}"
+          echo "Selected Xcode:"
+          xcode-select -p
+          xcodebuild -version
+          echo "Installed Xcode apps:"
+          find /Applications -maxdepth 1 -name 'Xcode*.app' -print | sort
+          echo "Available SDKs:"
+          xcodebuild -showsdks
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
