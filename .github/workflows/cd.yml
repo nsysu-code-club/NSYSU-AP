@@ -135,6 +135,8 @@ jobs:
     name: iOS Deploy TestFlight
     needs: prepare
     runs-on: [self-hosted, macOS]
+    env:
+      DEVELOPER_DIR: /Applications/Xcode-27.2.0.app/Contents/Developer
     continue-on-error: true
     steps:
       - name: Checkout code
@@ -161,6 +163,10 @@ jobs:
           flutter-version-file: ${{ env.flutter_version_file }}
           channel: 'stable'
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+      - name: Install FlutterFire CLI
+        run: |
+          dart pub global activate flutterfire_cli 1.4.1
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
       - name: Flutter Initialize
         run: flutter doctor -v
       # ruby/setup-ruby prebuilt Rubies are hardcoded to /Users/runner/hostedtoolcache on macOS,
