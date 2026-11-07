@@ -108,6 +108,24 @@ class AppLocalizationsJa extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get openingBrowserContent => 'ブラウザーで外部サイトを開きます。続行しますか？';
 	@override String get openingBrowserTitle => '外部サイトを開く';
 	@override String get visitingUnSafeLink => '安全でないリンクです。URLが正しいか確認してください';
+	@override String get calendarPage => 'キャンパススケジュール';
+	@override String get calendarSortAscending => '日時：近い順';
+	@override String get calendarSortDescending => '日時：遠い順';
+	@override String get calendarNextPage => '次へ';
+	@override String get calendarPreviousPage => '前へ';
+	@override String get calendarEventIsEmpty => 'イベント情報はありません';
+	@override String calendarPageFormat({required Object total, required Object current}) => '${total} ページ中 ${current} ページ目';
+	@override String calendarEventCounts({required Object allEvents}) => '全 ${allEvents} 件のキャンパススケジュール';
+	@override String get calendarSearchBarHint => 'イベント名で検索';
+	@override String get calendarSelcrsPrefix => '履修登録日程';
+	@override String get calendarCourseSelectionPrefix => '【履修登録】';
+	@override String get calendarCourseSelectionPeriod => '履修登録期間：';
+	@override String calendarCourseSelectionStartSuffix({required Object time}) => ' (${time}開始)';
+	@override String get calendarFilterDate => '日付範囲で絞り込む';
+	@override String get calendarClearDateFilter => '日付フィルターをクリア';
+	@override String get calendarUnknownSummaryOrTime => '不明';
+	@override String get calendarLoadFailed => 'カレンダーの読み込みに失敗しました。ネットワーク接続を確認してください。';
+	@override String get calendarRetry => '再試行';
 	@override late final _AppLocalizationsEnrollCertificateJa enrollCertificate = _AppLocalizationsEnrollCertificateJa._(_root);
 }
 
@@ -217,6 +235,24 @@ extension on AppLocalizationsJa {
 			'openingBrowserContent' => 'ブラウザーで外部サイトを開きます。続行しますか？',
 			'openingBrowserTitle' => '外部サイトを開く',
 			'visitingUnSafeLink' => '安全でないリンクです。URLが正しいか確認してください',
+			'calendarPage' => 'キャンパススケジュール',
+			'calendarSortAscending' => '日時：近い順',
+			'calendarSortDescending' => '日時：遠い順',
+			'calendarNextPage' => '次へ',
+			'calendarPreviousPage' => '前へ',
+			'calendarEventIsEmpty' => 'イベント情報はありません',
+			'calendarPageFormat' => ({required Object total, required Object current}) => '${total} ページ中 ${current} ページ目',
+			'calendarEventCounts' => ({required Object allEvents}) => '全 ${allEvents} 件のキャンパススケジュール',
+			'calendarSearchBarHint' => 'イベント名で検索',
+			'calendarSelcrsPrefix' => '履修登録日程',
+			'calendarCourseSelectionPrefix' => '【履修登録】',
+			'calendarCourseSelectionPeriod' => '履修登録期間：',
+			'calendarCourseSelectionStartSuffix' => ({required Object time}) => ' (${time}開始)',
+			'calendarFilterDate' => '日付範囲で絞り込む',
+			'calendarClearDateFilter' => '日付フィルターをクリア',
+			'calendarUnknownSummaryOrTime' => '不明',
+			'calendarLoadFailed' => 'カレンダーの読み込みに失敗しました。ネットワーク接続を確認してください。',
+			'calendarRetry' => '再試行',
 			'enrollCertificate.title' => '在学証明書',
 			'enrollCertificate.regenerate' => '再取得',
 			'enrollCertificate.retry' => '再試行',

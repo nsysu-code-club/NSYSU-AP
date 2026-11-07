@@ -108,6 +108,24 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get openingBrowserContent => 'This will open an external website in your browser. Continue?';
 	@override String get openingBrowserTitle => 'Open External Website';
 	@override String get visitingUnSafeLink => 'Unsafe link. Please confirm the URL is correct.';
+	@override String get calendarPage => 'Schedule';
+	@override String get calendarSortAscending => 'Time : Ascending';
+	@override String get calendarSortDescending => 'Time : Descending';
+	@override String get calendarNextPage => 'Next';
+	@override String get calendarPreviousPage => 'Previous';
+	@override String get calendarEventIsEmpty => 'No event data found';
+	@override String calendarPageFormat({required Object current, required Object total}) => 'Page ${current} of ${total}';
+	@override String calendarEventCounts({required Object allEvents}) => 'Total events : ${allEvents}';
+	@override String get calendarSearchBarHint => 'Search event name';
+	@override String get calendarSelcrsPrefix => 'Course Selection Schedule';
+	@override String get calendarCourseSelectionPrefix => '[Course Selection] ';
+	@override String get calendarCourseSelectionPeriod => 'Schedule: ';
+	@override String calendarCourseSelectionStartSuffix({required Object time}) => ' (${time})';
+	@override String get calendarFilterDate => 'Filter date range';
+	@override String get calendarClearDateFilter => 'Clear date filter';
+	@override String get calendarUnknownSummaryOrTime => 'Unknown';
+	@override String get calendarLoadFailed => 'Failed to load calendar. Please check your network connection.';
+	@override String get calendarRetry => 'Retry';
 	@override late final _AppLocalizationsEnrollCertificateEn enrollCertificate = _AppLocalizationsEnrollCertificateEn._(_root);
 }
 
@@ -217,6 +235,24 @@ extension on AppLocalizationsEn {
 			'openingBrowserContent' => 'This will open an external website in your browser. Continue?',
 			'openingBrowserTitle' => 'Open External Website',
 			'visitingUnSafeLink' => 'Unsafe link. Please confirm the URL is correct.',
+			'calendarPage' => 'Schedule',
+			'calendarSortAscending' => 'Time : Ascending',
+			'calendarSortDescending' => 'Time : Descending',
+			'calendarNextPage' => 'Next',
+			'calendarPreviousPage' => 'Previous',
+			'calendarEventIsEmpty' => 'No event data found',
+			'calendarPageFormat' => ({required Object current, required Object total}) => 'Page ${current} of ${total}',
+			'calendarEventCounts' => ({required Object allEvents}) => 'Total events : ${allEvents}',
+			'calendarSearchBarHint' => 'Search event name',
+			'calendarSelcrsPrefix' => 'Course Selection Schedule',
+			'calendarCourseSelectionPrefix' => '[Course Selection] ',
+			'calendarCourseSelectionPeriod' => 'Schedule: ',
+			'calendarCourseSelectionStartSuffix' => ({required Object time}) => ' (${time})',
+			'calendarFilterDate' => 'Filter date range',
+			'calendarClearDateFilter' => 'Clear date filter',
+			'calendarUnknownSummaryOrTime' => 'Unknown',
+			'calendarLoadFailed' => 'Failed to load calendar. Please check your network connection.',
+			'calendarRetry' => 'Retry',
 			'enrollCertificate.title' => 'Certificate of Enrollment',
 			'enrollCertificate.regenerate' => 'Retrieve Again',
 			'enrollCertificate.retry' => 'Try Again',
