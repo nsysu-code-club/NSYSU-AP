@@ -8,6 +8,10 @@ name: Crawler Tests
 # run here — the daily `crawler-monitor.yml` cron handles those.
 
 on:
+  schedule:
+    # 01:17 UTC = 09:17 Asia/Taipei
+    - cron: '17 1 * * *'
+  workflow_dispatch:
   push:
     branches:
       - master

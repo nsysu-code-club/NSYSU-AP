@@ -1,6 +1,10 @@
 name: CI
 
 on:
+  schedule:
+    # 01:17 UTC = 09:17 Asia/Taipei
+    - cron: '17 1 * * *'
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -64,7 +68,7 @@ jobs:
       - name: Analyze
         run: flutter analyze --no-fatal-infos
       - name: Test
-        run: flutter test || true
+        run: flutter test
 
   build_android:
     name: Build Android App
