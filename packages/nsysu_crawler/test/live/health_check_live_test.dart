@@ -4,13 +4,14 @@
 library;
 
 import 'package:dio/dio.dart';
+import 'package:nsysu_crawler/nsysu_crawler.dart';
 import 'package:test/test.dart';
 
 import '_helpers.dart';
 
 /// Liveness probes for every NSYSU endpoint we depend on. No
-/// authentication, no parsing — just a plain GET that asserts the server
-/// answered below 500. If any of these fail, the school is having an
+/// authentication or parsing. School servers must respond below 500 and the
+/// iBus+ guest token endpoint must respond with HTTP 200. If any of these fail, the school is having an
 /// outage; the parser-shaped tests in `selcrs_live_test.dart` /
 /// `graduation_live_test.dart` / `tuition_live_test.dart` will fail
 /// differently when only the HTML structure has drifted.
@@ -42,58 +43,50 @@ void main() {
   };
 
   for (final MapEntry<String, String> entry in endpoints.entries) {
-    test(
-      'Health Check ${entry.key} is reachable',
-      () async {
-        logTarget('HealthCheck', 'getEndpoint', <String, dynamic>{
-          'name': entry.key,
-          'url': entry.value,
-        });
-        final Response<dynamic> response = await healthDio.get<dynamic>(
-          entry.value,
-        );
-        expect(
-          response.statusCode,
-          isNotNull,
-          reason: '${entry.key} (${entry.value}) returned no status',
-        );
-        expect(
-          response.statusCode! < 500,
-          isTrue,
-          reason:
-              '${entry.key} returned HTTP ${response.statusCode} (server '
-              'error / outage)',
-        );
-        logSuccess('HealthCheck', 'getEndpoint', <String, dynamic>{
-          'name': entry.key,
-          'statusCode': response.statusCode,
-        });
-      },
-      timeout: const Timeout(Duration(seconds: 30)),
-    );
-  }
-
-  test(
-    'Health Check iBus (campus bus realtime) is reachable',
-    () async {
-      const String endpoint = 'https://ibus.tbkc.gov.tw/ibus/graphql';
-      logTarget('HealthCheck', 'postEndpoint', <String, dynamic>{
-        'name': 'iBus (campus bus realtime)',
-        'url': endpoint,
+    test('Health Check ${entry.key} is reachable', () async {
+      logTarget('HealthCheck', 'getEndpoint', <String, dynamic>{
+        'name': entry.key,
+        'url': entry.value,
       });
-      final Response<dynamic> response = await healthDio.post<dynamic>(
-        endpoint,
-        data: <String, dynamic>{
-          'query': 'query { route(xno: 901, lang: "zh") { name } }',
-        },
+      final Response<dynamic> response = await healthDio.get<dynamic>(
+        entry.value,
       );
-      expect(response.statusCode, 200);
-      expect(response.data, isA<Map<String, dynamic>>());
-      logSuccess('HealthCheck', 'postEndpoint', <String, dynamic>{
-        'name': 'iBus (campus bus realtime)',
+      expect(
+        response.statusCode,
+        isNotNull,
+        reason: '${entry.key} (${entry.value}) returned no status',
+      );
+      expect(
+        response.statusCode! < 500,
+        isTrue,
+        reason:
+            '${entry.key} returned HTTP ${response.statusCode} (server '
+            'error / outage)',
+      );
+      logSuccess('HealthCheck', 'getEndpoint', <String, dynamic>{
+        'name': entry.key,
         'statusCode': response.statusCode,
       });
-    },
-    timeout: const Timeout(Duration(seconds: 30)),
-  );
+    }, timeout: const Timeout(Duration(seconds: 30)));
+  }
+
+  test('Health Check iBus+ (guest token) is reachable', () async {
+    const String endpoint = BusHelper.tokenPath;
+    logTarget('HealthCheck', 'postEndpoint', <String, dynamic>{
+      'name': 'iBus+ (guest token)',
+      'url': endpoint,
+    });
+    final Response<dynamic> response = await healthDio.post<dynamic>(
+      endpoint,
+      options: Options(
+        contentType: 'application/json; charset=utf-8',
+        headers: <String, dynamic>{'X-Api-Version': '1'},
+      ),
+    );
+    expect(response.statusCode, 200);
+    logSuccess('HealthCheck', 'postEndpoint', <String, dynamic>{
+      'name': 'iBus+ (guest token)',
+      'statusCode': response.statusCode,
+    });
+  }, timeout: const Timeout(Duration(seconds: 30)));
 }

@@ -1,31 +1,163 @@
 {
-  "data": {
-    "route901": {
-      "name": "橘1A",
-      "departure": "哈瑪星",
-      "destination": "中山大學行政大樓",
-      "buses": {
-        "edges": [
+  "status": 0,
+  "data": [
+    [
+      {
+        "routeid": "2192",
+        "direction": "0",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "文學院",
+        "stopname_En": "College of Liberal Arts",
+        "routename_Zh_Tw": "橘1",
+        "routename_En": "Orange 1",
+        "routeStop": {
+          "departureStopName": "哈瑪星",
+          "destinationStopName": "文學院"
+        },
+        "carId": "null",
+        "etas": []
+      }
+    ],
+    [
+      {
+        "routeid": "2192",
+        "direction": "1",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "哈瑪星",
+        "stopname_En": "Hamasen",
+        "carId": null,
+        "etas": []
+      }
+    ],
+    [
+      {
+        "routeid": "219",
+        "direction": "0",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "文學院",
+        "stopname_En": "College of Liberal Arts",
+        "routename_Zh_Tw": "橘1",
+        "routename_En": "Orange 1",
+        "routeStop": {
+          "departureStopName": "哈瑪星",
+          "destinationStopName": "文學院"
+        },
+        "carId": "null",
+        "etas": []
+      }
+    ],
+    [
+      {
+        "routeid": "219",
+        "direction": "1",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "哈瑪星",
+        "stopname_En": "Hamasen",
+        "carId": null,
+        "etas": []
+      }
+    ],
+    [
+      {
+        "routeid": "50",
+        "direction": "0",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "文學院",
+        "stopname_En": "College of Liberal Arts",
+        "routename_Zh_Tw": "橘1",
+        "routename_En": "Orange 1",
+        "routeStop": {
+          "departureStopName": "哈瑪星",
+          "destinationStopName": "文學院"
+        },
+        "carId": "null",
+        "etas": []
+      }
+    ],
+    [
+      {
+        "routeid": "50",
+        "direction": "1",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "哈瑪星",
+        "stopname_En": "Hamasen",
+        "carId": null,
+        "etas": []
+      }
+    ],
+    [
+      {
+        "routeid": "9011",
+        "direction": "0",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "文學院",
+        "stopname_En": "College of Liberal Arts",
+        "routename_Zh_Tw": "橘1",
+        "routename_En": "Orange 1",
+        "routeStop": {
+          "departureStopName": "哈瑪星",
+          "destinationStopName": "文學院"
+        },
+        "carId": "null",
+        "etas": []
+      }
+    ],
+    [
+      {
+        "routeid": "9011",
+        "direction": "1",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "哈瑪星",
+        "stopname_En": "Hamasen",
+        "carId": null,
+        "etas": []
+      }
+    ],
+    [
+      {
+        "routeid": "901",
+        "direction": "0",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "文學院",
+        "stopname_En": "College of Liberal Arts",
+        "routename_Zh_Tw": "橘1",
+        "routename_En": "Orange 1",
+        "routeStop": {
+          "departureStopName": "哈瑪星",
+          "destinationStopName": "文學院"
+        },
+        "carId": "BUS-2, null",
+        "etas": [
           {
-            "node": {
-              "id": "BUS-2"
-            }
-          },
-          {
-            "node": {
-              "id": "BUS-1"
-            }
+            "busId": "BUS-1"
           }
         ]
       }
-    },
-    "route9011": {
-      "name": "橘1B",
-      "departure": "中山大學行政大樓",
-      "destination": "哈瑪星",
-      "buses": {
-        "edges": []
+    ],
+    [
+      {
+        "routeid": "901",
+        "direction": "1",
+        "stopsequence": 1,
+        "stopID": "1",
+        "stopname_Zh_Tw": "哈瑪星",
+        "stopname_En": "Hamasen",
+        "carId": " BUS-1, NULL ",
+        "etas": [
+          {
+            "busId": "BUS-3"
+          }
+        ]
       }
-    }
-  }
+    ]
+  ]
 }
