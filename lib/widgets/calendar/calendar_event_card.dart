@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/calendar_event.dart';
 import 'package:nsysu_ap/utils/calendar_parsing.dart';
+import 'package:nsysu_ap/widgets/calendar/calendar_event_visuals.dart';
 
 class CalendarEventCard extends StatelessWidget {
   final CalendarEvent event;
+  final bool showDate;
 
   const CalendarEventCard({
     super.key,
     required this.event,
+    this.showDate = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final String dateDisplay = CalendarParsing.formatEventDisplayDate(event);
+    final CalendarEventCategory category = CalendarParsing.classifyEventSummary(
+      event.summary,
+    );
+    final Color accentColor = calendarEventAccentColor(
+      category,
+      Theme.of(context),
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -27,9 +37,7 @@ class CalendarEventCard extends StatelessWidget {
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(
-          color: colorScheme.outlineVariant,
-        ),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -40,17 +48,16 @@ class CalendarEventCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withValues(alpha: 0.4),
+                color: accentColor.withValues(alpha: 0.13),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                Icons.calendar_month_rounded,
-                color: colorScheme.primary,
+                calendarEventCategoryIcon(category),
+                color: accentColor,
                 size: 24,
               ),
             ),
             const SizedBox(width: 14),
-
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,27 +71,29 @@ class CalendarEventCard extends StatelessWidget {
                       height: 1.3,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.access_time_rounded,
-                        size: 15,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          dateDisplay,
-                          style: TextStyle(
-                            color: colorScheme.onSurfaceVariant,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
+                  if (showDate) ...<Widget>[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 15,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            dateDisplay,
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

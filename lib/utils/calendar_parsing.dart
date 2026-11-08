@@ -8,7 +8,37 @@ import 'package:nsysu_ap/models/calendar_event.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/fetch_selcrs.dart' as fs;
 
+enum CalendarEventCategory { general, courseSelection, holiday, examination }
+
 class CalendarParsing {
+  static CalendarEventCategory classifyEventSummary(String summary) {
+    final String normalized = summary.trim().toLowerCase();
+
+    if (normalized.startsWith('【選課】') ||
+        normalized.startsWith('[course selection]') ||
+        normalized.startsWith('【履修登録】')) {
+      return CalendarEventCategory.courseSelection;
+    }
+    if (normalized.contains('放假') ||
+        normalized.contains('補假') ||
+        normalized.contains('暑假開始') ||
+        normalized.contains('寒假開始') ||
+        normalized.contains('national holiday') ||
+        normalized.contains('make-up day') ||
+        normalized.contains('compensatory holiday') ||
+        normalized.contains('summer vacation begins') ||
+        normalized.contains('winter vacation begins')) {
+      return CalendarEventCategory.holiday;
+    }
+    if (normalized.contains('期中考試') ||
+        normalized.contains('期末考試') ||
+        normalized.contains('midterm examination') ||
+        normalized.contains('final examination')) {
+      return CalendarEventCategory.examination;
+    }
+    return CalendarEventCategory.general;
+  }
+
   static DateTime? parseEventDate(String raw) {
     if (raw.isEmpty || raw == '未知') {
       return null;
@@ -49,8 +79,9 @@ class CalendarParsing {
           .where((Map<String, dynamic> item) => item['type'] == 'VEVENT')
           .toList();
 
-      final List<CalendarEvent> result =
-          events.map((Map<String, dynamic> event) {
+      final List<CalendarEvent> result = events.map((
+        Map<String, dynamic> event,
+      ) {
         final dynamic summary = event['summary'] ?? '無標題';
         final Object? dtstart = event['dtstart'];
         final Object? dtend = event['dtend'];
@@ -102,9 +133,11 @@ class CalendarParsing {
         final int ed = int.parse(match.group(4)!);
         if (sm == start.month) {
           final int endYear = (em >= sm) ? start.year : start.year + 1;
-          final DateTime endDate = DateTime(endYear, em, ed).add(
-            const Duration(days: 1),
-          );
+          final DateTime endDate = DateTime(
+            endYear,
+            em,
+            ed,
+          ).add(const Duration(days: 1));
           final String newEnd =
               '${endDate.year.toString().padLeft(4, '0')}'
               '${endDate.month.toString().padLeft(2, '0')}'
@@ -120,9 +153,7 @@ class CalendarParsing {
     return event;
   }
 
-  static void sortEvents(
-      List<CalendarEvent> events,
-      {bool ascending = true}){
+  static void sortEvents(List<CalendarEvent> events, {bool ascending = true}) {
     events.sort((CalendarEvent a, CalendarEvent b) {
       final DateTime? dateA = parseEventDate(a.dtstart);
       final DateTime? dateB = parseEventDate(b.dtstart);
@@ -141,10 +172,12 @@ class CalendarParsing {
   }
 
   static List<CalendarEvent> filterEvents(
-      List<CalendarEvent> events, String keyword){
+    List<CalendarEvent> events,
+    String keyword,
+  ) {
     final String cleanKeyword = keyword.trim().toLowerCase();
     if (cleanKeyword.isEmpty) return events;
-    return events.where((CalendarEvent event){
+    return events.where((CalendarEvent event) {
       return event.summary.toLowerCase().contains(cleanKeyword);
     }).toList();
   }
@@ -183,7 +216,8 @@ class CalendarParsing {
     }).toList();
   }
 
-  static List<CalendarEvent> getPagedEvents(List<CalendarEvent> allEvents, {
+  static List<CalendarEvent> getPagedEvents(
+    List<CalendarEvent> allEvents, {
     required int page,
     int pageSize = 10,
   }) {
@@ -281,7 +315,8 @@ class CalendarParsing {
   }
 
   static Future<String> _getCalendarIcsUrl() async {
-    String icsUrl = 'https://raw.githubusercontent.com/abc873693/NSYSU-AP/master/school_schedule_115.ics';
+    String icsUrl =
+        'https://raw.githubusercontent.com/nsysu-code-club/NSYSU-AP/master/school_schedule_115.ics';
 
     if (FirebaseRemoteConfigUtils.isSupported) {
       try {
@@ -289,8 +324,9 @@ class CalendarParsing {
         await remoteConfig.fetch();
         await remoteConfig.activate();
         final String scheduleUrl =
-          LocaleSettings.currentLocale == AppLocale.zhHantTw ?
-            Constants.scheduleIcsUrlZh : Constants.scheduleIcsUrlEn;
+            LocaleSettings.currentLocale == AppLocale.zhHantTw
+            ? Constants.scheduleIcsUrlZh
+            : Constants.scheduleIcsUrlEn;
         final String remoteUrl = remoteConfig.getString(scheduleUrl);
         if (remoteUrl.isNotEmpty) {
           icsUrl = remoteUrl;

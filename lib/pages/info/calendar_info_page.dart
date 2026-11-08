@@ -4,9 +4,7 @@ import 'package:nsysu_ap/models/calendar_event.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/calendar_parsing.dart';
 import 'package:nsysu_ap/widgets/calendar/calendar_event_card.dart';
-import 'package:nsysu_ap/widgets/calendar/calendar_info_banner.dart';
-import 'package:nsysu_ap/widgets/calendar/calendar_pagination_bar.dart';
-import 'package:nsysu_ap/widgets/calendar/calendar_search_bar.dart';
+import 'package:nsysu_ap/widgets/calendar/calendar_month_overview.dart';
 
 class CalendarPage extends StatefulWidget {
   final bool showAppBar;
@@ -18,16 +16,29 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  int _currentPage = 1;
-  final int _pageSize = 10;
   List<CalendarEvent> _allEvents = <CalendarEvent>[];
   List<CalendarEvent> _filteredEvents = <CalendarEvent>[];
   bool _isLoading = true;
   bool _hasError = false;
-  bool _ascending = true;
+  bool _isSearching = false;
   String _searchKeyword = '';
   final TextEditingController _searchController = TextEditingController();
-  DateTimeRange? _selectedDateRange;
+  final ScrollController _eventScrollController = ScrollController();
+  final GlobalKey _eventListKey = GlobalKey();
+  final Map<DateTime, GlobalKey> _dateKeys = <DateTime, GlobalKey>{};
+  final Map<DateTime, GlobalKey> _scrollDateKeys = <DateTime, GlobalKey>{};
+  List<DateTime> _orderedAgendaDates = <DateTime>[];
+  DateTime _selectedDate = _dateOnly(DateTime.now());
+  DateTime? _highlightedDate;
+  DateTime? _transientEmptyDate;
+  DateTime _visibleMonth = DateTime(DateTime.now().year, DateTime.now().month);
+  bool _isProgrammaticScroll = false;
+  bool _isScrollSyncEnabled = false;
+  bool _isRemovingTransientDate = false;
+  bool _hasPendingTransientRemoval = false;
+
+  static DateTime _dateOnly(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
 
   @override
   void initState() {
@@ -36,12 +47,16 @@ class _CalendarPageState extends State<CalendarPage> {
       'calendar_info_page.dart',
     );
     super.initState();
+    _eventScrollController.addListener(_syncSelectedDateToScroll);
     _loadEvents();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _eventScrollController
+      ..removeListener(_syncSelectedDateToScroll)
+      ..dispose();
     super.dispose();
   }
 
@@ -67,18 +82,14 @@ class _CalendarPageState extends State<CalendarPage> {
       _hasError = false;
     });
     _applyFilters();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToInitialDate());
   }
 
-  void _applyFilters({bool resetPage = true}) {
+  void _applyFilters() {
     setState(() {
-      if (resetPage) {
-        _currentPage = 1;
-      }
       _filteredEvents = CalendarParsing.filterAndSortEvents(
         _allEvents,
         keyword: _searchKeyword,
-        dateRange: _selectedDateRange,
-        ascending: _ascending,
       );
     });
   }
@@ -88,59 +99,227 @@ class _CalendarPageState extends State<CalendarPage> {
     _applyFilters();
   }
 
-  void _clearSearch() {
-    _searchController.clear();
-    _searchKeyword = '';
-    _applyFilters();
-  }
-
-  Future<void> _pickDateRange() async {
-    final DateTime now = DateTime.now();
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(now.year - 3),
-      lastDate: DateTime(now.year + 3),
-      initialDateRange: _selectedDateRange,
-      builder: (BuildContext context, Widget? child) {
-        final ThemeData theme = Theme.of(context);
-        return Theme(
-          data: theme.copyWith(colorScheme: theme.colorScheme),
-          child: child!,
-        );
-      },
-    );
-
-    if (!mounted) {
+  void _toggleSearch() {
+    if (_isSearching) {
+      _searchController.clear();
+      _searchKeyword = '';
+      _isSearching = false;
+      _applyFilters();
       return;
     }
+    setState(() => _isSearching = true);
+  }
 
-    if (picked != null) {
-      _selectedDateRange = picked;
-      _applyFilters();
+  Map<DateTime, List<CalendarEvent>> _eventsByDate() {
+    final Map<DateTime, List<CalendarEvent>> result =
+        <DateTime, List<CalendarEvent>>{};
+    for (final CalendarEvent event in _filteredEvents) {
+      final DateTime? start = CalendarParsing.parseEventDate(event.dtstart);
+      if (start == null) continue;
+      result.putIfAbsent(_dateOnly(start), () => <CalendarEvent>[]).add(event);
+    }
+    return result;
+  }
+
+  Map<DateTime, Set<CalendarEventCategory>> _eventCategoriesByDate() {
+    final Map<DateTime, Set<CalendarEventCategory>> result =
+        <DateTime, Set<CalendarEventCategory>>{};
+    for (final CalendarEvent event in _filteredEvents) {
+      final DateTime? start = CalendarParsing.parseEventDate(event.dtstart);
+      if (start == null) continue;
+      result
+          .putIfAbsent(_dateOnly(start), () => <CalendarEventCategory>{})
+          .add(CalendarParsing.classifyEventSummary(event.summary));
+    }
+    return result;
+  }
+
+  Future<void> _scrollToInitialDate() async {
+    if (!mounted) {
+      _isScrollSyncEnabled = true;
+      return;
+    }
+    final DateTime today = _dateOnly(DateTime.now());
+    setState(() => _highlightedDate = today);
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return;
+    final BuildContext? targetContext = _scrollDateKeys[today]?.currentContext;
+    if (targetContext != null && targetContext.mounted) {
+      _isProgrammaticScroll = true;
+      await _scrollDateIntoView(targetContext, animate: false);
+      _isProgrammaticScroll = false;
+    }
+    _isScrollSyncEnabled = true;
+  }
+
+  Future<void> _selectDate(DateTime date, {bool animate = true}) async {
+    final DateTime normalized = _dateOnly(date);
+    final bool hasEvents = _eventsByDate().containsKey(normalized);
+    final bool isToday = normalized == _dateOnly(DateTime.now());
+    setState(() {
+      _selectedDate = normalized;
+      _visibleMonth = DateTime(normalized.year, normalized.month);
+      _highlightedDate = normalized;
+      if (isToday) {
+        _transientEmptyDate = null;
+        _hasPendingTransientRemoval = false;
+      }
+      if (!hasEvents && !isToday) {
+        _transientEmptyDate = normalized;
+        _hasPendingTransientRemoval = false;
+      }
+    });
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return;
+    final BuildContext? targetContext =
+        _scrollDateKeys[normalized]?.currentContext;
+    if (targetContext == null || !targetContext.mounted) return;
+    _isProgrammaticScroll = true;
+    await _scrollDateIntoView(targetContext, animate: animate);
+    _isProgrammaticScroll = false;
+  }
+
+  Future<void> _scrollDateIntoView(
+    BuildContext targetContext, {
+    required bool animate,
+  }) async {
+    final RenderBox? listBox =
+        _eventListKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? targetBox = targetContext.findRenderObject() as RenderBox?;
+    if (listBox == null ||
+        targetBox == null ||
+        !_eventScrollController.hasClients) {
+      return;
+    }
+    final double targetY = targetBox
+        .localToGlobal(Offset.zero, ancestor: listBox)
+        .dy;
+    final double offset = (_eventScrollController.offset + targetY - 24).clamp(
+      0.0,
+      _eventScrollController.position.maxScrollExtent,
+    );
+    if (animate) {
+      await _eventScrollController.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      _eventScrollController.jumpTo(offset);
     }
   }
 
-  void _clearDateFilter() {
-    _selectedDateRange = null;
-    _applyFilters();
+  void _changeVisibleMonth(DateTime month) {
+    setState(() => _visibleMonth = DateTime(month.year, month.month));
   }
 
-  void _toggleSort() {
-    _ascending = !_ascending;
-    _applyFilters(resetPage: false);
+  void _goToToday() {
+    final DateTime today = _dateOnly(DateTime.now());
+    _selectDate(today);
+  }
+
+  void _syncSelectedDateToScroll() {
+    if (!_isScrollSyncEnabled ||
+        _isProgrammaticScroll ||
+        _isRemovingTransientDate ||
+        !mounted) {
+      return;
+    }
+    final RenderBox? listBox =
+        _eventListKey.currentContext?.findRenderObject() as RenderBox?;
+    if (listBox == null) return;
+    DateTime? activeDate;
+    for (final DateTime date in _orderedAgendaDates) {
+      final RenderBox? box =
+          _dateKeys[date]?.currentContext?.findRenderObject() as RenderBox?;
+      if (box == null || !box.attached) continue;
+      final double y = box.localToGlobal(Offset.zero, ancestor: listBox).dy;
+      final double bottom = y + box.size.height;
+      if (bottom > 8) {
+        activeDate = date;
+        break;
+      }
+    }
+    final DateTime? transientDate = _transientEmptyDate;
+    final RenderBox? transientBox = transientDate == null
+        ? null
+        : _scrollDateKeys[transientDate]?.currentContext?.findRenderObject()
+              as RenderBox?;
+    if (transientDate != null &&
+        transientBox != null &&
+        transientBox.attached) {
+      final double top = transientBox
+          .localToGlobal(Offset.zero, ancestor: listBox)
+          .dy;
+      final double bottom = top + transientBox.size.height;
+      if (bottom <= 0 || top >= listBox.size.height) {
+        if (_eventScrollController.position.isScrollingNotifier.value) {
+          _hasPendingTransientRemoval = true;
+        } else {
+          _removeTransientDateWithoutJump(
+            activeDate,
+            removedExtentAbove: bottom <= 0 ? transientBox.size.height : 0,
+          );
+          return;
+        }
+      }
+    }
+    if (activeDate != null &&
+        (activeDate != _selectedDate || activeDate != _highlightedDate)) {
+      setState(() {
+        _selectedDate = activeDate!;
+        _highlightedDate = activeDate;
+        _visibleMonth = DateTime(activeDate.year, activeDate.month);
+      });
+    }
+  }
+
+  void _removeTransientDateWithoutJump(
+    DateTime? activeDate, {
+    required double removedExtentAbove,
+  }) {
+    _isRemovingTransientDate = true;
+    _isProgrammaticScroll = true;
+    _hasPendingTransientRemoval = false;
+    if (removedExtentAbove > 0 && _eventScrollController.hasClients) {
+      final double correctedOffset =
+          (_eventScrollController.offset - removedExtentAbove).clamp(
+            0.0,
+            _eventScrollController.position.maxScrollExtent,
+          );
+      _eventScrollController.jumpTo(correctedOffset);
+    }
+    setState(() {
+      _transientEmptyDate = null;
+      if (activeDate != null) {
+        _selectedDate = activeDate;
+        _highlightedDate = activeDate;
+        _visibleMonth = DateTime(activeDate.year, activeDate.month);
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _isProgrammaticScroll = false;
+      _isRemovingTransientDate = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Widget safeContent = SafeArea(
+      top: !widget.showAppBar,
+      bottom: false,
+      child: _wContent(),
+    );
 
     if (!widget.showAppBar) {
-      return Material(color: colorScheme.surface, child: _wContent());
+      return Material(color: colorScheme.surface, child: safeContent);
     }
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: _wAppbar(),
-      body: _wContent(),
+      body: safeContent,
     );
   }
 
@@ -150,7 +329,23 @@ class _CalendarPageState extends State<CalendarPage> {
       backgroundColor: colorScheme.primary,
       foregroundColor: colorScheme.onPrimary,
       elevation: 0,
-      title: Text(app.calendarPage),
+      title: _isSearching
+          ? TextField(
+              controller: _searchController,
+              autofocus: true,
+              textInputAction: TextInputAction.search,
+              onChanged: _performSearch,
+              decoration: InputDecoration(
+                hintText: app.calendarSearchBarHint,
+                hintStyle: TextStyle(
+                  color: colorScheme.onPrimary.withValues(alpha: 0.7),
+                ),
+                border: InputBorder.none,
+              ),
+              style: TextStyle(color: colorScheme.onPrimary, fontSize: 18),
+              cursorColor: colorScheme.onPrimary,
+            )
+          : Text(app.calendarPage),
       titleTextStyle: TextStyle(
         color: colorScheme.onPrimary,
         fontSize: 20,
@@ -160,16 +355,12 @@ class _CalendarPageState extends State<CalendarPage> {
       centerTitle: true,
       actions: <Widget>[
         IconButton(
-          tooltip: _ascending
-              ? app.calendarSortAscending
-              : app.calendarSortDescending,
+          tooltip: _isSearching ? app.optionCancel : app.calendarSearchBarHint,
           icon: Icon(
-            _ascending
-                ? Icons.arrow_upward_rounded
-                : Icons.arrow_downward_rounded,
+            _isSearching ? Icons.close_rounded : Icons.search_rounded,
             color: colorScheme.onPrimary,
           ),
-          onPressed: _toggleSort,
+          onPressed: _toggleSearch,
         ),
         const SizedBox(width: 8),
       ],
@@ -191,71 +382,182 @@ class _CalendarPageState extends State<CalendarPage> {
       return _wErrorView(colorScheme);
     }
 
-    final int totalPages = CalendarParsing.getTotalPages(
-      _filteredEvents.length,
-      pageSize: _pageSize,
-    );
-    final List<CalendarEvent> pagedEvents = CalendarParsing.getPagedEvents(
-      _filteredEvents,
-      page: _currentPage,
-      pageSize: _pageSize,
-    );
+    Widget buildCalendar({bool expandVertically = false}) =>
+        CalendarMonthOverview(
+          visibleMonth: _visibleMonth,
+          selectedDate: _selectedDate,
+          eventCategoriesByDate: _eventCategoriesByDate(),
+          onDateSelected: _selectDate,
+          onMonthChanged: _changeVisibleMonth,
+          expandVertically: expandVertically,
+        );
 
-    return Column(
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bool isLandscape = constraints.maxWidth > constraints.maxHeight;
+        if (isLandscape) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(flex: 5, child: buildCalendar(expandVertically: true)),
+              Expanded(flex: 6, child: _wAgendaPane(colorScheme)),
+            ],
+          );
+        }
+        return Column(
+          children: <Widget>[
+            buildCalendar(),
+            Expanded(child: _wAgendaPane(colorScheme)),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _wAgendaPane(ColorScheme colorScheme) {
+    return Stack(
       children: <Widget>[
-        CalendarInfoBanner(
-          eventCount: _filteredEvents.length,
-          ascending: _ascending,
-          onToggleSort: _toggleSort,
-        ),
-        CalendarSearchBar(
-          controller: _searchController,
-          searchKeyword: _searchKeyword,
-          selectedDateRange: _selectedDateRange,
-          onChanged: (String value) {
-            setState(() {
-              _searchKeyword = value;
-            });
-          },
-          onSubmitted: _performSearch,
-          onClearSearch: _clearSearch,
-          onPickDateRange: _pickDateRange,
-          onClearDateFilter: _clearDateFilter,
-        ),
-        Expanded(
-          child: _filteredEvents.isEmpty
+        Positioned.fill(
+          child: _filteredEvents.isEmpty && _searchKeyword.isNotEmpty
               ? _wEmptyView(colorScheme)
-              : ListView.builder(
-                  itemCount: pagedEvents.length,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  itemBuilder: (BuildContext context, int index) {
-                    return CalendarEventCard(event: pagedEvents[index]);
-                  },
-                ),
+              : _wMonthList(colorScheme),
         ),
-        if (_filteredEvents.isNotEmpty)
-          CalendarPaginationBar(
-            currentPage: _currentPage,
-            totalPages: totalPages,
-            onPrevious: _currentPage > 1
-                ? () {
-                    setState(() {
-                      _currentPage--;
-                    });
-                  }
-                : null,
-            onNext: _currentPage < totalPages
-                ? () {
-                    setState(() {
-                      _currentPage++;
-                    });
-                  }
-                : null,
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: FloatingActionButton.extended(
+            heroTag: 'calendar-today',
+            onPressed: _goToToday,
+            icon: const Icon(Icons.today_rounded, size: 20),
+            label: Text(MaterialLocalizations.of(context).currentDateLabel),
           ),
+        ),
       ],
+    );
+  }
+
+  Widget _wMonthList(ColorScheme colorScheme) {
+    final Map<DateTime, List<CalendarEvent>> eventGroups = _eventsByDate();
+    final DateTime today = _dateOnly(DateTime.now());
+    eventGroups.putIfAbsent(today, () => <CalendarEvent>[]);
+    final DateTime? transientDate = _transientEmptyDate;
+    if (transientDate != null) {
+      eventGroups.putIfAbsent(transientDate, () => <CalendarEvent>[]);
+    }
+    final List<MapEntry<DateTime, List<CalendarEvent>>> sortedEntries =
+        eventGroups.entries.toList()..sort(
+          (
+            MapEntry<DateTime, List<CalendarEvent>> a,
+            MapEntry<DateTime, List<CalendarEvent>> b,
+          ) => a.key.compareTo(b.key),
+        );
+    final Map<DateTime, List<CalendarEvent>> eventsByDate =
+        Map<DateTime, List<CalendarEvent>>.fromEntries(sortedEntries);
+    _orderedAgendaDates = eventsByDate.keys.toList();
+    _dateKeys.removeWhere(
+      (DateTime date, GlobalKey _) => !eventsByDate.containsKey(date),
+    );
+    _scrollDateKeys.removeWhere(
+      (DateTime date, GlobalKey _) => !eventsByDate.containsKey(date),
+    );
+    for (final DateTime date in eventsByDate.keys) {
+      _dateKeys.putIfAbsent(date, GlobalKey.new);
+      _scrollDateKeys.putIfAbsent(date, GlobalKey.new);
+    }
+    return NotificationListener<ScrollEndNotification>(
+      onNotification: (ScrollEndNotification notification) {
+        if (_hasPendingTransientRemoval) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _syncSelectedDateToScroll();
+          });
+        }
+        return false;
+      },
+      child: SingleChildScrollView(
+        key: _eventListKey,
+        controller: _eventScrollController,
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+        child: Column(
+          children: eventsByDate.entries.map((
+            MapEntry<DateTime, List<CalendarEvent>> entry,
+          ) {
+            final MaterialLocalizations localizations =
+                MaterialLocalizations.of(context);
+            final bool isActive = entry.key == _highlightedDate;
+            final bool isToday = entry.key == today;
+            final String weekday = DateFormat.EEEE().format(entry.key);
+            final String monthYear = DateFormat('MMM y').format(entry.key);
+            return Container(
+              key: _scrollDateKeys[entry.key],
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.fromLTRB(12, 16, 10, 2),
+              decoration: BoxDecoration(
+                color: isActive
+                    ? colorScheme.primaryContainer.withValues(alpha: 0.2)
+                    : Colors.transparent,
+                border: Border(
+                  left: BorderSide(
+                    color: isActive ? colorScheme.primary : Colors.transparent,
+                    width: 4,
+                  ),
+                ),
+              ),
+              child: Column(
+                key: _dateKeys[entry.key],
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Semantics(
+                    button: true,
+                    child: InkWell(
+                      onTap: () => _selectDate(entry.key),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: <Widget>[
+                            Text(
+                              '${entry.key.day}',
+                              style: TextStyle(
+                                color: isActive
+                                    ? colorScheme.primary
+                                    : colorScheme.onSurface,
+                                fontSize: 32,
+                                height: 0.9,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                isToday
+                                    ? localizations.currentDateLabel
+                                    : '$weekday · $monthYear',
+                                style: TextStyle(
+                                  color: isToday
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurfaceVariant,
+                                  fontSize: 13,
+                                  fontWeight: isToday
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  ...entry.value.map(
+                    (CalendarEvent event) =>
+                        CalendarEventCard(event: event, showDate: false),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 
