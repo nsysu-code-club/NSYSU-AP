@@ -5,18 +5,12 @@ import 'package:nsysu_ap/widgets/calendar/calendar_event_visuals.dart';
 
 class CalendarEventCard extends StatelessWidget {
   final CalendarEvent event;
-  final bool showDate;
 
-  const CalendarEventCard({
-    super.key,
-    required this.event,
-    this.showDate = true,
-  });
+  const CalendarEventCard({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final String dateDisplay = CalendarParsing.formatEventDisplayDate(event);
     final CalendarEventCategory category = CalendarParsing.classifyEventSummary(
       event.summary,
     );
@@ -59,42 +53,14 @@ class CalendarEventCard extends StatelessWidget {
             ),
             const SizedBox(width: 14),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    event.summary,
-                    style: TextStyle(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      height: 1.3,
-                    ),
-                  ),
-                  if (showDate) ...<Widget>[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.access_time_rounded,
-                          size: 15,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            dateDisplay,
-                            style: TextStyle(
-                              color: colorScheme.onSurfaceVariant,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
+              child: Text(
+                event.summary,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  height: 1.3,
+                ),
               ),
             ),
           ],

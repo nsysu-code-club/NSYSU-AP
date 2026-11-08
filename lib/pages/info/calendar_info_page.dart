@@ -345,7 +345,7 @@ class _CalendarPageState extends State<CalendarPage> {
               style: TextStyle(color: colorScheme.onPrimary, fontSize: 18),
               cursorColor: colorScheme.onPrimary,
             )
-          : Text(app.calendarPage),
+          : Text(ap.events),
       titleTextStyle: TextStyle(
         color: colorScheme.onPrimary,
         fontSize: 20,
@@ -549,8 +549,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     ),
                   ),
                   ...entry.value.map(
-                    (CalendarEvent event) =>
-                        CalendarEventCard(event: event, showDate: false),
+                    (CalendarEvent event) => CalendarEventCard(event: event),
                   ),
                 ],
               ),

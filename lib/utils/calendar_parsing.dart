@@ -1,7 +1,6 @@
 import 'package:ap_common/ap_common.dart'
     hide AppLocale, AppLocaleUtils, LocaleSettings, TranslationProvider;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
-import 'package:flutter/material.dart';
 import 'package:icalendar_parser/icalendar_parser.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/calendar_event.dart';
@@ -182,136 +181,17 @@ class CalendarParsing {
     }).toList();
   }
 
-  static List<CalendarEvent> filterEventsByDateRange(
-    List<CalendarEvent> events,
-    DateTimeRange range,
-  ) {
-    final DateTime rangeStart = DateTime(
-      range.start.year,
-      range.start.month,
-      range.start.day,
-    );
-    final DateTime rangeEndExclusive = DateTime(
-      range.end.year,
-      range.end.month,
-      range.end.day,
-    ).add(const Duration(days: 1));
-
-    return events.where((CalendarEvent event) {
-      final DateTime? start = parseEventDate(event.dtstart);
-      if (start == null) {
-        return false;
-      }
-      DateTime? end = parseEventDate(event.dtend);
-      final bool isAllDay = !event.dtstart.contains('T');
-      if (end == null || end == start) {
-        if (isAllDay) {
-          end = start.add(const Duration(days: 1));
-        } else {
-          return !start.isBefore(rangeStart) &&
-              start.isBefore(rangeEndExclusive);
-        }
-      }
-      return start.isBefore(rangeEndExclusive) && end.isAfter(rangeStart);
-    }).toList();
-  }
-
-  static List<CalendarEvent> getPagedEvents(
-    List<CalendarEvent> allEvents, {
-    required int page,
-    int pageSize = 10,
-  }) {
-    final int startIndex = (page - 1) * pageSize;
-    if (startIndex < 0 || startIndex >= allEvents.length) {
-      return <CalendarEvent>[];
-    }
-    int endIndex = startIndex + pageSize;
-    if (endIndex > allEvents.length) {
-      endIndex = allEvents.length;
-    }
-    return allEvents.sublist(startIndex, endIndex);
-  }
-
   static List<CalendarEvent> filterAndSortEvents(
     List<CalendarEvent> events, {
     String keyword = '',
-    DateTimeRange? dateRange,
     bool ascending = true,
   }) {
-    List<CalendarEvent> results = events;
-    if (keyword.trim().isNotEmpty) {
-      results = filterEvents(results, keyword);
-    }
-    if (dateRange != null) {
-      results = filterEventsByDateRange(results, dateRange);
-    } else {
-      results = List<CalendarEvent>.from(results);
-    }
+    final List<CalendarEvent> results = filterEvents(
+      List<CalendarEvent>.from(events),
+      keyword,
+    );
     sortEvents(results, ascending: ascending);
     return results;
-  }
-
-  static String formatEventDate(String raw) {
-    if (raw.isEmpty || raw == '未知') {
-      return raw;
-    }
-    final DateTime? parsed = parseEventDate(raw);
-    if (parsed != null) {
-      final String y = parsed.year.toString().padLeft(4, '0');
-      final String m = parsed.month.toString().padLeft(2, '0');
-      final String d = parsed.day.toString().padLeft(2, '0');
-      return '$y-$m-$d';
-    }
-    return raw;
-  }
-
-  static String formatEventDisplayDate(CalendarEvent event) {
-    final DateTime? start = parseEventDate(event.dtstart);
-    if (start == null) {
-      return event.dtstart;
-    }
-    final String startStr = formatEventDate(event.dtstart);
-    final DateTime? end = parseEventDate(event.dtend);
-    if (end == null || event.dtend.isEmpty || event.dtend == '未知') {
-      return startStr;
-    }
-
-    final bool isAllDay = !event.dtstart.contains('T');
-    if (isAllDay) {
-      if (end.isBefore(start) || end.difference(start).inDays <= 1) {
-        return startStr;
-      }
-      final DateTime lastIncluded = end.subtract(const Duration(days: 1));
-      final String endStr = formatEventDate(
-        '${lastIncluded.year.toString().padLeft(4, '0')}'
-        '${lastIncluded.month.toString().padLeft(2, '0')}'
-        '${lastIncluded.day.toString().padLeft(2, '0')}',
-      );
-      return '$startStr ~ $endStr';
-    } else {
-      final String endStr = formatEventDate(event.dtend);
-      if (startStr == endStr) {
-        return startStr;
-      }
-      return '$startStr ~ $endStr';
-    }
-  }
-
-  static String formatDateRange(DateTimeRange range) {
-    final String startM = range.start.month.toString().padLeft(2, '0');
-    final String startD = range.start.day.toString().padLeft(2, '0');
-    final String startStr = '${range.start.year}/$startM/$startD';
-    final String endM = range.end.month.toString().padLeft(2, '0');
-    final String endD = range.end.day.toString().padLeft(2, '0');
-    final String endStr = '${range.end.year}/$endM/$endD';
-    return '$startStr ~ $endStr';
-  }
-
-  static int getTotalPages(int totalCount, {int pageSize = 10}) {
-    if (totalCount <= 0) {
-      return 1;
-    }
-    return (totalCount / pageSize).ceil();
   }
 
   static Future<String> _getCalendarIcsUrl() async {

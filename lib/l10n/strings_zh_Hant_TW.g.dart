@@ -248,29 +248,8 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '不安全的連結，請確認網址是否正確'
 	String get visitingUnSafeLink => '不安全的連結，請確認網址是否正確';
 
-	/// zh-Hant-TW: '校園行事曆'
-	String get calendarPage => '校園行事曆';
-
-	/// zh-Hant-TW: '時間 : 由近到遠'
-	String get calendarSortAscending => '時間 : 由近到遠';
-
-	/// zh-Hant-TW: '時間 : 由遠到近'
-	String get calendarSortDescending => '時間 : 由遠到近';
-
-	/// zh-Hant-TW: '下一頁'
-	String get calendarNextPage => '下一頁';
-
-	/// zh-Hant-TW: '上一頁'
-	String get calendarPreviousPage => '上一頁';
-
 	/// zh-Hant-TW: '沒有任何活動資料'
 	String get calendarEventIsEmpty => '沒有任何活動資料';
-
-	/// zh-Hant-TW: '第 ${current} / ${total} 頁'
-	String calendarPageFormat({required Object current, required Object total}) => '第 ${current} / ${total} 頁';
-
-	/// zh-Hant-TW: '共 ${allEvents} 筆校園行程'
-	String calendarEventCounts({required Object allEvents}) => '共 ${allEvents} 筆校園行程';
 
 	/// zh-Hant-TW: '搜尋活動名稱'
 	String get calendarSearchBarHint => '搜尋活動名稱';
@@ -286,12 +265,6 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 
 	/// zh-Hant-TW: ' (${time}開始)'
 	String calendarCourseSelectionStartSuffix({required Object time}) => ' (${time}開始)';
-
-	/// zh-Hant-TW: '篩選日期區間'
-	String get calendarFilterDate => '篩選日期區間';
-
-	/// zh-Hant-TW: '清除日期篩選'
-	String get calendarClearDateFilter => '清除日期篩選';
 
 	/// zh-Hant-TW: '未知'
 	String get calendarUnknownSummaryOrTime => '未知';
@@ -451,21 +424,12 @@ extension on AppLocalizations {
 			'openingBrowserContent' => '將使用瀏覽器開啟外部網站，是否繼續？',
 			'openingBrowserTitle' => '開啟外部網站',
 			'visitingUnSafeLink' => '不安全的連結，請確認網址是否正確',
-			'calendarPage' => '校園行事曆',
-			'calendarSortAscending' => '時間 : 由近到遠',
-			'calendarSortDescending' => '時間 : 由遠到近',
-			'calendarNextPage' => '下一頁',
-			'calendarPreviousPage' => '上一頁',
 			'calendarEventIsEmpty' => '沒有任何活動資料',
-			'calendarPageFormat' => ({required Object current, required Object total}) => '第 ${current} / ${total} 頁',
-			'calendarEventCounts' => ({required Object allEvents}) => '共 ${allEvents} 筆校園行程',
 			'calendarSearchBarHint' => '搜尋活動名稱',
 			'calendarSelcrsPrefix' => '選課時程',
 			'calendarCourseSelectionPrefix' => '【選課】',
 			'calendarCourseSelectionPeriod' => '選課時段：',
 			'calendarCourseSelectionStartSuffix' => ({required Object time}) => ' (${time}開始)',
-			'calendarFilterDate' => '篩選日期區間',
-			'calendarClearDateFilter' => '清除日期篩選',
 			'calendarUnknownSummaryOrTime' => '未知',
 			'calendarLoadFailed' => '載入行事曆失敗，請檢查網路連線',
 			'calendarRetry' => '重新載入',
