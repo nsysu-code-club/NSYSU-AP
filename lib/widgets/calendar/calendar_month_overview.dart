@@ -11,6 +11,7 @@ class CalendarMonthOverview extends StatefulWidget {
   final ValueChanged<DateTime> onDateSelected;
   final ValueChanged<DateTime> onMonthChanged;
   final bool expandVertically;
+  final bool allowMonthSwipe;
 
   const CalendarMonthOverview({
     super.key,
@@ -20,6 +21,7 @@ class CalendarMonthOverview extends StatefulWidget {
     required this.onDateSelected,
     required this.onMonthChanged,
     this.expandVertically = false,
+    this.allowMonthSwipe = true,
   });
 
   @override
@@ -119,6 +121,9 @@ class _CalendarMonthOverviewState extends State<CalendarMonthOverview> {
     );
     final int firstWeekday = localizations.firstDayOfWeekIndex;
     final Widget pager = PageView.builder(
+      physics: widget.allowMonthSwipe
+          ? null
+          : const NeverScrollableScrollPhysics(),
       controller: _pageController,
       scrollDirection: Axis.vertical,
       onPageChanged: _handlePageChanged,

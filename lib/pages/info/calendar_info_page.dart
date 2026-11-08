@@ -133,14 +133,23 @@ class _CalendarPageState extends State<CalendarPage>
   void _performSearch(String keyword) {
     _searchKeyword = keyword;
     _applyFilters();
+    if (_filteredEvents.isEmpty) {
+      _stickyBarFactor.value = 0;
+      _publishStickyEvents(const <CalendarEvent, double>{});
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _searchKeyword == keyword) {
+        _syncSelectedDateToScroll();
+      }
+    });
   }
 
   void _toggleSearch() {
     if (_isSearching) {
       _searchController.clear();
-      _searchKeyword = '';
       _isSearching = false;
-      _applyFilters();
+      _performSearch('');
       return;
     }
     setState(() => _isSearching = true);
@@ -526,26 +535,30 @@ class _CalendarPageState extends State<CalendarPage>
       return _wErrorView(colorScheme);
     }
 
-    Widget buildCalendar({bool expandVertically = false}) =>
-        CalendarMonthOverview(
-          visibleMonth: _visibleMonth,
-          selectedDate: _selectedDate,
-          eventCategoriesByDate: _categoriesByDate,
-          onDateSelected: _selectDate,
-          onMonthChanged: _changeVisibleMonth,
-          expandVertically: expandVertically,
-        );
+    Widget buildCalendar({
+      bool expandVertically = false,
+      bool allowMonthSwipe = true,
+    }) => CalendarMonthOverview(
+      visibleMonth: _visibleMonth,
+      selectedDate: _selectedDate,
+      eventCategoriesByDate: _categoriesByDate,
+      onDateSelected: _selectDate,
+      onMonthChanged: _changeVisibleMonth,
+      expandVertically: expandVertically,
+      allowMonthSwipe: allowMonthSwipe,
+    );
 
+    // Scaffold consumes the keyboard inset when it resizes its body.
+    final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
         final bool isLandscape =
             constraints.maxWidth > constraints.maxHeight + keyboardInset;
         final TextScaler textScaler = MediaQuery.textScalerOf(context);
         // Allow for six rows and the month/weekday labels above them.
         final double minCalendarHeight =
             6 * 35 + 18 + 1.25 * (textScaler.scale(24) + textScaler.scale(11));
-        final bool hideCalendar =
+        final bool keyboardConstrainsCalendar =
             _isSearching &&
             keyboardInset > 0 &&
             constraints.maxHeight < minCalendarHeight;
@@ -553,17 +566,28 @@ class _CalendarPageState extends State<CalendarPage>
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              if (hideCalendar)
-                const SizedBox.shrink()
-              else
-                Expanded(flex: 5, child: buildCalendar(expandVertically: true)),
+              Expanded(
+                flex: 5,
+                child: keyboardConstrainsCalendar
+                    ? SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: SizedBox(
+                          height: minCalendarHeight,
+                          child: buildCalendar(
+                            expandVertically: true,
+                            allowMonthSwipe: false,
+                          ),
+                        ),
+                      )
+                    : buildCalendar(expandVertically: true),
+              ),
               Expanded(flex: 6, child: _wAgendaPane(colorScheme)),
             ],
           );
         }
         return Column(
           children: <Widget>[
-            if (hideCalendar) const SizedBox.shrink() else buildCalendar(),
+            if (!keyboardConstrainsCalendar) buildCalendar(),
             Expanded(child: _wAgendaPane(colorScheme)),
           ],
         );

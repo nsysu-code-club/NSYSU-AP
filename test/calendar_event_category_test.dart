@@ -99,6 +99,19 @@ void main() {
       );
     });
 
+    test('treats a date-only DTEND as exclusive even with a timed start', () {
+      final CalendarEvent event = CalendarEvent(
+        summary: 'Registration period',
+        dtstart: '20260901T090000',
+        dtend: '20260906',
+      );
+
+      expect(
+        CalendarParsing.eventEndDateInclusive(event),
+        DateTime(2026, 9, 5),
+      );
+    });
+
     test('includes the deadline day for timed course-selection ranges', () {
       final CalendarEvent event = CalendarEvent(
         summary: '【選課】Course withdrawal',

@@ -17,7 +17,7 @@ class CalendarParsing {
     final DateTime? start = parseEventDate(event.dtstart);
     final DateTime? end = parseEventDate(event.dtend);
     if (start == null || end == null) return null;
-    final DateTime inclusiveEnd = event.dtstart.contains('T')
+    final DateTime inclusiveEnd = event.dtend.contains('T')
         ? dateOnly(end)
         : dateOnly(end.subtract(const Duration(days: 1)));
     return inclusiveEnd.isBefore(dateOnly(start))
