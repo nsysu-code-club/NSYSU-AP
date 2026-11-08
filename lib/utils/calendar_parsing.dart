@@ -10,6 +10,29 @@ import 'package:nsysu_ap/utils/fetch_selcrs.dart' as fs;
 enum CalendarEventCategory { general, courseSelection, holiday, examination }
 
 class CalendarParsing {
+  static DateTime dateOnly(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
+
+  static DateTime? eventEndDateInclusive(CalendarEvent event) {
+    final DateTime? start = parseEventDate(event.dtstart);
+    final DateTime? end = parseEventDate(event.dtend);
+    if (start == null || end == null) return null;
+    final DateTime inclusiveEnd = event.dtstart.contains('T')
+        ? dateOnly(end)
+        : dateOnly(end.subtract(const Duration(days: 1)));
+    return inclusiveEnd.isBefore(dateOnly(start))
+        ? dateOnly(start)
+        : inclusiveEnd;
+  }
+
+  static bool eventCoversDate(CalendarEvent event, DateTime date) {
+    final DateTime? start = parseEventDate(event.dtstart);
+    final DateTime? end = eventEndDateInclusive(event);
+    if (start == null || end == null) return false;
+    final DateTime day = dateOnly(date);
+    return !day.isBefore(dateOnly(start)) && !day.isAfter(end);
+  }
+
   static CalendarEventCategory classifyEventSummary(String summary) {
     final String normalized = summary.trim().toLowerCase();
 

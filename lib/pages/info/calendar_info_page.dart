@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:ap_common/ap_common.dart';
+import 'package:flutter/foundation.dart' show mapEquals;
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/calendar_event.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
@@ -15,9 +18,17 @@ class CalendarPage extends StatefulWidget {
   State<CalendarPage> createState() => _CalendarPageState();
 }
 
-class _CalendarPageState extends State<CalendarPage> {
+class _CalendarPageState extends State<CalendarPage>
+    with SingleTickerProviderStateMixin {
+  static const double _stickyBarHeight = 100;
   List<CalendarEvent> _allEvents = <CalendarEvent>[];
   List<CalendarEvent> _filteredEvents = <CalendarEvent>[];
+  final Map<DateTime, List<CalendarEvent>> _eventsByDate =
+      <DateTime, List<CalendarEvent>>{};
+  final Map<DateTime, Set<CalendarEventCategory>> _categoriesByDate =
+      <DateTime, Set<CalendarEventCategory>>{};
+  final Map<DateTime, Map<CalendarEvent, DateTime>> _spanningEventsByDate =
+      <DateTime, Map<CalendarEvent, DateTime>>{};
   bool _isLoading = true;
   bool _hasError = false;
   bool _isSearching = false;
@@ -27,6 +38,11 @@ class _CalendarPageState extends State<CalendarPage> {
   final GlobalKey _eventListKey = GlobalKey();
   final Map<DateTime, GlobalKey> _dateKeys = <DateTime, GlobalKey>{};
   final Map<DateTime, GlobalKey> _scrollDateKeys = <DateTime, GlobalKey>{};
+  final Map<CalendarEvent, GlobalKey> _eventCardKeys =
+      <CalendarEvent, GlobalKey>{};
+  final ValueNotifier<Map<CalendarEvent, double>> _stickyEventProgress =
+      ValueNotifier<Map<CalendarEvent, double>>(<CalendarEvent, double>{});
+  late final AnimationController _stickyBarFactor;
   List<DateTime> _orderedAgendaDates = <DateTime>[];
   DateTime _selectedDate = _dateOnly(DateTime.now());
   DateTime? _highlightedDate;
@@ -36,9 +52,13 @@ class _CalendarPageState extends State<CalendarPage> {
   bool _isScrollSyncEnabled = false;
   bool _isRemovingTransientDate = false;
   bool _hasPendingTransientRemoval = false;
+  int _scrollRequestId = 0;
 
   static DateTime _dateOnly(DateTime date) =>
       DateTime(date.year, date.month, date.day);
+
+  static DateTime? _eventStartDate(CalendarEvent event) =>
+      CalendarParsing.parseEventDate(event.dtstart);
 
   @override
   void initState() {
@@ -47,6 +67,7 @@ class _CalendarPageState extends State<CalendarPage> {
       'calendar_info_page.dart',
     );
     super.initState();
+    _stickyBarFactor = AnimationController(vsync: this, value: 0);
     _eventScrollController.addListener(_syncSelectedDateToScroll);
     _loadEvents();
   }
@@ -54,6 +75,8 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _stickyEventProgress.dispose();
+    _stickyBarFactor.dispose();
     _eventScrollController
       ..removeListener(_syncSelectedDateToScroll)
       ..dispose();
@@ -78,10 +101,22 @@ class _CalendarPageState extends State<CalendarPage> {
     }
     setState(() {
       _allEvents = events;
+      final DateTime today = _dateOnly(DateTime.now());
+      _selectedDate = today;
+      _highlightedDate = today;
+      _visibleMonth = DateTime(today.year, today.month);
       _isLoading = false;
       _hasError = false;
     });
     _applyFilters();
+    final Map<CalendarEvent, double> ongoingToday = <CalendarEvent, double>{
+      for (final MapEntry<CalendarEvent, DateTime> entry
+          in _spanningEventsByDate[_selectedDate]?.entries ??
+              const <MapEntry<CalendarEvent, DateTime>>[])
+        if (entry.value.isBefore(_selectedDate)) entry.key: 1,
+    };
+    _publishStickyEvents(ongoingToday);
+    _stickyBarFactor.value = ongoingToday.isEmpty ? 0 : 1;
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToInitialDate());
   }
 
@@ -91,6 +126,7 @@ class _CalendarPageState extends State<CalendarPage> {
         _allEvents,
         keyword: _searchKeyword,
       );
+      _indexFilteredEvents();
     });
   }
 
@@ -110,51 +146,55 @@ class _CalendarPageState extends State<CalendarPage> {
     setState(() => _isSearching = true);
   }
 
-  Map<DateTime, List<CalendarEvent>> _eventsByDate() {
-    final Map<DateTime, List<CalendarEvent>> result =
-        <DateTime, List<CalendarEvent>>{};
+  void _indexFilteredEvents() {
+    _eventsByDate.clear();
+    _categoriesByDate.clear();
+    _spanningEventsByDate.clear();
     for (final CalendarEvent event in _filteredEvents) {
       final DateTime? start = CalendarParsing.parseEventDate(event.dtstart);
       if (start == null) continue;
-      result.putIfAbsent(_dateOnly(start), () => <CalendarEvent>[]).add(event);
+      final DateTime startDay = _dateOnly(start);
+      _eventsByDate.putIfAbsent(startDay, () => <CalendarEvent>[]).add(event);
+      final DateTime end =
+          CalendarParsing.eventEndDateInclusive(event) ?? _dateOnly(start);
+      final CalendarEventCategory category =
+          CalendarParsing.classifyEventSummary(event.summary);
+      DateTime day = _dateOnly(start);
+      while (!day.isAfter(end)) {
+        _categoriesByDate
+            .putIfAbsent(day, () => <CalendarEventCategory>{})
+            .add(category);
+        if (end.isAfter(startDay)) {
+          _spanningEventsByDate.putIfAbsent(
+            day,
+            () => <CalendarEvent, DateTime>{},
+          )[event] = startDay;
+        }
+        day = day.add(const Duration(days: 1));
+      }
     }
-    return result;
-  }
-
-  Map<DateTime, Set<CalendarEventCategory>> _eventCategoriesByDate() {
-    final Map<DateTime, Set<CalendarEventCategory>> result =
-        <DateTime, Set<CalendarEventCategory>>{};
-    for (final CalendarEvent event in _filteredEvents) {
-      final DateTime? start = CalendarParsing.parseEventDate(event.dtstart);
-      if (start == null) continue;
-      result
-          .putIfAbsent(_dateOnly(start), () => <CalendarEventCategory>{})
-          .add(CalendarParsing.classifyEventSummary(event.summary));
-    }
-    return result;
   }
 
   Future<void> _scrollToInitialDate() async {
-    if (!mounted) {
-      _isScrollSyncEnabled = true;
-      return;
-    }
-    final DateTime today = _dateOnly(DateTime.now());
-    setState(() => _highlightedDate = today);
-    await WidgetsBinding.instance.endOfFrame;
     if (!mounted) return;
+    final DateTime today = _selectedDate;
     final BuildContext? targetContext = _scrollDateKeys[today]?.currentContext;
     if (targetContext != null && targetContext.mounted) {
+      final int requestId = ++_scrollRequestId;
       _isProgrammaticScroll = true;
       await _scrollDateIntoView(targetContext, animate: false);
+      if (!mounted || requestId != _scrollRequestId) return;
       _isProgrammaticScroll = false;
     }
     _isScrollSyncEnabled = true;
+    _refreshStickyEventsForSelection(today);
   }
 
   Future<void> _selectDate(DateTime date, {bool animate = true}) async {
+    final int requestId = ++_scrollRequestId;
+    _isProgrammaticScroll = true;
     final DateTime normalized = _dateOnly(date);
-    final bool hasEvents = _eventsByDate().containsKey(normalized);
+    final bool hasEvents = _eventsByDate.containsKey(normalized);
     final bool isToday = normalized == _dateOnly(DateTime.now());
     setState(() {
       _selectedDate = normalized;
@@ -170,13 +210,26 @@ class _CalendarPageState extends State<CalendarPage> {
       }
     });
     await WidgetsBinding.instance.endOfFrame;
-    if (!mounted) return;
+    if (!mounted || requestId != _scrollRequestId) return;
     final BuildContext? targetContext =
         _scrollDateKeys[normalized]?.currentContext;
-    if (targetContext == null || !targetContext.mounted) return;
-    _isProgrammaticScroll = true;
-    await _scrollDateIntoView(targetContext, animate: animate);
-    _isProgrammaticScroll = false;
+    if (targetContext != null && targetContext.mounted) {
+      await _scrollDateIntoView(targetContext, animate: animate);
+    }
+    if (mounted && requestId == _scrollRequestId) {
+      _isScrollSyncEnabled = true;
+      _isProgrammaticScroll = false;
+      _refreshStickyEventsForSelection(normalized, animate: animate);
+    }
+  }
+
+  void _refreshStickyEventsForSelection(DateTime date, {bool animate = false}) {
+    if (!mounted) return;
+    final RenderBox? listBox =
+        _eventListKey.currentContext?.findRenderObject() as RenderBox?;
+    if (listBox != null) {
+      _updateStickyEvents(date, listBox, null, 0, animate: animate);
+    }
   }
 
   Future<void> _scrollDateIntoView(
@@ -194,7 +247,7 @@ class _CalendarPageState extends State<CalendarPage> {
     final double targetY = targetBox
         .localToGlobal(Offset.zero, ancestor: listBox)
         .dy;
-    final double offset = (_eventScrollController.offset + targetY - 24).clamp(
+    final double offset = (_eventScrollController.offset + targetY - 12).clamp(
       0.0,
       _eventScrollController.position.maxScrollExtent,
     );
@@ -215,7 +268,10 @@ class _CalendarPageState extends State<CalendarPage> {
 
   void _goToToday() {
     final DateTime today = _dateOnly(DateTime.now());
-    _selectDate(today);
+    final bool isScrolling =
+        _eventScrollController.hasClients &&
+        _eventScrollController.position.isScrollingNotifier.value;
+    _selectDate(today, animate: !isScrolling);
   }
 
   void _syncSelectedDateToScroll() {
@@ -229,13 +285,19 @@ class _CalendarPageState extends State<CalendarPage> {
         _eventListKey.currentContext?.findRenderObject() as RenderBox?;
     if (listBox == null) return;
     DateTime? activeDate;
+    DateTime? departingDate;
+    double departingBottom = 0;
     for (final DateTime date in _orderedAgendaDates) {
       final RenderBox? box =
           _dateKeys[date]?.currentContext?.findRenderObject() as RenderBox?;
       if (box == null || !box.attached) continue;
       final double y = box.localToGlobal(Offset.zero, ancestor: listBox).dy;
       final double bottom = y + box.size.height;
-      if (bottom > 8) {
+      if (bottom <= 0) {
+        departingDate = date;
+        departingBottom = bottom;
+      }
+      if (bottom > 0) {
         activeDate = date;
         break;
       }
@@ -271,6 +333,88 @@ class _CalendarPageState extends State<CalendarPage> {
         _highlightedDate = activeDate;
         _visibleMonth = DateTime(activeDate.year, activeDate.month);
       });
+    }
+    _updateStickyEvents(activeDate, listBox, departingDate, departingBottom);
+  }
+
+  void _updateStickyEvents(
+    DateTime? activeDate,
+    RenderBox listBox,
+    DateTime? departingDate,
+    double departingBottom, {
+    bool animate = false,
+  }) {
+    if (departingDate != null && departingBottom > -_stickyBarHeight) {
+      final Map<CalendarEvent, DateTime>? departing =
+          _spanningEventsByDate[departingDate];
+      final Map<CalendarEvent, DateTime>? active =
+          _spanningEventsByDate[activeDate];
+      if (departing != null &&
+          !departing.keys.any(
+            (CalendarEvent event) => active?.containsKey(event) ?? false,
+          )) {
+        _stickyBarFactor.value = 1 + departingBottom / _stickyBarHeight;
+        _publishStickyEvents(<CalendarEvent, double>{
+          for (final CalendarEvent event in departing.keys) event: 1,
+        });
+        return;
+      }
+    }
+    if (activeDate == null) {
+      _publishStickyEvents(const <CalendarEvent, double>{});
+      _stickyBarFactor.value = 0;
+      return;
+    }
+    final Map<CalendarEvent, double> next = <CalendarEvent, double>{};
+    final Map<CalendarEvent, DateTime>? spanning =
+        _spanningEventsByDate[activeDate];
+    for (final MapEntry<CalendarEvent, DateTime> entry
+        in spanning?.entries ?? const <MapEntry<CalendarEvent, DateTime>>[]) {
+      final CalendarEvent event = entry.key;
+      if (entry.value.isBefore(activeDate)) {
+        next[event] = 1;
+        continue;
+      }
+      final RenderBox? cardBox =
+          _eventCardKeys[event]?.currentContext?.findRenderObject()
+              as RenderBox?;
+      if (cardBox == null || !cardBox.attached || cardBox.size.height == 0) {
+        continue;
+      }
+      final double top = cardBox
+          .localToGlobal(Offset.zero, ancestor: listBox)
+          .dy;
+      final double progress = (-top / cardBox.size.height).clamp(0.0, 1.0);
+      if (progress > 0) next[event] = progress;
+    }
+    final double barFactor = next.values.fold<double>(
+      0,
+      (double maximum, double progress) => math.max(maximum, progress),
+    );
+    if (!animate ||
+        MediaQuery.disableAnimationsOf(context) ||
+        barFactor == _stickyBarFactor.value) {
+      _stickyBarFactor.value = barFactor;
+      _publishStickyEvents(next);
+      return;
+    }
+
+    // Keep the outgoing cards visible until the row has slid out.
+    if (next.isNotEmpty) _publishStickyEvents(next);
+    _stickyBarFactor
+        .animateTo(
+          barFactor,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+        )
+        .then((_) {
+          if (mounted) _publishStickyEvents(next);
+        });
+  }
+
+  void _publishStickyEvents(Map<CalendarEvent, double> events) {
+    if (!mapEquals(_stickyEventProgress.value, events)) {
+      _stickyEventProgress.value = events;
     }
   }
 
@@ -386,7 +530,7 @@ class _CalendarPageState extends State<CalendarPage> {
         CalendarMonthOverview(
           visibleMonth: _visibleMonth,
           selectedDate: _selectedDate,
-          eventCategoriesByDate: _eventCategoriesByDate(),
+          eventCategoriesByDate: _categoriesByDate,
           onDateSelected: _selectDate,
           onMonthChanged: _changeVisibleMonth,
           expandVertically: expandVertically,
@@ -394,19 +538,32 @@ class _CalendarPageState extends State<CalendarPage> {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final bool isLandscape = constraints.maxWidth > constraints.maxHeight;
+        final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+        final bool isLandscape =
+            constraints.maxWidth > constraints.maxHeight + keyboardInset;
+        final TextScaler textScaler = MediaQuery.textScalerOf(context);
+        // Allow for six rows and the month/weekday labels above them.
+        final double minCalendarHeight =
+            6 * 35 + 18 + 1.25 * (textScaler.scale(24) + textScaler.scale(11));
+        final bool hideCalendar =
+            _isSearching &&
+            keyboardInset > 0 &&
+            constraints.maxHeight < minCalendarHeight;
         if (isLandscape) {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Expanded(flex: 5, child: buildCalendar(expandVertically: true)),
+              if (hideCalendar)
+                const SizedBox.shrink()
+              else
+                Expanded(flex: 5, child: buildCalendar(expandVertically: true)),
               Expanded(flex: 6, child: _wAgendaPane(colorScheme)),
             ],
           );
         }
         return Column(
           children: <Widget>[
-            buildCalendar(),
+            if (hideCalendar) const SizedBox.shrink() else buildCalendar(),
             Expanded(child: _wAgendaPane(colorScheme)),
           ],
         );
@@ -418,9 +575,16 @@ class _CalendarPageState extends State<CalendarPage> {
     return Stack(
       children: <Widget>[
         Positioned.fill(
-          child: _filteredEvents.isEmpty && _searchKeyword.isNotEmpty
-              ? _wEmptyView(colorScheme)
-              : _wMonthList(colorScheme),
+          child: Column(
+            children: <Widget>[
+              _wStickyEvents(),
+              Expanded(
+                child: _filteredEvents.isEmpty && _searchKeyword.isNotEmpty
+                    ? _wEmptyView(colorScheme)
+                    : _wMonthList(colorScheme),
+              ),
+            ],
+          ),
         ),
         Positioned(
           right: 16,
@@ -436,33 +600,119 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
+  Widget _wStickyEvents() {
+    return AnimatedBuilder(
+      animation: _stickyBarFactor,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double fullWidth = constraints.maxWidth - 32;
+          return ValueListenableBuilder<Map<CalendarEvent, double>>(
+            valueListenable: _stickyEventProgress,
+            builder:
+                (
+                  BuildContext context,
+                  Map<CalendarEvent, double> events,
+                  Widget? child,
+                ) {
+                  final bool singleCard = events.length == 1;
+                  return Container(
+                    height: _stickyBarHeight,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    color: Theme.of(context).colorScheme.surface,
+                    child: SingleChildScrollView(
+                      key: ValueKey<bool>(singleCard),
+                      physics: singleCard
+                          ? const NeverScrollableScrollPhysics()
+                          : null,
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: <Widget>[
+                          for (final MapEntry<CalendarEvent, double> entry
+                              in events.entries)
+                            Container(
+                              margin: const EdgeInsets.only(right: 12),
+                              width: fullWidth * (1 - 0.25 * entry.value),
+                              child: Opacity(
+                                opacity: entry.value,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    final DateTime? start = _eventStartDate(
+                                      entry.key,
+                                    );
+                                    if (start != null) _selectDate(start);
+                                  },
+                                  child: CalendarEventCard(
+                                    event: entry.key,
+                                    compact: true,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+          );
+        },
+      ),
+      builder: (BuildContext context, Widget? child) {
+        final double barFactor = _stickyBarFactor.value;
+        return ClipRect(
+          child: Align(
+            alignment: Alignment.topLeft,
+            heightFactor: barFactor,
+            child: Transform.translate(
+              offset: Offset(0, -_stickyBarHeight * (1 - barFactor)),
+              child: child,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _wMonthList(ColorScheme colorScheme) {
-    final Map<DateTime, List<CalendarEvent>> eventGroups = _eventsByDate();
+    final Map<DateTime, List<CalendarEvent>> eventGroups =
+        Map<DateTime, List<CalendarEvent>>.of(_eventsByDate);
     final DateTime today = _dateOnly(DateTime.now());
     eventGroups.putIfAbsent(today, () => <CalendarEvent>[]);
     final DateTime? transientDate = _transientEmptyDate;
     if (transientDate != null) {
       eventGroups.putIfAbsent(transientDate, () => <CalendarEvent>[]);
     }
-    final List<MapEntry<DateTime, List<CalendarEvent>>> sortedEntries =
-        eventGroups.entries.toList()..sort(
-          (
-            MapEntry<DateTime, List<CalendarEvent>> a,
-            MapEntry<DateTime, List<CalendarEvent>> b,
-          ) => a.key.compareTo(b.key),
-        );
-    final Map<DateTime, List<CalendarEvent>> eventsByDate =
-        Map<DateTime, List<CalendarEvent>>.fromEntries(sortedEntries);
-    _orderedAgendaDates = eventsByDate.keys.toList();
+    _orderedAgendaDates = eventGroups.keys.toList()..sort();
+    final Set<DateTime> stickyExitDates = <DateTime>{};
+    for (int index = 0; index + 1 < _orderedAgendaDates.length; index++) {
+      final DateTime date = _orderedAgendaDates[index];
+      final Map<CalendarEvent, DateTime>? spanning =
+          _spanningEventsByDate[date];
+      if (spanning == null) continue;
+      final Map<CalendarEvent, DateTime>? following =
+          _spanningEventsByDate[_orderedAgendaDates[index + 1]];
+      if (!spanning.keys.any(
+        (CalendarEvent event) => following?.containsKey(event) ?? false,
+      )) {
+        stickyExitDates.add(date);
+      }
+    }
+    final List<DateTime> previousStickyExits = <DateTime>[];
     _dateKeys.removeWhere(
-      (DateTime date, GlobalKey _) => !eventsByDate.containsKey(date),
+      (DateTime date, GlobalKey _) => !eventGroups.containsKey(date),
     );
     _scrollDateKeys.removeWhere(
-      (DateTime date, GlobalKey _) => !eventsByDate.containsKey(date),
+      (DateTime date, GlobalKey _) => !eventGroups.containsKey(date),
     );
-    for (final DateTime date in eventsByDate.keys) {
+    for (final DateTime date in _orderedAgendaDates) {
       _dateKeys.putIfAbsent(date, GlobalKey.new);
       _scrollDateKeys.putIfAbsent(date, GlobalKey.new);
+    }
+    _eventCardKeys.removeWhere(
+      (CalendarEvent event, GlobalKey _) => !_filteredEvents.contains(event),
+    );
+    for (final CalendarEvent event in _filteredEvents) {
+      _eventCardKeys.putIfAbsent(event, GlobalKey.new);
     }
     return NotificationListener<ScrollEndNotification>(
       onNotification: (ScrollEndNotification notification) {
@@ -478,18 +728,24 @@ class _CalendarPageState extends State<CalendarPage> {
         controller: _eventScrollController,
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
         child: Column(
-          children: eventsByDate.entries.map((
-            MapEntry<DateTime, List<CalendarEvent>> entry,
-          ) {
+          children: _orderedAgendaDates.map((DateTime date) {
             final MaterialLocalizations localizations =
                 MaterialLocalizations.of(context);
-            final bool isActive = entry.key == _highlightedDate;
-            final bool isToday = entry.key == today;
-            final String weekday = DateFormat.EEEE().format(entry.key);
-            final String monthYear = DateFormat('MMM y').format(entry.key);
-            return Container(
-              key: _scrollDateKeys[entry.key],
-              margin: const EdgeInsets.only(bottom: 20),
+            final bool isActive = date == _highlightedDate;
+            final bool isToday = date == today;
+            final String weekday = DateFormat.EEEE().format(date);
+            final String monthYear = DateFormat('MMM y').format(date);
+            final List<DateTime> exitsBeforeDate = List<DateTime>.of(
+              previousStickyExits,
+            );
+            if (stickyExitDates.contains(date)) {
+              previousStickyExits.add(date);
+            }
+            final Widget section = Container(
+              // Give the outgoing row one pixel of travel per scroll pixel.
+              margin: EdgeInsets.only(
+                bottom: stickyExitDates.contains(date) ? _stickyBarHeight : 20,
+              ),
               padding: const EdgeInsets.fromLTRB(12, 16, 10, 2),
               decoration: BoxDecoration(
                 color: isActive
@@ -503,20 +759,20 @@ class _CalendarPageState extends State<CalendarPage> {
                 ),
               ),
               child: Column(
-                key: _dateKeys[entry.key],
+                key: _dateKeys[date],
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Semantics(
                     button: true,
                     child: InkWell(
-                      onTap: () => _selectDate(entry.key),
+                      onTap: () => _selectDate(date),
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: <Widget>[
                             Text(
-                              '${entry.key.day}',
+                              '${date.day}',
                               style: TextStyle(
                                 color: isActive
                                     ? colorScheme.primary
@@ -548,11 +804,51 @@ class _CalendarPageState extends State<CalendarPage> {
                       ),
                     ),
                   ),
-                  ...entry.value.map(
-                    (CalendarEvent event) => CalendarEventCard(event: event),
+                  ...eventGroups[date]!.map(
+                    (CalendarEvent event) => CalendarEventCard(
+                      key: _eventCardKeys[event],
+                      event: event,
+                    ),
                   ),
                 ],
               ),
+            );
+            final Widget positionedSection = exitsBeforeDate.isEmpty
+                ? section
+                : AnimatedBuilder(
+                    animation: _eventScrollController,
+                    child: section,
+                    builder: (BuildContext context, Widget? child) {
+                      final RenderBox? listBox =
+                          _eventListKey.currentContext?.findRenderObject()
+                              as RenderBox?;
+                      if (listBox == null) return child!;
+                      double remainingSpace = 0;
+                      for (final DateTime exitDate in exitsBeforeDate) {
+                        final RenderBox? exitBox =
+                            _scrollDateKeys[exitDate]?.currentContext
+                                    ?.findRenderObject()
+                                as RenderBox?;
+                        if (exitBox == null || !exitBox.hasSize) continue;
+                        final double gapEnd =
+                            exitBox
+                                .localToGlobal(Offset.zero, ancestor: listBox)
+                                .dy +
+                            exitBox.size.height;
+                        remainingSpace += gapEnd.clamp(0.0, _stickyBarHeight);
+                      }
+                      // The scroll offset first consumes the row's exit space.
+                      // Hold the agenda at the viewport edge until the
+                      // remaining exit space reaches zero.
+                      return Transform.translate(
+                        offset: Offset(0, -remainingSpace),
+                        child: child,
+                      );
+                    },
+                  );
+            return SizedBox(
+              key: _scrollDateKeys[date],
+              child: positionedSection,
             );
           }).toList(),
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nsysu_ap/models/calendar_event.dart';
 import 'package:nsysu_ap/utils/calendar_parsing.dart';
 
 void main() {
@@ -72,6 +73,46 @@ void main() {
       expect(
         CalendarParsing.classifyEventSummary('Faculty submit final grades'),
         CalendarEventCategory.general,
+      );
+    });
+  });
+
+  group('CalendarParsing multi-day coverage', () {
+    test('treats an all-day DTEND as exclusive', () {
+      final CalendarEvent event = CalendarEvent(
+        summary: 'Registration period',
+        dtstart: '20260814',
+        dtend: '20260905',
+      );
+
+      expect(
+        CalendarParsing.eventEndDateInclusive(event),
+        DateTime(2026, 9, 4),
+      );
+      expect(
+        CalendarParsing.eventCoversDate(event, DateTime(2026, 9, 4)),
+        isTrue,
+      );
+      expect(
+        CalendarParsing.eventCoversDate(event, DateTime(2026, 9, 5)),
+        isFalse,
+      );
+    });
+
+    test('includes the deadline day for timed course-selection ranges', () {
+      final CalendarEvent event = CalendarEvent(
+        summary: '【選課】Course withdrawal',
+        dtstart: '20261113T090000',
+        dtend: '20261120T170000',
+      );
+
+      expect(
+        CalendarParsing.eventEndDateInclusive(event),
+        DateTime(2026, 11, 20),
+      );
+      expect(
+        CalendarParsing.eventCoversDate(event, DateTime(2026, 11, 20)),
+        isTrue,
       );
     });
   });
