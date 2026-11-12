@@ -44,6 +44,29 @@ dart run tool/install_git_hooks.dart
 fvm dart run tool/pre_commit.dart
 ```
 
+### Linux 桌面版建置
+
+除了 Flutter 官方文件列出的 `clang`、`cmake`、`ninja-build`、`pkg-config`、`libgtk-3-dev`，本專案在 Ubuntu / Debian 上還需要：
+
+```bash
+sudo apt-get install -y liblzma-dev lld llvm libwebkit2gtk-4.1-dev
+```
+
+- `liblzma-dev`：`linux/flutter/CMakeLists.txt` 以 `pkg_check_modules` 要求 `liblzma`。
+- `lld`、`llvm`：`objective_c` 套件的 native-assets build hook 會尋找 `ld.lld` 與 `llvm-ar`。
+- `libwebkit2gtk-4.1-dev`：登入流程使用的 `desktop_webview_window`。
+
+若第一次 CMake configure 因缺套件而失敗，補裝後請先 `rm -rf build/linux` 再建置；否則 CMake cache 會保留預設的 `/usr/local` 安裝路徑而出現 `Permission denied`。
+
+打包 `.deb` 使用 [flutter_distributor](https://pub.dev/packages/flutter_distributor)，套件中繼資料在 `linux/packaging/deb/make_config.yaml`：
+
+```bash
+dart pub global activate flutter_distributor
+flutter_distributor package --platform linux --targets deb --skip-clean
+```
+
+Firebase（推播、Remote Config、Crashlytics）沒有 Linux 實作，桌面版一律關閉，行為與 Windows 版相同。
+
 ## 2. Issue 與分支原則
 
 所有變更在開始前都應該先有對應的 Issue。這能讓討論、設計取捨、實作分支與 PR 都有清楚的追蹤來源。
