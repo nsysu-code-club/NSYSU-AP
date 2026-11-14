@@ -14,42 +14,49 @@ Map<String, dynamic> _readFixture(String name) =>
 
 void main() {
   group('parseIbusRouteList', () {
-    test('keeps supported order and maps active bus ids', () {
+    test(
+      'keeps route order and deduplicates vehicle IDs across directions',
+      () {
+        final List<BusInfo> routes = parseIbusRouteList(
+          _readFixture('ibus_route_list.json'),
+          languageCode: 'zh',
+        );
+        expect(
+          routes.map((BusInfo route) => route.routeId),
+          supportedBusRouteIds,
+        );
+        expect(routes.first.busIds, <String>['BUS-2', 'BUS-1', 'BUS-3']);
+        expect(routes.first.carId, 'BUS-2,BUS-1,BUS-3');
+        expect(routes.first.isOperating, isTrue);
+        expect(routes.last.isOperating, isFalse);
+        expect(routes.last.stopName, '未行駛');
+      },
+    );
+
+    test('localizes endpoints from stop names across both directions', () {
       final List<BusInfo> routes = parseIbusRouteList(
         _readFixture('ibus_route_list.json'),
-        languageCode: 'zh',
+        languageCode: 'en-US',
       );
-
-      expect(routes.map((BusInfo route) => route.routeId), <int>[901, 9011]);
-      expect(routes.first.busIds, <String>['BUS-2', 'BUS-1']);
-      expect(routes.first.carId, 'BUS-2,BUS-1');
-      expect(routes.first.isOperating, isTrue);
-      expect(routes.last.isOperating, isFalse);
-      expect(routes.last.stopName, '未行駛');
-    });
-
-    test('uses english out-of-service text', () {
-      final List<BusInfo> routes = parseIbusRouteList(
-        _readFixture('ibus_route_list.json'),
-        languageCode: 'en',
-      );
-
+      expect(routes.first.name, 'Orange 1');
+      expect(routes.first.departure, 'Hamasen');
+      expect(routes.first.destination, 'College of Liberal Arts');
       expect(routes.last.stopName, 'Out of service');
     });
 
-    test('rejects GraphQL errors and empty supported data', () {
+    test('rejects application errors and partial batches', () {
+      final Map<String, dynamic> response = _readFixture(
+        'ibus_route_list.json',
+      );
+      response['status'] = 1;
       expect(
-        () => parseIbusRouteList(<String, dynamic>{
-          'errors': <dynamic>[
-            <String, dynamic>{'message': 'failed'},
-          ],
-        }, languageCode: 'zh'),
+        () => parseIbusRouteList(response, languageCode: 'zh'),
         throwsFormatException,
       );
+      response['status'] = 0;
+      (response['data'] as List<dynamic>).removeLast();
       expect(
-        () => parseIbusRouteList(<String, dynamic>{
-          'data': <String, dynamic>{},
-        }, languageCode: 'zh'),
+        () => parseIbusRouteList(response, languageCode: 'zh'),
         throwsFormatException,
       );
     });
@@ -62,88 +69,47 @@ void main() {
       times = parseIbusRouteTimes(
         _readFixture('ibus_route_times.json'),
         routeId: 901,
+        languageCode: 'en',
         taipeiNow: DateTime(2026, 7, 14, 12),
       );
     });
 
-    test('joins by stop and direction, then sorts by direction and order', () {
-      expect(times, hasLength(6));
+    test('sorts by direction and sequence and skips malformed stops', () {
       expect(
         times.map((BusTime time) => '${time.direction.name}:${time.seqNo}'),
-        <String>['go:1', 'go:2', 'go:3', 'go:4', 'back:1', 'back:2'],
+        <String>['go:1', 'go:2', 'go:3', 'go:4', 'back:1', 'back:2', 'back:3'],
       );
       expect(times[1].stopId, 'shared');
-      expect(times[1].name, '去程共用站');
+      expect(times[1].name, 'Outbound shared stop');
       expect(times[4].stopId, 'shared');
       expect(times[4].name, '返程共用站');
+      expect(times[1].isGoBack, 'N');
+      expect(times[4].isGoBack, 'Y');
     });
 
-    test('maps nearest ETA and all arrival states', () {
-      expect(times[0].arrivalStatus, BusArrivalStatus.arriving);
-      expect(times[0].etaMinutes, 0);
-      expect(times[0].arrivedTime, '進站中');
-      expect(times[1].arrivalStatus, BusArrivalStatus.comingSoon);
-      expect(times[1].etaMinutes, 1);
-      expect(times[2].arrivalStatus, BusArrivalStatus.minutes);
-      expect(times[2].etaMinutes, 3);
-      expect(times[2].arrivedTime, '3');
-      expect(times[3].arrivalStatus, BusArrivalStatus.scheduled);
-      expect(times[3].scheduledTime, '13:00');
-      expect(times[4].arrivalStatus, BusArrivalStatus.departed);
-      expect(times[5].arrivalStatus, BusArrivalStatus.notOperating);
-    });
-
-    test('skips malformed station data', () {
-      final List<BusTime> parsed = parseIbusRouteTimes(<String, dynamic>{
-        'data': <String, dynamic>{
-          'route': <String, dynamic>{
-            'estimateTimes': <String, dynamic>{'edges': <dynamic>[]},
-            'stations': <String, dynamic>{
-              'edges': <dynamic>[
-                <String, dynamic>{
-                  'goBack': 3,
-                  'orderNo': 1,
-                  'node': <String, dynamic>{'id': 'x', 'name': 'bad'},
-                },
-              ],
-            },
-          },
-        },
-      }, routeId: 901);
-
-      expect(parsed, isEmpty);
-    });
-
-    test('degrades malformed comeTime to notOperating', () {
-      final List<BusTime> parsed = parseIbusRouteTimes(<String, dynamic>{
-        'data': <String, dynamic>{
-          'route': <String, dynamic>{
-            'estimateTimes': <String, dynamic>{
-              'edges': <dynamic>[
-                <String, dynamic>{
-                  'node': <String, dynamic>{
-                    'id': 'bad-time',
-                    'goBack': 1,
-                    'comeTime': '24:00',
-                    'etas': <dynamic>[],
-                  },
-                },
-              ],
-            },
-            'stations': <String, dynamic>{
-              'edges': <dynamic>[
-                <String, dynamic>{
-                  'goBack': 1,
-                  'orderNo': 1,
-                  'node': <String, dynamic>{'id': 'bad-time', 'name': '錯誤時間站'},
-                },
-              ],
-            },
-          },
-        },
-      }, routeId: 901);
-
-      expect(parsed.single.arrivalStatus, BusArrivalStatus.notOperating);
-    });
+    test(
+      'prefers valid per-vehicle ETAs and falls back to stop ETA or time',
+      () {
+        expect(
+          times.map((BusTime time) => time.arrivalStatus),
+          <BusArrivalStatus>[
+            BusArrivalStatus.arriving,
+            BusArrivalStatus.comingSoon,
+            BusArrivalStatus.minutes,
+            BusArrivalStatus.scheduled,
+            BusArrivalStatus.departed,
+            BusArrivalStatus.notOperating,
+            BusArrivalStatus.notOperating,
+          ],
+        );
+        expect(times[0].etaMinutes, 0);
+        expect(times[1].etaMinutes, 1);
+        expect(times[2].etaMinutes, 3);
+        expect(times[3].scheduledTime, '13:00');
+        expect(times[5].scheduledTime, isNull);
+        expect(times[6].etaMinutes, isNull);
+        expect(times[6].scheduledTime, isNull);
+      },
+    );
   });
 }

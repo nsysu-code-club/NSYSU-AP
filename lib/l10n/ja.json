@@ -43,6 +43,7 @@
   "busScheduledTime": "予定時刻\n${time}",
   "busDeparted": "出発済み",
   "busNotOperating": "運行なし",
+  "busNoLiveBus": "運行中の車両なし",
   "towCarHelper": "レッカー移動サポート",
   "subscriptionArea": "通知を受け取るエリア",
   "towCarNews": "最新情報",

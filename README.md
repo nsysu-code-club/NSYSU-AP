@@ -103,9 +103,11 @@ NSYSU_USER=B12345678 NSYSU_PASS=xxx dart test -P live -r expanded
 
 | Workflow | 觸發 | 功能 |
 |---|---|---|
-| [`CI`](.github/workflows/ci.yml) | PR / push to master | Android / iOS / Windows 建置驗證 |
-| [`Crawler Tests`](.github/workflows/test.yml) | PR / push to master | 跑 nsysu_crawler 的 hermetic dart test，亞秒級 |
-| [`Crawler Monitor`](.github/workflows/crawler-monitor.yml) | 每天 08:00 TPE + 手動觸發 | 打真站跑 live tests，失敗發 Discord 通知並分類「網站異常」🔴 / 「結構異常」🟡 |
+| [`CI`](.github/workflows/ci.yml) | PR / push to master、develop（符合 paths 篩選）+ 每天 08:00 TPE + 手動觸發 | Flutter 分析與單元測試，失敗即阻擋；非每日排程另執行 Android / iOS / Windows 建置 |
+| [`Crawler Tests`](.github/workflows/test.yml) | PR / push to master + 每天 08:00 TPE + 手動觸發 | nsysu_crawler 靜態分析與不連網的單元測試 |
+| [`Crawler Monitor`](.github/workflows/crawler-monitor.yml) | 每天 08:00 TPE + 手動觸發 | 真站 live tests，包含 iBus+ token 與五條公車路線的雙向站點；失敗發 Discord 通知並標示失敗測試群組 |
+
+排程執行預設分支的程式碼，分支修改須合併後才會納入每日驗證；實際啟動時間可能延後。公車測試不要求當下有營運車輛，因此停駛時仍可驗證 API 與站點結構。
 
 設 secrets：repo Settings → Secrets and variables → Actions
 - `NSYSU_USERNAME` / `NSYSU_PASSWORD`：跑 cron 的測試帳號（**用 alt account，不要日常帳號**）

@@ -43,6 +43,7 @@
   "busScheduledTime": "Scheduled\n${time}",
   "busDeparted": "Departed",
   "busNotOperating": "Not\nOperating",
+  "busNoLiveBus": "No live bus",
   "towCarHelper": "Tow Car Helper",
   "subscriptionArea": "Subscription Area",
   "towCarNews": "News",

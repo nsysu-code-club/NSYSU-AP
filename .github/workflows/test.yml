@@ -1,13 +1,17 @@
 name: Crawler Tests
 
 # Hermetic dart tests for the nsysu_crawler package — runs on every PR
-# and on master pushes. Pure Dart, no flutter required, sub-second
-# runtime; cheap protection against parser regressions.
+# and on master pushes, plus daily validation. Pure Dart, no flutter
+# required; cheap protection against parser regressions.
 #
 # Live integration tests (those tagged `live` / `live-anonymous`) are NOT
 # run here — the daily `crawler-monitor.yml` cron handles those.
 
 on:
+  schedule:
+    # 00:00 UTC = 08:00 Asia/Taipei
+    - cron: '0 0 * * *'
+  workflow_dispatch:
   push:
     branches:
       - master

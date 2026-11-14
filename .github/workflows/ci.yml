@@ -1,6 +1,9 @@
 name: CI
 
 on:
+  schedule:
+    # 00:00 UTC = 08:00 Asia/Taipei; daily analysis and tests only.
+    - cron: '0 0 * * *'
   push:
     branches:
       - master
@@ -10,6 +13,7 @@ on:
     paths:
       - 'lib/**'
       - 'test/**'
+      - 'packages/nsysu_crawler/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
       - 'android/**'
@@ -27,6 +31,7 @@ on:
     paths:
       - 'lib/**'
       - 'test/**'
+      - 'packages/nsysu_crawler/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
       - 'android/**'
@@ -45,7 +50,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -65,9 +70,10 @@ jobs:
       - name: Analyze
         run: flutter analyze --no-fatal-infos
       - name: Test
-        run: flutter test || true
+        run: flutter test
 
   build_android:
+    if: github.event_name != 'schedule'
     name: Build Android App
     needs: analyze_and_test
     runs-on: ubuntu-latest
@@ -94,6 +100,7 @@ jobs:
         run: flutter build appbundle --release
 
   build_ios:
+    if: github.event_name != 'schedule'
     name: Build iOS App
     needs: analyze_and_test
     runs-on: [self-hosted, macOS]
@@ -136,6 +143,7 @@ jobs:
         run: flutter build ios --release --no-codesign
 
   build_windows:
+    if: github.event_name != 'schedule'
     name: Build Windows App
     needs: analyze_and_test
     runs-on: windows-latest

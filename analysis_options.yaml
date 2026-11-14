@@ -8,6 +8,8 @@ analyzer:
     - lib/l10n/*.dart
     - lib/**/*.g.dart
     - packages/**
+    - ios/vendor/**
+    - macos/vendor/**
 
 linter:
   rules:

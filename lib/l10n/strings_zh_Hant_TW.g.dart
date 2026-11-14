@@ -173,6 +173,9 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '未行駛'
 	String get busNotOperating => '未行駛';
 
+	/// zh-Hant-TW: '目前無車輛'
+	String get busNoLiveBus => '目前無車輛';
+
 	/// zh-Hant-TW: '拖車小幫手'
 	String get towCarHelper => '拖車小幫手';
 
@@ -372,6 +375,7 @@ extension on AppLocalizations {
 			'busScheduledTime' => ({required Object time}) => '表定\n${time}',
 			'busDeparted' => '已離站',
 			'busNotOperating' => '未行駛',
+			'busNoLiveBus' => '目前無車輛',
 			'towCarHelper' => '拖車小幫手',
 			'subscriptionArea' => '訂閱區域',
 			'towCarNews' => '最新消息',

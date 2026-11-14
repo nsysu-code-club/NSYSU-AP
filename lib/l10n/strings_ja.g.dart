@@ -83,6 +83,7 @@ class AppLocalizationsJa extends AppLocalizations with BaseTranslations<AppLocal
 	@override String busScheduledTime({required Object time}) => '予定時刻\n${time}';
 	@override String get busDeparted => '出発済み';
 	@override String get busNotOperating => '運行なし';
+	@override String get busNoLiveBus => '運行中の車両なし';
 	@override String get towCarHelper => 'レッカー移動サポート';
 	@override String get subscriptionArea => '通知を受け取るエリア';
 	@override String get towCarNews => '最新情報';
@@ -192,6 +193,7 @@ extension on AppLocalizationsJa {
 			'busScheduledTime' => ({required Object time}) => '予定時刻\n${time}',
 			'busDeparted' => '出発済み',
 			'busNotOperating' => '運行なし',
+			'busNoLiveBus' => '運行中の車両なし',
 			'towCarHelper' => 'レッカー移動サポート',
 			'subscriptionArea' => '通知を受け取るエリア',
 			'towCarNews' => '最新情報',

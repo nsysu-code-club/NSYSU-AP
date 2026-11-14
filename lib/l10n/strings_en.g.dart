@@ -83,6 +83,7 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String busScheduledTime({required Object time}) => 'Scheduled\n${time}';
 	@override String get busDeparted => 'Departed';
 	@override String get busNotOperating => 'Not\nOperating';
+	@override String get busNoLiveBus => 'No live bus';
 	@override String get towCarHelper => 'Tow Car Helper';
 	@override String get subscriptionArea => 'Subscription Area';
 	@override String get towCarNews => 'News';
@@ -192,6 +193,7 @@ extension on AppLocalizationsEn {
 			'busScheduledTime' => ({required Object time}) => 'Scheduled\n${time}',
 			'busDeparted' => 'Departed',
 			'busNotOperating' => 'Not\nOperating',
+			'busNoLiveBus' => 'No live bus',
 			'towCarHelper' => 'Tow Car Helper',
 			'subscriptionArea' => 'Subscription Area',
 			'towCarNews' => 'News',
