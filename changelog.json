@@ -1,4 +1,17 @@
 {
+  "20101": {
+    "version": "2.1.1",
+    "visible": true,
+    "date": "2026/11/14",
+    "zh-TW": [
+      "修正公車路線與到站資訊無法載入的問題",
+      "改善目前無車輛時的提示文字"
+    ],
+    "en-US": [
+      "Fix bus routes and arrival information failing to load.",
+      "Improve the message shown when no live vehicles are available."
+    ]
+  },
   "20100": {
     "version": "2.1.0",
     "visible": true,
