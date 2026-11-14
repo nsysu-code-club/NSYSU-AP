@@ -1,22 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/models/calendar_event.dart';
 import 'package:nsysu_ap/utils/calendar_parsing.dart';
+import 'package:nsysu_ap/widgets/calendar/calendar_event_visuals.dart';
 
 class CalendarEventCard extends StatelessWidget {
   final CalendarEvent event;
+  final bool compact;
 
   const CalendarEventCard({
     super.key,
     required this.event,
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final String dateDisplay = CalendarParsing.formatEventDisplayDate(event);
+    final CalendarEventCategory category = CalendarParsing.classifyEventSummary(
+      event.summary,
+    );
+    final Color accentColor = calendarEventAccentColor(
+      category,
+      Theme.of(context),
+    );
+    final DateTime? start = CalendarParsing.parseEventDate(event.dtstart);
+    final DateTime? end = CalendarParsing.eventEndDateInclusive(event);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
+    final String? rangeLabel =
+        start != null && end != null && end.isAfter(start)
+        ? '${localizations.formatShortDate(start)} → '
+              '${localizations.formatShortDate(end)}'
+        : null;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      height: compact ? 84 : null,
+      margin: compact ? EdgeInsets.zero : const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -27,64 +47,54 @@ class CalendarEventCard extends StatelessWidget {
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(
-          color: colorScheme.outlineVariant,
-        ),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(compact ? 12 : 16),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              width: 44,
-              height: 44,
+              width: compact ? 40 : 44,
+              height: compact ? 40 : 44,
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withValues(alpha: 0.4),
+                color: accentColor.withValues(alpha: 0.13),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                Icons.calendar_month_rounded,
-                color: colorScheme.primary,
+                calendarEventCategoryIcon(category),
+                color: accentColor,
                 size: 24,
               ),
             ),
-            const SizedBox(width: 14),
-
+            SizedBox(width: compact ? 10 : 14),
             Expanded(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
                     event.summary,
+                    maxLines: compact ? 2 : null,
+                    overflow: compact ? TextOverflow.ellipsis : null,
                     style: TextStyle(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      height: 1.3,
+                      fontSize: compact ? 14 : 16,
+                      height: 1.25,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.access_time_rounded,
-                        size: 15,
+                  if (rangeLabel != null) ...<Widget>[
+                    const SizedBox(height: 3),
+                    Text(
+                      rangeLabel,
+                      style: TextStyle(
                         color: colorScheme.onSurfaceVariant,
+                        fontSize: compact ? 11 : 12,
+                        fontWeight: FontWeight.w600,
                       ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          dateDisplay,
-                          style: TextStyle(
-                            color: colorScheme.onSurfaceVariant,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ],
               ),
             ),
