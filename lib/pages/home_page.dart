@@ -9,8 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/pages/bus/bus_list_page.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
-import 'package:nsysu_ap/pages/guide/school_map_page.dart';
-import 'package:nsysu_ap/pages/info/shcool_info_page.dart';
+import 'package:nsysu_ap/pages/info/calendar_info_page.dart';
+import 'package:nsysu_ap/pages/info/school_info_page.dart';
 import 'package:nsysu_ap/pages/login/login_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/pages/study/course_page.dart';
@@ -378,7 +378,14 @@ class HomePageState extends State<HomePage> {
             onTap: () =>
                 _openPage(BusListPage(locale: Locale(Intl.defaultLocale!))),
           ),
-          _buildSchoolNavigationSection(),
+          DrawerMenuItem(
+            icon: ApIcon.dateRange,
+            title: ap.events,
+            onTap: () => _openPage(
+              const CalendarPage(showAppBar: true),
+              useCupertinoRoute: false,
+            ),
+          ),
           DrawerMenuItem(
             icon: ApIcon.school,
             title: app.graduationCheckChecklist,
@@ -538,26 +545,6 @@ class HomePageState extends State<HomePage> {
               );
             }
           },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSchoolNavigationSection() {
-    return DrawerMenuSection(
-      icon: ApIcon.navigation,
-      title: ap.schoolNavigation,
-      initiallyExpanded: isSchoolNavigationExpanded,
-      onExpansionChanged: (bool value) {
-        setState(() {
-          isSchoolNavigationExpanded = value;
-        });
-      },
-      children: <DrawerSubMenuItem>[
-        DrawerSubMenuItem(
-          icon: ApIcon.map,
-          title: ap.schoolMap,
-          onTap: () => _openPage(SchoolMapPage(), useCupertinoRoute: false),
         ),
       ],
     );
