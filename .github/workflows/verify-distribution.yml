@@ -55,7 +55,8 @@ jobs:
                   raise RuntimeError('No valid Distribution identity with private key')
               run('security', 'find-certificate', '-c', 'Apple Distribution', '-p', keychain)
               target = str(work / 'signature-probe')
-              shutil.copy2('/bin/ls', target)
+              shutil.copyfile('/bin/ls', target)
+          os.chmod(target, 0o700)
               failures = 0
               for identity in found:
                   for mode in ('match-only', 'with-wwdr', 'with-partition-list'):
