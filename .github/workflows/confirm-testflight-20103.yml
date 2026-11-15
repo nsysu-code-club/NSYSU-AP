@@ -74,6 +74,7 @@ jobs:
                 api_key: api_key,
                 app_identifier: "com.nsysu.ap",
                 distribute_only: true,
+                app_platform: "ios",
                 app_version: "2.1.1",
                 build_number: "20103",
                 skip_submission: true,
