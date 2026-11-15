@@ -1,0 +1,88 @@
+name: Verify ci-nsysu Distribution
+on:
+  push:
+    branches: [ci/verify-nsysu-distribution]
+permissions:
+  contents: read
+jobs:
+  distribution:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 10
+    env:
+      DEVELOPER_DIR: /Applications/Xcode-27.2.0.app/Contents/Developer
+      FASTLANE_SKIP_UPDATE_CHECK: '1'
+      FASTLANE_OPT_OUT_USAGE: '1'
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
+      GIT_SSH_COMMAND: ssh -o StrictHostKeyChecking=accept-new
+    steps:
+      - name: Verify Distribution in runner security session
+        shell: bash
+        run: |
+          export PATH="/opt/homebrew/opt/ruby/bin:/opt/homebrew/bin:$PATH"
+          python3 -u <<'PYTHON'
+          import os, pathlib, re, secrets, shlex, shutil, subprocess, tempfile
+          
+          def run(*args, check=True):
+              result = subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+              print(result.stdout, end='', flush=True)
+              if check and result.returncode:
+                  raise RuntimeError(f'{args[0]} failed: {result.returncode}')
+              return result
+          
+          assert run('id', '-un').stdout.strip() == 'ci-nsysu'
+          run('launchctl', 'managername')
+          original_list = shlex.split(run('security', 'list-keychains', '-d', 'user').stdout)
+          original_default = shlex.split(run('security', 'default-keychain', '-d', 'user', check=False).stdout)
+          password = secrets.token_hex(24)
+          print(f'::add-mask::{password}', flush=True)
+          work = pathlib.Path(tempfile.mkdtemp(prefix='nsysu-dist-', dir=os.environ['RUNNER_TEMP']))
+          keychain = str(pathlib.Path.home() / 'Library/Keychains' / f'nsysu-dist-{os.environ["GITHUB_RUN_ID"]}.keychain-db')
+          try:
+              run('security', 'create-keychain', '-p', password, keychain)
+              run('security', 'set-keychain-settings', '-lut', '1800', keychain)
+              run('security', 'unlock-keychain', '-p', password, keychain)
+              run('security', 'list-keychains', '-d', 'user', '-s', keychain, *original_list)
+              run('security', 'default-keychain', '-d', 'user', '-s', keychain)
+              os.chdir(work)
+              run('fastlane', 'run', 'match', 'type:appstore', 'readonly:true',
+                  'app_identifier:com.nsysu.ap,com.nsysu.ap.CourseAppWidget',
+                  'git_url:git@github.com:abc873693/certificates.git', 'git_branch:ap-ci-2026',
+                  f'keychain_name:{keychain}', f'keychain_password:{password}')
+              identities = run('security', 'find-identity', '-v', '-p', 'codesigning', keychain).stdout
+              found = re.findall(r'\b([A-F0-9]{40}) "(?:Apple Distribution|iPhone Distribution):[^\n]+"', identities)
+              if not found:
+                  raise RuntimeError('No valid Distribution identity with private key')
+              run('security', 'find-certificate', '-c', 'Apple Distribution', '-p', keychain)
+              target = str(work / 'signature-probe')
+              shutil.copy2('/bin/ls', target)
+              failures = 0
+              for identity in found:
+                  for mode in ('match-only', 'with-wwdr', 'with-partition-list'):
+                      print(f'== {identity} / {mode}', flush=True)
+                      if mode == 'with-wwdr':
+                          for generation in ('G3', 'G4', 'G5', 'G6'):
+                              cert = str(work / f'WWDR{generation}.cer')
+                              run('curl', '-fsSL', '--retry', '2', '-o', cert,
+                                  f'https://www.apple.com/certificateauthority/AppleWWDRCA{generation}.cer')
+                              run('security', 'import', cert, '-k', keychain)
+                      if mode == 'with-partition-list':
+                          run('security', 'set-key-partition-list', '-S', 'apple-tool:,apple:,codesign:', '-s', '-k', password, keychain)
+                      result = run('codesign', '--force', '--sign', identity, '--keychain', keychain,
+                                   '--timestamp=none', '--verbose=4', target, check=False)
+                      if result.returncode == 0:
+                          run('codesign', '--verify', '--strict', '--verbose=4', target)
+                          run('codesign', '--display', '--verbose=4', target)
+                          print(f'PASS: Distribution signing and verification / {mode}', flush=True)
+                          break
+                  else:
+                      failures += 1
+              if failures:
+                  raise RuntimeError(f'{failures} Distribution identities failed actual codesign')
+          finally:
+              if original_default and pathlib.Path(original_default[0]).exists():
+                  run('security', 'default-keychain', '-d', 'user', '-s', original_default[0], check=False)
+              run('security', 'list-keychains', '-d', 'user', '-s', *original_list, check=False)
+              run('security', 'delete-keychain', keychain, check=False)
+              shutil.rmtree(work)
+          PYTHON
