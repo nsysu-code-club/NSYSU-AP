@@ -1,0 +1,193 @@
+name: Rebuild NSYSU iOS 2.1.1 (20103)
+on:
+  push:
+    branches: [ci/rebuild-nsysu-ios-20103]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: nsysu-ios-recovery-20103
+  cancel-in-progress: false
+jobs:
+  ios:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 60
+    env:
+      DEVELOPER_DIR: /Applications/Xcode-27.2.0.app/Contents/Developer
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      FASTLANE_SKIP_UPDATE_CHECK: '1'
+      FASTLANE_OPT_OUT_USAGE: '1'
+      APP_STORE_CONNECT_BUNDLE_IDENTIFIER: com.nsysu.ap
+      DEVELOPER_PORTAL_TEAM_ID: ${{ secrets.DEVELOPER_PORTAL_TEAM_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c683c0b1011d65e5d1244577fc6a1b172ad98ebe
+          persist-credentials: false
+      - name: Setup Ruby
+        run: echo "/opt/homebrew/opt/ruby/bin:/opt/homebrew/bin" >> "$GITHUB_PATH"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+          channel: stable
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          dart pub global activate flutterfire_cli 1.4.1
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+          cd ios
+          bundle config set path vendor/bundle
+          bundle install
+      - name: Download original beta changelog
+        uses: actions/download-artifact@v4
+        with:
+          name: changelog-aggregated
+          run-id: 43593123180
+          github-token: ${{ github.token }}
+      - name: Format original changelog
+        working-directory: ios/fastlane
+        env:
+          AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ios
+      - name: Prepare isolated signing keychain
+        run: |
+          python3 - <<'PYTHON'
+          import json, os, pathlib, secrets, shlex, subprocess
+          assert subprocess.check_output(['id', '-un'], text=True).strip() == 'ci-nsysu'
+          state = {}
+          for domain in ('list', 'default'):
+              p = subprocess.run(['security', f'{domain}-keychain' + ('s' if domain == 'list' else ''), '-d', 'user'], text=True, capture_output=True)
+              state[domain] = shlex.split(p.stdout) if p.returncode == 0 else []
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'nsysu-recovery-keychain-state.json').write_text(json.dumps(state))
+          password = secrets.token_hex(24)
+          print(f'::add-mask::{password}', flush=True)
+          keychain = str(pathlib.Path.home() / 'Library/Keychains' / f'nsysu-recovery-{os.environ["GITHUB_RUN_ID"]}.keychain-db')
+          with open(os.environ['GITHUB_ENV'], 'a') as out:
+              out.write(f'SIGNING_KEYCHAIN={keychain}\nSIGNING_KEYCHAIN_PASSWORD={password}\n')
+          PYTHON
+      - name: Install readonly match signing
+        working-directory: ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
+          GIT_SSH_COMMAND: ssh -o StrictHostKeyChecking=accept-new
+        run: |
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          lane = r'''  lane :recovery_signing do
+              create_keychain(
+                name: ENV.fetch("SIGNING_KEYCHAIN"),
+                password: ENV.fetch("SIGNING_KEYCHAIN_PASSWORD"),
+                unlock: true,
+                timeout: 3600,
+                default_keychain: true,
+                add_to_search_list: true
+              )
+              match(
+                type: "appstore",
+                readonly: true,
+                app_identifier: ["com.nsysu.ap", "com.nsysu.ap.CourseAppWidget"],
+                git_url: "git@github.com:abc873693/certificates.git",
+                git_branch: "ap-ci-2026",
+                git_private_key: ENV.fetch("MATCH_GIT_PRIVATE_KEY"),
+                keychain_name: ENV.fetch("SIGNING_KEYCHAIN"),
+                keychain_password: ENV.fetch("SIGNING_KEYCHAIN_PASSWORD")
+              )
+              profiles = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
+              {"Runner" => "com.nsysu.ap", "CourseAppWidgetExtension" => "com.nsysu.ap.CourseAppWidget"}.each do |target, identifier|
+                update_code_signing_settings(
+                  path: "Runner.xcodeproj",
+                  use_automatic_signing: false,
+                  targets: [target],
+                  build_configurations: ["Release"],
+                  team_id: ENV.fetch("DEVELOPER_PORTAL_TEAM_ID"),
+                  code_sign_identity: "Apple Distribution",
+                  profile_name: profiles.fetch(identifier)
+                )
+              end
+              entries = profiles.map { |id, name| "<key>#{id}</key><string>#{name}</string>" }.join("\n")
+              File.write("../ExportOptions.plist", <<~PLIST)
+                <?xml version="1.0" encoding="UTF-8"?>
+                <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+                <plist version="1.0"><dict>
+                <key>method</key><string>app-store-connect</string>
+                <key>signingStyle</key><string>manual</string>
+                <key>teamID</key><string>#{ENV.fetch("DEVELOPER_PORTAL_TEAM_ID")}</string>
+                <key>provisioningProfiles</key><dict>#{entries}</dict>
+                </dict></plist>
+              PLIST
+            end
+          '''
+          path = Path('fastlane/Fastfile')
+          text = path.read_text()
+          assert text.count('platform :ios do\n') == 1
+          path.write_text(text.replace('platform :ios do\n', 'platform :ios do\n' + lane, 1))
+          PYTHON
+          bundle exec fastlane ios recovery_signing
+      - name: Build original iOS beta 2.1.1 (20103)
+        run: flutter build ipa --release --build-number=20103 --export-options-plist=ios/ExportOptions.plist
+      - name: Verify app and Widget signatures
+        run: |
+          python3 - <<'PYTHON'
+          import pathlib, plistlib, subprocess, tempfile, zipfile
+          ipa, = pathlib.Path('build/ios/ipa').glob('*.ipa')
+          with tempfile.TemporaryDirectory(dir='${{ runner.temp }}') as tmp:
+              with zipfile.ZipFile(ipa) as archive:
+                  archive.extractall(tmp)
+              app = pathlib.Path(tmp, 'Payload/Runner.app')
+              targets = [app, *app.glob('PlugIns/*.appex')]
+              assert len(targets) == 2, targets
+              expected = {'com.nsysu.ap', 'com.nsysu.ap.CourseAppWidget'}
+              for target in targets:
+                  with (target / 'Info.plist').open('rb') as file:
+                      info = plistlib.load(file)
+                  assert info['CFBundleShortVersionString'] == '2.1.1', info
+                  assert info['CFBundleVersion'] == '20103', info
+                  expected.remove(info['CFBundleIdentifier'])
+                  subprocess.run(['codesign', '--verify', '--strict', '--verbose=4', str(target)], check=True)
+                  details = subprocess.check_output(['codesign', '--display', '--verbose=4', str(target)], stderr=subprocess.STDOUT, text=True)
+                  print(details)
+                  assert 'Authority=Apple Distribution: Open Culture Foundation (9UZ879Y8DL)' in details
+                  assert 'TeamIdentifier=9UZ879Y8DL' in details
+              assert not expected
+          PYTHON
+      - name: Save IPA and dSYMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: nsysu-ios-2.1.1-20103
+          retention-days: 7
+          path: |
+            build/ios/ipa/*.ipa
+            build/ios/archive/Runner.xcarchive/dSYMs/
+          if-no-files-found: error
+      - name: Decode App Store Connect API key
+        env:
+          API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+        run: |
+          umask 077
+          printf '%s' "$API_KEY_BASE64" | base64 --decode > ios/AuthKey.p8
+      - name: Upload original beta to TestFlight
+        working-directory: ios
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_API_ISSUER_ID }}
+          APP_STORE_CONNECT_TEAM_ID: ${{ secrets.APP_STORE_CONNECT_TEAM_ID }}
+          APP_STORE_CONNECT_APPLE_ID: ${{ secrets.APP_STORE_CONNECT_APPLE_ID }}
+        run: bundle exec fastlane ios release key_id:"$KEY_ID" issuer_id:"$ISSUER_ID"
+      - name: Restore keychain settings and remove signing material
+        if: always()
+        run: |
+          python3 - <<'PYTHON'
+          import json, os, pathlib, subprocess
+          state_file = pathlib.Path(os.environ['RUNNER_TEMP'], 'nsysu-recovery-keychain-state.json')
+          if state_file.exists():
+              state = json.loads(state_file.read_text())
+              if state['default'] and pathlib.Path(state['default'][0]).exists():
+                  subprocess.run(['security', 'default-keychain', '-d', 'user', '-s', state['default'][0]], check=True)
+              subprocess.run(['security', 'list-keychains', '-d', 'user', '-s', *state['list']], check=True)
+          keychain = os.environ.get('SIGNING_KEYCHAIN')
+          if keychain and pathlib.Path(keychain).exists():
+              subprocess.run(['security', 'delete-keychain', keychain], check=True)
+          pathlib.Path('ios/AuthKey.p8').unlink(missing_ok=True)
+          PYTHON
