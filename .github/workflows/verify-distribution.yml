@@ -59,16 +59,26 @@ jobs:
               os.chmod(target, 0o700)
               failures = 0
               for identity in found:
-                  for mode in ('match-only', 'with-wwdr', 'with-partition-list'):
+                  for mode in ('match-only', 'with-wwdr', 'with-partition-list', 'with-apple-root'):
                       print(f'== {identity} / {mode}', flush=True)
                       if mode == 'with-wwdr':
                           for generation in ('G3', 'G4', 'G5', 'G6'):
                               cert = str(work / f'WWDR{generation}.cer')
                               run('curl', '-fsSL', '--retry', '2', '-o', cert,
                                   f'https://www.apple.com/certificateauthority/AppleWWDRCA{generation}.cer')
-                              run('security', 'import', cert, '-k', keychain)
+                              run('security', 'import', cert, '-k', keychain, check=False)
                       if mode == 'with-partition-list':
                           run('security', 'set-key-partition-list', '-S', 'apple-tool:,apple:,codesign:', '-s', '-k', password, keychain)
+                      if mode == 'with-apple-root':
+                          root = str(work / 'AppleRoot.cer')
+                          run('curl', '-fsSL', '-o', root, 'https://www.apple.com/appleca/AppleIncRootCertificate.cer')
+                          run('security', 'import', root, '-k', keychain, check=False)
+                          run('security', 'list-keychains', '-d', 'user', '-s', keychain, '/Library/Keychains/System.keychain', '/System/Library/Keychains/SystemRootCertificates.keychain')
+                          run('security', 'dump-trust-settings', check=False)
+                          run('security', 'dump-trust-settings', '-d', check=False)
+                          cert_pem = work / 'distribution.pem'
+                          cert_pem.write_text(subprocess.check_output(['security', 'find-certificate', '-c', 'Apple Distribution', '-p', keychain], text=True))
+                          run('security', 'verify-cert', '-c', str(cert_pem), '-p', 'codeSign', '-k', keychain, '-v', check=False)
                       result = run('codesign', '--force', '--sign', identity, '--keychain', keychain,
                                    '--timestamp=none', '--verbose=4', target, check=False)
                       if result.returncode == 0:
