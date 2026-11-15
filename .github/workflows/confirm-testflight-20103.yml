@@ -1,0 +1,92 @@
+name: Confirm recovered NSYSU TestFlight 20103
+on:
+  push:
+    branches: [ci/confirm-nsysu-ios-20103]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  confirm:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 20
+    env:
+      DEVELOPER_DIR: /Applications/Xcode-27.2.0.app/Contents/Developer
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      FASTLANE_SKIP_UPDATE_CHECK: '1'
+      FASTLANE_OPT_OUT_USAGE: '1'
+      APP_STORE_CONNECT_BUNDLE_IDENTIFIER: com.nsysu.ap
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c683c0b1011d65e5d1244577fc6a1b172ad98ebe
+          persist-credentials: false
+      - name: Setup Ruby
+        run: echo "/opt/homebrew/opt/ruby/bin:/opt/homebrew/bin" >> "$GITHUB_PATH"
+      - name: Install dependencies
+        working-directory: ios
+        run: |
+          bundle config set path vendor/bundle
+          bundle install
+      - uses: actions/download-artifact@v4
+        with:
+          name: changelog-aggregated
+          run-id: 43593123180
+          github-token: ${{ github.token }}
+      - name: Format original changelog
+        working-directory: ios/fastlane
+        env:
+          AGGREGATED_CHANGELOG: ${{ github.workspace }}/changelog_aggregated.json
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/format_changelog.sh" ios
+      - name: Confirm Apple received build and finish beta metadata
+        working-directory: ios
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_API_ISSUER_ID }}
+          API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+        run: |
+          umask 077
+          printf '%s' "$API_KEY_BASE64" | base64 --decode > AuthKey.p8
+          cat > fastlane/Fastfile <<'RUBY'
+          default_platform(:ios)
+          platform :ios do
+            lane :confirm_recovered_beta do
+              api_key = app_store_connect_api_key(
+                key_id: ENV.fetch("KEY_ID"),
+                issuer_id: ENV.fetch("ISSUER_ID"),
+                key_filepath: "./AuthKey.p8",
+                duration: 1200,
+                in_house: false
+              )
+              app = Spaceship::ConnectAPI::App.find("com.nsysu.ap")
+              UI.user_error!("NSYSU app not found") unless app
+              build = nil
+              30.times do
+                build = Spaceship::ConnectAPI::Build.all(app_id: app.id, version: "2.1.1", build_number: "20103", platform: "IOS").first
+                UI.message("RECOVERED_BUILD: #{build&.app_version} (#{build&.version}) state=#{build&.processing_state || 'NOT_VISIBLE'}")
+                break if build && build.processing_state != "PROCESSING"
+                sleep(20)
+              end
+              UI.user_error!("Build 2.1.1 (20103) did not finish processing") unless build && build.processing_state == "VALID"
+              changelog = File.exist?("./zh-TW.txt") ? File.read("./zh-TW.txt") : "Bug fixes and improvements."
+              localized = {"default" => {whats_new: changelog}}
+              localized["en-US"] = {whats_new: File.read("./en-US.txt")} if File.exist?("./en-US.txt")
+              upload_to_testflight(
+                api_key: api_key,
+                app_identifier: "com.nsysu.ap",
+                skip_binary_upload: true,
+                app_version: "2.1.1",
+                build_number: "20103",
+                skip_submission: true,
+                notify_external_testers: true,
+                changelog: changelog,
+                localized_build_info: localized
+              )
+              refreshed = Spaceship::ConnectAPI::Build.get(build_id: build.id)
+              UI.success("CONFIRMED: #{refreshed.app_version} (#{refreshed.version}) state=#{refreshed.processing_state} internal=#{refreshed.build_beta_detail.internal_build_state} external=#{refreshed.build_beta_detail.external_build_state}")
+            end
+          end
+          RUBY
+          bundle exec fastlane ios confirm_recovered_beta
+      - name: Remove API key
+        if: always()
+        run: rm -f ios/AuthKey.p8
