@@ -59,7 +59,7 @@ jobs:
               os.chmod(target, 0o700)
               failures = 0
               for identity in found:
-                  for mode in ('match-only', 'with-wwdr', 'with-partition-list', 'with-apple-root'):
+                  for mode in ('match-only', 'with-wwdr', 'with-partition-list', 'with-apple-root', 'without-keychain', 'user-bootstrap'):
                       print(f'== {identity} / {mode}', flush=True)
                       if mode == 'with-wwdr':
                           for generation in ('G3', 'G4', 'G5', 'G6'):
@@ -79,8 +79,12 @@ jobs:
                           cert_pem = work / 'distribution.pem'
                           cert_pem.write_text(subprocess.check_output(['security', 'find-certificate', '-c', 'Apple Distribution', '-p', keychain], text=True))
                           run('security', 'verify-cert', '-c', str(cert_pem), '-p', 'codeSign', '-k', keychain, '-v', check=False)
-                      result = run('codesign', '--force', '--sign', identity, '--keychain', keychain,
-                                   '--timestamp=none', '--verbose=4', target, check=False)
+                      command = ['codesign', '--force', '--sign', identity, '--timestamp=none', '--verbose=4', target]
+                      if mode not in ('without-keychain', 'user-bootstrap'):
+                          command.extend(['--keychain', keychain])
+                      if mode == 'user-bootstrap':
+                          command = ['launchctl', 'asuser', str(os.getuid())] + command
+                      result = run(*command, check=False)
                       if result.returncode == 0:
                           run('codesign', '--verify', '--strict', '--verbose=4', target)
                           run('codesign', '--display', '--verbose=4', target)
