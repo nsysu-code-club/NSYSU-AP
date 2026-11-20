@@ -14,6 +14,7 @@ import 'package:nsysu_ap/app.dart';
 import 'package:nsysu_ap/pages/enroll_certificate/enroll_certificate_page.dart';
 import 'package:nsysu_ap/pages/home_page.dart';
 import 'package:nsysu_ap/pages/login/login_page.dart';
+import 'package:nsysu_ap/pages/tabs/campus_tab.dart';
 import 'package:nsysu_ap/pages/tabs/home_tab.dart';
 import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/theme/liquid_glass_theme.dart';
@@ -134,6 +135,91 @@ void main() {
   });
 
   setUp(() => preferences.store.clear());
+
+  testWidgets('homepage post button opens carousel submissions', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const _TestAppHost(
+        child: HomePage(
+          enableStartupSideEffects: false,
+          initialBusState: DataLoaded<List<BusInfo>>(<BusInfo>[]),
+        ),
+      ),
+    );
+    final Finder post = find.text(app.postAnnouncement);
+    await tester.ensureVisible(post);
+    await tester.pumpAndSettle();
+    await tester.tap(post);
+    await tester.pumpAndSettle();
+    expect(find.text('首頁輪播投稿系統'), findsOneWidget);
+    expect(find.text(ap.announcementReviewSystem), findsNothing);
+  });
+
+  testWidgets('campus review entry shows and announces the pending total', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 760);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(top: 24, bottom: 20);
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(
+          highContrast: true,
+          disableAnimations: true,
+        );
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    int opens = 0;
+    Widget screen({required bool isLogin, required int? count}) => _TestAppHost(
+      child: Scaffold(
+        body: CampusTab(
+          isLogin: isLogin,
+          pendingAnnouncementCount: count,
+          userInfo: null,
+          displayPicture: false,
+          onAvatarTap: () {},
+          onOpenSchoolMap: () {},
+          onOpenSchoolInfo: () {},
+          onOpenAnnouncementReview: () => opens++,
+          onOpenSettings: () {},
+          onOpenAbout: () {},
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(screen(isLogin: true, count: 7));
+    final Finder tile = find.widgetWithText(
+      AppleGroupedTile,
+      ap.announcementReviewSystem,
+    );
+    final Finder badge = find.text(app.pendingAnnouncementCount(count: 7));
+    await tester.ensureVisible(tile);
+    await tester.pumpAndSettle();
+    expect(badge.hitTestable(), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(
+        RegExp(
+          '${RegExp.escape(ap.announcementReviewSystem)}.*'
+          '${RegExp.escape(app.pendingAnnouncementCount(count: 7))}',
+          dotAll: true,
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    Focus.of(tester.element(badge)).requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(opens, 1);
+
+    await tester.pumpWidget(screen(isLogin: true, count: 0));
+    expect(find.text(app.pendingAnnouncementCount(count: 0)), findsOneWidget);
+    await tester.pumpWidget(screen(isLogin: false, count: 7));
+    expect(badge, findsNothing);
+  });
 
   testWidgets('switches across 4 tabs without Drawer or SnackBar '
       'and shows inline login card when logged out', (

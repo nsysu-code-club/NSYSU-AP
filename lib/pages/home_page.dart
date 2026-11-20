@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ap_common/ap_common.dart';
 import 'package:ap_common_firebase/ap_common_firebase.dart';
 import 'package:ap_common_plugin/ap_common_plugin.dart';
@@ -7,6 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nsysu_ap/config/constants.dart';
+import 'package:nsysu_ap/pages/announcement_review/announcement_review_page.dart';
+import 'package:nsysu_ap/pages/announcement_review/carousel_article.dart';
 import 'package:nsysu_ap/pages/graduation_report_page.dart';
 import 'package:nsysu_ap/pages/guide/school_map_page.dart';
 import 'package:nsysu_ap/pages/info/shcool_info_page.dart';
@@ -21,6 +25,7 @@ import 'package:nsysu_ap/pages/tabs/study_tab.dart';
 import 'package:nsysu_ap/pages/tuition_and_fees_page.dart';
 import 'package:nsysu_ap/pages/user_info_page.dart';
 import 'package:nsysu_ap/resources/image_assets.dart';
+import 'package:nsysu_ap/utils/announcement_review_session.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/enroll_certificate/enroll_certificate_cache.dart';
 import 'package:nsysu_ap/utils/enroll_certificate/enrollment_certificate_session.dart';
@@ -58,8 +63,12 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  static const String _announcementDomain = '@g-mail.nsysu.edu.tw';
+
   int _currentTabIndex = 0;
   late final NewFeatureDiscovery _featureDiscovery;
+  late final AnnouncementReviewSession _announcementReview;
+  AppLifecycleListener? _announcementLifecycle;
 
   HomeState state = HomeState.loading;
 
@@ -79,10 +88,16 @@ class HomePageState extends State<HomePage> {
     super.initState();
     _featureDiscovery = NewFeatureDiscovery(PreferenceUtil.instance)
       ..addListener(_refreshFeatureLabels);
+    _announcementReview = AnnouncementReviewSession(
+      preferences: PreferenceUtil.instance,
+    )..addListener(_refreshAnnouncementBadge);
     if (!widget.enableStartupSideEffects) {
       state = HomeState.empty;
       return;
     }
+    _announcementLifecycle = AppLifecycleListener(
+      onResume: () => unawaited(_announcementReview.refresh()),
+    );
     AnalyticsUtil.instance.setCurrentScreen('HomePage', 'home_page.dart');
     Future<void>.microtask(() async {
       SystemChrome.setSystemUIOverlayStyle(
@@ -117,9 +132,22 @@ class HomePageState extends State<HomePage> {
   }
 
   void _refreshFeatureLabels() => setState(() {});
+  void _refreshAnnouncementBadge() => setState(() {});
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.enableStartupSideEffects) {
+      _announcementReview.setSchoolAccount(
+        isLogin ? SelcrsHelper.instance.username : null,
+      );
+    }
+  }
 
   @override
   void dispose() {
+    _announcementLifecycle?.dispose();
+    _announcementReview.dispose();
     _featureDiscovery.dispose();
     super.dispose();
   }
@@ -141,11 +169,12 @@ class HomePageState extends State<HomePage> {
         onAvatarTap: _handleAvatarTap,
         onLoginTap: openLoginPage,
         onOpenCourse: () => _openPage(CoursePage(), needLogin: true),
-        onOpenAnnouncementReview: _openAnnouncementReview,
+        onOpenAnnouncementSubmission: () =>
+            _openAnnouncementReview(submissionOnly: true),
         onAnnouncementTap: (Announcement announcement) {
           ApUtils.pushCupertinoStyle(
             context,
-            AnnouncementContentPage(announcement: announcement),
+            CarouselArticlePage(item: announcement),
           );
         },
         onRefreshAnnouncements: _getAllAnnouncement,
@@ -178,6 +207,7 @@ class HomePageState extends State<HomePage> {
       ),
       CampusTab(
         isLogin: isLogin,
+        pendingAnnouncementCount: _announcementReview.pendingCount,
         userInfo: userInfo,
         displayPicture: displayPicture,
         onAvatarTap: _handleAvatarTap,
@@ -204,6 +234,9 @@ class HomePageState extends State<HomePage> {
                 setState(() => _currentTabIndex = index);
                 if (index == 0 && isLogin) {
                   _loadCourseData();
+                }
+                if (index == 3) {
+                  unawaited(_announcementReview.refresh());
                 }
               },
               trailingAction: widget.trailingAction,
@@ -277,13 +310,25 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _openAnnouncementReview() async {
+  Future<void> _openAnnouncementReview({bool submissionOnly = false}) async {
     AnnouncementHelper.instance.organization = 'nsysu';
     AnnouncementHelper.instance.appleBundleId = 'com.nsysu.ap';
-    ApUtils.pushCupertinoStyle(
-      context,
-      const AnnouncementHomePage(organizationDomain: '@g-mail.nsysu.edu.tw'),
-    );
+    await _announcementReview.openPage(() async {
+      if (!mounted) return;
+      unawaited(_loadAnnouncementFcmToken());
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => AnnouncementReviewPage(
+            organizationDomain: _announcementDomain,
+            linkToCampusAccount: isLogin,
+            submissionOnly: submissionOnly,
+          ),
+        ),
+      );
+    }, linkReviewer: !submissionOnly);
+  }
+
+  Future<void> _loadAnnouncementFcmToken() async {
     if (FirebaseMessagingUtils.isSupported) {
       try {
         final FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -368,6 +413,7 @@ class HomePageState extends State<HomePage> {
         setState(() {
           ShareDataWidget.of(context)!.data.isLogin = true;
         });
+        _announcementReview.setSchoolAccount(SelcrsHelper.instance.username);
         ShareDataWidget.of(context)!.data.getUserInfo();
         _loadCourseData();
       case ApiError<GeneralResponse>(:final GeneralResponse response):
@@ -387,6 +433,7 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _logout() async {
+    _announcementReview.setSchoolAccount(null);
     final String activeUsername = SelcrsHelper.instance.username.trim();
     final String username = activeUsername.isNotEmpty
         ? activeUsername
@@ -480,6 +527,7 @@ class HomePageState extends State<HomePage> {
       setState(() {
         ShareDataWidget.of(context)!.data.isLogin = true;
       });
+      _announcementReview.setSchoolAccount(SelcrsHelper.instance.username);
       ShareDataWidget.of(context)!.data.getUserInfo();
       _loadCourseData();
     }

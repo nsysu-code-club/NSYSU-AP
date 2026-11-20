@@ -7,6 +7,7 @@ import 'package:nsysu_ap/widgets/liquid_glass/liquid_glass_tab_bar.dart';
 
 class CampusTab extends StatelessWidget {
   final bool isLogin;
+  final int? pendingAnnouncementCount;
   final UserInfo? userInfo;
   final bool displayPicture;
   final VoidCallback onAvatarTap;
@@ -19,6 +20,7 @@ class CampusTab extends StatelessWidget {
   const CampusTab({
     super.key,
     required this.isLogin,
+    this.pendingAnnouncementCount,
     required this.userInfo,
     required this.displayPicture,
     required this.onAvatarTap,
@@ -66,6 +68,12 @@ class CampusTab extends StatelessWidget {
                       AppleGroupedTile(
                         icon: Icons.post_add_rounded,
                         title: ap.announcementReviewSystem,
+                        titleAccessory:
+                            !isLogin || pendingAnnouncementCount == null
+                            ? null
+                            : _PendingAnnouncementBadge(
+                                count: pendingAnnouncementCount!,
+                              ),
                         subtitle: app.announcementReviewSubtitle,
                         onTap: onOpenAnnouncementReview,
                       ),
@@ -92,6 +100,35 @@ class CampusTab extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PendingAnnouncementBadge extends StatelessWidget {
+  const _PendingAnnouncementBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    final bool highContrast = MediaQuery.highContrastOf(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: highContrast ? colors.onSurface : colors.primaryContainer,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+        child: Text(
+          app.pendingAnnouncementCount(count: count),
+          style: TextStyle(
+            color: highContrast ? colors.surface : colors.onPrimaryContainer,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }

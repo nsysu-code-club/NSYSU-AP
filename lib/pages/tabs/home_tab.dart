@@ -1,5 +1,6 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
+import 'package:nsysu_ap/pages/announcement_review/carousel_article.dart';
 import 'package:nsysu_ap/theme/liquid_glass_theme.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/widgets/liquid_glass/apple_grouped_section.dart';
@@ -18,7 +19,7 @@ class HomeTab extends StatelessWidget {
   final VoidCallback onAvatarTap;
   final VoidCallback onLoginTap;
   final VoidCallback onOpenCourse;
-  final VoidCallback onOpenAnnouncementReview;
+  final VoidCallback onOpenAnnouncementSubmission;
   final ValueChanged<Announcement> onAnnouncementTap;
   final Future<void> Function() onRefreshAnnouncements;
 
@@ -33,7 +34,7 @@ class HomeTab extends StatelessWidget {
     required this.onAvatarTap,
     required this.onLoginTap,
     required this.onOpenCourse,
-    required this.onOpenAnnouncementReview,
+    required this.onOpenAnnouncementSubmission,
     required this.onAnnouncementTap,
     required this.onRefreshAnnouncements,
   });
@@ -242,7 +243,7 @@ class HomeTab extends StatelessWidget {
           title: app.latestAnnouncements,
           titleColor: theme.colorScheme.primary,
           trailing: TextButton.icon(
-            onPressed: onOpenAnnouncementReview,
+            onPressed: onOpenAnnouncementSubmission,
             icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
             label: Text(
               app.postAnnouncement,
@@ -355,6 +356,7 @@ class _AnnouncementHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String excerpt = carouselExcerpt(announcement.description);
     final ThemeData theme = Theme.of(context);
     final LiquidGlassTheme glass = LiquidGlassTheme.of(context);
     final double screenWidth = MediaQuery.sizeOf(context).width;
@@ -416,10 +418,10 @@ class _AnnouncementHeroCard extends StatelessWidget {
                             height: 1.25,
                           ),
                         ),
-                        if (announcement.description.isNotEmpty) ...<Widget>[
+                        if (excerpt.isNotEmpty) ...<Widget>[
                           const SizedBox(height: 6),
                           Text(
-                            announcement.description,
+                            excerpt,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
