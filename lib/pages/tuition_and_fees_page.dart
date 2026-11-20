@@ -1,5 +1,6 @@
 // ignore_for_file: unnecessary_string_interpolations
 
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:ap_common/ap_common.dart';
@@ -7,10 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:nsysu_ap/extensions/tuition_and_fees_ui_extension.dart';
 import 'package:nsysu_ap/pages/enroll_certificate/enroll_certificate_page.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
+import 'package:nsysu_ap/utils/new_feature_discovery.dart';
+import 'package:nsysu_ap/widgets/liquid_glass/new_feature_label.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
 class TuitionAndFeesPage extends StatefulWidget {
-  const TuitionAndFeesPage({super.key});
+  const TuitionAndFeesPage({super.key, required this.featureDiscovery});
+
+  final NewFeatureDiscovery featureDiscovery;
 
   @override
   _TuitionAndFeesPageState createState() => _TuitionAndFeesPageState();
@@ -42,27 +47,36 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
       appBar: AppBar(title: Text(app.tuitionAndCert)),
       body: Column(
         children: <Widget>[
-          Card(
-            margin: const EdgeInsets.all(16.0),
-            child: ListTile(
-              leading: const Icon(Icons.picture_as_pdf_outlined),
-              title: Text(app.enrollCertificate.title),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => ApUtils.pushCupertinoStyle(
-                context, 
-                const EnrollCertificatePage()
-// Testing the webview of the enrollment certificate page when no available testing account //
-//              EnrollCertificatePage(
-//                downloadCertificate: ({
-//                  required String username,
-//                  required String password,
-//                }) {
-//                  throw const EnrollmentCertificateException(
-//                    EnrollmentCertificateExceptionKind.registrationRequired,
-//                    '模擬校方要求補填資料',
-//                  );
-//                },
-//              ),
+          ListenableBuilder(
+            listenable: widget.featureDiscovery,
+            builder: (BuildContext context, Widget? child) => Card(
+              margin: const EdgeInsets.all(16),
+              child: ListTile(
+                leading: const Icon(Icons.picture_as_pdf_outlined),
+                title: Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: <Widget>[
+                    Text(app.enrollCertificate.action),
+                    if (widget.featureDiscovery.showsLabelAt(
+                      NewFeatureLocation.enrollmentCertificate,
+                    ))
+                      const NewFeatureLabel(),
+                  ],
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  unawaited(
+                    widget.featureDiscovery.markOpened(
+                      NewFeature.enrollmentCertificate,
+                    ),
+                  );
+                  ApUtils.pushCupertinoStyle(
+                    context,
+                    const EnrollCertificatePage(),
+                  );
+                },
               ),
             ),
           ),

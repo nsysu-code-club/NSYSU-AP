@@ -71,6 +71,7 @@
   "visitingUnSafeLink": "Unsafe link. Please confirm the URL is correct.",
   "enrollCertificate": {
     "title": "Certificate of Enrollment",
+    "action": "Generate Enrollment Certificate",
     "regenerate": "Retrieve Again",
     "retry": "Try Again",
     "download": "Download / Export",
@@ -90,5 +91,28 @@
     "registrationRequired": "The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.",
     "registrationSessionUnavailable": "The previous registration session could not be cleared safely. To protect your account, close this page and try again, or use an external browser.",
     "registrationComplete": "Finished — Retrieve Again"
-  }
+  },
+  "tabStudy": "Academics",
+  "tabCampus": "Campus",
+  "newFeature": "New",
+  "latestAnnouncements": "Latest Announcements",
+  "postAnnouncement": "Submit",
+  "loginCardTitle": "Sign In to Campus Portal",
+  "loginCardSubtitle": "Sign in to view today's schedule, grades, graduation checklist, and enrollment certificate",
+  "studyCoreSection": "Core Academics",
+  "studyToolsSection": "Academic Tools & Certificates",
+  "courseSubtitle": "View semester timetable & classrooms",
+  "scoreSubtitle": "Check semester grades & credits",
+  "graduationCheckSubtitle": "Review required, general education & total credits",
+  "tuitionAndCertSubtitle": "Download tuition receipts & enrollment certificate",
+  "courseSelectorSubtitle": "Open external course selection helper",
+  "campusServicesSection": "Campus Services",
+  "appSection": "Application",
+  "schoolMapSubtitle": "Explore campus buildings & locations",
+  "schoolInfoSubtitle": "Campus directory & academic calendar",
+  "announcementReviewSubtitle": "Submit or manage campus announcements",
+  "accountSheetTitle": "Account & Settings",
+  "viewProfileHint": "View and edit profile",
+  "busRoutesSection": "Campus Bus Routes",
+  "busOperatingStatus": "Operating · ${busId}"
 }

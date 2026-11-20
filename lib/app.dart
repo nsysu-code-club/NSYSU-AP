@@ -16,6 +16,7 @@ import 'package:nsysu_ap/pages/home_page.dart';
 import 'package:nsysu_ap/pages/setting_page.dart';
 import 'package:nsysu_ap/pages/study/course_page.dart';
 import 'package:nsysu_ap/pages/study/score_page.dart';
+import 'package:nsysu_ap/theme/liquid_glass_theme.dart';
 import 'package:nsysu_ap/utils/app_locale_controller.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/widgets/locale_initialization_gate.dart';
@@ -159,13 +160,19 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         child: Builder(
           builder: (BuildContext context) {
             final Color seedColor = ApTheme.of(context).seedColor;
+            final ThemeData lightTheme = AppleLiquidTheme.harmonize(
+              ApTheme.light(seedColor),
+            );
+            final ThemeData darkTheme = AppleLiquidTheme.harmonize(
+              ApTheme.dark(seedColor),
+            );
             return LocaleInitializationGate(
               initialization: _localeInitialization,
               onRetry: _retryLocaleInitialization,
-              theme: ApTheme.light(seedColor),
-              darkTheme: ApTheme.dark(seedColor),
+              theme: lightTheme,
+              darkTheme: darkTheme,
               themeMode: themeMode,
-              builder: (_) => _buildLocalizedApp(seedColor),
+              builder: (_) => _buildLocalizedApp(lightTheme, darkTheme),
             );
           },
         ),
@@ -173,7 +180,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildLocalizedApp(Color seedColor) {
+  Widget _buildLocalizedApp(ThemeData lightTheme, ThemeData darkTheme) {
     return ap_l10n.TranslationProvider(
       child: TranslationProvider(
         child: Builder(
@@ -183,16 +190,16 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
               debugShowCheckedModeBanner: false,
               routes: <String, WidgetBuilder>{
                 Navigator.defaultRouteName: (BuildContext context) =>
-                    HomePage(),
-                HomePage.routerName: (BuildContext context) => HomePage(),
+                    const HomePage(),
+                HomePage.routerName: (BuildContext context) => const HomePage(),
                 CoursePage.routerName: (BuildContext context) => CoursePage(),
                 ScorePage.routerName: (BuildContext context) => ScorePage(),
                 GraduationReportPage.routerName: (BuildContext context) =>
                     const GraduationReportPage(),
                 SettingPage.routerName: (BuildContext context) => SettingPage(),
               },
-              theme: ApTheme.light(seedColor),
-              darkTheme: ApTheme.dark(seedColor),
+              theme: lightTheme,
+              darkTheme: darkTheme,
               themeMode: themeMode,
               locale: TranslationProvider.of(context).flutterLocale,
               navigatorObservers: <NavigatorObserver>[

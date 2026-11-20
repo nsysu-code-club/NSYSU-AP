@@ -110,6 +110,29 @@ class AppLocalizationsJa extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get openingBrowserTitle => '外部サイトを開く';
 	@override String get visitingUnSafeLink => '安全でないリンクです。URLが正しいか確認してください';
 	@override late final _AppLocalizationsEnrollCertificateJa enrollCertificate = _AppLocalizationsEnrollCertificateJa._(_root);
+	@override String get tabStudy => '学業';
+	@override String get tabCampus => 'キャンパス';
+	@override String get newFeature => '新機能';
+	@override String get latestAnnouncements => '最新のお知らせ';
+	@override String get postAnnouncement => '投稿';
+	@override String get loginCardTitle => '学務システムにログイン';
+	@override String get loginCardSubtitle => 'ログインすると今日の時間割、成績、卒業要件、在学証明書を確認できます';
+	@override String get studyCoreSection => '基本学務';
+	@override String get studyToolsSection => '学務ツールと証明書';
+	@override String get courseSubtitle => '今学期の時間割と教室を確認';
+	@override String get scoreSubtitle => '各学期の成績と単位明細を確認';
+	@override String get graduationCheckSubtitle => '必修・教養・累計卒業単位を確認';
+	@override String get tuitionAndCertSubtitle => '学費領収書と在学証明書の取得';
+	@override String get courseSelectorSubtitle => '外部の履修登録補助サイトを開く';
+	@override String get campusServicesSection => 'キャンパスサービス';
+	@override String get appSection => 'アプリケーション';
+	@override String get schoolMapSubtitle => 'キャンパスマップと施設案内';
+	@override String get schoolInfoSubtitle => '学内電話番号と年間行事予定';
+	@override String get announcementReviewSubtitle => '学内イベントの投稿・審査管理';
+	@override String get accountSheetTitle => 'アカウントと設定';
+	@override String get viewProfileHint => 'プロフィールを表示・編集';
+	@override String get busRoutesSection => '学内バス路線';
+	@override String busOperatingStatus({required Object busId}) => '運行中 · ${busId}';
 }
 
 // Path: enrollCertificate
@@ -120,6 +143,7 @@ class _AppLocalizationsEnrollCertificateJa extends AppLocalizationsEnrollCertifi
 
 	// Translations
 	@override String get title => '在学証明書';
+	@override String get action => '在学証明書を発行';
 	@override String get regenerate => '再取得';
 	@override String get retry => '再試行';
 	@override String get download => 'ダウンロード／エクスポート';
@@ -220,6 +244,7 @@ extension on AppLocalizationsJa {
 			'openingBrowserTitle' => '外部サイトを開く',
 			'visitingUnSafeLink' => '安全でないリンクです。URLが正しいか確認してください',
 			'enrollCertificate.title' => '在学証明書',
+			'enrollCertificate.action' => '在学証明書を発行',
 			'enrollCertificate.regenerate' => '再取得',
 			'enrollCertificate.retry' => '再試行',
 			'enrollCertificate.download' => 'ダウンロード／エクスポート',
@@ -239,6 +264,29 @@ extension on AppLocalizationsJa {
 			'enrollCertificate.registrationRequired' => '大学から在学証明書が発行されませんでした。学籍登録システムで必要事項を確認・入力してから再取得してください。',
 			'enrollCertificate.registrationSessionUnavailable' => '以前の学籍登録セッションを安全に削除できませんでした。アカウントを保護するため、このページを閉じて再試行するか、外部ブラウザーを使用してください。',
 			'enrollCertificate.registrationComplete' => '入力を完了して再取得',
+			'tabStudy' => '学業',
+			'tabCampus' => 'キャンパス',
+			'newFeature' => '新機能',
+			'latestAnnouncements' => '最新のお知らせ',
+			'postAnnouncement' => '投稿',
+			'loginCardTitle' => '学務システムにログイン',
+			'loginCardSubtitle' => 'ログインすると今日の時間割、成績、卒業要件、在学証明書を確認できます',
+			'studyCoreSection' => '基本学務',
+			'studyToolsSection' => '学務ツールと証明書',
+			'courseSubtitle' => '今学期の時間割と教室を確認',
+			'scoreSubtitle' => '各学期の成績と単位明細を確認',
+			'graduationCheckSubtitle' => '必修・教養・累計卒業単位を確認',
+			'tuitionAndCertSubtitle' => '学費領収書と在学証明書の取得',
+			'courseSelectorSubtitle' => '外部の履修登録補助サイトを開く',
+			'campusServicesSection' => 'キャンパスサービス',
+			'appSection' => 'アプリケーション',
+			'schoolMapSubtitle' => 'キャンパスマップと施設案内',
+			'schoolInfoSubtitle' => '学内電話番号と年間行事予定',
+			'announcementReviewSubtitle' => '学内イベントの投稿・審査管理',
+			'accountSheetTitle' => 'アカウントと設定',
+			'viewProfileHint' => 'プロフィールを表示・編集',
+			'busRoutesSection' => '学内バス路線',
+			'busOperatingStatus' => ({required Object busId}) => '運行中 · ${busId}',
 			_ => null,
 		};
 	}

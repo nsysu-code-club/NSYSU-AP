@@ -110,6 +110,29 @@ class AppLocalizationsEn extends AppLocalizations with BaseTranslations<AppLocal
 	@override String get openingBrowserTitle => 'Open External Website';
 	@override String get visitingUnSafeLink => 'Unsafe link. Please confirm the URL is correct.';
 	@override late final _AppLocalizationsEnrollCertificateEn enrollCertificate = _AppLocalizationsEnrollCertificateEn._(_root);
+	@override String get tabStudy => 'Academics';
+	@override String get tabCampus => 'Campus';
+	@override String get newFeature => 'New';
+	@override String get latestAnnouncements => 'Latest Announcements';
+	@override String get postAnnouncement => 'Submit';
+	@override String get loginCardTitle => 'Sign In to Campus Portal';
+	@override String get loginCardSubtitle => 'Sign in to view today\'s schedule, grades, graduation checklist, and enrollment certificate';
+	@override String get studyCoreSection => 'Core Academics';
+	@override String get studyToolsSection => 'Academic Tools & Certificates';
+	@override String get courseSubtitle => 'View semester timetable & classrooms';
+	@override String get scoreSubtitle => 'Check semester grades & credits';
+	@override String get graduationCheckSubtitle => 'Review required, general education & total credits';
+	@override String get tuitionAndCertSubtitle => 'Download tuition receipts & enrollment certificate';
+	@override String get courseSelectorSubtitle => 'Open external course selection helper';
+	@override String get campusServicesSection => 'Campus Services';
+	@override String get appSection => 'Application';
+	@override String get schoolMapSubtitle => 'Explore campus buildings & locations';
+	@override String get schoolInfoSubtitle => 'Campus directory & academic calendar';
+	@override String get announcementReviewSubtitle => 'Submit or manage campus announcements';
+	@override String get accountSheetTitle => 'Account & Settings';
+	@override String get viewProfileHint => 'View and edit profile';
+	@override String get busRoutesSection => 'Campus Bus Routes';
+	@override String busOperatingStatus({required Object busId}) => 'Operating · ${busId}';
 }
 
 // Path: enrollCertificate
@@ -120,6 +143,7 @@ class _AppLocalizationsEnrollCertificateEn extends AppLocalizationsEnrollCertifi
 
 	// Translations
 	@override String get title => 'Certificate of Enrollment';
+	@override String get action => 'Generate Enrollment Certificate';
 	@override String get regenerate => 'Retrieve Again';
 	@override String get retry => 'Try Again';
 	@override String get download => 'Download / Export';
@@ -220,6 +244,7 @@ extension on AppLocalizationsEn {
 			'openingBrowserTitle' => 'Open External Website',
 			'visitingUnSafeLink' => 'Unsafe link. Please confirm the URL is correct.',
 			'enrollCertificate.title' => 'Certificate of Enrollment',
+			'enrollCertificate.action' => 'Generate Enrollment Certificate',
 			'enrollCertificate.regenerate' => 'Retrieve Again',
 			'enrollCertificate.retry' => 'Try Again',
 			'enrollCertificate.download' => 'Download / Export',
@@ -239,6 +264,29 @@ extension on AppLocalizationsEn {
 			'enrollCertificate.registrationRequired' => 'The university did not issue a certificate. Check and complete any required information in the registration system, then retrieve the certificate again.',
 			'enrollCertificate.registrationSessionUnavailable' => 'The previous registration session could not be cleared safely. To protect your account, close this page and try again, or use an external browser.',
 			'enrollCertificate.registrationComplete' => 'Finished — Retrieve Again',
+			'tabStudy' => 'Academics',
+			'tabCampus' => 'Campus',
+			'newFeature' => 'New',
+			'latestAnnouncements' => 'Latest Announcements',
+			'postAnnouncement' => 'Submit',
+			'loginCardTitle' => 'Sign In to Campus Portal',
+			'loginCardSubtitle' => 'Sign in to view today\'s schedule, grades, graduation checklist, and enrollment certificate',
+			'studyCoreSection' => 'Core Academics',
+			'studyToolsSection' => 'Academic Tools & Certificates',
+			'courseSubtitle' => 'View semester timetable & classrooms',
+			'scoreSubtitle' => 'Check semester grades & credits',
+			'graduationCheckSubtitle' => 'Review required, general education & total credits',
+			'tuitionAndCertSubtitle' => 'Download tuition receipts & enrollment certificate',
+			'courseSelectorSubtitle' => 'Open external course selection helper',
+			'campusServicesSection' => 'Campus Services',
+			'appSection' => 'Application',
+			'schoolMapSubtitle' => 'Explore campus buildings & locations',
+			'schoolInfoSubtitle' => 'Campus directory & academic calendar',
+			'announcementReviewSubtitle' => 'Submit or manage campus announcements',
+			'accountSheetTitle' => 'Account & Settings',
+			'viewProfileHint' => 'View and edit profile',
+			'busRoutesSection' => 'Campus Bus Routes',
+			'busOperatingStatus' => ({required Object busId}) => 'Operating · ${busId}',
 			_ => null,
 		};
 	}

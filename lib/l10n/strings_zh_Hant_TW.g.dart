@@ -252,6 +252,75 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	String get visitingUnSafeLink => '不安全的連結，請確認網址是否正確';
 
 	late final AppLocalizationsEnrollCertificateZhHantTw enrollCertificate = AppLocalizationsEnrollCertificateZhHantTw.internal(_root);
+
+	/// zh-Hant-TW: '課業'
+	String get tabStudy => '課業';
+
+	/// zh-Hant-TW: '校園'
+	String get tabCampus => '校園';
+
+	/// zh-Hant-TW: '新功能'
+	String get newFeature => '新功能';
+
+	/// zh-Hant-TW: '最新公告'
+	String get latestAnnouncements => '最新公告';
+
+	/// zh-Hant-TW: '投稿'
+	String get postAnnouncement => '投稿';
+
+	/// zh-Hant-TW: '登入校務系統'
+	String get loginCardTitle => '登入校務系統';
+
+	/// zh-Hant-TW: '登入後即可查看今日課表、學期成績、畢業檢核與在學證明'
+	String get loginCardSubtitle => '登入後即可查看今日課表、學期成績、畢業檢核與在學證明';
+
+	/// zh-Hant-TW: '核心學務'
+	String get studyCoreSection => '核心學務';
+
+	/// zh-Hant-TW: '學務工具與證明'
+	String get studyToolsSection => '學務工具與證明';
+
+	/// zh-Hant-TW: '查看本學期課表與上課地點'
+	String get courseSubtitle => '查看本學期課表與上課地點';
+
+	/// zh-Hant-TW: '查詢各學期成績與學分明細'
+	String get scoreSubtitle => '查詢各學期成績與學分明細';
+
+	/// zh-Hant-TW: '檢視必修、通識與累計畢業學分'
+	String get graduationCheckSubtitle => '檢視必修、通識與累計畢業學分';
+
+	/// zh-Hant-TW: '下載學雜費收據與提取在學證明'
+	String get tuitionAndCertSubtitle => '下載學雜費收據與提取在學證明';
+
+	/// zh-Hant-TW: '開啟外部選課輔助工具網站'
+	String get courseSelectorSubtitle => '開啟外部選課輔助工具網站';
+
+	/// zh-Hant-TW: '校園服務'
+	String get campusServicesSection => '校園服務';
+
+	/// zh-Hant-TW: '應用程式'
+	String get appSection => '應用程式';
+
+	/// zh-Hant-TW: '瀏覽西子灣校區建築與位置導覽'
+	String get schoolMapSubtitle => '瀏覽西子灣校區建築與位置導覽';
+
+	/// zh-Hant-TW: '查詢校園常用電話與年度行事曆'
+	String get schoolInfoSubtitle => '查詢校園常用電話與年度行事曆';
+
+	/// zh-Hant-TW: '投稿校園活動宣傳或管理審核'
+	String get announcementReviewSubtitle => '投稿校園活動宣傳或管理審核';
+
+	/// zh-Hant-TW: '帳號與設定'
+	String get accountSheetTitle => '帳號與設定';
+
+	/// zh-Hant-TW: '查看與編輯個人資料'
+	String get viewProfileHint => '查看與編輯個人資料';
+
+	/// zh-Hant-TW: '校園公車路線'
+	String get busRoutesSection => '校園公車路線';
+
+	/// zh-Hant-TW: '營運中 · ${busId}'
+	String busOperatingStatus({required Object busId}) => '營運中 · ${busId}';
 }
 
 // Path: enrollCertificate
@@ -264,6 +333,9 @@ class AppLocalizationsEnrollCertificateZhHantTw {
 
 	/// zh-Hant-TW: '在學證明'
 	String get title => '在學證明';
+
+	/// zh-Hant-TW: '產生在學證明'
+	String get action => '產生在學證明';
 
 	/// zh-Hant-TW: '重新提取'
 	String get regenerate => '重新提取';
@@ -402,6 +474,7 @@ extension on AppLocalizations {
 			'openingBrowserTitle' => '開啟外部網站',
 			'visitingUnSafeLink' => '不安全的連結，請確認網址是否正確',
 			'enrollCertificate.title' => '在學證明',
+			'enrollCertificate.action' => '產生在學證明',
 			'enrollCertificate.regenerate' => '重新提取',
 			'enrollCertificate.retry' => '重新執行',
 			'enrollCertificate.download' => '下載／匯出',
@@ -421,6 +494,29 @@ extension on AppLocalizations {
 			'enrollCertificate.registrationRequired' => '校方未提供在學證明。請在註冊系統確認並補填必要資料，完成後再重新提取。',
 			'enrollCertificate.registrationSessionUnavailable' => '無法安全地清除先前的註冊系統工作階段。為保護帳號資料，請關閉此頁後再試一次，或改用外部瀏覽器。',
 			'enrollCertificate.registrationComplete' => '完成填寫，重新提取',
+			'tabStudy' => '課業',
+			'tabCampus' => '校園',
+			'newFeature' => '新功能',
+			'latestAnnouncements' => '最新公告',
+			'postAnnouncement' => '投稿',
+			'loginCardTitle' => '登入校務系統',
+			'loginCardSubtitle' => '登入後即可查看今日課表、學期成績、畢業檢核與在學證明',
+			'studyCoreSection' => '核心學務',
+			'studyToolsSection' => '學務工具與證明',
+			'courseSubtitle' => '查看本學期課表與上課地點',
+			'scoreSubtitle' => '查詢各學期成績與學分明細',
+			'graduationCheckSubtitle' => '檢視必修、通識與累計畢業學分',
+			'tuitionAndCertSubtitle' => '下載學雜費收據與提取在學證明',
+			'courseSelectorSubtitle' => '開啟外部選課輔助工具網站',
+			'campusServicesSection' => '校園服務',
+			'appSection' => '應用程式',
+			'schoolMapSubtitle' => '瀏覽西子灣校區建築與位置導覽',
+			'schoolInfoSubtitle' => '查詢校園常用電話與年度行事曆',
+			'announcementReviewSubtitle' => '投稿校園活動宣傳或管理審核',
+			'accountSheetTitle' => '帳號與設定',
+			'viewProfileHint' => '查看與編輯個人資料',
+			'busRoutesSection' => '校園公車路線',
+			'busOperatingStatus' => ({required Object busId}) => '營運中 · ${busId}',
 			_ => null,
 		};
 	}
