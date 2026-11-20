@@ -1,13 +1,13 @@
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/foundation.dart';
 
-enum NewFeatureLocation { studyTab, tuitionAndFees, enrollmentCertificate }
+enum NewFeatureLocation { campusTab, tuitionAndFees, enrollmentCertificate }
 
 enum NewFeature {
   enrollmentCertificate(
     'pref_opened_enrollment_certificate',
     <NewFeatureLocation>{
-      NewFeatureLocation.studyTab,
+      NewFeatureLocation.campusTab,
       NewFeatureLocation.tuitionAndFees,
       NewFeatureLocation.enrollmentCertificate,
     },

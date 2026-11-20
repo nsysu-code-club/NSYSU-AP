@@ -38,8 +38,8 @@ class GraduationReportPageState extends State<GraduationReportPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(app.graduationCheckChecklist)),
+    return ApPageScaffold(
+      title: Text(app.graduationCheckChecklist),
       body: Flex(
         direction: Axis.vertical,
         mainAxisSize: MainAxisSize.min,
@@ -98,6 +98,10 @@ class GraduationReportPageState extends State<GraduationReportPage>
       loaded: (GraduationReportData data, String? hint) =>
           SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
+            padding: ApAppShell.contentPadding(
+              context,
+              spacing: const EdgeInsets.only(bottom: 8),
+            ),
             child: Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,

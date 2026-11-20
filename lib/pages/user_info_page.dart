@@ -5,10 +5,7 @@ import 'package:nsysu_crawler/nsysu_crawler.dart';
 class UserInfoPage extends StatefulWidget {
   final UserInfo userInfo;
 
-  const UserInfoPage({
-    super.key,
-    required this.userInfo,
-  });
+  const UserInfoPage({super.key, required this.userInfo});
 
   @override
   _UserInfoPageState createState() => _UserInfoPageState();
@@ -21,8 +18,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
   @override
   void initState() {
-    AnalyticsUtil.instance
-        .setCurrentScreen('UserInfoPage', 'user_info_page.dart');
+    AnalyticsUtil.instance.setCurrentScreen(
+      'UserInfoPage',
+      'user_info_page.dart',
+    );
     userInfo = widget.userInfo;
     super.initState();
   }
@@ -32,8 +31,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return UserInfoScaffold(
       userInfo: userInfo,
       onRefresh: () async {
-        final ApiResult<UserInfo> result =
-            await SelcrsHelper.instance.getUserInfo();
+        final ApiResult<UserInfo> result = await SelcrsHelper.instance
+            .getUserInfo();
         if (result case ApiSuccess<UserInfo>(:final UserInfo data)) {
           setState(() {
             userInfo = data;
@@ -52,9 +51,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
               builder: (_) {
                 return AlertDialog(
                   title: Text(ap.changeEmail),
-                  content: TextField(
-                    controller: newEmail,
-                  ),
+                  content: TextField(controller: newEmail),
                   actions: <Widget>[
                     InkWell(
                       onTap: () async {
@@ -63,16 +60,13 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           context: context,
                           builder: (BuildContext context) => PopScope(
                             canPop: false,
-                            child: ProgressDialog(
-                              ap.loading,
-                            ),
+                            child: ProgressDialog(ap.loading),
                           ),
                           barrierDismissible: false,
                         );
-                        final ApiResult<UserInfo> result =
-                            await SelcrsHelper.instance.changeMail(
-                          mail: newEmail.text,
-                        );
+                        final ApiResult<UserInfo> result = await SelcrsHelper
+                            .instance
+                            .changeMail(mail: newEmail.text);
                         if (!context.mounted) return;
                         Navigator.pop(context);
                         switch (result) {
@@ -85,15 +79,21 @@ class _UserInfoPageState extends State<UserInfoPage> {
                               userInfo = data;
                             });
                           case ApiFailure<UserInfo>(
-                              :final DioException exception):
+                            :final DioException exception,
+                          ):
                             if (exception.i18nMessage != null) {
                               UiUtil.instance.showToast(
-                                  context, exception.i18nMessage!);
+                                context,
+                                exception.i18nMessage!,
+                              );
                             }
                           case ApiError<UserInfo>(
-                              :final GeneralResponse response):
+                            :final GeneralResponse response,
+                          ):
                             UiUtil.instance.showToast(
-                                context, response.message);
+                              context,
+                              response.message,
+                            );
                         }
                       },
                       child: Text(ap.confirm),

@@ -820,7 +820,7 @@ packages:
     source: hosted
     version: "2.0.33"
   flutter_quill:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_quill
       sha256: "1f773f5f75e2628d80361c2c840c592791a0a157ebd587c9e37cf2cb8b8519b7"
@@ -846,7 +846,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_widget_from_html_core:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_widget_from_html_core
       sha256: "530f2e3cc57be1a00f8bfae1b0000064e8a6df0cf1fb4d48a80f85afde9b39b7"
@@ -958,7 +958,7 @@ packages:
     source: hosted
     version: "1.0.1"
   html:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: html
       sha256: "6d1264f2dffa1b1101c25a91dff0dc2daee4c18e87cd8538729773c073dbf602"
@@ -1629,7 +1629,7 @@ packages:
     source: hosted
     version: "3.0.0"
   sign_in_with_apple:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: sign_in_with_apple
       sha256: e84a62e17b7e463abf0a64ce826c2cd1f0b72dff07b7b275e32d5302d76fb4c5
@@ -1930,7 +1930,7 @@ packages:
     source: hosted
     version: "15.0.2"
   vsc_quill_delta_to_html:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: vsc_quill_delta_to_html
       sha256: "9aca60d53ed1b700e922dabff8cd8b3490daecbf99c258f19eb45820b794fa45"

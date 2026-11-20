@@ -1,9 +1,52 @@
+import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nsysu_ap/theme/liquid_glass_theme.dart';
-import 'package:nsysu_ap/widgets/liquid_glass/liquid_glass_tab_bar.dart';
 
 void main() {
+  testWidgets('nested detail routes hide navbar and preserve back button', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: ApAppShell(
+          destinations: <ApDestination>[
+            ApDestination(
+              id: 'home',
+              label: 'Home',
+              icon: Icons.home,
+              builder: (BuildContext context) => Scaffold(
+                body: TextButton(
+                  onPressed: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ApPageScaffold(
+                        title: const Text('Details'),
+                        body: const Text('Detail body'),
+                      ),
+                    ),
+                  ),
+                  child: const Text('Open details'),
+                ),
+              ),
+            ),
+            ApDestination(
+              id: 'campus',
+              label: 'Campus',
+              icon: Icons.school,
+              builder: (_) => const Scaffold(),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open details'));
+    await tester.pumpAndSettle();
+    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byIcon(ApIcon.chevronLeft), findsOneWidget);
+    await tester.tap(find.byIcon(ApIcon.chevronLeft));
+    await tester.pumpAndSettle();
+    expect(find.byType(NavigationBar), findsOneWidget);
+  });
   const List<LiquidGlassTabItem> sampleItems = <LiquidGlassTabItem>[
     LiquidGlassTabItem(
       icon: Icons.home_outlined,
@@ -77,74 +120,59 @@ void main() {
     },
   );
 
-  testWidgets(
-    'renders detached circular trailingAction when provided '
-    'and invokes callback',
-    (WidgetTester tester) async {
-      bool trailingTapped = false;
+  testWidgets('shows a small feature dot without adding label text', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: LiquidGlassTabBar(
+            items: const <LiquidGlassTabItem>[
+              LiquidGlassTabItem(icon: Icons.home, label: 'Home'),
+              LiquidGlassTabItem(
+                icon: Icons.school,
+                label: 'Campus',
+                showBadge: true,
+                semanticsLabel: 'Campus, New',
+              ),
+            ],
+            currentIndex: 0,
+            onTap: (_) {},
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(Badge), findsNWidgets(2));
+    expect(find.text('New'), findsNothing);
+    expect(find.bySemanticsLabel('Campus, New'), findsOneWidget);
+  });
 
-      await tester.pumpWidget(
-        MaterialApp(
+  testWidgets('handles high contrast, reduced motion, and 2.0x text scaling '
+      'without overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          highContrast: true,
+          disableAnimations: true,
+          textScaler: TextScaler.linear(2.0),
+        ),
+        child: MaterialApp(
           theme: AppleLiquidTheme.harmonize(ThemeData.dark()),
           home: Scaffold(
             body: Align(
               alignment: Alignment.bottomCenter,
               child: LiquidGlassTabBar(
                 items: sampleItems,
-                currentIndex: 0,
+                currentIndex: 1,
                 onTap: (_) {},
-                trailingAction: LiquidGlassTabAction(
-                  icon: Icons.search_rounded,
-                  tooltip: '搜尋',
-                  onTap: () => trailingTapped = true,
-                ),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final Finder trailingFinder = find.byKey(
-        const ValueKey<String>('trailing_action'),
-      );
-      expect(trailingFinder, findsOneWidget);
-      expect(find.byIcon(Icons.search_rounded), findsOneWidget);
-
-      await tester.tap(trailingFinder);
-      await tester.pumpAndSettle();
-      expect(trailingTapped, isTrue);
-    },
-  );
-
-  testWidgets(
-    'handles high contrast, reduced motion, and 2.0x text scaling '
-    'without overflow',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(
-            highContrast: true,
-            disableAnimations: true,
-            textScaler: TextScaler.linear(2.0),
-          ),
-          child: MaterialApp(
-            theme: AppleLiquidTheme.harmonize(ThemeData.dark()),
-            home: Scaffold(
-              body: Align(
-                alignment: Alignment.bottomCenter,
-                child: LiquidGlassTabBar(
-                  items: sampleItems,
-                  currentIndex: 1,
-                  onTap: (_) {},
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-    },
-  );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }

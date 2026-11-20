@@ -33,10 +33,7 @@ class _BusListPageState extends State<BusListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(ap.bus)),
-      body: _body(),
-    );
+    return ApPageScaffold(title: Text(ap.bus), body: _body());
   }
 
   Widget _body() {

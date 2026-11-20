@@ -310,140 +310,14 @@ class AppLocalizations with BaseTranslations<AppLocale, AppLocalizations> {
 	/// zh-Hant-TW: '投稿校園活動宣傳或管理審核'
 	String get announcementReviewSubtitle => '投稿校園活動宣傳或管理審核';
 
-	/// zh-Hant-TW: '首頁輪播投稿系統'
-	String get announcementSubmissionSystem => '首頁輪播投稿系統';
-
 	/// zh-Hant-TW: '限非營利校園活動。請以活動名稱為標題，附上活動連結。封面會公開上傳至 ImgBB，建議使用 100 KB 以內的壓縮 JPEG，內文以 100 字為宜。'
 	String get carouselGuidelines => '限非營利校園活動。請以活動名稱為標題，附上活動連結。封面會公開上傳至 ImgBB，建議使用 100 KB 以內的壓縮 JPEG，內文以 100 字為宜。';
-
-	/// zh-Hant-TW: '輪播封面'
-	String get carouselCover => '輪播封面';
-
-	/// zh-Hant-TW: '選擇封面圖片'
-	String get carouselPick => '選擇封面圖片';
-
-	/// zh-Hant-TW: '更換圖片'
-	String get carouselReplace => '更換圖片';
 
 	/// zh-Hant-TW: '圖片將公開上傳至 ImgBB，建議使用 100 KB 以內的 JPEG。'
 	String get carouselImageHint => '圖片將公開上傳至 ImgBB，建議使用 100 KB 以內的 JPEG。';
 
-	/// zh-Hant-TW: '請先上傳封面圖片'
-	String get carouselImageRequired => '請先上傳封面圖片';
-
-	/// zh-Hant-TW: '圖片上傳失敗，請重新選擇圖片。'
-	String get carouselUploadFailed => '圖片上傳失敗，請重新選擇圖片。';
-
-	/// zh-Hant-TW: '活動資訊'
-	String get carouselDetails => '活動資訊';
-
-	/// zh-Hant-TW: '活動連結（選填）'
-	String get carouselLink => '活動連結（選填）';
-
-	/// zh-Hant-TW: '請輸入完整的 https 或 http 網址'
-	String get carouselLinkError => '請輸入完整的 https 或 http 網址';
-
-	/// zh-Hant-TW: '設定到期時間'
-	String get carouselSetExpiry => '設定到期時間';
-
-	/// zh-Hant-TW: '無到期時間'
-	String get carouselNoExpiry => '無到期時間';
-
-	/// zh-Hant-TW: '請選擇未來的到期時間'
-	String get carouselExpired => '請選擇未來的到期時間';
-
-	/// zh-Hant-TW: '活動說明'
-	String get carouselBody => '活動說明';
-
-	/// zh-Hant-TW: '輸入活動說明…'
-	String get carouselBodyHint => '輸入活動說明…';
-
-	/// zh-Hant-TW: '檢查'
-	String get carouselCheck => '檢查';
-
-	/// zh-Hant-TW: '投稿未送出，請再試一次。'
-	String get carouselSubmitFailed => '投稿未送出，請再試一次。';
-
-	/// zh-Hant-TW: '檢查投稿'
-	String get carouselPreview => '檢查投稿';
-
-	/// zh-Hant-TW: '粗體'
-	String get carouselBold => '粗體';
-
-	/// zh-Hant-TW: '斜體'
-	String get carouselItalic => '斜體';
-
-	/// zh-Hant-TW: '字型大小'
-	String get carouselSize => '字型大小';
-
-	/// zh-Hant-TW: '小字'
-	String get carouselSmall => '小字';
-
-	/// zh-Hant-TW: '標準'
-	String get carouselNormal => '標準';
-
-	/// zh-Hant-TW: '大字'
-	String get carouselLarge => '大字';
-
-	/// zh-Hant-TW: '項目符號'
-	String get carouselBullet => '項目符號';
-
-	/// zh-Hant-TW: '編號清單'
-	String get carouselOrdered => '編號清單';
-
-	/// zh-Hant-TW: '增加縮排'
-	String get carouselIndent => '增加縮排';
-
-	/// zh-Hant-TW: '減少縮排'
-	String get carouselOutdent => '減少縮排';
-
-	/// zh-Hant-TW: '開啟活動連結'
-	String get carouselOpenLink => '開啟活動連結';
-
-	/// zh-Hant-TW: '放大封面圖片'
-	String get carouselZoom => '放大封面圖片';
-
-	/// zh-Hant-TW: '${count} 則未審查公告'
-	String pendingAnnouncementCount({required Object count}) => '${count} 則未審查公告';
-
 	/// zh-Hant-TW: '使用具審查權限的公告帳號登入後，會連結目前的校務帳號，下次可自動登入審查系統。'
 	String get announcementReviewLinkHint => '使用具審查權限的公告帳號登入後，會連結目前的校務帳號，下次可自動登入審查系統。';
-
-	/// zh-Hant-TW: '使用 Google 登入'
-	String get announcementGoogleSignIn => '使用 Google 登入';
-
-	/// zh-Hant-TW: '使用 Apple 登入'
-	String get announcementAppleSignIn => '使用 Apple 登入';
-
-	/// zh-Hant-TW: '新增公告'
-	String get addPublishedAnnouncement => '新增公告';
-
-	/// zh-Hant-TW: '投稿審查'
-	String get announcementReviewQueue => '投稿審查';
-
-	/// zh-Hant-TW: '已發布公告'
-	String get publishedAnnouncements => '已發布公告';
-
-	/// zh-Hant-TW: '核准'
-	String get approveAnnouncement => '核准';
-
-	/// zh-Hant-TW: '退回'
-	String get rejectAnnouncement => '退回';
-
-	/// zh-Hant-TW: '已複製投稿者帳號'
-	String get announcementApplicantCopied => '已複製投稿者帳號';
-
-	/// zh-Hant-TW: '截止日期 ${date}'
-	String announcementDeadline({required Object date}) => '截止日期 ${date}';
-
-	/// zh-Hant-TW: '「${title}」的更多操作'
-	String announcementItemActions({required Object title}) => '「${title}」的更多操作';
-
-	/// zh-Hant-TW: '刪除投稿'
-	String get deleteReviewApplication => '刪除投稿';
-
-	/// zh-Hant-TW: '確定要刪除「${title}」嗎？'
-	String confirmAnnouncementDeletion({required Object title}) => '確定要刪除「${title}」嗎？';
 
 	/// zh-Hant-TW: '帳號與設定'
 	String get accountSheetTitle => '帳號與設定';
@@ -648,51 +522,9 @@ extension on AppLocalizations {
 			'schoolMapSubtitle' => '瀏覽西子灣校區建築與位置導覽',
 			'schoolInfoSubtitle' => '查詢校園常用電話與年度行事曆',
 			'announcementReviewSubtitle' => '投稿校園活動宣傳或管理審核',
-			'announcementSubmissionSystem' => '首頁輪播投稿系統',
 			'carouselGuidelines' => '限非營利校園活動。請以活動名稱為標題，附上活動連結。封面會公開上傳至 ImgBB，建議使用 100 KB 以內的壓縮 JPEG，內文以 100 字為宜。',
-			'carouselCover' => '輪播封面',
-			'carouselPick' => '選擇封面圖片',
-			'carouselReplace' => '更換圖片',
 			'carouselImageHint' => '圖片將公開上傳至 ImgBB，建議使用 100 KB 以內的 JPEG。',
-			'carouselImageRequired' => '請先上傳封面圖片',
-			'carouselUploadFailed' => '圖片上傳失敗，請重新選擇圖片。',
-			'carouselDetails' => '活動資訊',
-			'carouselLink' => '活動連結（選填）',
-			'carouselLinkError' => '請輸入完整的 https 或 http 網址',
-			'carouselSetExpiry' => '設定到期時間',
-			'carouselNoExpiry' => '無到期時間',
-			'carouselExpired' => '請選擇未來的到期時間',
-			'carouselBody' => '活動說明',
-			'carouselBodyHint' => '輸入活動說明…',
-			'carouselCheck' => '檢查',
-			'carouselSubmitFailed' => '投稿未送出，請再試一次。',
-			'carouselPreview' => '檢查投稿',
-			'carouselBold' => '粗體',
-			'carouselItalic' => '斜體',
-			'carouselSize' => '字型大小',
-			'carouselSmall' => '小字',
-			'carouselNormal' => '標準',
-			'carouselLarge' => '大字',
-			'carouselBullet' => '項目符號',
-			'carouselOrdered' => '編號清單',
-			'carouselIndent' => '增加縮排',
-			'carouselOutdent' => '減少縮排',
-			'carouselOpenLink' => '開啟活動連結',
-			'carouselZoom' => '放大封面圖片',
-			'pendingAnnouncementCount' => ({required Object count}) => '${count} 則未審查公告',
 			'announcementReviewLinkHint' => '使用具審查權限的公告帳號登入後，會連結目前的校務帳號，下次可自動登入審查系統。',
-			'announcementGoogleSignIn' => '使用 Google 登入',
-			'announcementAppleSignIn' => '使用 Apple 登入',
-			'addPublishedAnnouncement' => '新增公告',
-			'announcementReviewQueue' => '投稿審查',
-			'publishedAnnouncements' => '已發布公告',
-			'approveAnnouncement' => '核准',
-			'rejectAnnouncement' => '退回',
-			'announcementApplicantCopied' => '已複製投稿者帳號',
-			'announcementDeadline' => ({required Object date}) => '截止日期 ${date}',
-			'announcementItemActions' => ({required Object title}) => '「${title}」的更多操作',
-			'deleteReviewApplication' => '刪除投稿',
-			'confirmAnnouncementDeletion' => ({required Object title}) => '確定要刪除「${title}」嗎？',
 			'accountSheetTitle' => '帳號與設定',
 			'viewProfileHint' => '查看與編輯個人資料',
 			'busRoutesSection' => '校園公車路線',

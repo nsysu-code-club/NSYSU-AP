@@ -824,31 +824,33 @@ class EnrollmentCertificateHelper {
   }
 
   static EnrollmentCertificateException _fromDioException(DioException error) {
-    switch (error.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
+    switch (error.type.name) {
+      case 'connectionTimeout':
+      case 'sendTimeout':
+      case 'receiveTimeout':
+      case 'transformTimeout':
         return EnrollmentCertificateException(
           EnrollmentCertificateExceptionKind.timeout,
           'The RegWeb request timed out.',
           cause: error,
         );
-      case DioExceptionType.cancel:
+      case 'cancel':
         return EnrollmentCertificateException(
           EnrollmentCertificateExceptionKind.cancelled,
           'The RegWeb request was cancelled.',
           cause: error,
         );
-      case DioExceptionType.badResponse:
+      case 'badResponse':
         return EnrollmentCertificateException(
           EnrollmentCertificateExceptionKind.http,
           'RegWeb returned an unsuccessful HTTP status.',
           statusCode: error.response?.statusCode,
           cause: error,
         );
-      case DioExceptionType.badCertificate:
-      case DioExceptionType.connectionError:
-      case DioExceptionType.unknown:
+      case 'badCertificate':
+      case 'connectionError':
+      case 'unknown':
+      default:
         return EnrollmentCertificateException(
           EnrollmentCertificateExceptionKind.network,
           'The RegWeb request could not reach the server securely.',

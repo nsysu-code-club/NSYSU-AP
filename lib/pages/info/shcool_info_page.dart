@@ -34,14 +34,14 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
 
   late TabController controller;
 
-  int _currentIndex = 0;
-
   Uint8List? data;
 
   @override
   void initState() {
-    AnalyticsUtil.instance
-        .setCurrentScreen('SchoolInfoPage', 'school_info_page.dart');
+    AnalyticsUtil.instance.setCurrentScreen(
+      'SchoolInfoPage',
+      'school_info_page.dart',
+    );
     controller = TabController(length: 2, vsync: this);
     _getSchedules();
     super.initState();
@@ -55,18 +55,13 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(ap.schoolInfo),
-      ),
+    return ApPageScaffold(
+      title: Text(ap.schoolInfo),
       body: TabBarView(
         controller: controller,
         physics: const NeverScrollableScrollPhysics(),
         children: <Widget>[
-          PhoneListView(
-            state: phoneState,
-            phoneModelList: phoneModelList,
-          ),
+          PhoneListView(state: phoneState, phoneModelList: phoneModelList),
           PdfView(
             state: pdfState,
             data: data,
@@ -77,28 +72,11 @@ class SchoolInfoPageState extends State<SchoolInfoPage>
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (int index) {
-          setState(() {
-            _currentIndex = index;
-            controller.animateTo(_currentIndex);
-          });
-        },
-        fixedColor: Theme.of(context).colorScheme.primary,
-        items: <BottomNavigationBarItem>[
-//          BottomNavigationBarItem(
-//            icon: Icon(ApIcon.fiberNew),
-//            title: Text(ap.notifications),
-//          ),
-          BottomNavigationBarItem(
-            icon: Icon(ApIcon.phone),
-            label: ap.phones,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(ApIcon.dateRange),
-            label: ap.events,
-          ),
+      bottom: TabBar(
+        controller: controller,
+        tabs: <Widget>[
+          Tab(icon: Icon(ApIcon.phone), text: ap.phones),
+          Tab(icon: Icon(ApIcon.dateRange), text: ap.events),
         ],
       ),
     );

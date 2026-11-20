@@ -52,16 +52,14 @@ class _BusTimePageState extends State<BusTimePage>
   @override
   Widget build(BuildContext context) {
     final BusInfo busInfo = widget.busInfo;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.busInfo.name),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: <Widget>[
-            Tab(text: busInfo.departure),
-            Tab(text: busInfo.destination),
-          ],
-        ),
+    return ApPageScaffold(
+      title: Text(widget.busInfo.name),
+      bottom: TabBar(
+        controller: _tabController,
+        tabs: <Widget>[
+          Tab(text: busInfo.departure),
+          Tab(text: busInfo.destination),
+        ],
       ),
       body: _body(),
     );

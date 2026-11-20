@@ -43,8 +43,8 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(app.tuitionAndCert)),
+    return ApPageScaffold(
+      title: Text(app.tuitionAndCert),
       body: Column(
         children: <Widget>[
           ListenableBuilder(
@@ -114,7 +114,10 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
         },
         child: ListView.builder(
           shrinkWrap: true,
-          padding: const EdgeInsets.all(8.0),
+          padding: ApAppShell.contentPadding(
+            context,
+            spacing: const EdgeInsets.fromLTRB(8, 8, 8, 16),
+          ),
           itemBuilder: (BuildContext context, int index) {
             if (index == 0) {
               return Text(
@@ -167,8 +170,8 @@ class _TuitionAndFeesPageState extends State<TuitionAndFeesPage> {
                 // (no hardware back button / swipe gesture) can navigate back.
                 ApUtils.pushCupertinoStyle(
                   context,
-                  Scaffold(
-                    appBar: AppBar(title: Text(item.title)),
+                  ApPageScaffold(
+                    title: Text(item.title),
                     // PdfView has two FloatingActionButtons that share the
                     // default hero tag; disabling heroes here avoids the
                     // "multiple heroes share the same tag" assertion during

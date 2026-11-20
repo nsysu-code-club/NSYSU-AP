@@ -150,8 +150,8 @@ class _EnrollCertificatePageState extends State<EnrollCertificatePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(app.enrollCertificate.title)),
+    return ApPageScaffold(
+      title: Text(app.enrollCertificate.title),
       body: _buildBody(),
       floatingActionButton: _pdfData == null
           ? null

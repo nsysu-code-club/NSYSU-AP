@@ -25,45 +25,38 @@ class ConfirmFormPage extends StatefulWidget {
 class _ConfirmFormPageState extends State<ConfirmFormPage> {
   InAppWebViewController? webViewController;
 
-  String get url => sprintf(
-        widget.confirmFormUrl,
-        <String>[widget.username.toUpperCase()],
-      );
+  String get url =>
+      sprintf(widget.confirmFormUrl, <String>[widget.username.toUpperCase()]);
 
   @override
   void initState() {
-    AnalyticsUtil.instance
-        .setCurrentScreen('ConfirmFormPage', 'confirm_form_page.dart');
+    AnalyticsUtil.instance.setCurrentScreen(
+      'ConfirmFormPage',
+      'confirm_form_page.dart',
+    );
     Future<void>.microtask(() => _loadData());
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(ap.confirm),
-        actions: <Widget>[
-          if (!kIsWeb && (io.Platform.isAndroid || io.Platform.isIOS))
-            TextButton(
-              onPressed: _launchUrl,
-              child: Text(
-                app.openBrowserToFill,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
+    return ApPageScaffold(
+      title: Text(ap.confirm),
+      actions: <Widget>[
+        if (!kIsWeb && (io.Platform.isAndroid || io.Platform.isIOS))
+          TextButton(
+            onPressed: _launchUrl,
+            child: Text(
+              app.openBrowserToFill,
+              style: TextStyle(color: Theme.of(context).colorScheme.primary),
             ),
-        ],
-      ),
+          ),
+      ],
       body: !kIsWeb && (io.Platform.isAndroid || io.Platform.isIOS)
           ? InAppWebView(
               initialUrlRequest: URLRequest(
                 url: WebUri(
-                  sprintf(
-                    widget.confirmFormUrl,
-                    <String>[widget.username],
-                  ),
+                  sprintf(widget.confirmFormUrl, <String>[widget.username]),
                 ),
               ),
               onWebViewCreated: (InAppWebViewController webViewController) {
@@ -87,10 +80,8 @@ class _ConfirmFormPageState extends State<ConfirmFormPage> {
 
   Future<void> _loadData() async {
     final CookieManager cookiesManager = CookieManager.instance();
-    final List<io.Cookie> list =
-        await SelcrsHelper.instance.cookieJar.loadForRequest(
-      Uri.parse(SelcrsHelper.baseUrl),
-    );
+    final List<io.Cookie> list = await SelcrsHelper.instance.cookieJar
+        .loadForRequest(Uri.parse(SelcrsHelper.baseUrl));
     for (final io.Cookie cookie in list) {
       cookiesManager.setCookie(
         url: WebUri(SelcrsHelper.baseUrl),

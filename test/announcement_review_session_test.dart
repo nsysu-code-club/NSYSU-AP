@@ -181,6 +181,54 @@ void main() {
     },
   );
 
+  test('restores a submission login without linking review access', () async {
+    session.setSchoolAccount(campusId);
+    await session.openPage(() async {
+      _session().save();
+      await preferences.setBool(ApConstants.announcementIsLogin, true);
+    }, linkReviewer: false);
+
+    await session.openPage(() async {
+      expect(
+        preferences.getBool(ApConstants.announcementIsLogin, false),
+        isTrue,
+      );
+    }, linkReviewer: false);
+    await session.refresh();
+    expect(reads, 0);
+
+    session.setSchoolAccount('B987654321');
+    await session.openPage(() async {
+      expect(
+        preferences.getBool(ApConstants.announcementIsLogin, true),
+        isFalse,
+      );
+    }, linkReviewer: false);
+  });
+
+  test('restores guest submission login until explicit sign-out', () async {
+    await session.openPage(() async {
+      _session().save();
+      await preferences.setBool(ApConstants.announcementIsLogin, true);
+    }, linkReviewer: false);
+    session.dispose();
+    session = createSession();
+
+    await session.openPage(() async {
+      expect(
+        preferences.getBool(ApConstants.announcementIsLogin, false),
+        isTrue,
+      );
+      await preferences.setBool(ApConstants.announcementIsLogin, false);
+    }, linkReviewer: false);
+    await session.openPage(() async {
+      expect(
+        preferences.getBool(ApConstants.announcementIsLogin, true),
+        isFalse,
+      );
+    }, linkReviewer: false);
+  });
+
   test(
     'does not fetch for normal users or for a different campus account',
     () async {

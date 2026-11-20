@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:nsysu_ap/utils/announcement_access.dart';
 
 /// Restores the announcement account previously linked by the active campus
 /// user. Authorization and the application list come from the review service.
@@ -19,6 +18,8 @@ class AnnouncementReviewSession extends ChangeNotifier {
        _signOutGoogle = signOutGoogle ?? _signOutGoogleAccount;
 
   static const String _linkedReviewerKey = 'pref_linked_announcement_reviewer';
+  static const String _submissionLoginKey =
+      'pref_announcement_submission_login';
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: <String>['email'],
   );
@@ -42,8 +43,10 @@ class AnnouncementReviewSession extends ChangeNotifier {
     _schoolAccount = account;
     _invalidateRequests();
     _updateCount(null);
-    final AnnouncementLoginData? saved = _savedReviewer();
-    if (saved != null && (account == null || !_isLinked(account, saved))) {
+    final AnnouncementLoginData? saved = _savedLogin();
+    if (saved != null &&
+        !_isSubmissionLinked(account, saved) &&
+        (account == null || !_isLinked(account, saved))) {
       unawaited(_suspendReviewer());
     }
     if (account != null) unawaited(refresh());
@@ -141,7 +144,7 @@ class AnnouncementReviewSession extends ChangeNotifier {
     };
   }
 
-  /// Only a sign-in through the review entry establishes a campus account link.
+  /// A submission login can be restored without establishing a review link.
   Future<void> openPage(
     Future<void> Function() open, {
     bool linkReviewer = true,
@@ -158,13 +161,19 @@ class AnnouncementReviewSession extends ChangeNotifier {
           : null;
       final bool isLinked =
           saved != null && account != null && _isLinked(account, saved);
+      final bool submissionLinked =
+          savedLogin != null && _isSubmissionLinked(account, savedLogin);
+      final bool canRestore =
+          (!linkReviewer && submissionLinked) ||
+          (isLinked && (!linkReviewer || !saved.isExpired));
       final bool wasRestored =
-          saved != null &&
-          isLinked &&
-          !saved.isExpired &&
+          canRestore &&
           _preferences.getBool(ApConstants.announcementIsLogin, false);
       bool canLink = true;
-      if (savedLogin == null || (saved != null && !wasRestored)) {
+      if (savedLogin == null ||
+          (!wasRestored &&
+              (saved != null ||
+                  (!submissionLinked && _savedSubmissionLink.isNotEmpty)))) {
         await _suspendReviewer();
         if (saved != null && !isLinked && _isGoogleSession) {
           // The review page's Google button can otherwise reuse the last
@@ -178,23 +187,32 @@ class AnnouncementReviewSession extends ChangeNotifier {
       }
       await open();
       if (account != _schoolAccount) {
-        if (_savedReviewer() != null) await _suspendReviewer();
+        if (_savedLogin() != null) await _suspendReviewer();
         return;
       }
-      if (account == null || !canLink) return;
+      if (!canLink) return;
 
       if (_preferences.getBool(ApConstants.announcementIsLogin, false)) {
         final AnnouncementLoginData? reviewer = _savedReviewer();
-        if (linkReviewer && reviewer != null && !reviewer.isExpired) {
+        if (!linkReviewer) {
+          final AnnouncementLoginData? submission = _savedLogin();
+          final String? link = submission == null
+              ? null
+              : _submissionLink(account, submission);
+          if (link != null) {
+            await _preferences.setStringSecurity(_submissionLoginKey, link);
+          }
+        } else if (account != null && reviewer != null && !reviewer.isExpired) {
           await _preferences.setStringSecurity(
             _linkedReviewerKey,
             _link(account, reviewer),
           );
         }
       } else if (wasRestored) {
-        // Explicit sign-out in the review screen revokes automatic restoration.
+        // Explicit sign-out revokes automatic restoration.
         _clearAuthorization();
         await _preferences.remove(_linkedReviewerKey);
+        await _preferences.remove(_submissionLoginKey);
       }
     } finally {
       _reviewOpen = false;
@@ -240,6 +258,25 @@ class AnnouncementReviewSession extends ChangeNotifier {
           _link(account, data);
     } on Object {
       return false;
+    }
+  }
+
+  static String? _submissionLink(String? account, AnnouncementLoginData data) {
+    final String? username = data.username;
+    if (username == null || username.isEmpty) return null;
+    return '${account ?? ''}\n${data.loginType}:$username';
+  }
+
+  bool _isSubmissionLinked(String? account, AnnouncementLoginData data) {
+    final String? link = _submissionLink(account, data);
+    return link != null && _savedSubmissionLink == link;
+  }
+
+  String get _savedSubmissionLink {
+    try {
+      return _preferences.getStringSecurity(_submissionLoginKey, '');
+    } on Object {
+      return '';
     }
   }
 

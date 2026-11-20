@@ -2,9 +2,7 @@ import 'dart:typed_data';
 
 import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
-import 'package:nsysu_ap/theme/liquid_glass_theme.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/widgets/liquid_glass/apple_grouped_section.dart';
 
 class AccountSheet extends StatelessWidget {
   final UserInfo? userInfo;
@@ -35,6 +33,7 @@ class AccountSheet extends StatelessWidget {
   }) {
     return showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext sheetContext) {
@@ -78,22 +77,20 @@ class AccountSheet extends StatelessWidget {
       if (dept.isNotEmpty) dept,
     ].join(' · ');
 
-    return SafeArea(
-      top: false,
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 540),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: glass.canvasBackgroundColor,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(28),
-              ),
-              border: Border.all(color: glass.subtleBorderColor),
-            ),
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 540),
+        child: Material(
+          color: theme.scaffoldBackgroundColor,
+          clipBehavior: Clip.antiAlias,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: SafeArea(
+            top: false,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(0, 10, 0, 24),
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
@@ -121,7 +118,7 @@ class AccountSheet extends StatelessWidget {
                         ),
                         IconButton(
                           icon: Icon(
-                            Icons.close_rounded,
+                            ApIcon.cancel,
                             color: onSurface.withValues(alpha: 0.65),
                           ),
                           onPressed: () => Navigator.of(context).pop(),
@@ -186,7 +183,7 @@ class AccountSheet extends StatelessWidget {
                                   ),
                                 ),
                                 Icon(
-                                  Icons.chevron_right_rounded,
+                                  ApIcon.chevronRight,
                                   color: onSurface.withValues(alpha: 0.38),
                                 ),
                               ],
@@ -256,10 +253,7 @@ class AccountSheet extends StatelessWidget {
       ),
       child: ClipOval(
         child: (bytes != null && bytes.isNotEmpty)
-            ? Image.memory(
-                bytes,
-                fit: BoxFit.cover,
-              )
+            ? Image.memory(bytes, fit: BoxFit.cover)
             : Center(
                 child: initial != null
                     ? Text(
@@ -270,11 +264,7 @@ class AccountSheet extends StatelessWidget {
                           color: Colors.white,
                         ),
                       )
-                    : const Icon(
-                        Icons.person_rounded,
-                        size: 28,
-                        color: Colors.white,
-                      ),
+                    : Icon(ApIcon.person, size: 28, color: Colors.white),
               ),
       ),
     );

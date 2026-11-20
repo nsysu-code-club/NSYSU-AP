@@ -13,10 +13,7 @@ class _SchoolMapPageState extends State<SchoolMapPage> {
     return ImageViewerScaffold(
       title: ap.schoolMap,
       imageViewers: <ImageViewer>[
-        ImageViewer(
-          title: '',
-          assetName: ImageAssets.schoolMap,
-        ),
+        ImageViewer(title: '', assetName: ImageAssets.schoolMap),
       ],
     );
   }

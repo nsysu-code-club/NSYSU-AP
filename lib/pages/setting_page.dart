@@ -34,10 +34,14 @@ class SettingPageState extends State<SettingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(title: Text(ap.settings)),
+    return ApPageScaffold(
+      scaffoldKey: _scaffoldKey,
+      title: Text(ap.settings),
       body: SingleChildScrollView(
+        padding: ApAppShell.contentPadding(
+          context,
+          spacing: const EdgeInsets.only(bottom: 16),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -123,7 +127,6 @@ class SettingPageState extends State<SettingPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 32),
           ],
         ),
       ),

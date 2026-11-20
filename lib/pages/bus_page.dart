@@ -2,14 +2,10 @@ import 'package:ap_common/ap_common.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/pages/bus/bus_time_page.dart';
-import 'package:nsysu_ap/theme/liquid_glass_theme.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
-import 'package:nsysu_ap/widgets/liquid_glass/apple_grouped_section.dart';
-import 'package:nsysu_ap/widgets/liquid_glass/apple_page_header.dart';
-import 'package:nsysu_ap/widgets/liquid_glass/liquid_glass_tab_bar.dart';
 import 'package:nsysu_crawler/nsysu_crawler.dart';
 
-class BusTab extends StatefulWidget {
+class BusPage extends StatefulWidget {
   final Locale locale;
   final bool isLogin;
   final UserInfo? userInfo;
@@ -17,7 +13,7 @@ class BusTab extends StatefulWidget {
   final VoidCallback onAvatarTap;
   final DataState<List<BusInfo>>? initialState;
 
-  const BusTab({
+  const BusPage({
     super.key,
     required this.locale,
     required this.isLogin,
@@ -28,10 +24,10 @@ class BusTab extends StatefulWidget {
   });
 
   @override
-  State<BusTab> createState() => _BusTabState();
+  State<BusPage> createState() => _BusPageState();
 }
 
-class _BusTabState extends State<BusTab> {
+class _BusPageState extends State<BusPage> {
   late DataState<List<BusInfo>> _state;
 
   @override
@@ -65,36 +61,14 @@ class _BusTabState extends State<BusTab> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: RefreshIndicator(
-        onRefresh: _loadBusData,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          slivers: <Widget>[
-            SliverToBoxAdapter(
-              child: AppleContentContainer(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    ApplePageHeader(
-                      title: ap.bus,
-                      isLogin: widget.isLogin,
-                      userInfo: widget.userInfo,
-                      displayPicture: widget.displayPicture,
-                      onAvatarTap: widget.onAvatarTap,
-                    ),
-                    _buildContent(context),
-                    const SizedBox(height: LiquidGlassTabBar.bottomClearance),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return ApPageScaffold.scrollable(
+      title: ap.bus,
+      isLogin: widget.isLogin,
+      userInfo: widget.userInfo,
+      displayPicture: widget.displayPicture,
+      onAvatarTap: widget.onAvatarTap,
+      onRefresh: _loadBusData,
+      children: <Widget>[_buildContent(context)],
     );
   }
 
@@ -138,7 +112,7 @@ class _BusTabState extends State<BusTab> {
                     _BusStatusBadge(bus: bus),
                     const SizedBox(width: 6),
                     Icon(
-                      Icons.chevron_right_rounded,
+                      ApIcon.chevronRight,
                       size: 20,
                       color: theme.colorScheme.onSurface.withValues(
                         alpha: 0.38,
@@ -150,10 +124,8 @@ class _BusTabState extends State<BusTab> {
                   Navigator.push(
                     context,
                     CupertinoPageRoute<dynamic>(
-                      builder: (_) => BusTimePage(
-                        busInfo: bus,
-                        locale: widget.locale,
-                      ),
+                      builder: (_) =>
+                          BusTimePage(busInfo: bus, locale: widget.locale),
                     ),
                   );
                 },

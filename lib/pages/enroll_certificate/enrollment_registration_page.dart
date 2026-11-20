@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
+import 'package:ap_common/ap_common.dart' show ApPageScaffold;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -277,17 +279,15 @@ class _EnrollmentRegistrationPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(app.enrollCertificate.registrationTitle),
-        actions: <Widget>[
-          IconButton(
-            tooltip: app.openBrowserToFill,
-            onPressed: _openBrowser,
-            icon: const Icon(Icons.open_in_browser_rounded),
-          ),
-        ],
-      ),
+    return ApPageScaffold(
+      title: Text(app.enrollCertificate.registrationTitle),
+      actions: <Widget>[
+        IconButton(
+          tooltip: app.openBrowserToFill,
+          onPressed: _openBrowser,
+          icon: const Icon(Icons.open_in_browser_rounded),
+        ),
+      ],
       body: SafeArea(
         child: Column(
           children: <Widget>[

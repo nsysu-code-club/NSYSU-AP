@@ -20,8 +20,10 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
 
   @override
   void initState() {
-    AnalyticsUtil.instance
-        .setCurrentScreen('SearchStudentIdPage', 'search_student_id_page.dart');
+    AnalyticsUtil.instance.setCurrentScreen(
+      'SearchStudentIdPage',
+      'search_student_id_page.dart',
+    );
     super.initState();
   }
 
@@ -31,21 +33,19 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
   }
 
   TextStyle _editTextStyle() => const TextStyle(
-        color: Colors.white,
-        fontSize: 18.0,
-        decorationColor: Colors.white,
-      );
+    color: Colors.white,
+    fontSize: 18.0,
+    decorationColor: Colors.white,
+  );
 
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(
       builder: (_, Orientation orientation) {
-        return Scaffold(
+        return ApPageScaffold(
           backgroundColor: Theme.of(context).colorScheme.primary,
           resizeToAvoidBottomInset: orientation == Orientation.portrait,
-          appBar: AppBar(
-            elevation: 0.0,
-          ),
+          title: const SizedBox.shrink(),
           body: Container(
             alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(horizontal: 30.0),
@@ -73,10 +73,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
               child: Center(
                 child: Text(
                   'N',
-                  style: TextStyle(
-                    fontSize: 120,
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(fontSize: 120, color: Colors.white),
                 ),
               ),
             ),
@@ -87,10 +84,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
               child: Center(
                 child: Text(
                   'N',
-                  style: TextStyle(
-                    fontSize: 120,
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(fontSize: 120, color: Colors.white),
                 ),
               ),
             ),
@@ -105,9 +99,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
           nameFocusNode.unfocus();
           FocusScope.of(context).requestFocus(idFocusNode);
         },
-        decoration: InputDecoration(
-          labelText: ap.name,
-        ),
+        decoration: InputDecoration(labelText: ap.name),
         style: _editTextStyle(),
       ),
       TextField(
@@ -118,9 +110,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
           idFocusNode.unfocus();
           _search();
         },
-        decoration: InputDecoration(
-          labelText: ap.id,
-        ),
+        decoration: InputDecoration(labelText: ap.id),
         style: _editTextStyle(),
       ),
       const SizedBox(height: 8.0),
@@ -132,9 +122,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 Theme(
-                  data: ThemeData(
-                    unselectedWidgetColor: Colors.white,
-                  ),
+                  data: ThemeData(unselectedWidgetColor: Colors.white),
                   child: Checkbox(
                     activeColor: Colors.white,
                     checkColor: Theme.of(context).colorScheme.primary,
@@ -142,10 +130,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                     onChanged: _onAutoFillChanged,
                   ),
                 ),
-                Text(
-                  ap.autoFill,
-                  style: const TextStyle(color: Colors.white),
-                ),
+                Text(ap.autoFill, style: const TextStyle(color: Colors.white)),
               ],
             ),
             onTap: () => _onAutoFillChanged(!isAutoFill),
@@ -188,8 +173,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
     if (_name.text.isEmpty || _id.text.isEmpty) {
       UiUtil.instance.showToast(context, ap.doNotEmpty);
     } else {
-      final ApiResult<String> result =
-          await SelcrsHelper.instance.getUsername(
+      final ApiResult<String> result = await SelcrsHelper.instance.getUsername(
         name: _name.text,
         id: _id.text,
       );
@@ -220,9 +204,7 @@ class SearchStudentIdPageState extends State<SearchStudentIdPage> {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       if (list.length == 2)
-                        TextSpan(
-                          text: '\n\n${app.firstLoginHint}',
-                        ),
+                        TextSpan(text: '\n\n${app.firstLoginHint}'),
                     ],
                   ),
                 ),
