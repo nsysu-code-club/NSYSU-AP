@@ -1,0 +1,22 @@
+{
+  "retrieved": "2026-11-18",
+  "skills": [
+    {
+      "name": "apple-hig",
+      "repository": "https://github.com/daft2/apple-hig-skill",
+      "commit": "d7fb4531db34115c2dd7c2089abd3641362a8a98",
+      "path": "skills/apple-hig",
+      "files": {
+        "CHECKLIST.md": "38d30200797b528a5823156a80cc102111a98a07e9c2e3becf3f31143625bc18",
+        "COMPONENTS.md": "cf4319b3571bda96b7c3a2ad6cdceb7b7a4a510b2a7d9b7d0b8d53352376abf6",
+        "FOUNDATIONS.md": "f7f71233f1e6095778a693c4ab607ad11030c34af41d33617f9e10e7a9039944",
+        "INPUTS.md": "4a7f1540585d1730e4f95b6bbd58a583e7b24836f82c0f274129dc9d20dddf99",
+        "PATTERNS.md": "229e3d0cb2a0006390a089c4c7cbfe14cc58363dc32ce52b3a3464df96701102",
+        "PLATFORMS.md": "01aa7b3544f43cb49d05a6409b36d1983b0436d7d160868009c109184f0fd6ad",
+        "SKILL.md": "3e1dd207d4972b0c26d16586a0de187104d5b9ca538d9f764d65d85abfb26d8e",
+        "TECHNOLOGIES.md": "42d63d034f8b3c04d6466f14e4e21ededf84056a970409c1d084020cb55bea4f",
+        "UPSTREAM-LICENSE": "8166fbb2ef59737b3a51706be0c764304c9b57086462b2341ce51bf618462336"
+      }
+    }
+  ]
+}
