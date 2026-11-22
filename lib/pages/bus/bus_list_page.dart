@@ -57,7 +57,7 @@ class _BusListPageState extends State<BusListPage> {
           return ListTile(
             title: Text(bus.name),
             trailing: Text(
-              bus.isOperating ? bus.busIds.first : app.busNotOperating,
+              bus.isOperating ? bus.busIds.first : app.busNoLiveBus,
               style: TextStyle(
                 color: bus.isOperating ? Colors.green : Colors.red,
               ),

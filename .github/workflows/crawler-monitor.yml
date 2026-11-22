@@ -28,6 +28,10 @@ jobs:
     name: Crawler Structure Monitor
     runs-on: [self-hosted, macOS]
     timeout-minutes: 15
+    defaults:
+      run:
+        # PIPESTATUS below must capture dart's exit code, not tee's.
+        shell: bash
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,7 +58,7 @@ jobs:
           echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
           set -e
 
-      - name: Run anonymous live tests (bus + health checks)
+      - name: Run anonymous live tests (iBus+ five routes + health checks)
         id: test_anon
         working-directory: packages/nsysu_crawler
         run: |
@@ -156,5 +160,5 @@ jobs:
             -d @-
 
       - name: Fail workflow on test failure
-        if: steps.test_live.outputs.exit_code != '0' || steps.test_anon.outputs.exit_code != '0'
+        if: always() && (steps.test_live.outputs.exit_code != '0' || steps.test_anon.outputs.exit_code != '0')
         run: exit 1

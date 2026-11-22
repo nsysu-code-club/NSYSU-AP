@@ -73,38 +73,53 @@ void main() {
       timeout: const Timeout(Duration(seconds: 30)),
     );
 
-    test(
-      'getBusTime returns arrival times for the first route',
-      () async {
-        logTarget('BusHelper', 'getBusTime', <String, dynamic>{
-          'lang': 'zh',
-          'desc': 'arrival times',
-        });
-        final ApiResult<List<BusInfo>?> infoResult = await BusHelper.instance
-            .getBusInfoList(languageCode: 'zh');
-        final List<BusInfo> list =
-            (infoResult as ApiSuccess<List<BusInfo>?>).data!;
-        final BusInfo first = list.first;
-        logInfo('BusHelper', 'selectRoute', <String, dynamic>{
-          'route': first.name,
-          'routeId': first.routeId,
-        });
-        final ApiResult<List<BusTime>?> result = await BusHelper.instance
-            .getBusTime(languageCode: 'zh', busInfo: first);
-        expect(result, isA<ApiSuccess<List<BusTime>?>>());
-        final List<BusTime>? times =
-            (result as ApiSuccess<List<BusTime>?>).data;
-        expect(times, isNotNull);
-        expect(times, isNotEmpty);
-        expect(
-          times!.map((BusTime time) => time.direction),
-          containsAll(<BusDirection>[BusDirection.go, BusDirection.back]),
-        );
-        logSuccess('BusHelper', 'getBusTime', <String, dynamic>{
-          'count': times.length,
-        });
-      },
-      timeout: const Timeout(Duration(seconds: 30)),
-    );
+    for (final int routeId in <int>[901, 9011, 50, 219, 2192]) {
+      test(
+        'getBusTime($routeId) returns both directions',
+        () async {
+          logTarget('BusHelper', 'getBusTime', <String, dynamic>{
+            'lang': 'zh',
+            'routeId': routeId,
+            'desc': 'arrival times',
+          });
+          final ApiResult<List<BusInfo>?> infoResult = await BusHelper.instance
+              .getBusInfoList(languageCode: 'zh');
+          expect(infoResult, isA<ApiSuccess<List<BusInfo>?>>());
+          final List<BusInfo> list =
+              (infoResult as ApiSuccess<List<BusInfo>?>).data!;
+          final BusInfo route = list.singleWhere(
+            (BusInfo candidate) => candidate.routeId == routeId,
+          );
+          logInfo('BusHelper', 'selectRoute', <String, dynamic>{
+            'route': route.name,
+            'routeId': route.routeId,
+          });
+          final ApiResult<List<BusTime>?> result = await BusHelper.instance
+              .getBusTime(languageCode: 'zh', busInfo: route);
+          expect(result, isA<ApiSuccess<List<BusTime>?>>());
+          final List<BusTime>? times =
+              (result as ApiSuccess<List<BusTime>?>).data;
+          expect(times, isNotNull);
+          expect(times, isNotEmpty);
+          expect(
+            times!.map((BusTime time) => time.direction),
+            containsAll(<BusDirection>[BusDirection.go, BusDirection.back]),
+          );
+          expect(
+            times.map((BusTime time) => time.routeId),
+            everyElement(routeId),
+          );
+          for (final BusTime time in times) {
+            expect(time.stopId, isNotEmpty);
+            expect(time.name, isNotEmpty);
+          }
+          logSuccess('BusHelper', 'getBusTime', <String, dynamic>{
+            'routeId': routeId,
+            'count': times.length,
+          });
+        },
+        timeout: const Timeout(Duration(seconds: 30)),
+      );
+    }
   });
 }

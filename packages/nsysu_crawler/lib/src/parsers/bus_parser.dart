@@ -7,198 +7,224 @@ List<BusInfo> parseIbusRouteList(
   Map<String, dynamic> response, {
   required String languageCode,
 }) {
-  final Map<String, dynamic> data = _readData(response);
-  final bool isEnglish = languageCode.startsWith('en');
-  final List<BusInfo> routes = <BusInfo>[];
+  final Map<int, List<_Stop>> routes = _readRoutes(
+    response,
+    supportedBusRouteIds,
+  );
+  final bool english = languageCode.startsWith('en');
+  return <BusInfo>[
+    for (final int routeId in supportedBusRouteIds)
+      _routeInfo(routeId, routes[routeId]!, english),
+  ];
+}
 
-  for (final int routeId in supportedBusRouteIds) {
-    final dynamic rawRoute = data['route$routeId'];
-    if (rawRoute is! Map) continue;
-    final Map<String, dynamic> route = Map<String, dynamic>.from(rawRoute);
-    final String? name = route['name'] as String?;
-    final String? departure = route['departure'] as String?;
-    final String? destination = route['destination'] as String?;
-    if (name == null || departure == null || destination == null) continue;
-
-    final List<String> busIds = _readBusIds(route['buses']);
-    routes.add(
-      BusInfo(
-        carId: busIds.isEmpty ? null : busIds.join(','),
-        busIds: busIds,
-        stopName: busIds.isEmpty ? (isEnglish ? 'Out of service' : '未行駛') : '',
-        routeId: routeId,
-        name: name,
-        isOpenData: 'Y',
-        departure: departure,
-        destination: destination,
-        updateTime: null,
-      ),
-    );
+BusInfo _routeInfo(int routeId, List<_Stop> stops, bool english) {
+  final Set<String> ids = <String>{};
+  final Map<String, String> englishNames = <String, String>{};
+  String? name;
+  String? departure;
+  String? destination;
+  for (final _Stop stop in stops) {
+    final Map<String, dynamic> data = stop.data;
+    name ??= _localizedName(data, 'routename', english);
+    final String? zhName = _text(data['stopname_Zh_Tw']);
+    final String? enName = _text(data['stopname_En']);
+    if (zhName != null && enName != null) englishNames[zhName] = enName;
+    final dynamic endpoints = data['routeStop'];
+    if (stop.direction == BusDirection.go && endpoints is Map) {
+      departure ??= _text(endpoints['departureStopName']);
+      destination ??= _text(endpoints['destinationStopName']);
+    }
+    _addVehicleIds(ids, data['carId']);
+    for (final Map<String, dynamic> eta in _etas(data)) {
+      _addVehicleIds(ids, eta['busId']);
+    }
   }
-
-  if (routes.isEmpty) {
-    throw const FormatException('iBus returned no supported routes');
+  if (name == null || departure == null || destination == null) {
+    throw FormatException('iBus+ route $routeId has incomplete metadata');
   }
-  return routes;
+  return BusInfo(
+    carId: ids.isEmpty ? null : ids.join(','),
+    busIds: ids.toList(),
+    stopName: ids.isEmpty ? (english ? 'Out of service' : '未行駛') : '',
+    routeId: routeId,
+    name: name,
+    isOpenData: 'Y',
+    departure: english ? englishNames[departure] ?? departure : departure,
+    destination: english
+        ? englishNames[destination] ?? destination
+        : destination,
+    updateTime: null,
+  );
 }
 
 List<BusTime> parseIbusRouteTimes(
   Map<String, dynamic> response, {
   required int routeId,
+  required String languageCode,
   DateTime? taipeiNow,
 }) {
-  final Map<String, dynamic> data = _readData(response);
-  final dynamic rawRoute = data['route'];
-  if (rawRoute is! Map) {
-    throw const FormatException('iBus route is missing');
-  }
-  final Map<String, dynamic> route = Map<String, dynamic>.from(rawRoute);
-  final List<dynamic> stationEdges = _readEdges(route['stations']);
-  if (stationEdges.isEmpty) {
-    throw const FormatException('iBus route has no stations');
-  }
-
-  final Map<String, _EstimateTime> estimates = <String, _EstimateTime>{};
-  for (final dynamic rawEdge in _readEdges(route['estimateTimes'])) {
-    if (rawEdge is! Map) continue;
-    final dynamic rawNode = rawEdge['node'];
-    if (rawNode is! Map) continue;
-    final Map<String, dynamic> node = Map<String, dynamic>.from(rawNode);
-    final String? stopId = node['id'] as String?;
-    final int? goBack = node['goBack'] as int?;
-    if (stopId == null || goBack == null) continue;
-    estimates[_stopKey(stopId, goBack)] = _EstimateTime(
-      comeTime: node['comeTime'] as String? ?? '',
-      etaMinutes: _readEtaMinutes(node['etas']),
-    );
-  }
-
+  final List<_Stop> stops = _readRoutes(response, <int>[routeId])[routeId]!;
   final DateTime now =
       taipeiNow ?? DateTime.now().toUtc().add(const Duration(hours: 8));
   final int currentMinutes = now.hour * 60 + now.minute;
+  final bool english = languageCode.startsWith('en');
   final List<BusTime> times = <BusTime>[];
-
-  for (final dynamic rawEdge in stationEdges) {
-    if (rawEdge is! Map) continue;
-    final Map<String, dynamic> edge = Map<String, dynamic>.from(rawEdge);
-    final dynamic rawNode = edge['node'];
-    if (rawNode is! Map) continue;
-    final Map<String, dynamic> node = Map<String, dynamic>.from(rawNode);
-    final String? stopId = node['id'] as String?;
-    final String? name = node['name'] as String?;
-    final int? goBack = edge['goBack'] as int?;
-    final int? orderNo = edge['orderNo'] as int?;
-    if (stopId == null ||
-        name == null ||
-        goBack == null ||
-        orderNo == null ||
-        (goBack != 1 && goBack != 2)) {
-      continue;
-    }
-
-    final _EstimateTime estimate =
-        estimates[_stopKey(stopId, goBack)] ??
-        const _EstimateTime(comeTime: '', etaMinutes: <int>[]);
-    final int? nearestEta = estimate.etaMinutes.isEmpty
+  for (final _Stop stop in stops) {
+    final Map<String, dynamic> data = stop.data;
+    final String name = _localizedName(data, 'stopname', english)!;
+    // The existing model has no dedicated suspended or skipped-stop state.
+    final bool unavailable =
+        _integer(data['issusPended']) == 1 ||
+        _integer(data['isConstruction']) == 1 ||
+        _integer(data['isEvent']) == 1;
+    final int? eta = unavailable ? null : _nearestEta(data);
+    final String? scheduledTime = unavailable
         ? null
-        : estimate.etaMinutes.reduce(
-            (int current, int next) => current < next ? current : next,
-          );
+        : _text(data['nextbustime']);
+    final int? scheduledMinutes = _clockMinutes(scheduledTime);
+    final String? validSchedule = scheduledMinutes == null
+        ? null
+        : scheduledTime;
     final BusArrivalStatus status = _resolveStatus(
-      nearestEta: nearestEta,
-      comeTime: estimate.comeTime,
-      currentMinutes: currentMinutes,
+      eta,
+      scheduledMinutes,
+      currentMinutes,
     );
-    final String? scheduledTime = estimate.comeTime.trim().isEmpty
-        ? null
-        : estimate.comeTime.trim();
-
     times.add(
       BusTime(
         routeId: routeId,
-        stopId: stopId,
+        stopId: stop.id,
         name: name,
-        arrivedTime: _legacyArrivedTime(status, nearestEta, scheduledTime),
-        realArrivedTime: scheduledTime,
-        isGoBack: goBack == 2 ? 'Y' : 'N',
-        seqNo: orderNo,
-        direction: goBack == 2 ? BusDirection.back : BusDirection.go,
+        arrivedTime: _legacyArrivedTime(status, eta, validSchedule),
+        realArrivedTime: validSchedule,
+        isGoBack: stop.direction == BusDirection.back ? 'Y' : 'N',
+        seqNo: stop.sequence,
+        direction: stop.direction,
         arrivalStatus: status,
-        etaMinutes: nearestEta,
-        scheduledTime: scheduledTime,
+        etaMinutes: eta,
+        scheduledTime: validSchedule,
       ),
     );
   }
-
-  times.sort((BusTime a, BusTime b) {
-    final int directionOrder = a.direction.index.compareTo(b.direction.index);
-    return directionOrder != 0 ? directionOrder : a.seqNo.compareTo(b.seqNo);
-  });
   return times;
 }
 
-Map<String, dynamic> _readData(Map<String, dynamic> response) {
-  final dynamic errors = response['errors'];
-  if (errors is List && errors.isNotEmpty) {
-    throw const FormatException('iBus returned GraphQL errors');
+Map<int, List<_Stop>> _readRoutes(
+  Map<String, dynamic> response,
+  List<int> routeIds,
+) {
+  final dynamic groups = response['data'];
+  if (_integer(response['status']) != 0 || groups is! List<dynamic>) {
+    throw const FormatException('iBus+ returned an invalid estimate response');
   }
-  final dynamic data = response['data'];
-  if (data is! Map) {
-    throw const FormatException('iBus data is missing');
+  final Map<int, List<_Stop>> routes = <int, List<_Stop>>{
+    for (final int id in routeIds) id: <_Stop>[],
+  };
+  for (final List<dynamic> group in groups.whereType<List<dynamic>>()) {
+    for (final Map<String, dynamic> data
+        in group.whereType<Map<String, dynamic>>()) {
+      final List<_Stop>? stops = routes[_integer(data['routeid'])];
+      final int? direction = _integer(data['direction']);
+      final int? sequence = _integer(data['stopsequence']);
+      final String? id = _text(data['stopID']);
+      if (stops == null ||
+          (direction != 0 && direction != 1) ||
+          sequence == null ||
+          sequence < 0 ||
+          id == null ||
+          _localizedName(data, 'stopname', false) == null) {
+        continue;
+      }
+      stops.add(
+        _Stop(
+          data,
+          id,
+          direction == 0 ? BusDirection.go : BusDirection.back,
+          sequence,
+        ),
+      );
+    }
   }
-  return Map<String, dynamic>.from(data);
+  for (final MapEntry<int, List<_Stop>> route in routes.entries) {
+    final List<_Stop> stops = route.value;
+    stops.sort((_Stop a, _Stop b) {
+      final int directionOrder = a.direction.index.compareTo(b.direction.index);
+      return directionOrder == 0
+          ? a.sequence.compareTo(b.sequence)
+          : directionOrder;
+    });
+    if (stops.isEmpty ||
+        stops.first.direction != BusDirection.go ||
+        stops.last.direction != BusDirection.back) {
+      throw FormatException('iBus+ route ${route.key} is missing a direction');
+    }
+  }
+  return routes;
 }
 
-List<dynamic> _readEdges(dynamic connection) {
-  if (connection is! Map) return <dynamic>[];
-  final dynamic edges = connection['edges'];
-  return edges is List ? edges : <dynamic>[];
+String? _text(dynamic value) {
+  if (value is! String && value is! int) return null;
+  final String text = value.toString().trim();
+  return text.isEmpty || text.toLowerCase() == 'null' ? null : text;
 }
 
-List<String> _readBusIds(dynamic buses) {
-  final List<String> ids = <String>[];
-  for (final dynamic rawEdge in _readEdges(buses)) {
-    if (rawEdge is! Map || rawEdge['node'] is! Map) continue;
-    final dynamic id = (rawEdge['node'] as Map)['id'];
-    if (id is String && id.isNotEmpty) ids.add(id);
-  }
-  return ids;
+int? _integer(dynamic value) => int.tryParse(_text(value) ?? '');
+
+String? _localizedName(Map<String, dynamic> data, String key, bool english) {
+  final String? zh = _text(data['${key}_Zh_Tw']);
+  final String? en = _text(data['${key}_En']);
+  return english ? en ?? zh : zh ?? en;
 }
 
-List<int> _readEtaMinutes(dynamic etas) {
-  if (etas is! List) return <int>[];
-  return etas
-      .whereType<Map>()
-      .map((Map<dynamic, dynamic> eta) => eta['etaTime'])
-      .whereType<num>()
-      .map((num eta) => eta.toInt())
-      .toList(growable: false);
+Iterable<Map<String, dynamic>> _etas(Map<String, dynamic> data) {
+  final dynamic etas = data['etas'];
+  return etas is List<dynamic>
+      ? etas.whereType<Map<String, dynamic>>()
+      : const <Map<String, dynamic>>[];
 }
 
-BusArrivalStatus _resolveStatus({
-  required int? nearestEta,
-  required String comeTime,
-  required int currentMinutes,
-}) {
-  if (nearestEta != null) {
-    if (nearestEta <= 0) return BusArrivalStatus.arriving;
-    if (nearestEta == 1) return BusArrivalStatus.comingSoon;
-    return BusArrivalStatus.minutes;
+void _addVehicleIds(Set<String> ids, dynamic value) {
+  for (final String candidate in (_text(value) ?? '').split(',')) {
+    final String? id = _text(candidate);
+    if (id != null) ids.add(id);
   }
-  if (comeTime.trim().isEmpty) return BusArrivalStatus.notOperating;
+}
 
-  final RegExpMatch? match = RegExp(
-    r'^(\d{1,2}):(\d{2})$',
-  ).firstMatch(comeTime.trim());
-  if (match == null) {
-    return BusArrivalStatus.notOperating;
+int? _validEta(dynamic value) {
+  final int? eta = _integer(value);
+  return eta != null && eta >= 0 ? eta : null;
+}
+
+int? _nearestEta(Map<String, dynamic> data) {
+  int? nearest;
+  for (final Map<String, dynamic> eta in _etas(data)) {
+    final int? minutes = _validEta(eta['etaTime']);
+    if (minutes != null && (nearest == null || minutes < nearest)) {
+      nearest = minutes;
+    }
   }
+  return nearest ?? _validEta(data['estimatetime']);
+}
+
+int? _clockMinutes(String? time) {
+  if (time == null) return null;
+  final RegExpMatch? match = RegExp(r'^(\d{1,2}):(\d{2})$').firstMatch(time);
+  if (match == null) return null;
   final int hour = int.parse(match.group(1)!);
   final int minute = int.parse(match.group(2)!);
-  if (hour > 23 || minute > 59) {
-    return BusArrivalStatus.notOperating;
+  return hour < 24 && minute < 60 ? hour * 60 + minute : null;
+}
+
+BusArrivalStatus _resolveStatus(int? eta, int? schedule, int now) {
+  if (eta != null) {
+    if (eta == 0) return BusArrivalStatus.arriving;
+    if (eta == 1) return BusArrivalStatus.comingSoon;
+    return BusArrivalStatus.minutes;
   }
-  return hour * 60 + minute > currentMinutes
+  if (schedule == null) return BusArrivalStatus.notOperating;
+  // iBus+ supplies a clock time without a date. Keep the same-day comparison.
+  return schedule > now
       ? BusArrivalStatus.scheduled
       : BusArrivalStatus.departed;
 }
@@ -223,11 +249,11 @@ String? _legacyArrivedTime(
   }
 }
 
-String _stopKey(String stopId, int goBack) => '$goBack:$stopId';
+class _Stop {
+  const _Stop(this.data, this.id, this.direction, this.sequence);
 
-class _EstimateTime {
-  const _EstimateTime({required this.comeTime, required this.etaMinutes});
-
-  final String comeTime;
-  final List<int> etaMinutes;
+  final Map<String, dynamic> data;
+  final String id;
+  final BusDirection direction;
+  final int sequence;
 }

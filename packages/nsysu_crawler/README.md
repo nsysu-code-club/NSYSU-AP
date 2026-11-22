@@ -107,8 +107,9 @@ NSYSU_HTTP_LOG=1 dart test -P live -r expanded
 
 ### CI
 
-- 每個 PR：`.github/workflows/test.yml`（hermetic dart test only，亞秒級）
-- 每天 08:00 TPE：`.github/workflows/crawler-monitor.yml`（live + live-anonymous，失敗時發 Discord）
+- 對 master 的 PR / push、每天 08:00 TPE 或手動觸發：`.github/workflows/test.yml`（靜態分析 + hermetic dart tests，不連網）
+- 每天 08:00 TPE 或手動觸發：`.github/workflows/crawler-monitor.yml`（live + live-anonymous，失敗時發 Discord）。公車監控涵蓋 iBus+ token、中文／英文路線清單及 901、9011、50、219、2192 五條路線的雙向站點，不要求即時車輛存在。
+- 每日排程使用預設分支；修改合併後生效，實際啟動時間可能延後。
 
 ## Architecture（簡述）
 

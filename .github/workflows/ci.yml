@@ -1,6 +1,9 @@
 name: CI
 
 on:
+  schedule:
+    # 00:00 UTC = 08:00 Asia/Taipei; daily analysis and tests only.
+    - cron: '0 0 * * *'
   push:
     branches:
       - master
@@ -10,6 +13,7 @@ on:
     paths:
       - 'lib/**'
       - 'test/**'
+      - 'packages/nsysu_crawler/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
       - 'android/**'
@@ -27,6 +31,7 @@ on:
     paths:
       - 'lib/**'
       - 'test/**'
+      - 'packages/nsysu_crawler/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
       - 'android/**'
@@ -37,6 +42,7 @@ on:
       - 'assets/**'
       - '.fvmrc'
       - '.github/workflows/ci.yml'
+  workflow_dispatch:
 
 env:
   flutter_version_file: '.fvmrc'
@@ -44,7 +50,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -64,9 +70,10 @@ jobs:
       - name: Analyze
         run: flutter analyze --no-fatal-infos
       - name: Test
-        run: flutter test || true
+        run: flutter test
 
   build_android:
+    if: github.event_name != 'schedule'
     name: Build Android App
     needs: analyze_and_test
     runs-on: ubuntu-latest
@@ -93,9 +100,12 @@ jobs:
         run: flutter build appbundle --release
 
   build_ios:
+    if: github.event_name != 'schedule'
     name: Build iOS App
     needs: analyze_and_test
     runs-on: [self-hosted, macOS]
+    env:
+      DEVELOPER_DIR: /Applications/Xcode-27.2.0.app/Contents/Developer
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -104,12 +114,28 @@ jobs:
         with:
           distribution: 'zulu'
           java-version:  ${{ env.java_version }}
+      - name: Inspect Xcode installations
+        shell: bash
+        run: |
+          echo "Runner: $RUNNER_NAME"
+          echo "DEVELOPER_DIR=${DEVELOPER_DIR:-<unset>}"
+          echo "Selected Xcode:"
+          xcode-select -p
+          xcodebuild -version
+          echo "Installed Xcode apps:"
+          find /Applications -maxdepth 1 -name 'Xcode*.app' -print | sort
+          echo "Available SDKs:"
+          xcodebuild -showsdks
       - name: Run Flutter tasks
         uses: subosito/flutter-action@v2
         with:
           flutter-version-file: ${{ env.flutter_version_file }}
           channel: 'stable'
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+      - name: Install FlutterFire CLI
+        run: |
+          dart pub global activate flutterfire_cli 1.4.1
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
       - name: Flutter Initialize
         run: flutter doctor -v
       - run: flutter pub get
@@ -117,6 +143,7 @@ jobs:
         run: flutter build ios --release --no-codesign
 
   build_windows:
+    if: github.event_name != 'schedule'
     name: Build Windows App
     needs: analyze_and_test
     runs-on: windows-latest
