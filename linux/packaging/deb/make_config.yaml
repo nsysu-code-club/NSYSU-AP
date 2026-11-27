@@ -1,0 +1,32 @@
+# Metadata for the Debian package built by flutter_distributor:
+#   dart pub global activate flutter_distributor
+#   flutter_distributor package --platform linux --targets deb --skip-clean
+# Output lands in dist/<version>/. See CONTRIBUTING.md "Linux 桌面版建置".
+display_name: 中山校務通
+package_name: nsysu-ap
+generic_name: NSYSU AP
+installed_size: 54000
+maintainer:
+  name: NSYSU Code Club
+  email: nsysu.gdsc@gmail.com
+priority: optional
+section: education
+essential: false
+icon: linux/packaging/deb/icon.png
+startup_notify: true
+startup_wm_class: nsysu_ap
+keywords:
+  - NSYSU
+  - 中山大學
+  - 校務通
+categories:
+  - Education
+# Runtime libraries the release bundle links against (everything else in
+# `ldd` output is pulled in transitively by these). The "t64" names are the
+# Ubuntu 24.04+ spellings; the alternatives keep Debian and older Ubuntu happy.
+dependencies:
+  - libgtk-3-0t64 | libgtk-3-0
+  - libglib2.0-0t64 | libglib2.0-0
+  - libwebkit2gtk-4.1-0
+  - liblzma5
+  - libblkid1
