@@ -1,22 +1,87 @@
+require "plist"
+require "securerandom"
+
 default_platform(:ios)
 
 APP_STORE_CONNECT_BUNDLE_IDENTIFIER = ENV["APP_STORE_CONNECT_BUNDLE_IDENTIFIER"]
 
 platform :ios do
-  lane :release do |options|
-    key_id = options[:key_id]
-    issuer_id = options[:issuer_id]
+  private_lane :connect_api_key do |options|
+    app_store_connect_api_key(
+      key_id: options.fetch(:key_id),
+      issuer_id: options.fetch(:issuer_id),
+      key_filepath: File.expand_path("../AuthKey.p8", __dir__),
+      duration: 1200,
+      in_house: false
+    )
+  end
 
+  lane :signing do |options|
+    team_id = ENV.fetch("DEVELOPER_PORTAL_TEAM_ID")
+    keychain_name = ENV.fetch("CI_SIGNING_KEYCHAIN")
+    keychain_password = SecureRandom.hex(32)
+    bundle_ids = {
+      "Runner" => ENV.fetch("APP_STORE_CONNECT_BUNDLE_IDENTIFIER"),
+      "CourseAppWidgetExtension" => "com.nsysu.ap.CourseAppWidget",
+    }
+
+    # security cms needs a default keychain on the dedicated runner account.
+    has_default_keychain = system("security", "default-keychain", "-d", "user", out: File::NULL, err: File::NULL)
+    create_keychain(
+      name: keychain_name,
+      password: keychain_password,
+      default_keychain: !has_default_keychain,
+      unlock: true,
+      timeout: 0,
+      require_create: true
+    )
+
+    match(
+      type: "appstore",
+      readonly: true,
+      api_key: connect_api_key(options),
+      team_id: team_id,
+      app_identifier: bundle_ids.values,
+      git_private_key: ENV.fetch("MATCH_GIT_PRIVATE_KEY_PATH"),
+      keychain_name: keychain_name,
+      keychain_password: keychain_password
+    )
+
+    profile_mapping = lane_context.fetch(SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING)
+    provisioning_profiles = bundle_ids.values.to_h do |bundle_id|
+      [bundle_id, profile_mapping.fetch(bundle_id)]
+    end
+
+    bundle_ids.each do |target, bundle_id|
+      update_code_signing_settings(
+        path: File.expand_path("../Runner.xcodeproj", __dir__),
+        targets: [target],
+        build_configurations: ["Release"],
+        sdk: "iphoneos*",
+        use_automatic_signing: false,
+        team_id: team_id,
+        code_sign_identity: "Apple Distribution",
+        profile_name: provisioning_profiles.fetch(bundle_id)
+      )
+    end
+
+    Plist::Emit.save_plist(
+      {
+        "method" => "app-store-connect",
+        "signingStyle" => "manual",
+        "signingCertificate" => "Apple Distribution",
+        "teamID" => team_id,
+        "provisioningProfiles" => provisioning_profiles,
+      },
+      File.expand_path("../ExportOptions.plist", __dir__)
+    )
+  end
+
+  lane :release do |options|
     changelog_file = "./zh-TW.txt"
     changelog = File.exist?(changelog_file) ? File.read(changelog_file) : "Bug fixes and improvements."
 
-    api_key = app_store_connect_api_key(
-        key_id: key_id,
-        issuer_id: issuer_id,
-        key_filepath: "./AuthKey.p8",
-        duration: 1200,
-        in_house: false
-    )
+    api_key = connect_api_key(options)
 
     ipa_dir = File.expand_path("../../build/ios/ipa", __dir__)
     ipa_files = Dir["#{ipa_dir}/*.ipa"]
@@ -36,14 +101,54 @@ platform :ios do
       localized_info["en-US"] = { whats_new: File.read(en_file) }
     end
 
-    upload_to_testflight(
-      app_identifier: "#{APP_STORE_CONNECT_BUNDLE_IDENTIFIER}",
+    testflight_options = {
+      app_identifier: APP_STORE_CONNECT_BUNDLE_IDENTIFIER,
       api_key: api_key,
-      ipa: ipa_path,
       skip_submission: true,
       notify_external_testers: true,
       changelog: changelog,
       localized_build_info: localized_info,
-    )
+    }
+
+    begin
+      upload_to_testflight(**testflight_options, ipa: ipa_path)
+    rescue StandardError => upload_error
+      # altool can report a missing resume-state file after Apple accepts the IPA.
+      raise unless upload_error.message.include?("CDUploaderStateInfoResumeFilePath")
+
+      app_version = options[:app_version]
+      build_number = options[:build_number]
+      raise if app_version.to_s.empty? || build_number.to_s.empty?
+
+      app = Spaceship::ConnectAPI::App.find(APP_STORE_CONNECT_BUNDLE_IDENTIFIER)
+      raise unless app
+
+      UI.important("Checking App Store Connect for iOS build #{app_version} (#{build_number}) after the altool resume-state error")
+      build = nil
+      30.times do |attempt|
+        build = Spaceship::ConnectAPI::Build.all(
+          app_id: app.id,
+          version: app_version,
+          build_number: build_number,
+          platform: "IOS"
+        ).first
+        break if build && build.processing_state != "PROCESSING"
+
+        sleep(20) if attempt < 29
+      end
+
+      unless build&.processing_state == "VALID"
+        UI.error("App Store Connect build state: #{build&.processing_state || 'NOT_VISIBLE'}")
+        raise
+      end
+
+      upload_to_testflight(
+        **testflight_options,
+        distribute_only: true,
+        app_platform: "ios",
+        app_version: app_version,
+        build_number: build_number
+      )
+    end
   end
 end

@@ -137,7 +137,9 @@ jobs:
     runs-on: [self-hosted, macOS]
     env:
       DEVELOPER_DIR: /Applications/Xcode-27.2.0.app/Contents/Developer
-    continue-on-error: true
+      CI_SIGNING_KEYCHAIN: ci-signing-${{ github.run_id }}-${{ github.run_attempt }}.keychain
+      KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_API_ISSUER_ID }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -178,29 +180,75 @@ jobs:
           bundle config set path vendor/bundle
           bundle install
         working-directory: ./ios
-      - name: Unlock keychain for code signing
-        run: |
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$HOME/Library/Keychains/login.keychain-db"
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$HOME/Library/Keychains/login.keychain-db"
+      - name: Decode API Key
         env:
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-      - run: flutter build ipa --release --build-number=${{ needs.prepare.outputs.version_code }}
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+        run: |
+          umask 077
+          printf '%s' "${APP_STORE_CONNECT_API_KEY_BASE64:?Missing App Store Connect API key}" | base64 --decode > ios/AuthKey.p8
+      - name: Save runner keychain settings
+        run: |
+          ruby -rjson -ropen3 -rshellwords <<'RUBY'
+          search_list, status = Open3.capture2("security", "list-keychains", "-d", "user")
+          abort "Could not read the keychain search list" unless status.success?
+
+          default, status = Open3.capture2("security", "default-keychain", "-d", "user")
+          state = { search_list: Shellwords.split(search_list), default: status.success? ? Shellwords.split(default) : [] }
+          path = File.join(ENV.fetch("RUNNER_TEMP"), "#{ENV.fetch("CI_SIGNING_KEYCHAIN")}.json")
+          File.write(path, JSON.generate(state))
+          RUBY
+      - name: Prepare iOS signing
+        working-directory: ./ios
+        env:
+          APP_STORE_CONNECT_BUNDLE_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_BUNDLE_IDENTIFIER }}
+          DEVELOPER_PORTAL_TEAM_ID: ${{ secrets.DEVELOPER_PORTAL_TEAM_ID }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
+          GIT_SSH_COMMAND: ssh -o StrictHostKeyChecking=accept-new
+        run: |
+          umask 077
+          MATCH_GIT_PRIVATE_KEY_PATH="$(mktemp "$RUNNER_TEMP/match-deploy-key.XXXXXX")"
+          export MATCH_GIT_PRIVATE_KEY_PATH
+          trap 'rm -f "$MATCH_GIT_PRIVATE_KEY_PATH"' EXIT
+          printf '%s\n' "${MATCH_GIT_PRIVATE_KEY:?Missing MATCH_GIT_PRIVATE_KEY secret}" > "$MATCH_GIT_PRIVATE_KEY_PATH"
+          unset MATCH_GIT_PRIVATE_KEY
+          bundle exec fastlane ios signing key_id:"$KEY_ID" issuer_id:"$ISSUER_ID"
+      - run: flutter build ipa --release --build-number=${{ needs.prepare.outputs.version_code }} --export-options-plist=ios/ExportOptions.plist
       - name: Zip dSYM
         run: zip Runner.app.dSYM.zip -r ../archive/Runner.xcarchive/dSYMs/
         working-directory: ./build/ios/ipa
-      - name: Decode API Key
-        run: |
-          echo "${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}" | base64 --decode > ios/AuthKey.p8
       - name: Deploy iOS Beta to TestFlight via Fastlane
-        run: bundle exec fastlane ios release key_id:"${{ env.KEY_ID }}" issuer_id:"${{ env.ISSUER_ID }}"
+        run: bundle exec fastlane ios release key_id:"$KEY_ID" issuer_id:"$ISSUER_ID" app_version:"$APP_VERSION" build_number:"$BUILD_NUMBER"
         working-directory: ./ios
         env:
+          APP_VERSION: ${{ needs.prepare.outputs.version }}
+          BUILD_NUMBER: ${{ needs.prepare.outputs.version_code }}
           APP_STORE_CONNECT_TEAM_ID: '${{ secrets.APP_STORE_CONNECT_TEAM_ID }}'
           APP_STORE_CONNECT_APPLE_ID: '${{ secrets.APP_STORE_CONNECT_APPLE_ID }}'
           APP_STORE_CONNECT_BUNDLE_IDENTIFIER: '${{ secrets.APP_STORE_CONNECT_BUNDLE_IDENTIFIER }}'
           DEVELOPER_PORTAL_TEAM_ID: '${{ secrets.DEVELOPER_PORTAL_TEAM_ID }}'
-          KEY_ID: '${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}'
-          ISSUER_ID: '${{ secrets.APP_STORE_CONNECT_API_API_ISSUER_ID }}'
+      - name: Clean up iOS signing
+        if: always()
+        run: |
+          rm -f ios/AuthKey.p8 ios/ExportOptions.plist
+          keychain="$HOME/Library/Keychains/$CI_SIGNING_KEYCHAIN"
+          cleanup_status=0
+          if [[ -f "$keychain-db" ]]; then
+            security delete-keychain "$keychain-db" || cleanup_status=$?
+          elif [[ -f "$keychain" ]]; then
+            security delete-keychain "$keychain" || cleanup_status=$?
+          fi
+          ruby -rjson <<'RUBY'
+          path = File.join(ENV.fetch("RUNNER_TEMP"), "#{ENV.fetch("CI_SIGNING_KEYCHAIN")}.json")
+          if File.file?(path)
+            state = JSON.parse(File.read(path))
+            search_list_restored = system("security", "list-keychains", "-d", "user", "-s", *state.fetch("search_list"))
+            default_restored = system("security", "default-keychain", "-d", "user", "-s", *state.fetch("default"))
+            File.delete(path)
+            abort "Could not restore runner keychain settings" unless search_list_restored && default_restored
+          end
+          RUBY
+          exit "$cleanup_status"
 
   deploy_windows:
     name: Windows App
