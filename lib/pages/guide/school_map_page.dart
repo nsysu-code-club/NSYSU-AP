@@ -1,23 +1,20 @@
-import 'package:ap_common/ap_common.dart';
 import 'package:flutter/material.dart';
 import 'package:nsysu_ap/resources/image_assets.dart';
+import 'package:photo_view/photo_view.dart';
 
-class SchoolMapPage extends StatefulWidget {
-  @override
-  _SchoolMapPageState createState() => _SchoolMapPageState();
-}
+class SchoolMapViewer extends StatelessWidget {
+  const SchoolMapViewer({super.key});
 
-class _SchoolMapPageState extends State<SchoolMapPage> {
   @override
   Widget build(BuildContext context) {
-    return ImageViewerScaffold(
-      title: ap.schoolMap,
-      imageViewers: <ImageViewer>[
-        ImageViewer(
-          title: '',
-          assetName: ImageAssets.schoolMap,
-        ),
-      ],
+    return PhotoView(
+      imageProvider: const AssetImage(ImageAssets.schoolMap),
+      backgroundDecoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+      ),
+      minScale: PhotoViewComputedScale.contained,
+      initialScale: PhotoViewComputedScale.contained,
+      maxScale: PhotoViewComputedScale.covered * 3,
     );
   }
 }
