@@ -25,7 +25,7 @@ dependencies:
 
   #official plugin
   http: ^1.2.2
-  html: ^0.15.0
+  html: ^0.15.7
   url_launcher: ^6.1.5
 
   #third party plugin
