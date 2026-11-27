@@ -1,14 +1,66 @@
 import 'package:ap_common/ap_common.dart'
     hide AppLocale, AppLocaleUtils, LocaleSettings, TranslationProvider;
 import 'package:ap_common_firebase/ap_common_firebase.dart';
-import 'package:flutter/material.dart';
 import 'package:icalendar_parser/icalendar_parser.dart';
 import 'package:nsysu_ap/config/constants.dart';
 import 'package:nsysu_ap/models/calendar_event.dart';
 import 'package:nsysu_ap/utils/app_localizations.dart';
 import 'package:nsysu_ap/utils/fetch_selcrs.dart' as fs;
 
+enum CalendarEventCategory { general, courseSelection, holiday, examination }
+
 class CalendarParsing {
+  static DateTime dateOnly(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
+
+  static DateTime? eventEndDateInclusive(CalendarEvent event) {
+    final DateTime? start = parseEventDate(event.dtstart);
+    final DateTime? end = parseEventDate(event.dtend);
+    if (start == null || end == null) return null;
+    final DateTime inclusiveEnd = event.dtend.contains('T')
+        ? dateOnly(end)
+        : dateOnly(end.subtract(const Duration(days: 1)));
+    return inclusiveEnd.isBefore(dateOnly(start))
+        ? dateOnly(start)
+        : inclusiveEnd;
+  }
+
+  static bool eventCoversDate(CalendarEvent event, DateTime date) {
+    final DateTime? start = parseEventDate(event.dtstart);
+    final DateTime? end = eventEndDateInclusive(event);
+    if (start == null || end == null) return false;
+    final DateTime day = dateOnly(date);
+    return !day.isBefore(dateOnly(start)) && !day.isAfter(end);
+  }
+
+  static CalendarEventCategory classifyEventSummary(String summary) {
+    final String normalized = summary.trim().toLowerCase();
+
+    if (normalized.startsWith('【選課】') ||
+        normalized.startsWith('[course selection]') ||
+        normalized.startsWith('【履修登録】')) {
+      return CalendarEventCategory.courseSelection;
+    }
+    if (normalized.contains('放假') ||
+        normalized.contains('補假') ||
+        normalized.contains('暑假開始') ||
+        normalized.contains('寒假開始') ||
+        normalized.contains('national holiday') ||
+        normalized.contains('make-up day') ||
+        normalized.contains('compensatory holiday') ||
+        normalized.contains('summer vacation begins') ||
+        normalized.contains('winter vacation begins')) {
+      return CalendarEventCategory.holiday;
+    }
+    if (normalized.contains('期中考試') ||
+        normalized.contains('期末考試') ||
+        normalized.contains('midterm examination') ||
+        normalized.contains('final examination')) {
+      return CalendarEventCategory.examination;
+    }
+    return CalendarEventCategory.general;
+  }
+
   static DateTime? parseEventDate(String raw) {
     if (raw.isEmpty || raw == '未知') {
       return null;
@@ -49,8 +101,9 @@ class CalendarParsing {
           .where((Map<String, dynamic> item) => item['type'] == 'VEVENT')
           .toList();
 
-      final List<CalendarEvent> result =
-          events.map((Map<String, dynamic> event) {
+      final List<CalendarEvent> result = events.map((
+        Map<String, dynamic> event,
+      ) {
         final dynamic summary = event['summary'] ?? '無標題';
         final Object? dtstart = event['dtstart'];
         final Object? dtend = event['dtend'];
@@ -102,9 +155,11 @@ class CalendarParsing {
         final int ed = int.parse(match.group(4)!);
         if (sm == start.month) {
           final int endYear = (em >= sm) ? start.year : start.year + 1;
-          final DateTime endDate = DateTime(endYear, em, ed).add(
-            const Duration(days: 1),
-          );
+          final DateTime endDate = DateTime(
+            endYear,
+            em,
+            ed,
+          ).add(const Duration(days: 1));
           final String newEnd =
               '${endDate.year.toString().padLeft(4, '0')}'
               '${endDate.month.toString().padLeft(2, '0')}'
@@ -120,9 +175,7 @@ class CalendarParsing {
     return event;
   }
 
-  static void sortEvents(
-      List<CalendarEvent> events,
-      {bool ascending = true}){
+  static void sortEvents(List<CalendarEvent> events, {bool ascending = true}) {
     events.sort((CalendarEvent a, CalendarEvent b) {
       final DateTime? dateA = parseEventDate(a.dtstart);
       final DateTime? dateB = parseEventDate(b.dtstart);
@@ -141,147 +194,32 @@ class CalendarParsing {
   }
 
   static List<CalendarEvent> filterEvents(
-      List<CalendarEvent> events, String keyword){
+    List<CalendarEvent> events,
+    String keyword,
+  ) {
     final String cleanKeyword = keyword.trim().toLowerCase();
     if (cleanKeyword.isEmpty) return events;
-    return events.where((CalendarEvent event){
+    return events.where((CalendarEvent event) {
       return event.summary.toLowerCase().contains(cleanKeyword);
     }).toList();
-  }
-
-  static List<CalendarEvent> filterEventsByDateRange(
-    List<CalendarEvent> events,
-    DateTimeRange range,
-  ) {
-    final DateTime rangeStart = DateTime(
-      range.start.year,
-      range.start.month,
-      range.start.day,
-    );
-    final DateTime rangeEndExclusive = DateTime(
-      range.end.year,
-      range.end.month,
-      range.end.day,
-    ).add(const Duration(days: 1));
-
-    return events.where((CalendarEvent event) {
-      final DateTime? start = parseEventDate(event.dtstart);
-      if (start == null) {
-        return false;
-      }
-      DateTime? end = parseEventDate(event.dtend);
-      final bool isAllDay = !event.dtstart.contains('T');
-      if (end == null || end == start) {
-        if (isAllDay) {
-          end = start.add(const Duration(days: 1));
-        } else {
-          return !start.isBefore(rangeStart) &&
-              start.isBefore(rangeEndExclusive);
-        }
-      }
-      return start.isBefore(rangeEndExclusive) && end.isAfter(rangeStart);
-    }).toList();
-  }
-
-  static List<CalendarEvent> getPagedEvents(List<CalendarEvent> allEvents, {
-    required int page,
-    int pageSize = 10,
-  }) {
-    final int startIndex = (page - 1) * pageSize;
-    if (startIndex < 0 || startIndex >= allEvents.length) {
-      return <CalendarEvent>[];
-    }
-    int endIndex = startIndex + pageSize;
-    if (endIndex > allEvents.length) {
-      endIndex = allEvents.length;
-    }
-    return allEvents.sublist(startIndex, endIndex);
   }
 
   static List<CalendarEvent> filterAndSortEvents(
     List<CalendarEvent> events, {
     String keyword = '',
-    DateTimeRange? dateRange,
     bool ascending = true,
   }) {
-    List<CalendarEvent> results = events;
-    if (keyword.trim().isNotEmpty) {
-      results = filterEvents(results, keyword);
-    }
-    if (dateRange != null) {
-      results = filterEventsByDateRange(results, dateRange);
-    } else {
-      results = List<CalendarEvent>.from(results);
-    }
+    final List<CalendarEvent> results = filterEvents(
+      List<CalendarEvent>.from(events),
+      keyword,
+    );
     sortEvents(results, ascending: ascending);
     return results;
   }
 
-  static String formatEventDate(String raw) {
-    if (raw.isEmpty || raw == '未知') {
-      return raw;
-    }
-    final DateTime? parsed = parseEventDate(raw);
-    if (parsed != null) {
-      final String y = parsed.year.toString().padLeft(4, '0');
-      final String m = parsed.month.toString().padLeft(2, '0');
-      final String d = parsed.day.toString().padLeft(2, '0');
-      return '$y-$m-$d';
-    }
-    return raw;
-  }
-
-  static String formatEventDisplayDate(CalendarEvent event) {
-    final DateTime? start = parseEventDate(event.dtstart);
-    if (start == null) {
-      return event.dtstart;
-    }
-    final String startStr = formatEventDate(event.dtstart);
-    final DateTime? end = parseEventDate(event.dtend);
-    if (end == null || event.dtend.isEmpty || event.dtend == '未知') {
-      return startStr;
-    }
-
-    final bool isAllDay = !event.dtstart.contains('T');
-    if (isAllDay) {
-      if (end.isBefore(start) || end.difference(start).inDays <= 1) {
-        return startStr;
-      }
-      final DateTime lastIncluded = end.subtract(const Duration(days: 1));
-      final String endStr = formatEventDate(
-        '${lastIncluded.year.toString().padLeft(4, '0')}'
-        '${lastIncluded.month.toString().padLeft(2, '0')}'
-        '${lastIncluded.day.toString().padLeft(2, '0')}',
-      );
-      return '$startStr ~ $endStr';
-    } else {
-      final String endStr = formatEventDate(event.dtend);
-      if (startStr == endStr) {
-        return startStr;
-      }
-      return '$startStr ~ $endStr';
-    }
-  }
-
-  static String formatDateRange(DateTimeRange range) {
-    final String startM = range.start.month.toString().padLeft(2, '0');
-    final String startD = range.start.day.toString().padLeft(2, '0');
-    final String startStr = '${range.start.year}/$startM/$startD';
-    final String endM = range.end.month.toString().padLeft(2, '0');
-    final String endD = range.end.day.toString().padLeft(2, '0');
-    final String endStr = '${range.end.year}/$endM/$endD';
-    return '$startStr ~ $endStr';
-  }
-
-  static int getTotalPages(int totalCount, {int pageSize = 10}) {
-    if (totalCount <= 0) {
-      return 1;
-    }
-    return (totalCount / pageSize).ceil();
-  }
-
   static Future<String> _getCalendarIcsUrl() async {
-    String icsUrl = 'https://raw.githubusercontent.com/abc873693/NSYSU-AP/master/school_schedule_115.ics';
+    String icsUrl =
+        'https://raw.githubusercontent.com/nsysu-code-club/NSYSU-AP/master/school_schedule_115.ics';
 
     if (FirebaseRemoteConfigUtils.isSupported) {
       try {
@@ -289,8 +227,9 @@ class CalendarParsing {
         await remoteConfig.fetch();
         await remoteConfig.activate();
         final String scheduleUrl =
-          LocaleSettings.currentLocale == AppLocale.zhHantTw ?
-            Constants.scheduleIcsUrlZh : Constants.scheduleIcsUrlEn;
+            LocaleSettings.currentLocale == AppLocale.zhHantTw
+            ? Constants.scheduleIcsUrlZh
+            : Constants.scheduleIcsUrlEn;
         final String remoteUrl = remoteConfig.getString(scheduleUrl);
         if (remoteUrl.isNotEmpty) {
           icsUrl = remoteUrl;
